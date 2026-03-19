@@ -96,4 +96,4 @@ availableSecrets:
 
 options:
   logging: CLOUD_LOGGING_ONLY
-  machineType: 'e2-standard-8' # 使用標準型機器 (32GB RAM) 避免 Gradle 記憶體不足 (OOM) 崩潰
+  machineType: 'E2_HIGHCPU_32' # 使用 32 vCPU / 32GB RAM 的規格，避免 Gradle 記憶體不足 (OOM) 崩潰
