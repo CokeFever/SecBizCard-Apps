@@ -36,6 +36,16 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Inject Firebase Configuration (Android)
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: echo "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
+
+      - name: Inject Firebase Options (Dart)
+        env:
+          FIREBASE_OPTIONS_DART: ${{ secrets.FIREBASE_OPTIONS_DART }}
+        run: echo "$FIREBASE_OPTIONS_DART" > lib/firebase_options.dart
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:

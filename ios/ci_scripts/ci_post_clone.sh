@@ -59,6 +59,18 @@ else
     echo "Please add OCR_DEPLOY_KEY in Xcode Cloud workflow environment variables."
 fi
 
+# Inject Firebase Configuration (iOS)
+echo "Injecting Firebase configuration files..."
+if [ -n "$GOOGLE_SERVICE_INFO_PLIST" ]; then
+    echo "Creating ios/Runner/GoogleService-Info.plist..."
+    echo "$GOOGLE_SERVICE_INFO_PLIST" > ios/Runner/GoogleService-Info.plist
+fi
+
+if [ -n "$FIREBASE_OPTIONS_DART" ]; then
+    echo "Creating lib/firebase_options.dart..."
+    echo "$FIREBASE_OPTIONS_DART" > lib/firebase_options.dart
+fi
+
 # Install dependencies
 echo "Running flutter pub get..."
 flutter pub get
