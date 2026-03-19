@@ -1,0 +1,70 @@
+{
+  "project_info": {
+    "project_number": "769422548283",
+    "project_id": "ixo-app-secbizcard",
+    "storage_bucket": "ixo-app-secbizcard.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:769422548283:android:27d1c89a4ca4b6c4eaab1e",
+        "android_client_info": {
+          "package_name": "app.ixo.secbizcard"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "769422548283-9j35t65s6j0uh0a0i12fgfeu56r5br43.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.ixo.secbizcard",
+            "certificate_hash": "5e4dac576985c11cc0d68ed2f47606fa11cbec5b"
+          }
+        },
+        {
+          "client_id": "769422548283-ekvcg4m9rh3uv30p2bc0jsrct27t0v26.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.ixo.secbizcard",
+            "certificate_hash": "9d81802406a0660930119b6fef35a65394f59bd2"
+          }
+        },
+        {
+          "client_id": "769422548283-ptt7h41r4ja4fldh9n33bljfe08kdgke.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.ixo.secbizcard",
+            "certificate_hash": "7e52887909e9b601247a6d087c341e27ed2a2558"
+          }
+        },
+        {
+          "client_id": "769422548283-rvuciu2cmfj9149fudj9q59pql4ofo8q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJTBg2SdgW1ImAsV9fQi3tzQYNpFIrrRY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "769422548283-rvuciu2cmfj9149fudj9q59pql4ofo8q.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "769422548283-uqjqjev8csut666r5i9rni8qa5mnvmh6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "app.ixo.secbizcard"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
