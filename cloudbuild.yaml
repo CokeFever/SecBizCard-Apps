@@ -38,16 +38,20 @@ steps:
         # 預先掃描 GitHub 避免 Host key 驗證問題
         ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
         
-        # Flutter 建置 (使用 GIT_SSH_COMMAND 強制使用我們設定的金鑰並跳過主機檢查)
-        export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa"
-        
         # 限制 Gradle 記憶體使用，避免在 8GB 機器上 OOM (GCP Quota 限制無法用 32GB 機器)
-        export GRADLE_OPTS="-Xmx3g -XX:MaxMetaspaceSize=512m -Dorg.gradle.daemon=false"
+        # 設定更大的堆疊限制並嘗試關閉 daemon
+        export GRADLE_OPTS="-Xmx3g -XX:MaxMetaspaceSize=512m -Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Dorg.gradle.workers.max=1"
         export JAVA_OPTS="-Xmx3g"
+        
+        # 預先安裝 CMake 避免在 Flutter 建置中途觸發安裝導致 OOM
+        echo "Pre-installing CMake 3.22.1..."
+        yes | sdkmanager --install "cmake;3.22.1"
         
         flutter pub get
         flutter gen-l10n
         dart run build_runner build --delete-conflicting-outputs
+        
+        echo "Starting Flutter Build..."
         flutter build aab --release
     secretEnv: ['ANDROID_KEYSTORE_PASSWORD', 'ANDROID_KEY_ALIAS', 'ANDROID_KEY_PASSWORD', 'OCR_DEPLOY_KEY', 'GOOGLE_SERVICES_JSON', 'FIREBASE_OPTIONS_DART']
 
