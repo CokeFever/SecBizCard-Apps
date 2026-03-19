@@ -24,6 +24,7 @@ steps:
         
         # 設定 SSH Deploy Key，讓 Flutter 可以下載私密 Git Package (SecBizCard_OCR)
         mkdir -p ~/.ssh
+        # 這裡假設 OCR_DEPLOY_KEY 是 Base64 編碼過的 (GCP 習慣)
         echo "$$OCR_DEPLOY_KEY" | base64 -d > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan github.com >> ~/.ssh/known_hosts
