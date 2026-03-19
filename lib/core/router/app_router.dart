@@ -27,7 +27,10 @@ import 'package:secbizcard/features/contacts/presentation/screens/contacts_list_
 
 part 'app_router.g.dart';
 
-@riverpod
+// keepAlive: true is critical — prevents the router from being
+// disposed and re-created during widget rebuilds, which would
+// briefly emit AsyncLoading and flash the login screen.
+@Riverpod(keepAlive: true)
 GoRouter goRouter(Ref ref) {
   final authNotifier = ValueNotifier<AsyncValue<fire_auth.User?>>(
     ref.read(authStateProvider),
@@ -46,8 +49,10 @@ GoRouter goRouter(Ref ref) {
       final loggingIn = matchedLocation == '/login';
       const isWeb = kIsWeb;
 
-      // When loading, don't redirect
-      if (authState.isLoading) return null;
+      // When loading OR error: do not redirect — stay on current page.
+      // This prevents a transient null (during Firebase Auth init or app
+      // resume) from flashing the login screen.
+      if (authState.isLoading || authState.hasError) return null;
 
       // WEB: Landing page '/' is public
       if (isWeb && matchedLocation == '/') return null;

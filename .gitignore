@@ -23,6 +23,8 @@
 .pub-cache/
 .pub/
 /build/
+# Local dependency overrides (never commit; CI uses git SSH dep from pubspec.yaml)
+pubspec_overrides.yaml
 
 # Android
 .gradle/

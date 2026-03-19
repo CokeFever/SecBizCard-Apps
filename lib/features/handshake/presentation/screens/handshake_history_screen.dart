@@ -28,33 +28,41 @@ class HandshakeHistoryScreen extends ConsumerWidget {
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.delete_sweep),
-            onPressed: () async {
-              final confirm = await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Clear History?'),
-                  content: const Text('This will delete all handshake records.'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Clear'),
-                    ),
-                  ],
-                ),
-              );
+          historyAsync.when(
+            data: (reports) => IconButton(
+              icon: const Icon(Icons.delete_sweep),
+              onPressed: reports.isEmpty
+                  ? null
+                  : () async {
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Clear History?'),
+                          content: const Text(
+                            'This will delete all handshake records.',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('Clear'),
+                            ),
+                          ],
+                        ),
+                      );
 
-              if (confirm == true) {
-                await repository.clearHistory();
-                ref.invalidate(handshakeHistoryProvider);
-              }
-            },
-            tooltip: 'Clear History',
+                      if (confirm == true) {
+                        await repository.clearHistory();
+                        ref.invalidate(handshakeHistoryProvider);
+                      }
+                    },
+              tooltip: 'Clear History',
+            ),
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
           ),
         ],
       ),

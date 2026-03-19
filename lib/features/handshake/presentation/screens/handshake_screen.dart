@@ -8,6 +8,7 @@ import 'package:secbizcard/core/presentation/widgets/user_profile_avatar.dart';
 
 import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
 import 'package:secbizcard/features/handshake/data/handshake_repository.dart';
+import 'package:secbizcard/features/handshake/data/handshake_history_repository.dart';
 import 'package:secbizcard/features/profile/data/profile_repository.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
@@ -26,6 +27,7 @@ class HandshakeScreen extends ConsumerStatefulWidget {
 class _HandshakeScreenState extends ConsumerState<HandshakeScreen> {
   bool _isRequesting = false;
   bool _requestSent = false;
+  bool _hasLoggedContact = false; // prevent duplicate history entries
   UserProfile? _receivedProfile;
   String? _error;
 
@@ -110,6 +112,7 @@ class _HandshakeScreenState extends ConsumerState<HandshakeScreen> {
       (p) => {
         'displayName': p.displayName,
         'uid': p.uid,
+        'photoUrl': p.photoUrl, // Include photo so the approver can see it
         'title': p.title,
         'company': p.company,
         'createdAt': p.createdAt.toIso8601String(),
@@ -246,6 +249,30 @@ class _HandshakeScreenState extends ConsumerState<HandshakeScreen> {
     );
   }
 
+  /// Log the received contact to local notification history (requester side).
+  void _logReceivedContact(Map<String, dynamic> payload, String sessionId) {
+    if (_hasLoggedContact) return; // Only log once
+    _hasLoggedContact = true;
+
+    try {
+      final profile = UserProfile.fromJson(payload);
+      final historyRepo = ref.read(handshakeHistoryRepositoryProvider);
+      historyRepo.logRequest(
+        HandshakeHistoryRecord(
+          sessionId: sessionId,
+          senderUid: profile.uid,
+          senderName: profile.displayName,
+          photoUrl: profile.photoUrl,
+          status: HandshakeRequestStatus.approved,
+          timestamp: DateTime.now(),
+        ),
+      );
+      ref.invalidate(handshakeHistoryProvider);
+    } catch (e) {
+      debugPrint('[HandshakeScreen] Failed to log contact: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // If expired locally, show invalid UI early?
@@ -293,9 +320,9 @@ class _HandshakeScreenState extends ConsumerState<HandshakeScreen> {
           if (status == 'APPROVED') {
             final payload = data['payload'] as Map<String, dynamic>?;
             if (payload != null) {
+              // Log this to local notification history (requester side)
+              _logReceivedContact(payload, widget.sessionId);
               try {
-                // Return just the UI, but we can't update state here easily.
-                // We'll rely on the fact that _buildDataReceivedUI creates UI from payload.
                 return _buildDataReceivedUI(payload);
               } catch (e) {
                 return Center(child: Text('Error parsing data: $e'));

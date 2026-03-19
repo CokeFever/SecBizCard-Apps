@@ -38,6 +38,27 @@ fi
 echo "Pre-caching iOS artifacts..."
 flutter precache --ios
 
+# Set up SSH for private package (SecBizCard_OCR)
+echo "Setting up SSH for private dependencies..."
+mkdir -p ~/.ssh
+ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+if [ -n "$OCR_DEPLOY_KEY" ]; then
+    echo "Found OCR_DEPLOY_KEY environment variable. Configuring SSH key..."
+    # Decode base64 key or use raw key (assuming raw or base64 based on content, let's treat it as raw text like GitHub Actions)
+    # App Store Connect secrets are plain text. We write it to a file.
+    # To handle potential newlines, we decode it if we need to, but usually it's plain text.
+    # Let's echo it directly to id_ed25519 and set permissions
+    echo "$OCR_DEPLOY_KEY" > ~/.ssh/id_ed25519
+    chmod 600 ~/.ssh/id_ed25519
+    eval "$(ssh-agent -s)"
+    ssh-add ~/.ssh/id_ed25519
+else
+    echo "Warning: OCR_DEPLOY_KEY environment variable is not set."
+    echo "If SecBizCard_OCR is a private git dependency, `flutter pub get` will fail."
+    echo "Please add OCR_DEPLOY_KEY in Xcode Cloud workflow environment variables."
+fi
+
 # Install dependencies
 echo "Running flutter pub get..."
 flutter pub get
