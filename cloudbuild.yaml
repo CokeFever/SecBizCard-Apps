@@ -26,6 +26,7 @@ steps:
         mkdir -p ~/.ssh
         # 這裡假設 OCR_DEPLOY_KEY 是 Base64 編碼過的 (GCP 習慣)
         echo "$$OCR_DEPLOY_KEY" | base64 -d > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
         # 寫入 Firebase 設定檔 (從 Secret Manager 讀取)
         echo "$$GOOGLE_SERVICES_JSON" > android/app/google-services.json
         echo "$$FIREBASE_OPTIONS_DART" > lib/firebase_options.dart
