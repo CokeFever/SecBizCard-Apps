@@ -35,9 +35,9 @@ steps:
         eval $(ssh-agent -s)
         ssh-add ~/.ssh/id_rsa
         
-        # 預先掃描 GitHub 避免 Host key 驗證問題
-        ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
-        
+        # Flutter 建置 (使用 GIT_SSH_COMMAND 強制使用我們設定的金鑰並跳過主機檢查)
+        export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa"
+
         # 限制 Gradle 記憶體使用，避免在 8GB 機器上 OOM (GCP Quota 限制無法用 32GB 機器)
         # 設定更大的堆疊限制並嘗試關閉 daemon
         export GRADLE_OPTS="-Xmx3g -XX:MaxMetaspaceSize=512m -Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Dorg.gradle.workers.max=1"
