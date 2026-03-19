@@ -172,7 +172,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         notchMargin: 8.0,
-        child: Row(
+        child: SafeArea(
+          bottom: true,
+          child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             Expanded(
@@ -211,6 +213,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           ],
         ),
       ),
+    ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           if (_currentIndex == 0) {

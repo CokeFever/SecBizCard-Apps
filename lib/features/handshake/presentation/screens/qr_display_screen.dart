@@ -36,6 +36,11 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
   bool _isLoading = true;
   String? _error;
 
+  // Cache the requester's profile from the REQUESTED event
+  // so we can use it in APPROVED/RETURNED log entries 
+  // (Cloud Function may clear receiverProfile after approval)
+  Map<String, dynamic>? _cachedRequesterProfile;
+
   // Countdown timer
   Timer? _countdownTimer;
   int _remainingSeconds = 600; // 10 minutes
@@ -194,11 +199,18 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
 
   void _logHandshakeStatus(Map<String, dynamic> data, String status) {
     final historyRepo = ref.read(handshakeHistoryRepositoryProvider);
+
+    // Cache the requester profile when we first see it (REQUESTED event).
+    // After approval, Cloud Function may clear the field from the session doc.
     final receiverProfileMap =
         data['receiverProfile'] as Map<String, dynamic>?;
-    final senderName = receiverProfileMap?['displayName'] as String?;
-    final senderUid = receiverProfileMap?['uid'] as String?;
-    final photoUrl = receiverProfileMap?['photoUrl'] as String?;
+    if (receiverProfileMap != null) {
+      _cachedRequesterProfile = receiverProfileMap;
+    }
+    final profileToLog = _cachedRequesterProfile;
+    final senderName = profileToLog?['displayName'] as String?;
+    final senderUid = profileToLog?['uid'] as String?;
+    final photoUrl = profileToLog?['photoUrl'] as String?;
 
     HandshakeRequestStatus localStatus;
     switch (status) {
@@ -227,9 +239,12 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
         photoUrl: photoUrl,
         status: localStatus,
         timestamp: DateTime.now(),
-        receiverProfileJson: jsonEncode(data), // Save full raw data for approval later
+        receiverProfileJson: jsonEncode(data),
       ),
-    );
+    ).then((_) {
+      // Refresh the notification center after logging
+      ref.invalidate(handshakeHistoryProvider);
+    });
   }
 
   void _showIncomingReturnDialog(Map<String, dynamic> data) async {
