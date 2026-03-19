@@ -1,0 +1,476 @@
+import { onCall, onRequest, HttpsError, CallableRequest } from "firebase-functions/v2/https";
+import * as admin from "firebase-admin";
+
+admin.initializeApp();
+
+// ?€?€ Demo Session Constants ?€?€
+const DEMO_PROFILE = {
+    uid: "demo-secbizcard",
+    displayName: "SecBizCard",
+    email: "support@ixo.app",
+    company: "ixo.app",
+    title: "Secure Business Card Exchange",
+    photoUrl: "https://ixo.app/flutter/icons/Icon-512.png",
+    createdAt: new Date().toISOString(),
+};
+
+/**
+ * Creates a handshake session for business card exchange.
+ * 
+ * Request body: { contextType: string }
+ * Response: { sessionId: string, url: string }
+ */
+export const createHandshakeSession = onCall(
+    { cors: true },  // Allow CORS for callable functions
+    async (request: CallableRequest) => {
+        // Verify authentication
+        if (!request.auth) {
+            throw new HttpsError(
+                "unauthenticated",
+                "User must be authenticated to create a handshake session."
+            );
+        }
+
+        const creatorId = request.auth.uid;
+        // Default to 'business' if no contextType provided (per PRD simplification)
+        const contextType = request.data?.contextType || "business";
+        // Batch Approval flag
+        const batchApproval = request.data?.batchApproval ?? false;
+
+        // Validate contextType
+        const validContexts = ["business", "social", "lite"];
+        if (!validContexts.includes(contextType)) {
+            throw new HttpsError(
+                "invalid-argument",
+                "Valid contextType is required (business, social, or lite)."
+            );
+        }
+
+        // Generate a short 6-character alphanumeric hash
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'; // Excluded confusing chars (0,O,I,l,1)
+        let shortHash = '';
+        for (let i = 0; i < 6; i++) {
+            shortHash += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+
+        // Use shortHash as the document ID for direct lookup
+        const sessionRef = admin.firestore().collection("handshakes").doc(shortHash);
+
+        // Check if hash already exists (very unlikely but possible)
+        const existing = await sessionRef.get();
+        if (existing.exists) {
+            // Regenerate with timestamp suffix as fallback
+            shortHash = shortHash.substring(0, 4) + Date.now().toString(36).slice(-2);
+        }
+
+        const finalRef = admin.firestore().collection("handshakes").doc(shortHash);
+
+        // Create the handshake session
+        await finalRef.set({
+            creatorId,
+            contextType,
+            batchApproval, // Save flag
+            status: "waiting",
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            expiresAt: admin.firestore.Timestamp.fromMillis(
+                Date.now() + 10 * 60 * 1000 // 10 minutes expiry
+            ),
+        });
+
+
+        // Generate the short deep link URL
+        const url = `https://ixo.app/${shortHash}`;
+
+        return {
+            sessionId: shortHash,
+            url,
+        };
+    }
+);
+
+/**
+ * Receiver sends a request to the Sender.
+ * 
+ * Request body: { sessionId: string, receiverProfile: any }
+ * Response: { success: boolean }
+ */
+export const requestHandshake = onCall(
+    { cors: true },
+    async (request: CallableRequest) => {
+        if (!request.auth) {
+            throw new HttpsError("unauthenticated", "User must be authenticated.");
+        }
+
+        const { sessionId, receiverProfile } = request.data;
+        if (!sessionId) {
+            throw new HttpsError("invalid-argument", "sessionId is required.");
+        }
+
+        // ?€?€ Demo Session: Auto-approve with preset data ?€?€
+        if (sessionId.match(/^DEMO0[0-9]$/)) {
+            const db = admin.firestore();
+            const demoRef = db.collection("handshakes").doc(sessionId);
+
+            // Fetch to ensure we don't overwrite blindly, though we could
+            const demoDoc = await demoRef.get();
+            if (!demoDoc.exists) {
+                // If it doesn't exist, create it as APPROVED directly
+                // SECURITY FIX: Do not write recipientId or receiverProfile to prevent PII leakage on public demo session
+                await demoRef.set({
+                    creatorId: "demo-secbizcard",
+                    contextType: "business",
+                    status: "APPROVED",
+                    payload: DEMO_PROFILE,
+                    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                    requestedAt: admin.firestore.FieldValue.serverTimestamp(),
+                    respondedAt: admin.firestore.FieldValue.serverTimestamp(),
+                    expiresAt: admin.firestore.Timestamp.fromMillis(Date.now() + 10 * 365 * 24 * 60 * 60 * 1000), // 10 years valid
+                });
+            } else {
+                // IMPORTANT workaround for the old v1.2.9 app client bug:
+                // The old app listens to Firestore. If we instantly update to APPROVED,
+                // the app state 'isRequesting = false' and '_requestSent = true' might fire
+                // *after* the Firestore watcher sees APPROVED, causing the old app to jump to
+                // 'Waiting for approval' because of `if (_requestSent || status == 'REQUESTED')`.
+                // To fix this, we update to APPROVED after a tiny delay so the old app processes
+                // the _requestSent=true state first, THEN sees the APPROVED state.
+
+                // First, just acknowledge the request by setting it to REQUESTED
+                // SECURITY FIX: Do not write recipientId or receiverProfile to prevent PII leakage
+                await demoRef.update({
+                    status: "REQUESTED",
+                    requestedAt: admin.firestore.FieldValue.serverTimestamp(),
+                });
+
+                // Then simulate the sender approving it shortly after
+                setTimeout(async () => {
+                    await demoRef.update({
+                        status: "APPROVED",
+                        payload: DEMO_PROFILE,
+                        respondedAt: admin.firestore.FieldValue.serverTimestamp(),
+                    });
+                }, 1500); // 1.5 seconds delay to let the app settle into "Waiting for approval" state
+            }
+
+            return { success: true };
+        }
+
+        const db = admin.firestore();
+        const sessionRef = db.collection("handshakes").doc(sessionId);
+
+        // Transaction to ensure atomic update and status check
+        await db.runTransaction(async (transaction) => {
+            const sessionDoc = await transaction.get(sessionRef);
+            if (!sessionDoc.exists) {
+                throw new HttpsError("not-found", "Handshake session not found.");
+            }
+
+            const data = sessionDoc.data();
+
+            // Check Expiry
+            if (data?.expiresAt && data.expiresAt.toMillis() < Date.now()) {
+                throw new HttpsError("deadline-exceeded", "Session has expired.");
+            }
+
+            // Check for Auto-Approval (Batch Approval ON + Decision Made)
+            if (data?.batchApproval === true && data?.decisionAccept === true && data?.decisionPayload) {
+                transaction.update(sessionRef, {
+                    recipientId: request.auth?.uid,
+                    receiverProfile: receiverProfile || {},
+                    // Don't change status, keep it APPROVED
+                });
+                return;
+            }
+
+            // Status Check Logic
+            const currentStatus = data?.status;
+
+            // If currently processing another request (REQUESTED), we are busy.
+            // Unless it's the SAME user retrying? (Idempotency) - For now assume busy.
+            if (currentStatus === "REQUESTED") {
+                throw new HttpsError("failed-precondition", "Session is busy with another request.");
+            }
+
+            // If Batch Approval is OFF (or ON but no decision yet):
+            // We allow:
+            // 1. WAITING (First time)
+            // 2. CREATED (Initial)
+            // 3. APPROVED (Previous finished, sequential reuse)
+            // 4. REJECTED (Previous finished, sequential reuse)
+
+            // So essentially, as long as it's not REQUESTED, we allow overwriting to start a new handshake.
+
+            transaction.update(sessionRef, {
+                status: "REQUESTED",
+                receiverProfile: receiverProfile || {},
+                recipientId: request.auth?.uid,
+                requestedAt: admin.firestore.FieldValue.serverTimestamp(),
+            });
+        });
+
+        // Send FCM Notification to Creator (Only if logic above didn't return early?)
+        // The transaction above returns void.
+        // If we auto-approved, we might NOT want to spam Owner?
+        // Or we DO want to notify "Auto approved B"? 
+        // User requirements didn't specify.
+        // Let's send FCM anyway so Owner knows B connected.
+
+        try {
+            const sessionDoc = await db.collection("handshakes").doc(sessionId).get();
+            const creatorId = sessionDoc.data()?.creatorId;
+
+            if (creatorId) {
+                const userDoc = await db.collection("users").doc(creatorId).get();
+                const fcmToken = userDoc.data()?.fcmToken;
+
+                if (fcmToken) {
+                    await admin.messaging().send({
+                        token: fcmToken,
+                        data: {
+                            type: 'HANDSHAKE_REQUEST',
+                            sessionId: sessionId,
+                        },
+                        notification: {
+                            title: 'New Handshake Request',
+                            body: 'Someone wants to exchange info with you!',
+                        },
+                        android: { priority: 'high' },
+                        apns: { payload: { aps: { contentAvailable: true } } },
+                    });
+                }
+            }
+        } catch (e) {
+            console.error("Failed to send FCM", e);
+        }
+
+        return { success: true };
+    }
+);
+
+/**
+ * Sender responds to the request (Approve/Reject).
+ * 
+ * Request body: { sessionId: string, accept: boolean, payload: any }
+ * Response: { success: boolean }
+ */
+export const respondToHandshake = onCall(
+    { cors: true },
+    async (request: CallableRequest) => {
+        if (!request.auth) {
+            throw new HttpsError("unauthenticated", "User must be authenticated.");
+        }
+
+        const { sessionId, accept, payload } = request.data;
+        if (!sessionId) {
+            throw new HttpsError("invalid-argument", "sessionId is required.");
+        }
+
+        const db = admin.firestore();
+        const sessionRef = db.collection("handshakes").doc(sessionId);
+
+        await db.runTransaction(async (transaction) => {
+            const sessionDoc = await transaction.get(sessionRef);
+            if (!sessionDoc.exists) {
+                throw new HttpsError("not-found", "Handshake session not found.");
+            }
+
+            const data = sessionDoc.data();
+            // Verify ownership
+            if (data?.creatorId !== request.auth?.uid) {
+                throw new HttpsError("permission-denied", "Only the creator can respond.");
+            }
+
+            if (data?.status !== "REQUESTED") {
+                throw new HttpsError("failed-precondition", "Session is not in requested state.");
+            }
+
+            const updates: any = {
+                status: accept ? "APPROVED" : "REJECTED",
+                respondedAt: admin.firestore.FieldValue.serverTimestamp(),
+            };
+
+            if (accept && payload) {
+                updates.payload = payload;
+
+                // If Batch Approval is ON, save the decision for future auto-approvals
+                if (data?.batchApproval === true) {
+                    updates.decisionAccept = true;
+                    updates.decisionPayload = payload;
+                }
+            } else if (!accept) {
+                // If rejected, and Batch is ON... user said "?Žé¢?¨éƒ¨??reject"
+                if (data?.batchApproval === true) {
+                    updates.decisionAccept = false;
+                    updates.decisionPayload = null; // No payload
+                }
+            }
+
+            transaction.update(sessionRef, updates);
+        });
+
+        return { success: true };
+    }
+);
+
+
+/**
+ * Receiver returns data to the Sender (Reciprocal Exchange).
+ * 
+ * Request body: { sessionId: string, payload: any }
+ * Response: { success: boolean }
+ */
+export const returnHandshake = onCall(
+    { cors: true },
+    async (request: CallableRequest) => {
+        if (!request.auth) {
+            throw new HttpsError("unauthenticated", "User must be authenticated.");
+        }
+
+        const { sessionId, payload } = request.data;
+        if (!sessionId) {
+            throw new HttpsError("invalid-argument", "sessionId is required.");
+        }
+
+        const db = admin.firestore();
+        const sessionRef = db.collection("handshakes").doc(sessionId);
+
+        await db.runTransaction(async (transaction) => {
+            const sessionDoc = await transaction.get(sessionRef);
+            if (!sessionDoc.exists) {
+                throw new HttpsError("not-found", "Handshake session not found.");
+            }
+
+            const data = sessionDoc.data();
+
+            // Verify state: Must be APPROVED to return data
+            if (data?.status !== "APPROVED") {
+                throw new HttpsError("failed-precondition", "Session must be approved to return data.");
+            }
+
+            // Verify participant (Must be the one who requested it previously)
+            if (data?.recipientId !== request.auth?.uid) {
+                throw new HttpsError("permission-denied", "Only the recipient can return data.");
+            }
+
+            transaction.update(sessionRef, {
+                status: "RETURNED",
+                returnPayload: payload,
+                returnedAt: admin.firestore.FieldValue.serverTimestamp(),
+            });
+        });
+
+        // Notify Sender (Creator)
+        try {
+            const sessionDoc = await db.collection("handshakes").doc(sessionId).get();
+            const creatorId = sessionDoc.data()?.creatorId;
+
+            if (creatorId) {
+                const userDoc = await db.collection("users").doc(creatorId).get();
+                const fcmToken = userDoc.data()?.fcmToken;
+
+                if (fcmToken) {
+                    await admin.messaging().send({
+                        token: fcmToken,
+                        data: {
+                            type: 'HANDSHAKE_RETURN',
+                            sessionId: sessionId,
+                        },
+                        notification: {
+                            title: 'Info Returned!',
+                            body: 'The other person shared their info back.',
+                        },
+                        android: { priority: 'high' },
+                        apns: { payload: { aps: { contentAvailable: true } } },
+                    });
+                }
+            }
+        } catch (e) {
+            console.error("Failed to send FCM", e);
+        }
+
+        return { success: true };
+    }
+);
+
+/**
+ * Saves a pending session for deferred deep linking (iOS fingerprint-based).
+ * This is an HTTP endpoint called from the landing page.
+ * 
+ * Request body: { fingerprint: string, sessionId: string, platform: string }
+ * Response: { success: boolean }
+ */
+export const savePendingSession = onRequest(
+    { cors: true },
+    async (req, res) => {
+        if (req.method !== 'POST') {
+            res.status(405).json({ error: 'Method not allowed' });
+            return;
+        }
+
+        const { fingerprint, sessionId, platform } = req.body;
+
+        if (!fingerprint || !sessionId) {
+            res.status(400).json({ error: 'fingerprint and sessionId are required' });
+            return;
+        }
+
+        // Validate sessionId format (6 chars alphanumeric)
+        if (!/^[a-zA-Z0-9]{6}$/.test(sessionId)) {
+            res.status(400).json({ error: 'Invalid sessionId format' });
+            return;
+        }
+
+        const db = admin.firestore();
+        const pendingRef = db.collection('pending_sessions').doc(fingerprint);
+
+        await pendingRef.set({
+            sessionId,
+            platform: platform || 'unknown',
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            expiresAt: admin.firestore.Timestamp.fromMillis(
+                Date.now() + 10 * 60 * 1000 // 10 minutes expiry
+            ),
+        });
+
+        res.status(200).json({ success: true });
+    }
+);
+
+/**
+ * Retrieves and deletes a pending session for deferred deep linking.
+ * This is a callable function used by the Flutter app on first launch.
+ * 
+ * Request body: { fingerprint: string }
+ * Response: { sessionId: string | null }
+ */
+export const getPendingSession = onCall(
+    { cors: true },
+    async (request: CallableRequest) => {
+        const { fingerprint } = request.data;
+
+        if (!fingerprint) {
+            throw new HttpsError("invalid-argument", "fingerprint is required.");
+        }
+
+        const db = admin.firestore();
+        const pendingRef = db.collection('pending_sessions').doc(fingerprint);
+
+        const doc = await pendingRef.get();
+        if (!doc.exists) {
+            return { sessionId: null };
+        }
+
+        const data = doc.data();
+
+        // Check if expired
+        if (data?.expiresAt && data.expiresAt.toMillis() < Date.now()) {
+            await pendingRef.delete();
+            return { sessionId: null };
+        }
+
+        // Delete after retrieval (one-time use)
+        await pendingRef.delete();
+
+        return { sessionId: data?.sessionId || null };
+    }
+);
