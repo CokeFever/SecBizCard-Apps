@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SecBizCard</string>
+    <string name="nfc_service_desc">SecBizCard NFC Service</string>
+    <string name="nfc_aid_desc">SecBizCard</string>
+</resources>

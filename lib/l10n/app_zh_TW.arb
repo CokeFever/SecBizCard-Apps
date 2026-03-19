@@ -1,0 +1,11 @@
+{
+  "@@locale": "zh_TW",
+  "appTitle": "SecBizCard",
+  "loginSlogan": "安全、專業、即時",
+  "signInWithGoogle": "使用 Google 登入",
+  "signInWithApple": "使用 Apple 登入",
+  "orSignInWith": "或使用 {provider} 登入",
+  "profileTitle": "個人檔案",
+  "editProfile": "編輯檔案",
+  "onboardingWelcome": "歡迎使用 SecBizCard"
+}
