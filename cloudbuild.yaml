@@ -1,0 +1,84 @@
+steps:
+  # 1. 解碼 Keystore (利用 Secret Manager 的環境變數)
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: 'decode-keystore'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "$$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
+    secretEnv: ['ANDROID_KEYSTORE_BASE64']
+
+  # 2. 執行 Flutter Build AAB
+  - name: 'ghcr.io/cirruslabs/flutter:stable'
+    id: 'build-aab'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        # 建立臨時 key.properties 供 Gradle 使用
+        echo "storePassword=$$ANDROID_KEYSTORE_PASSWORD" > android/key.properties
+        echo "keyPassword=$$ANDROID_KEY_PASSWORD" >> android/key.properties
+        echo "keyAlias=$$ANDROID_KEY_ALIAS" >> android/key.properties
+        echo "storeFile=upload-keystore.jks" >> android/key.properties
+        
+        # 設定 SSH Deploy Key，讓 Flutter 可以下載私密 Git Package (SecBizCard_OCR)
+        mkdir -p ~/.ssh
+        echo "$$OCR_DEPLOY_KEY" | base64 -d > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan github.com >> ~/.ssh/known_hosts
+        
+        # Flutter 建置
+        flutter pub get
+        flutter gen-l10n
+        dart run build_runner build --delete-conflicting-outputs
+        flutter build aab --release
+    secretEnv: ['ANDROID_KEYSTORE_PASSWORD', 'ANDROID_KEY_ALIAS', 'ANDROID_KEY_PASSWORD', 'OCR_DEPLOY_KEY']
+
+  # 3. 上傳至 Google Play (使用 fastlane)
+  - name: 'ghcr.io/cirruslabs/flutter:stable'
+    id: 'upload-to-play'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        # 寫入服務帳號金鑰
+        echo "$$PLAY_STORE_SERVICE_ACCOUNT_JSON" > play-store-key.json
+        
+        # 安裝 fastlane (如果映像檔沒有內建)
+        if ! command -v fastlane &> /dev/null; then
+          apt-get update && apt-get install -y ruby-full
+          gem install fastlane -NV
+        fi
+        
+        # 執行上傳至 internal 測試軌道
+        # 改成您的 package name: app.ixo.secbizcard
+        fastlane run upload_to_play_store \
+          package_name:"app.ixo.secbizcard" \
+          json_key:"play-store-key.json" \
+          track:"internal" \
+          aab:"build/app/outputs/bundle/release/app-release.aab" \
+          skip_upload_metadata:true \
+          skip_upload_images:true \
+          skip_upload_screenshots:true
+    secretEnv: ['PLAY_STORE_SERVICE_ACCOUNT_JSON']
+
+# 定義 Secret 與全域設定
+availableSecrets:
+  secretManager:
+    - versionName: projects/ixo-app-secbizcard/secrets/ANDROID_KEYSTORE_BASE64/versions/latest
+      env: 'ANDROID_KEYSTORE_BASE64'
+    - versionName: projects/ixo-app-secbizcard/secrets/ANDROID_KEYSTORE_PASSWORD/versions/latest
+      env: 'ANDROID_KEYSTORE_PASSWORD'
+    - versionName: projects/ixo-app-secbizcard/secrets/ANDROID_KEY_ALIAS/versions/latest
+      env: 'ANDROID_KEY_ALIAS'
+    - versionName: projects/ixo-app-secbizcard/secrets/ANDROID_KEY_PASSWORD/versions/latest
+      env: 'ANDROID_KEY_PASSWORD'
+    - versionName: projects/ixo-app-secbizcard/secrets/PLAY_STORE_SERVICE_ACCOUNT_JSON/versions/latest
+      env: 'PLAY_STORE_SERVICE_ACCOUNT_JSON'
+    - versionName: projects/ixo-app-secbizcard/secrets/OCR_DEPLOY_KEY/versions/latest
+      env: 'OCR_DEPLOY_KEY'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8' # 使用較強悍的機器加速 Flutter 編譯 (Android build 較吃資源)
