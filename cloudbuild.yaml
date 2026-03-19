@@ -26,7 +26,9 @@ steps:
         mkdir -p ~/.ssh
         # 這裡假設 OCR_DEPLOY_KEY 是 Base64 編碼過的 (GCP 習慣)
         echo "$$OCR_DEPLOY_KEY" | base64 -d > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
+        # 寫入 Firebase 設定檔 (從 Secret Manager 讀取)
+        echo "$$GOOGLE_SERVICES_JSON" > android/app/google-services.json
+        echo "$$FIREBASE_OPTIONS_DART" > lib/firebase_options.dart
         
         # 啟動 ssh-agent 並加入金鑰 (這比只放檔案更穩健)
         eval $(ssh-agent -s)
@@ -41,7 +43,7 @@ steps:
         flutter gen-l10n
         dart run build_runner build --delete-conflicting-outputs
         flutter build aab --release
-    secretEnv: ['ANDROID_KEYSTORE_PASSWORD', 'ANDROID_KEY_ALIAS', 'ANDROID_KEY_PASSWORD', 'OCR_DEPLOY_KEY']
+    secretEnv: ['ANDROID_KEYSTORE_PASSWORD', 'ANDROID_KEY_ALIAS', 'ANDROID_KEY_PASSWORD', 'OCR_DEPLOY_KEY', 'GOOGLE_SERVICES_JSON', 'FIREBASE_OPTIONS_DART']
 
   # 3. 上傳至 Google Play (使用 fastlane)
   - name: 'ghcr.io/cirruslabs/flutter:stable'
@@ -86,6 +88,10 @@ availableSecrets:
       env: 'PLAY_STORE_SERVICE_ACCOUNT_JSON'
     - versionName: projects/ixo-app-secbizcard/secrets/OCR_DEPLOY_KEY/versions/latest
       env: 'OCR_DEPLOY_KEY'
+    - versionName: projects/ixo-app-secbizcard/secrets/GOOGLE_SERVICES_JSON/versions/latest
+      env: 'GOOGLE_SERVICES_JSON'
+    - versionName: projects/ixo-app-secbizcard/secrets/FIREBASE_OPTIONS_DART/versions/latest
+      env: 'FIREBASE_OPTIONS_DART'
 
 options:
   logging: CLOUD_LOGGING_ONLY
