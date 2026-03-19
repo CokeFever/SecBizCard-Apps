@@ -1,0 +1,33 @@
+name: sign_in_with_apple_example
+description: Demonstrates how to use the sign_in_with_apple plugin.
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.3.0
+  flutter: ">=3.19.1 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  http: ^1.2.1
+
+  sign_in_with_apple:
+    path: ../
+
+dev_dependencies:
+  flutter_lints: ^3.0.1
+  flutter_test:
+    sdk: flutter
+
+# Use the latest packages from the repo for the example
+dependency_overrides:
+  sign_in_with_apple_platform_interface:
+    path: ../../sign_in_with_apple_platform_interface
+
+  sign_in_with_apple_web:
+    path: ../../sign_in_with_apple_web
+
+flutter:
+  uses-material-design: true
