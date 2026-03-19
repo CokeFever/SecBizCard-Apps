@@ -43,9 +43,10 @@ echo "Setting up SSH for private dependencies..."
 mkdir -p ~/.ssh
 ssh-keyscan github.com >> ~/.ssh/known_hosts
 
+if [ -n "$OCR_DEPLOY_KEY" ]; then
     echo "Found OCR_DEPLOY_KEY environment variable. Configuring SSH key..."
-    # 使用 base64 解碼以避免多行格式在 CI 環境變數中跑掉
-    echo "$OCR_DEPLOY_KEY" | base64 -d > ~/.ssh/id_ed25519
+    # macOS base64 uses -D for decode.
+    echo "$OCR_DEPLOY_KEY" | base64 -D > ~/.ssh/id_ed25519
     chmod 600 ~/.ssh/id_ed25519
     eval "$(ssh-agent -s)"
     ssh-add ~/.ssh/id_ed25519
@@ -59,12 +60,12 @@ fi
 echo "Injecting Firebase configuration files..."
 if [ -n "$GOOGLE_SERVICE_INFO_PLIST" ]; then
     echo "Creating ios/Runner/GoogleService-Info.plist from Base64..."
-    echo "$GOOGLE_SERVICE_INFO_PLIST" | base64 -d > ios/Runner/GoogleService-Info.plist
+    echo "$GOOGLE_SERVICE_INFO_PLIST" | base64 -D > ios/Runner/GoogleService-Info.plist
 fi
 
 if [ -n "$FIREBASE_OPTIONS_DART" ]; then
     echo "Creating lib/firebase_options.dart from Base64..."
-    echo "$FIREBASE_OPTIONS_DART" | base64 -d > lib/firebase_options.dart
+    echo "$FIREBASE_OPTIONS_DART" | base64 -D > lib/firebase_options.dart
 fi
 
 # Install dependencies
