@@ -27,10 +27,17 @@ steps:
         # 這裡假設 OCR_DEPLOY_KEY 是 Base64 編碼過的 (GCP 習慣)
         echo "$$OCR_DEPLOY_KEY" | base64 -d > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan github.com >> ~/.ssh/known_hosts
         
-        # Flutter 建置 (使用 GIT_SSH_COMMAND 跳過主機金鑰檢查)
-        GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" flutter pub get
+        # 啟動 ssh-agent 並加入金鑰 (這比只放檔案更穩健)
+        eval $(ssh-agent -s)
+        ssh-add ~/.ssh/id_rsa
+        
+        # 預先掃描 GitHub 避免 Host key 驗證問題
+        ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
+        
+        # Flutter 建置 (使用 GIT_SSH_COMMAND 強制使用我們設定的金鑰並跳過主機檢查)
+        export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa"
+        flutter pub get
         flutter gen-l10n
         dart run build_runner build --delete-conflicting-outputs
         flutter build aab --release
