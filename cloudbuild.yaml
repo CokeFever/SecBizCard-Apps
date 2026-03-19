@@ -96,4 +96,4 @@ availableSecrets:
 
 options:
   logging: CLOUD_LOGGING_ONLY
-  machineType: 'E2_HIGHCPU_8' # 使用較強悍的機器加速 Flutter 編譯 (Android build 較吃資源)
+  machineType: 'e2-standard-8' # 使用標準型機器 (32GB RAM) 避免 Gradle 記憶體不足 (OOM) 崩潰
