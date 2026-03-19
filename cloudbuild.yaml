@@ -40,6 +40,11 @@ steps:
         
         # Flutter 建置 (使用 GIT_SSH_COMMAND 強制使用我們設定的金鑰並跳過主機檢查)
         export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa"
+        
+        # 限制 Gradle 記憶體使用，避免在 8GB 機器上 OOM (GCP Quota 限制無法用 32GB 機器)
+        export GRADLE_OPTS="-Xmx3g -XX:MaxMetaspaceSize=512m -Dorg.gradle.daemon=false"
+        export JAVA_OPTS="-Xmx3g"
+        
         flutter pub get
         flutter gen-l10n
         dart run build_runner build --delete-conflicting-outputs
@@ -96,4 +101,4 @@ availableSecrets:
 
 options:
   logging: CLOUD_LOGGING_ONLY
-  machineType: 'E2_HIGHCPU_32' # 使用 32 vCPU / 32GB RAM 的規格，避免 Gradle 記憶體不足 (OOM) 崩潰
+  machineType: 'E2_HIGHCPU_8'
