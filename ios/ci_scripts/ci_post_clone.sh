@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # The script runs in <project_root>/ios/ci_scripts
 
@@ -44,9 +44,9 @@ mkdir -p ~/.ssh
 ssh-keyscan github.com >> ~/.ssh/known_hosts
 
 if [ -n "$OCR_DEPLOY_KEY" ]; then
-    echo "Found OCR_DEPLOY_KEY environment variable. Configuring SSH key..."
-    # macOS base64 uses -D for decode.
-    echo "$OCR_DEPLOY_KEY" | base64 -D > ~/.ssh/id_ed25519
+    echo "Found OCR_DEPLOY_KEY environment variable (Length: ${#OCR_DEPLOY_KEY}). Configuring SSH key..."
+    # Use python3 for robust base64 decoding (handles binary data and line breaks consistently)
+    python3 -c "import base64, os; open(os.path.expanduser('~/.ssh/id_ed25519'), 'wb').write(base64.b64decode(os.environ['OCR_DEPLOY_KEY']))"
     chmod 600 ~/.ssh/id_ed25519
     eval "$(ssh-agent -s)"
     ssh-add ~/.ssh/id_ed25519
@@ -59,13 +59,13 @@ fi
 # Inject Firebase Configuration (iOS)
 echo "Injecting Firebase configuration files..."
 if [ -n "$GOOGLE_SERVICE_INFO_PLIST" ]; then
-    echo "Creating ios/Runner/GoogleService-Info.plist from Base64..."
-    echo "$GOOGLE_SERVICE_INFO_PLIST" | base64 -D > ios/Runner/GoogleService-Info.plist
+    echo "Creating ios/Runner/GoogleService-Info.plist from Base64 (Length: ${#GOOGLE_SERVICE_INFO_PLIST})..."
+    python3 -c "import base64, os; open('ios/Runner/GoogleService-Info.plist', 'wb').write(base64.b64decode(os.environ['GOOGLE_SERVICE_INFO_PLIST']))"
 fi
 
 if [ -n "$FIREBASE_OPTIONS_DART" ]; then
-    echo "Creating lib/firebase_options.dart from Base64..."
-    echo "$FIREBASE_OPTIONS_DART" | base64 -D > lib/firebase_options.dart
+    echo "Creating lib/firebase_options.dart from Base64 (Length: ${#FIREBASE_OPTIONS_DART})..."
+    python3 -c "import base64, os; open('lib/firebase_options.dart', 'wb').write(base64.b64decode(os.environ['FIREBASE_OPTIONS_DART']))"
 fi
 
 # Install dependencies
