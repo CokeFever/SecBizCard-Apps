@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.3.4] - 2026-03-20
+
+### Changed
+- **Architecture**:
+    - Project refactored into two repositories for open-sourcing.
+    - Extracted core OCR logic into a private package `SecBizCard_OCR`.
+- **CI/CD**:
+    - **GCP Cloud Build**: Added automated AAB builds and Play Store Internal distribution with robust Secret Manager integration.
+    - **Xcode Cloud**: Configured iOS builds with secure environment variable injection for Firebase and private dependencies.
+    - **GitHub Actions**: Configured Android QA APK builds for testing.
+- **Reliability**:
+    - Implemented robust Base64 decoding for sensitive configuration files in CI pipelines.
+    - Optimized build node resource usage (Gradle memory limits) to prevent OOM errors.
+    - Automated SSH key management for private git dependencies.
+
 ## [1.2.6] - 2026-02-01
 
 ### Added
