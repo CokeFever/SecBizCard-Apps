@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.3.6] - 2026-03-20
+
+### Fixed
+- **CI/CD**: Synchronized GCP Secret Manager with rotated Firebase API keys to fix Android login issue.
+
 ## [1.3.5] - 2026-03-20
 
 ### Fixed
