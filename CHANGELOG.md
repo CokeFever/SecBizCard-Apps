@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.3.5] - 2026-03-20
+
+### Fixed
+- **Firebase**: Updated stale API keys for Android and iOS after rotation. (Resolved "API key expired" login error).
+
 ## [1.3.4] - 2026-03-20
 
 ### Changed
