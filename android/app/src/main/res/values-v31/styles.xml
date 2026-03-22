@@ -5,6 +5,9 @@
         <item name="android:windowBackground">@android:color/white</item>
         <!-- For Android 12+ splash screen -->
         <item name="android:windowSplashScreenBackground">@android:color/white</item>
+        <!-- For status bar visibility -->
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
         <!-- Disable the Android 12+ splash screen icon -->
         <item name="android:windowSplashScreenAnimatedIcon">@android:color/transparent</item>
     </style>
