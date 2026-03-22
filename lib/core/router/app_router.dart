@@ -57,21 +57,21 @@ GoRouter goRouter(Ref ref) {
       // WEB: Landing page '/' is public
       if (isWeb && matchedLocation == '/') return null;
 
-      // MOBILE: Never stay on '/' - redirect based on auth
-      if (!isWeb && matchedLocation == '/') {
-        return user == null ? '/login' : '/home';
-      }
-
       // Not logged in -> force login (except for public paths)
       if (user == null) {
+        // [ANDROID FIX]: On Android, Firebase Auth may take a moment to initialize.
+        // If we are currently on the root ('/') which shows SplashScreen,
+        // we stay there until we are sure user is null.
+        if (!isWeb && matchedLocation == '/') return null;
+
         // Allow handshake paths for web (they'll see invitation)
         if (isWeb && matchedLocation.startsWith('/handshake/')) return null;
         if (loggingIn) return null;
         return '/login';
       }
 
-      // Logged in -> if on login page, go to home
-      if (loggingIn) {
+      // Logged in -> redirect based on location
+      if (loggingIn || matchedLocation == '/') {
         return '/home';
       }
 
