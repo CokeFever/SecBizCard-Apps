@@ -24,6 +24,8 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    final user = FirebaseAuth.instance.currentUser;
+    debugPrint('[DEBUG] main.dart: Firebase Initialized. Current User: ${user?.uid ?? "NULL"}');
 
     // Initial silent sign-in is handled via authStateChanges in the router
     // but the unified provider ensures we use the correct configuration.

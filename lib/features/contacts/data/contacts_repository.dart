@@ -8,6 +8,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:secbizcard/core/errors/failure.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
 
+import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/contacts/data/datasources/contacts_local_datasource.dart';
 import 'package:secbizcard/features/profile/data/datasources/profile_local_datasource.dart';
 
