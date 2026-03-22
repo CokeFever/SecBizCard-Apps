@@ -24,7 +24,7 @@ Future<List<UserProfile>> savedContacts(Ref ref) {
 @riverpod
 ContactsRepository contactsRepository(Ref ref) {
   return ContactsRepository(
-    GoogleSignIn(scopes: [people.PeopleServiceApi.contactsScope]),
+    ref.watch(googleSignInProvider),
     ref.watch(profileLocalDataSourceProvider),
     ref.watch(contactsLocalDataSourceProvider),
   );
