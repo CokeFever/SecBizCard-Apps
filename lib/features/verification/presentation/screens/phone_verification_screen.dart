@@ -145,6 +145,7 @@ class _PhoneVerificationScreenState
             setState(() {
               _errorMessage = e.toString();
               _isLoading = false;
+              _codeSent = false; // Reset to allow retrying
             });
           }
         }
