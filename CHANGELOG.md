@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.7] - 2026-03-22
+
+### Fixed
+- **iOS Deep Linking**: Added `Associated Domains` entitlement to fix Universal Links opening in browser.
+- **Android Login Persistence**: Added `GoogleSignIn().signInSilently()` initialization logic.
+- **Deep Linking**: Implemented iOS clipboard workaround for deferred deep linking on first launch.
+
 ## [1.3.6] - 2026-03-20
 
 ### Fixed

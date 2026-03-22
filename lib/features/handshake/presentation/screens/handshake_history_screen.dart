@@ -6,7 +6,6 @@ import 'dart:convert';
 import 'package:secbizcard/features/handshake/data/handshake_repository.dart';
 import 'package:secbizcard/features/handshake/data/handshake_history_repository.dart';
 import 'package:secbizcard/features/handshake/presentation/widgets/incoming_request_sheet.dart';
-import 'package:secbizcard/features/profile/domain/card_context.dart';
 import 'package:secbizcard/features/profile/data/profile_repository.dart';
 import 'package:secbizcard/features/profile/domain/user_profile_extensions.dart';
 import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
@@ -119,7 +118,7 @@ class HandshakeHistoryScreen extends ConsumerWidget {
                       return Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: _getStatusColor(status).withOpacity(0.1),
+                          color: _getStatusColor(status).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
