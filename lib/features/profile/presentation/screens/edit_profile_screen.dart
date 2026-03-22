@@ -14,6 +14,8 @@ import 'package:secbizcard/core/utils/image_picker_service.dart';
 import 'package:secbizcard/core/utils/async_value_ui.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'package:secbizcard/features/profile/presentation/controllers/edit_profile_controller.dart';
+import 'package:intl/intl.dart';
+import 'package:secbizcard/core/utils/field_formatter.dart';
 
 import 'package:secbizcard/features/storage/data/drive_repository.dart';
 
@@ -288,22 +290,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     }
   }
 
-  String _formatFieldLabel(String key) {
-    // Convert key (phone_work_2) to Label (Work Phone 2)
-    final parts = key.split('_');
-    if (parts.length < 2) return key; // Fallback
+  // Use shared FieldFormatter
+  String _formatFieldLabel(String key) => FieldFormatter.formatLabel(key);
 
-    String category = parts[0];
-    String label = parts[1];
-    String suffix = parts.length > 2 ? ' ${parts[2]}' : '';
-
-    // Capitalize
-    category = category[0].toUpperCase() + category.substring(1);
-    label = label[0].toUpperCase() + label.substring(1);
-
-    // Swap order for English reading: Work Phone, not Phone Work
-    return '$label $category$suffix';
-  }
 
   void _removeCustomField(String key) {
     setState(() {
@@ -499,11 +488,15 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         Expanded(
                           child: _buildTextField(
                             controller: entry.value,
-                            label: _formatFieldLabel(
-                              entry.key,
-                            ), // Use Formatter
-                            icon: _getIconForInfoType(entry.key),
+                            label: _formatFieldLabel(entry.key),
+                            icon: FieldFormatter.getIcon(entry.key),
                             focusNode: _customFieldFocusNodes[entry.key],
+                            readOnly: entry.key.toLowerCase().contains('birthday') || 
+                                     entry.key.toLowerCase().contains('date'),
+                            onTap: (entry.key.toLowerCase().contains('birthday') || 
+                                     entry.key.toLowerCase().contains('date'))
+                                ? () => _selectDate(context, entry.value)
+                                : null,
                           ),
                         ),
                         IconButton(
@@ -611,11 +604,15 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     String? Function(String?)? validator,
     Widget? suffixIcon,
     FocusNode? focusNode,
+    bool readOnly = false,
+    VoidCallback? onTap,
   }) {
     final theme = Theme.of(context);
     return TextFormField(
       controller: controller,
       focusNode: focusNode,
+      readOnly: readOnly,
+      onTap: onTap,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, color: theme.hintColor),
@@ -627,38 +624,31 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     );
   }
 
-  IconData _getIconForInfoType(String key) {
-    final lower = key.toLowerCase();
-    if (lower.contains('website') ||
-        lower.contains('url') ||
-        lower.contains('link')) {
-      return Icons.language;
+  Future<void> _selectDate(BuildContext context, TextEditingController controller) async {
+    DateTime initialDate = DateTime.now();
+    if (controller.text.isNotEmpty) {
+      try {
+        initialDate = DateFormat('yyyy/MM/dd').parse(controller.text);
+      } catch (_) {}
     }
-    if (lower.contains('linkedin')) {
-      return Icons.business_center;
+
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+
+    if (picked != null) {
+      setState(() {
+        controller.text = DateFormat('yyyy/MM/dd').format(picked);
+      });
     }
-    if (lower.contains('twitter') || lower.contains('social')) {
-      return Icons.group;
-    }
-    if (lower.contains('address')) {
-      return Icons.location_on;
-    }
-    if (lower.contains('birthday') || lower.contains('date')) {
-      return Icons.cake;
-    }
-    if (lower.contains('note')) {
-      return Icons.note;
-    }
-    if (lower.contains('phone') ||
-        lower.contains('mobile') ||
-        lower.contains('fax')) {
-      return Icons.phone;
-    }
-    if (lower.contains('email')) {
-      return Icons.email;
-    }
-    return Icons.info_outline;
   }
+
+  // Use shared FieldFormatter
+  IconData _getIconForInfoType(String key) => FieldFormatter.getIcon(key);
+
 }
 
 class _AddFieldDialog extends StatefulWidget {

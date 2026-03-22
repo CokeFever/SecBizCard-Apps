@@ -13,6 +13,7 @@ import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'package:secbizcard/features/storage/data/drive_repository.dart';
 import 'package:secbizcard/features/verification/presentation/screens/email_verification_screen.dart';
 import 'package:secbizcard/features/verification/presentation/screens/phone_verification_screen.dart';
+import 'package:secbizcard/core/utils/field_formatter.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -103,42 +104,11 @@ class ProfileScreen extends ConsumerWidget {
                         isEmailField && entry.value == (profile.email ?? '');
 
                     return _buildInfoTile(
-                      _getIconForCustomField(entry.key),
+                      FieldFormatter.getIcon(entry.key),
                       entry.value,
-                      label: entry.key,
-                      showVerificationHint: isEmailField && !isLoginEmail,
-                      onVerifyTap: isEmailField
-                          ? () async {
-                              if (isLoginEmail) {
-                                await Navigator.push<bool>(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => EmailVerificationScreen(
-                                      customEmail: entry.value,
-                                    ),
-                                  ),
-                                );
-                              } else {
-                                // Show dialog explaining limitation (V1)
-                                await showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: const Text('Feature Unavailable'),
-                                    content: Text(
-                                      'Independent verification for secondary emails (Work, School, etc.) is coming in a future update.\n\n'
-                                      'Currently, only your primary login email (${profile.email ?? "N/A"}) is verified.',
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: const Text('OK'),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }
-                            }
-                          : null,
+                      label: FieldFormatter.formatLabel(entry.key),
+                      showVerificationHint: false, // Hidden until mechanism is ready
+                      onVerifyTap: null, // Disabled for secondary emails
                     );
                   }),
                 ],
@@ -337,20 +307,8 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  IconData _getIconForCustomField(String fieldName) {
-    final name = fieldName.toLowerCase();
-    if (name.contains('email')) return Icons.email;
-    if (name.contains('phone')) return Icons.phone_android;
-    if (name.contains('website') || name.contains('url')) return Icons.language;
-    if (name.contains('linkedin')) return Icons.business_center;
-    if (name.contains('twitter') || name.contains('x')) {
-      return Icons.alternate_email;
-    }
-    if (name.contains('address')) return Icons.location_on;
-    if (name.contains('birthday')) return Icons.cake;
-    if (name.contains('note')) return Icons.note;
-    return Icons.info_outline;
-  }
+  // Removed duplicated _getIconForCustomField as we use FieldFormatter.getIcon
+
 
   Widget _buildInfoTileWithVerification(
     IconData icon,
