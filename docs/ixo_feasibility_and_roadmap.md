@@ -114,12 +114,11 @@
 - [x] **Cloud Backup/Restore**:
     - [x] Implemented full personal `UserProfile` serialization, ensuring settings, custom fields, and profile images persist across devices.
 
-### Phase 2: iOS 支援與上架
+### Phase 2: iOS 支援與上架 - [Completed]
 - [x] iOS 適配與測試。
 - [x] Apple Developer Program 申請與配置。
-- [/] App Store 審核與上架。
-    - [x] v1.3.1 首次送審被退回。
-    - [/] v1.3.2 補上 Sign in with Apple 功能，目前重新送審中。
+- [x] App Store 審核與上架。
+    - [x] v1.3.6 已正式發布 (Published)。
 
 ### Phase 3: 官網 SSR 重構 - [Completed]
 使用 **Vue/Nuxt 3** 重建官網，實現 SSR 加速與 SEO 優化。
