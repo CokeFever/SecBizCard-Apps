@@ -1,22 +1,5 @@
 # Changelog
 
-## [1.4.2] - 2026-03-22
-
-### Fixed
-- **CI/CD**: Improved robustness of `ci_post_clone.sh` to handle Base64 padding and whitespace issues when injecting Firebase configuration files.
-
-## [1.4.1] - 2026-03-22
-
-### Fixed
-- **CI/CD**: Removed hardcoded, version-controlled build configuration files (`Generated.xcconfig`, `flutter_export_environment.sh`) that caused path mismatches in Xcode Cloud.
-- **Project Hygiene**: Updated `.gitignore` to ensure generated Flutter build files are no longer tracked.
-
-## [1.4.0] - 2026-03-22
-
-### Fixed
-- **CI/CD**: Resolved TestFlight login failures by identifying stale environment variables (Firebase config files) in CI pipelines.
-- **iOS**: Cleaned up `Runner.entitlements` to remove environment mismatches and temporarily disabled `webcredentials` to isolate authentication issues.
-
 ## [1.3.9] - 2026-03-22
 
 ### Fixed
