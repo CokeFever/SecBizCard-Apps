@@ -22,10 +22,6 @@ google_sign_in.GoogleSignIn googleSignIn(Ref ref) {
   return google_sign_in.GoogleSignIn(
     // The Web client ID from Firebase console (client_type: 3 in google-services.json)
     serverClientId: '769422548283-rvuciu2cmfj9149fudj9q59pql4ofo8q.apps.googleusercontent.com',
-    scopes: [
-      'email',
-      'https://www.googleapis.com/auth/contacts', // People API contacts scope
-    ],
   );
 }
 

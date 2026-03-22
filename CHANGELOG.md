@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.3.9] - 2026-03-22
+
+### Fixed
+- **Android**: Resolved infinite loading loop on Splash Screen after notification permissions.
+- **iOS**: Fixed "Invalid OAuth response" error for Apple and Google Sign-In by restoring stable authentication logic.
+- **UI/UX**: Aligned **Splash Screen** branding (logo, title, slogan) with the **Login Screen** for a seamless startup experience.
+
+## [1.3.8] - 2026-03-22
+(Internal debugging release for Android login persistence)
+
 ## [1.3.7] - 2026-03-22
 
 ### Fixed
