@@ -111,7 +111,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                     ref.read(contactsSearchQueryProvider.notifier).state = v,
               )
             : Text(
-                _currentIndex == 0 ? 'Share' : 'Card Storage',
+                _currentIndex == 0 ? 'Share' : 'Card',
                 style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
               ),
         actions: [
