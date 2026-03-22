@@ -102,6 +102,18 @@
 - [x] **Code Quality**: Cleaned 50+ lint warnings and modernized color APIs.
 - [x] **Polishing**: Removed build number from App Drawer version.
 
+#### Sprint 9: Profile & Verification Resilience - [Completed]
+- [x] **Profile & Contacts**:
+    - [x] Standardized UI copy and unified `FieldFormatter` for custom fields.
+    - [x] Added native `showDatePicker` for standard birthday inputs.
+    - [x] Hidden pending verification UI tags for secondary emails.
+- [x] **Verification Handling**:
+    - [x] Fixed dynamic parsing tie-breaker for shared country codes (NANP +1).
+    - [x] Enhanced Error UI with `FirebaseAuthException` detection (`credential-already-in-use`).
+    - [x] Added 60s UX countdown timer and a 45s silent failure timeout defense.
+- [x] **Cloud Backup/Restore**:
+    - [x] Implemented full personal `UserProfile` serialization, ensuring settings, custom fields, and profile images persist across devices.
+
 ### Phase 2: iOS 支援與上架
 - [x] iOS 適配與測試。
 - [x] Apple Developer Program 申請與配置。
