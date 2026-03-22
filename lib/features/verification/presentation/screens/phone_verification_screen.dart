@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:intl_phone_field/countries.dart';
 
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/profile/data/profile_repository.dart';
@@ -28,19 +29,40 @@ class _PhoneVerificationScreenState
   bool _codeSent = false;
   String? _errorMessage;
   String _completePhoneNumber = '';
+  String _initialCountryCode = 'TW';
 
   @override
   void initState() {
     super.initState();
     if (widget.initialPhoneNumber != null) {
-      // Simple parsing updates for TW
       String phone = widget.initialPhoneNumber!;
-      if (phone.startsWith('+886')) {
-        phone = phone.substring(4);
-      }
-      // Strip leading zero for IntlPhoneField which adds prefix automatically
-      if (phone.startsWith('0')) {
-        phone = phone.substring(1);
+
+      // Handle numbers with '+' prefix correctly
+      if (phone.startsWith('+')) {
+        // Find best matching country by dial code
+        // We look for longest match first (+1 vs +11, etc.)
+        Country? bestMatch;
+        int longestMatch = 0;
+
+        for (final country in countries) {
+          final dialCode = '+${country.dialCode}';
+          if (phone.startsWith(dialCode)) {
+            if (dialCode.length > longestMatch) {
+              longestMatch = dialCode.length;
+              bestMatch = country;
+            }
+          }
+        }
+
+        if (bestMatch != null) {
+          _initialCountryCode = bestMatch.code;
+          phone = phone.substring(longestMatch);
+        }
+      } else {
+        // Fallback for TW
+        if (phone.startsWith('0')) {
+          phone = phone.substring(1);
+        }
       }
       _phoneController.text = phone;
     }
@@ -229,7 +251,7 @@ class _PhoneVerificationScreenState
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  initialCountryCode: 'TW',
+                  initialCountryCode: _initialCountryCode,
                   onChanged: (phone) {
                     _completePhoneNumber = phone.completeNumber;
                   },
