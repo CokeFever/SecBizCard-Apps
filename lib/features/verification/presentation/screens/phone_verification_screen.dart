@@ -58,6 +58,11 @@ class _PhoneVerificationScreenState
             if (dialCode.length > longestMatch) {
               longestMatch = dialCode.length;
               bestMatch = country;
+            } else if (dialCode.length == longestMatch) {
+              // Tie-breaker for shared dial codes (e.g. +1 for US/CA, +44 for UK/Isle of Man)
+              if (dialCode == '+1' && country.code == 'US') bestMatch = country;
+              if (dialCode == '+44' && country.code == 'GB') bestMatch = country;
+              if (dialCode == '+61' && country.code == 'AU') bestMatch = country;
             }
           }
         }
