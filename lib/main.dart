@@ -1,7 +1,10 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import 'package:secbizcard/generated/l10n/app_localizations.dart';
 import 'firebase_options.dart';
@@ -20,6 +23,18 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+
+    // 靜默喚醒 Google 登入狀態 (輔助 Android Firebase 維持 Session)
+    if (!kIsWeb && Platform.isAndroid) {
+      try {
+        await GoogleSignIn(
+          // The Web client ID from Firebase console (client_type: 3 in google-services.json)
+          serverClientId: '769422548283-rvuciu2cmfj9149fudj9q59pql4ofo8q.apps.googleusercontent.com',
+        ).signInSilently();
+      } catch (e) {
+        debugPrint('Google signInSilently error: $e');
+      }
+    }
 
     // 記得這裡要包覆 ProviderScope
     runApp(const ProviderScope(child: IxoApp()));

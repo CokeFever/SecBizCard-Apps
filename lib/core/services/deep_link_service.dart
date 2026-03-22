@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:app_links/app_links.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -63,6 +64,9 @@ class DeepLinkService extends _$DeepLinkService {
 
     // Check for install referrer on first launch (Android only)
     _checkInstallReferrer();
+
+    // Check clipboard for copied Universal Links (iOS deferred deep linking)
+    _checkClipboardForDeferredLink();
 
     // Listen for incoming links while app is running
     _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
@@ -127,6 +131,39 @@ class DeepLinkService extends _$DeepLinkService {
     } catch (e) {
       // Failed to check referrer, ignore
       // This can happen on non-Google Play devices or debug builds
+    }
+  }
+
+  Future<void> _checkClipboardForDeferredLink() async {
+    if (!Platform.isIOS) return;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final hasCheckedClipboard =
+          prefs.getBool('has_checked_clipboard_referrer') ?? false;
+
+      if (hasCheckedClipboard) return;
+      await prefs.setBool('has_checked_clipboard_referrer', true);
+
+      // Read clipboard
+      final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
+      if (clipboardData != null && clipboardData.text != null && clipboardData.text!.isNotEmpty) {
+        final text = clipboardData.text!;
+        final uri = Uri.tryParse(text);
+        if (uri != null) {
+          final sessionId = _extractSessionId(uri);
+          if (sessionId != null) {
+            // Clear clipboard to avoid reusing it later unintentionally
+            await Clipboard.setData(const ClipboardData(text: ''));
+            // Save pending session
+            await ref
+                .read(pendingHandshakeSessionProvider.notifier)
+                .savePendingSession(sessionId);
+          }
+        }
+      }
+    } catch (e) {
+      // Ignore errors (e.g. user denied paste permission)
     }
   }
 
