@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.4.1] - 2026-03-22
+
+### Fixed
+- **CI/CD**: Removed hardcoded, version-controlled build configuration files (`Generated.xcconfig`, `flutter_export_environment.sh`) that caused path mismatches in Xcode Cloud.
+- **Project Hygiene**: Updated `.gitignore` to ensure generated Flutter build files are no longer tracked.
+
 ## [1.4.0] - 2026-03-22
 
 ### Fixed

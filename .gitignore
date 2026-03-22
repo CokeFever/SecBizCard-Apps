@@ -50,6 +50,8 @@ ios/Runner/GoogleService-Info.plist
 *.secret
 
 # Generated files
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
 *.g.dart
 *.freezed.dart
 test/unit/mocks.mocks.dart
