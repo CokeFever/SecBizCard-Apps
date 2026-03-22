@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
+import 'package:intl/intl.dart';
+import 'package:secbizcard/core/utils/field_formatter.dart';
 
 class EditContactScreen extends ConsumerStatefulWidget {
   final UserProfile user;
@@ -105,52 +107,10 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
     });
   }
 
-  String _formatFieldLabel(String key) {
-    final parts = key.split('_');
-    if (parts.length < 2) return key;
+  // Use shared FieldFormatter
+  String _formatFieldLabel(String key) => FieldFormatter.formatLabel(key);
+  IconData _getIconForInfoType(String key) => FieldFormatter.getIcon(key);
 
-    String category = parts[0];
-    String label = parts[1];
-    String suffix = parts.length > 2 ? ' ${parts[2]}' : '';
-
-    category = category[0].toUpperCase() + category.substring(1);
-    label = label[0].toUpperCase() + label.substring(1);
-
-    return '$label $category$suffix';
-  }
-
-  IconData _getIconForInfoType(String key) {
-    final lower = key.toLowerCase();
-    if (lower.contains('website') ||
-        lower.contains('url') ||
-        lower.contains('link')) {
-      return Icons.language;
-    }
-    if (lower.contains('linkedin')) {
-      return Icons.business_center;
-    }
-    if (lower.contains('twitter') || lower.contains('social')) {
-      return Icons.group;
-    }
-    if (lower.contains('address')) {
-      return Icons.location_on;
-    }
-    if (lower.contains('birthday') || lower.contains('date')) {
-      return Icons.cake;
-    }
-    if (lower.contains('note')) {
-      return Icons.note;
-    }
-    if (lower.contains('phone') ||
-        lower.contains('mobile') ||
-        lower.contains('fax')) {
-      return Icons.phone;
-    }
-    if (lower.contains('email')) {
-      return Icons.email;
-    }
-    return Icons.info_outline;
-  }
 
   Future<void> _save() async {
     if (_formKey.currentState!.validate()) {
@@ -322,6 +282,12 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
                             entry.value,
                             _formatFieldLabel(entry.key),
                             _getIconForInfoType(entry.key),
+                            readOnly: entry.key.toLowerCase().contains('birthday') || 
+                                     entry.key.toLowerCase().contains('date'),
+                            onTap: (entry.key.toLowerCase().contains('birthday') || 
+                                     entry.key.toLowerCase().contains('date'))
+                                ? () => _selectDate(context, entry.value)
+                                : null,
                           ),
                         ),
                         IconButton(
@@ -360,9 +326,13 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
     IconData icon, {
     bool required = false,
     TextInputType? keyboardType,
+    bool readOnly = false,
+    VoidCallback? onTap,
   }) {
     return TextFormField(
       controller: controller,
+      readOnly: readOnly,
+      onTap: onTap,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, color: Colors.grey),
@@ -374,6 +344,29 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
           : null,
     );
   }
+
+  Future<void> _selectDate(BuildContext context, TextEditingController controller) async {
+    DateTime initialDate = DateTime.now();
+    if (controller.text.isNotEmpty) {
+      try {
+        initialDate = DateFormat('yyyy/MM/dd').parse(controller.text);
+      } catch (_) {}
+    }
+
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+
+    if (picked != null) {
+      setState(() {
+        controller.text = DateFormat('yyyy/MM/dd').format(picked);
+      });
+    }
+  }
+
 }
 
 class _AddFieldDialog extends StatefulWidget {
