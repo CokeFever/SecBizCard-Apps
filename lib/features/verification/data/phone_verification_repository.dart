@@ -33,7 +33,17 @@ class PhoneVerificationRepository {
           onVerificationCompleted(credential);
         },
         verificationFailed: (FirebaseAuthException e) {
-          onError(e.message ?? 'Verification failed');
+          String message = e.message ?? 'Verification failed';
+          if (e.code == 'invalid-phone-number') {
+            message = 'The provided phone number is not valid.';
+          } else if (e.code == 'quota-exceeded') {
+            message = 'SMS quota exceeded. Please try again later.';
+          } else if (e.code == 'too-many-requests') {
+            message = 'Too many requests. Please try again later.';
+          } else if (e.code == 'credential-already-in-use') {
+            message = 'This phone number is already linked to another account.';
+          }
+          onError('[$e.code] $message');
         },
         codeSent: (String verId, int? resendToken) {
           onCodeSent(verId);
