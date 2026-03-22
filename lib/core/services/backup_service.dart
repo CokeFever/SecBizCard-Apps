@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:secbizcard/core/errors/failure.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
+import 'package:secbizcard/features/profile/data/profile_repository.dart';
 import 'package:secbizcard/features/storage/data/drive_repository.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'package:secbizcard/core/config/theme_controller.dart';
@@ -26,6 +27,7 @@ BackupService backupService(Ref ref) {
     ref.read(driveRepositoryProvider),
     ref.read(contactsRepositoryProvider),
     ref.read(authRepositoryProvider),
+    ref.read(profileRepositoryProvider),
   );
 }
 
@@ -34,8 +36,9 @@ class BackupService {
   final DriveRepository _driveRepo;
   final ContactsRepository _contactsRepo;
   final AuthRepository _authRepo;
+  final ProfileRepository _profileRepo;
 
-  BackupService(this._ref, this._driveRepo, this._contactsRepo, this._authRepo);
+  BackupService(this._ref, this._driveRepo, this._contactsRepo, this._authRepo, this._profileRepo);
 
   static const String _backupFileName = 'ixo_app_backup.zip';
   static const String _settingsKeyTheme = 'theme_mode'; // Example setting key
@@ -82,12 +85,34 @@ class BackupService {
         serializedContacts.add(contactJson);
       }
 
+      // 1.5 Gather User Profile
+      Map<String, dynamic>? serializedProfile;
+      final profileResult = await _profileRepo.getUser(uid);
+      
+      UserProfile? profile;
+      profileResult.fold((l) => null, (p) => profile = p);
+
+      if (profile != null) {
+        var pJson = profile!.toJson();
+        if (profile!.photoUrl != null && !profile!.photoUrl!.startsWith('http')) {
+          final file = File(profile!.photoUrl!);
+          if (await file.exists()) {
+            final filename = 'profile/photo.jpg';
+            final bytes = await file.readAsBytes();
+            archive.addFile(ArchiveFile(filename, bytes.length, bytes));
+            pJson['photoUrl'] = 'zip://$filename';
+          }
+        }
+        serializedProfile = pJson;
+      }
+
       final packageInfo = await PackageInfo.fromPlatform();
       final backupData = {
         'timestamp': DateTime.now().toIso8601String(),
         'appVersion': packageInfo.version, // Real version
         'contacts': serializedContacts,
         'settings': settings,
+        'userProfile': serializedProfile,
       };
 
       // Add data.json
@@ -222,9 +247,31 @@ class BackupService {
               }
             }
 
+            // 7. Restore User Profile
+            if (data.containsKey('userProfile') && data['userProfile'] != null) {
+              final pJson = data['userProfile'] as Map<String, dynamic>;
+              String? photoUrl = pJson['photoUrl'];
+              if (photoUrl != null && photoUrl.startsWith('zip://')) {
+                final zipPath = photoUrl.replaceFirst('zip://', '');
+                final imgFile = archive.findFile(zipPath);
+                if (imgFile != null) {
+                  final localPath = '${appDir.path}/$zipPath';
+                  final localFile = File(localPath);
+                  await localFile.create(recursive: true);
+                  await localFile.writeAsBytes(imgFile.content);
+                  pJson['photoUrl'] = localPath;
+                } else {
+                  pJson['photoUrl'] = null; // Image missing in zip
+                }
+              }
+              final profile = UserProfile.fromJson(pJson);
+              await _profileRepo.createOrUpdateUser(profile);
+            }
+
             // Invalidate providers so UI updates
             _ref.invalidate(savedContactsProvider);
             _ref.invalidate(themeControllerProvider);
+            _ref.invalidate(userProfileProvider);
 
             return right(null);
           } catch (e) {
