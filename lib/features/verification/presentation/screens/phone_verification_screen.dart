@@ -39,11 +39,14 @@ class _PhoneVerificationScreenState
   @override
   void initState() {
     super.initState();
-    if (widget.initialPhoneNumber != null) {
+    if (widget.initialPhoneNumber != null &&
+        widget.initialPhoneNumber!.isNotEmpty) {
       String phone = widget.initialPhoneNumber!;
 
       // Handle numbers with '+' prefix correctly
       if (phone.startsWith('+')) {
+        _completePhoneNumber = phone; // Correct string to send to Firebase
+
         // Find best matching country by dial code
         // We look for longest match first (+1 vs +11, etc.)
         Country? bestMatch;
@@ -68,6 +71,7 @@ class _PhoneVerificationScreenState
         if (phone.startsWith('0')) {
           phone = phone.substring(1);
         }
+        _completePhoneNumber = '+886$phone'; // Correct string to send to Firebase
       }
       _phoneController.text = phone;
     }
