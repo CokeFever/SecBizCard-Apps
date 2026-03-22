@@ -39,11 +39,7 @@ AuthRepository authRepository(Ref ref) {
 
 @riverpod
 Stream<fire_auth.User?> authState(Ref ref) {
-  final stream = fire_auth.FirebaseAuth.instance.authStateChanges();
-  return stream.map((user) {
-    debugPrint('[DEBUG] AuthState Emission: ${user?.uid ?? "NULL"}');
-    return user;
-  });
+  return fire_auth.FirebaseAuth.instance.authStateChanges();
 }
 
 class AuthRepository {
