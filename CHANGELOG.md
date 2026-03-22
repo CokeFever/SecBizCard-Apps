@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.4.2] - 2026-03-22
+
+### Fixed
+- **CI/CD**: Improved robustness of `ci_post_clone.sh` to handle Base64 padding and whitespace issues when injecting Firebase configuration files.
+
 ## [1.4.1] - 2026-03-22
 
 ### Fixed
