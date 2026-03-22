@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.4.0] - 2026-03-22
+
+### Fixed
+- **CI/CD**: Resolved TestFlight login failures by identifying stale environment variables (Firebase config files) in CI pipelines.
+- **iOS**: Cleaned up `Runner.entitlements` to remove environment mismatches and temporarily disabled `webcredentials` to isolate authentication issues.
+
 ## [1.3.9] - 2026-03-22
 
 ### Fixed
