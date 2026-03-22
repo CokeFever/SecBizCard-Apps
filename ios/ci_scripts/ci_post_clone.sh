@@ -57,16 +57,8 @@ else
 fi
 
 # Inject Firebase Configuration (iOS)
-echo "Injecting Firebase configuration files..."
-if [ -n "$GOOGLE_SERVICE_INFO_PLIST" ]; then
-    echo "Creating ios/Runner/GoogleService-Info.plist from Base64 (Length: ${#GOOGLE_SERVICE_INFO_PLIST})..."
-    python3 -c "import base64, os; s = os.environ['GOOGLE_SERVICE_INFO_PLIST'].strip(); open('ios/Runner/GoogleService-Info.plist', 'wb').write(base64.b64decode(s + '=' * (-len(s) % 4)))"
-fi
-
-if [ -n "$FIREBASE_OPTIONS_DART" ]; then
-    echo "Creating lib/firebase_options.dart from Base64 (Length: ${#FIREBASE_OPTIONS_DART})..."
-    python3 -c "import base64, os; s = os.environ['FIREBASE_OPTIONS_DART'].strip(); open('lib/firebase_options.dart', 'wb').write(base64.b64decode(s + '=' * (-len(s) % 4)))"
-fi
+echo "Injecting Firebase configuration files using robust script..."
+python3 ios/ci_scripts/decode_firebase_config.py
 
 # Install dependencies
 echo "Running flutter pub get..."
