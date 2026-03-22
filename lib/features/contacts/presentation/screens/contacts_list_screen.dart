@@ -84,12 +84,12 @@ class _ContactsListScreenState extends ConsumerState<ContactsListScreen>
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'No contacts collected yet',
+                  'No cards yet',
                   style: GoogleFonts.inter(color: Colors.grey),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Collected cards will appear here',
+                  'Exchanged or OCR (scanned) cards will appear here',
                   style: GoogleFonts.inter(color: Colors.grey, fontSize: 12),
                 ),
               ],
@@ -175,7 +175,7 @@ class _ContactsListScreenState extends ConsumerState<ContactsListScreen>
                     ref.read(contactsSearchQueryProvider.notifier).state = v,
               )
             : Text(
-                'Card Storage',
+                'Card',
                 style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
               ),
         actions: [
