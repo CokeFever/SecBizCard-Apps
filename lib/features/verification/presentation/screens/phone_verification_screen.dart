@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -30,6 +31,10 @@ class _PhoneVerificationScreenState
   String? _errorMessage;
   String _completePhoneNumber = '';
   String _initialCountryCode = 'TW';
+  
+  Timer? _timeoutTimer;
+  Timer? _resendTimer;
+  int _resendCountdown = 0;
 
   @override
   void initState() {
@@ -70,9 +75,29 @@ class _PhoneVerificationScreenState
 
   @override
   void dispose() {
+    _timeoutTimer?.cancel();
+    _resendTimer?.cancel();
     _phoneController.dispose();
     _otpController.dispose();
     super.dispose();
+  }
+
+  void _startResendTimer() {
+    _resendCountdown = 60;
+    _resendTimer?.cancel();
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        if (_resendCountdown > 0) {
+          setState(() {
+            _resendCountdown--;
+          });
+        } else {
+          timer.cancel();
+        }
+      } else {
+        timer.cancel();
+      }
+    });
   }
 
   Future<void> _sendVerificationCode() async {
@@ -83,20 +108,35 @@ class _PhoneVerificationScreenState
       _errorMessage = null;
     });
 
+    // 60-second safety timeout in case Firebase silently drops the request
+    _timeoutTimer?.cancel();
+    _timeoutTimer = Timer(const Duration(seconds: 45), () {
+      if (mounted && _isLoading && !_codeSent) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage =
+              'SMS request timed out. The number might be already used, invalid, or blocked by the server.';
+        });
+      }
+    });
+
     final repository = ref.read(phoneVerificationRepositoryProvider);
 
     final result = await repository.sendVerificationCode(
       phoneNumber: _completePhoneNumber,
       onCodeSent: (verificationId) {
+        _timeoutTimer?.cancel();
         if (mounted) {
           setState(() {
             _verificationId = verificationId;
             _codeSent = true;
             _isLoading = false;
           });
+          _startResendTimer();
         }
       },
       onError: (error) {
+        _timeoutTimer?.cancel();
         if (mounted) {
           setState(() {
             _errorMessage = error;
@@ -105,6 +145,7 @@ class _PhoneVerificationScreenState
         }
       },
       onVerificationCompleted: (credential) async {
+        _timeoutTimer?.cancel();
         // Firebase auto-verification completed (instant verification)
         // Wait briefly to ensure the OTP screen is visible, so user sees what's happening
         await Future.delayed(const Duration(milliseconds: 500));
@@ -390,6 +431,27 @@ class _PhoneVerificationScreenState
                         ),
                 ),
                 const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Didn't receive the code? ",
+                      style: GoogleFonts.inter(fontSize: 14),
+                    ),
+                    TextButton(
+                      onPressed:
+                          (_resendCountdown > 0 || _isLoading)
+                              ? null
+                              : _sendVerificationCode,
+                      child: Text(
+                        _resendCountdown > 0
+                            ? 'Resend in ${_resendCountdown}s'
+                            : 'Resend Code',
+                        style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
                 TextButton(
                   onPressed: () {
                     setState(() {
@@ -397,6 +459,8 @@ class _PhoneVerificationScreenState
                       _verificationId = null;
                       _otpController.clear();
                       _errorMessage = null;
+                      _timeoutTimer?.cancel();
+                      _resendTimer?.cancel();
                     });
                   },
                   child: Text(
