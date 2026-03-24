@@ -355,9 +355,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   Future<void> _save() async {
     if (_formKey.currentState!.validate()) {
-      String? avatarDriveFileId = _isAvatarRemoved ? null : (_selectedImage != null ? null : widget.user.avatarDriveFileId);
-      String? cardFrontDriveFileId = _isCardFrontRemoved ? null : (_cardFrontImage != null ? null : widget.user.cardFrontDriveFileId);
-      String? cardBackDriveFileId = _isCardBackRemoved ? null : (_cardBackImage != null ? null : widget.user.cardBackDriveFileId);
+      String? avatarDriveFileId = _isAvatarRemoved ? null : widget.user.avatarDriveFileId;
+      String? cardFrontDriveFileId = _isCardFrontRemoved ? null : widget.user.cardFrontDriveFileId;
+      String? cardBackDriveFileId = _isCardBackRemoved ? null : widget.user.cardBackDriveFileId;
 
       // Collect custom fields
       final Map<String, String> customFields = {};

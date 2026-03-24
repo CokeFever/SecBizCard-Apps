@@ -93,58 +93,17 @@ class ProfileRepository {
       processedUser = await _persistImageIfNeeded(processedUser, (u) => u.cardFrontPath, 'profile');
       processedUser = await _persistImageIfNeeded(processedUser, (u) => u.cardBackPath, 'profile');
 
-      // 2. Upload to Google Drive for Cloud Persistence
-      // We only upload if there's a local path but no Drive ID yet
-      // OR if the path is actually a new local file (not already in Drive)
-      UserProfile updatedUser = processedUser;
-      
-      // Avatar
-      if (processedUser.photoUrl != null && 
-          processedUser.photoUrl!.isNotEmpty && 
-          !processedUser.photoUrl!.startsWith('http') &&
-          processedUser.avatarDriveFileId == null) {
-        final result = await _driveRepository.uploadImage(
-          File(processedUser.photoUrl!), 
-          'avatar_${processedUser.uid}.jpg'
-        );
-        result.fold((l) => null, (id) => updatedUser = updatedUser.copyWith(avatarDriveFileId: id));
-      }
-      
-      // Card Front
-      if (processedUser.cardFrontPath != null && 
-          processedUser.cardFrontPath!.isNotEmpty && 
-          !processedUser.cardFrontPath!.startsWith('http') &&
-          processedUser.cardFrontDriveFileId == null) {
-        final result = await _driveRepository.uploadImage(
-          File(processedUser.cardFrontPath!), 
-          'card_front_${processedUser.uid}.jpg'
-        );
-        result.fold((l) => null, (id) => updatedUser = updatedUser.copyWith(cardFrontDriveFileId: id));
-      }
-      
-      // Card Back
-      if (processedUser.cardBackPath != null && 
-          processedUser.cardBackPath!.isNotEmpty && 
-          !processedUser.cardBackPath!.startsWith('http') &&
-          processedUser.cardBackDriveFileId == null) {
-        final result = await _driveRepository.uploadImage(
-          File(processedUser.cardBackPath!), 
-          'card_back_${processedUser.uid}.jpg'
-        );
-        result.fold((l) => null, (id) => updatedUser = updatedUser.copyWith(cardBackDriveFileId: id));
-      }
-
-      // 3. Auto-detect business email domain
-      UserProfile finalUser = updatedUser;
-      if (updatedUser.email != null && updatedUser.email!.isNotEmpty) {
-        final businessDomain = _detectBusinessEmail(updatedUser.email!);
+      // 2. Auto-detect business email domain
+      UserProfile finalUser = processedUser;
+      if (processedUser.email != null && processedUser.email!.isNotEmpty) {
+        final businessDomain = _detectBusinessEmail(processedUser.email!);
         if (businessDomain != null &&
-            businessDomain != updatedUser.businessEmailDomain) {
-          finalUser = updatedUser.copyWith(businessEmailDomain: businessDomain);
+            businessDomain != processedUser.businessEmailDomain) {
+          finalUser = processedUser.copyWith(businessEmailDomain: businessDomain);
         }
       }
 
-      // 4. Save to Local Only
+      // 3. Save to Local Only
       await _localDataSource.saveUser(finalUser);
 
       return const Right(unit);
@@ -167,10 +126,10 @@ class ProfileRepository {
     if (!file.existsSync()) return user;
 
     final appDir = await getApplicationDocumentsDirectory();
-    final tempDir = await getTemporaryDirectory();
 
-    // Check if path is in temp directory
-    if (path.startsWith(tempDir.path)) {
+    // Check if path is NOT already in the persistent app directory
+    // or if it's in a temporary/cache location
+    if (!path.startsWith(appDir.path)) {
       final fileName = p.basename(path);
       final targetDir = Directory(p.join(appDir.path, subDir));
       if (!targetDir.existsSync()) {
@@ -178,7 +137,11 @@ class ProfileRepository {
       }
       
       final targetPath = p.join(targetDir.path, fileName);
-      await file.copy(targetPath);
+      
+      // Only copy if source and target are different
+      if (path != targetPath) {
+        await file.copy(targetPath);
+      }
       
       // Return updated user with new path
       if (getPath(user) == user.photoUrl) return user.copyWith(photoUrl: targetPath);
