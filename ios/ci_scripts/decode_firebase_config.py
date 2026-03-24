@@ -32,6 +32,12 @@ def decode_and_save(env_name, file_path):
         sys.exit(1)
 
 if __name__ == "__main__":
-    # The script is run from project root (cd ../.. in ci_post_clone.sh)
+    # The script is run from project root
+    # iOS Configuration
     decode_and_save("GOOGLE_SERVICE_INFO_PLIST", "ios/Runner/GoogleService-Info.plist")
+    
+    # Android Configuration
+    decode_and_save("GOOGLE_SERVICES_JSON", "android/app/google-services.json")
+    
+    # Shared Configuration
     decode_and_save("FIREBASE_OPTIONS_DART", "lib/firebase_options.dart")
