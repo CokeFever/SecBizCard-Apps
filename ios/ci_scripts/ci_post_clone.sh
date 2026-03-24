@@ -39,6 +39,7 @@ echo "Aggressively cleaning caches..."
 flutter clean
 rm -rf .dart_tool
 rm -rf pubspec.lock
+rm -rf $HOME/.pub-cache
 
 echo "Using Flutter from: $(which flutter)"
 flutter --version
@@ -58,10 +59,9 @@ echo "Setting up SSH for private dependencies..."
 mkdir -p ~/.ssh
 ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-if [ -n "$OCR_DEPLOY_KEY" ]; then
-    echo "Found OCR_DEPLOY_KEY environment variable (Length: ${#OCR_DEPLOY_KEY}). Configuring SSH key..."
-    # Use python3 for robust base64 decoding (handles binary data and line breaks consistently)
-    python3 -c "import base64, os; open(os.path.expanduser('~/.ssh/id_ed25519'), 'wb').write(base64.b64decode(os.environ['OCR_DEPLOY_KEY']))"
+    # Use Dart for robust base64 decoding
+    dart ios/ci_scripts/inject_secrets.dart
+    mv .ssh_id_ed25519 ~/.ssh/id_ed25519
     chmod 600 ~/.ssh/id_ed25519
     eval "$(ssh-agent -s)"
     ssh-add ~/.ssh/id_ed25519
@@ -71,9 +71,11 @@ else
     echo "Please add OCR_DEPLOY_KEY in Xcode Cloud workflow environment variables."
 fi
 
-# Inject Firebase Configuration (iOS)
-echo "Injecting Firebase configuration files using robust script..."
-python3 ios/ci_scripts/decode_firebase_config.py
+# Inject Firebase Configuration (iOS/Android/Dart)
+echo "Injecting Firebase configuration files using Dart script..."
+# Dart script handles all injection (GoogleService-Info.plist, google-services.json, firebase_options.dart)
+# It's already been called above if OCR_DEPLOY_KEY was present, but let's call it specifically to be sure.
+dart ios/ci_scripts/inject_secrets.dart
 
 echo "Verifying injected files content (first 100 bytes in hex):"
 [ -f "lib/firebase_options.dart" ] && head -c 100 "lib/firebase_options.dart" | xxd
