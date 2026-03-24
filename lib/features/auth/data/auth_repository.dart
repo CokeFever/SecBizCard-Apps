@@ -17,6 +17,8 @@ import 'package:secbizcard/features/profile/domain/user_profile.dart';
 
 part 'auth_repository.g.dart';
 
+final authInitializationStateProvider = StateProvider<bool>((ref) => true);
+
 @riverpod
 google_sign_in.GoogleSignIn googleSignIn(Ref ref) {
   return google_sign_in.GoogleSignIn(
@@ -30,6 +32,7 @@ AuthRepository authRepository(Ref ref) {
   return AuthRepository(
     fire_auth.FirebaseAuth.instance,
     ref.watch(googleSignInProvider),
+    ref,
   );
 }
 
@@ -42,7 +45,53 @@ class AuthRepository {
   final fire_auth.FirebaseAuth _firebaseAuth;
   final google_sign_in.GoogleSignIn _googleSignIn;
 
-  AuthRepository(this._firebaseAuth, this._googleSignIn);
+  AuthRepository(this._firebaseAuth, this._googleSignIn, this._ref) {
+    _init();
+  }
+
+  final Ref _ref;
+
+  void _init() async {
+    // Wait for initial auth state
+    final firstUser = await _firebaseAuth.authStateChanges().first;
+    if (firstUser == null) {
+      debugPrint('[Auth] Initial state: No user. Trying silent sign-in...');
+      await _trySilentSignIn();
+    } else {
+      debugPrint('[Auth] Initial state: User ${firstUser.uid} already active.');
+    }
+    
+    // Mark initialization as complete
+    _ref.read(authInitializationStateProvider.notifier).state = false;
+
+    _firebaseAuth.authStateChanges().listen((user) {
+      if (user != null) {
+        debugPrint('[Auth] User session active: ${user.uid}');
+      } else {
+        debugPrint('[Auth] No active Firebase session.');
+      }
+    });
+  }
+
+  Future<void> _trySilentSignIn() async {
+    try {
+      debugPrint('[Auth] Attempting Google Silent Sign-In...');
+      final googleUser = await _googleSignIn.signInSilently();
+      if (googleUser != null) {
+        debugPrint('[Auth] Google Silent Sign-In success: ${googleUser.email}');
+        final googleAuth = await googleUser.authentication;
+        final credential = fire_auth.GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+        await _firebaseAuth.signInWithCredential(credential);
+        debugPrint('[Auth] Firebase session restored via Silent Sign-In');
+      } else {
+      }
+    } catch (e) {
+      debugPrint('[Auth] Google Silent Sign-In error: $e');
+    }
+  }
 
   fire_auth.User? getCurrentUser() {
     return _firebaseAuth.currentUser;

@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 
 import 'package:secbizcard/core/database/database_helper.dart';
 
@@ -18,6 +20,79 @@ class ProfileLocalDataSource {
   final DatabaseHelper _dbHelper;
 
   ProfileLocalDataSource(this._dbHelper);
+
+  Future<String> _getAppDocsDir() async {
+    final dir = await getApplicationDocumentsDirectory();
+    return dir.path;
+  }
+
+  /// Converts an absolute path to a relative path for database storage.
+  /// Also repairs "legacy" absolute paths from previous playground/install sessions.
+  Future<String?> _toRelativePath(String? path) async {
+    if (path == null || path.isEmpty || path.startsWith('http') || path.startsWith('zip://')) {
+      return path;
+    }
+
+    final appDocsDir = await _getAppDocsDir();
+
+    // 1. Repair check: If path is absolute but contains old sandbox parts
+    // iOS: .../Application/UUID/Documents/profile/photo.jpg
+    // Android: .../app_flutter/profile/photo.jpg
+    if (path.contains('/Documents/')) {
+      final index = path.indexOf('/Documents/');
+      return path.substring(index + '/Documents/'.length);
+    }
+    if (path.contains('/app_flutter/')) {
+      final index = path.indexOf('/app_flutter/');
+      return path.substring(index + '/app_flutter/'.length);
+    }
+    if (path.contains('/files/')) {
+      final index = path.indexOf('/files/');
+      return path.substring(index + '/files/'.length);
+    }
+
+    // 2. Standard relativization
+    if (p.isAbsolute(path)) {
+      if (path.startsWith(appDocsDir)) {
+        return p.relative(path, from: appDocsDir);
+      }
+    }
+
+    return path;
+  }
+
+  /// Resolves a relative path from the database to an absolute runtime path.
+  Future<String?> _toAbsolutePath(String? path) async {
+    if (path == null || path.isEmpty || path.startsWith('http') || path.startsWith('zip://')) {
+      return path;
+    }
+
+    if (p.isAbsolute(path)) {
+      // If it's already absolute, check if it's a dead sandbox path
+      if (path.contains('/Documents/')) {
+        final docsIndex = path.indexOf('/Documents/');
+        final relativePart = path.substring(docsIndex + '/Documents/'.length);
+        final appDocsDir = await _getAppDocsDir();
+        return p.join(appDocsDir, relativePart);
+      }
+      if (path.contains('/app_flutter/')) {
+        final index = path.indexOf('/app_flutter/');
+        final relativePart = path.substring(index + '/app_flutter/'.length);
+        final appDocsDir = await _getAppDocsDir();
+        return p.join(appDocsDir, relativePart);
+      }
+      if (path.contains('/files/')) {
+        final index = path.indexOf('/files/');
+        final relativePart = path.substring(index + '/files/'.length);
+        final appDocsDir = await _getAppDocsDir();
+        return p.join(appDocsDir, relativePart);
+      }
+      return path;
+    }
+
+    final appDocsDir = await _getAppDocsDir();
+    return p.join(appDocsDir, path);
+  }
 
   Future<void> saveUser(UserProfile user) async {
     final db = await _dbHelper.database;
@@ -39,6 +114,13 @@ class ProfileLocalDataSource {
     } else {
       userMap['customFields'] = '{}';
     }
+
+    // Path Portability: Save as relative paths
+    userMap['photoUrl'] = await _toRelativePath(user.photoUrl);
+    userMap['originalImagePath'] = await _toRelativePath(user.originalImagePath);
+    userMap['flatImagePath'] = await _toRelativePath(user.flatImagePath);
+    userMap['cardFrontPath'] = await _toRelativePath(user.cardFrontPath);
+    userMap['cardBackPath'] = await _toRelativePath(user.cardBackPath);
 
     await db.insert(
       'users',
@@ -74,6 +156,13 @@ class ProfileLocalDataSource {
           map['customFields'] = <String, String>{};
         }
       }
+
+      // Path Portability: Resolve back to absolute paths
+      map['photoUrl'] = await _toAbsolutePath(map['photoUrl'] as String?);
+      map['originalImagePath'] = await _toAbsolutePath(map['originalImagePath'] as String?);
+      map['flatImagePath'] = await _toAbsolutePath(map['flatImagePath'] as String?);
+      map['cardFrontPath'] = await _toAbsolutePath(map['cardFrontPath'] as String?);
+      map['cardBackPath'] = await _toAbsolutePath(map['cardBackPath'] as String?);
 
       return UserProfile.fromJson(map);
     }

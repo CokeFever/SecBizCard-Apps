@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:secbizcard/core/utils/field_formatter.dart';
+import 'package:secbizcard/core/utils/dialog_utils.dart';
 
 import 'package:secbizcard/features/profile/data/profile_repository.dart';
 import 'package:secbizcard/features/profile/domain/card_context.dart';
@@ -18,13 +20,46 @@ class ContextSettingsScreen extends ConsumerStatefulWidget {
 
 class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
   late Map<ContextType, CardContext> _contexts;
+  late Map<String, dynamic> _initialContextsJson;
   bool _isSaving = false;
+
+  bool get _hasChanges {
+    final currentJson = <String, dynamic>{};
+    _contexts.forEach((key, value) {
+      currentJson[key.name] = value.toJson();
+    });
+    
+    // Compare JSON maps
+    return _mapsAreDifferent(currentJson, _initialContextsJson);
+  }
+
+  bool _mapsAreDifferent(Map<String, dynamic> m1, Map<String, dynamic> m2) {
+    if (m1.length != m2.length) return true;
+    for (var key in m1.keys) {
+      if (!m2.containsKey(key)) return true;
+      final v1 = m1[key];
+      final v2 = m2[key];
+      if (v1 is Map<String, dynamic> && v2 is Map<String, dynamic>) {
+        if (_mapsAreDifferent(v1, v2)) return true;
+      } else if (v1 != v2) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   @override
   void initState() {
     super.initState();
     // Initialize contexts from user profile or use defaults
-    _contexts = _parseContextsFromJson(widget.user.contextsJson);
+    final json = widget.user.contextsJson;
+    _contexts = _parseContextsFromJson(json);
+    
+    // Store initial state for change detection
+    _initialContextsJson = {};
+    _contexts.forEach((key, value) {
+      _initialContextsJson[key.name] = value.toJson();
+    });
   }
 
   Map<ContextType, CardContext> _parseContextsFromJson(
@@ -113,31 +148,41 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
       }
     }
   }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(
-          'Card Contexts',
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          IconButton(
-            icon: _isSaving
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.check),
-            onPressed: _isSaving ? null : _saveContexts,
+    final hasChanges = _hasChanges;
+
+    return PopScope(
+      canPop: !hasChanges || _isSaving,
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
+        if (didPop) return;
+        final bool shouldPop = await DialogUtils.showUnsavedChangesDialog(context) ?? false;
+        if (shouldPop && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        appBar: AppBar(
+          title: Text(
+            'Card Contexts',
+            style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
           ),
-        ],
-      ),
-      body: ListView(
+          actions: [
+            IconButton(
+              icon: _isSaving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.check),
+              onPressed: (_isSaving || !hasChanges) ? null : _saveContexts,
+            ),
+          ],
+        ),
+        body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Text(
@@ -155,8 +200,9 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
           _buildContextCard(ContextType.lite),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildContextCard(ContextType type) {
     final cardContext = _contexts[type]!;
@@ -224,6 +270,7 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
                     type,
                     cardContext.copyWith(showName: value),
                   ),
+                  icon: Icons.person_outline,
                 ),
                 _buildToggle(
                   'Email',
@@ -232,6 +279,7 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
                     type,
                     cardContext.copyWith(showEmail: value),
                   ),
+                  icon: Icons.email_outlined,
                 ),
                 _buildToggle(
                   'Phone',
@@ -240,6 +288,7 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
                     type,
                     cardContext.copyWith(showPhone: value),
                   ),
+                  icon: Icons.phone_outlined,
                 ),
                 _buildToggle(
                   'Job Title',
@@ -248,6 +297,7 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
                     type,
                     cardContext.copyWith(showTitle: value),
                   ),
+                  icon: Icons.work_outline,
                 ),
                 _buildToggle(
                   'Company',
@@ -256,6 +306,7 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
                     type,
                     cardContext.copyWith(showCompany: value),
                   ),
+                  icon: Icons.business_outlined,
                 ),
                 _buildToggle(
                   'Avatar',
@@ -264,7 +315,28 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
                     type,
                     cardContext.copyWith(showAvatar: value),
                   ),
+                  icon: Icons.image_outlined,
                 ),
+                if (widget.user.cardFrontPath != null || widget.user.cardFrontDriveFileId != null)
+                  _buildToggle(
+                    'Business Card Front',
+                    cardContext.showCardFront,
+                    (value) => _updateContext(
+                      type,
+                      cardContext.copyWith(showCardFront: value),
+                    ),
+                    icon: Icons.badge_outlined,
+                  ),
+                if (widget.user.cardBackPath != null || widget.user.cardBackDriveFileId != null)
+                  _buildToggle(
+                    'Business Card Back',
+                    cardContext.showCardBack,
+                    (value) => _updateContext(
+                      type,
+                      cardContext.copyWith(showCardBack: value),
+                    ),
+                    icon: Icons.badge_outlined,
+                  ),
 
                 // Dynamic Fields
                 if (widget.user.customFields.isNotEmpty) ...[
@@ -281,12 +353,11 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
                   ...widget.user.customFields.keys.map((key) {
                     final isVisible =
                         cardContext.showCustomFields[key] ?? false;
-                    // Defaulting to false for safety, or true if we want default share?
-                    // Usually opt-in is safer for privacy.
                     return _buildToggle(
-                      key,
+                      FieldFormatter.formatLabel(key),
                       isVisible,
                       (value) => _updateCustomFieldVisibility(type, key, value),
+                      icon: FieldFormatter.getIcon(key),
                     );
                   }),
                 ],
@@ -298,12 +369,21 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
     );
   }
 
-  Widget _buildToggle(String label, bool value, Function(bool) onChanged) {
+  Widget _buildToggle(
+    String label,
+    bool value,
+    Function(bool) onChanged, {
+    IconData? icon,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          if (icon != null) ...[
+            Icon(icon, size: 20, color: Theme.of(context).hintColor),
+            const SizedBox(width: 12),
+          ],
           Expanded(child: Text(label, style: GoogleFonts.inter())),
           Switch(value: value, onChanged: onChanged),
         ],

@@ -97,7 +97,7 @@ class BackupService {
         if (profile!.photoUrl != null && !profile!.photoUrl!.startsWith('http')) {
           final file = File(profile!.photoUrl!);
           if (await file.exists()) {
-            final filename = 'profile/photo.jpg';
+            const filename = 'profile/photo.jpg';
             final bytes = await file.readAsBytes();
             archive.addFile(ArchiveFile(filename, bytes.length, bytes));
             pJson['photoUrl'] = 'zip://$filename';

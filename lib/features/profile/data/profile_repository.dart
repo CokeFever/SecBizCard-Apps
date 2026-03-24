@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 
@@ -45,7 +48,14 @@ Stream<UserProfile?> userProfile(Ref ref) async* {
       yield newProfile;
     },
     (profile) async* {
-      yield profile;
+      // Sync Google/Auth photoUrl if local is missing
+      if (profile.photoUrl == null && user.photoURL != null) {
+        final updated = profile.copyWith(photoUrl: user.photoURL);
+        await repo.createOrUpdateUser(updated);
+        yield updated;
+      } else {
+        yield profile;
+      }
     },
   );
 }
@@ -69,23 +79,70 @@ class ProfileRepository {
 
   Future<Either<Failure, Unit>> createOrUpdateUser(UserProfile user) async {
     try {
-      // Auto-detect business email domain
-      UserProfile updatedUser = user;
-      if (user.email != null && user.email!.isNotEmpty) {
-        final businessDomain = _detectBusinessEmail(user.email!);
+      // 1. Move temporary image files to persistent storage if needed
+      UserProfile processedUser = user;
+      
+      processedUser = await _persistImageIfNeeded(processedUser, (u) => u.photoUrl, 'profile');
+      processedUser = await _persistImageIfNeeded(processedUser, (u) => u.originalImagePath, 'contacts');
+      processedUser = await _persistImageIfNeeded(processedUser, (u) => u.flatImagePath, 'contacts');
+      processedUser = await _persistImageIfNeeded(processedUser, (u) => u.cardFrontPath, 'profile');
+      processedUser = await _persistImageIfNeeded(processedUser, (u) => u.cardBackPath, 'profile');
+
+      // 2. Auto-detect business email domain
+      UserProfile updatedUser = processedUser;
+      if (processedUser.email != null && processedUser.email!.isNotEmpty) {
+        final businessDomain = _detectBusinessEmail(processedUser.email!);
         if (businessDomain != null &&
-            businessDomain != user.businessEmailDomain) {
-          updatedUser = user.copyWith(businessEmailDomain: businessDomain);
+            businessDomain != processedUser.businessEmailDomain) {
+          updatedUser = processedUser.copyWith(businessEmailDomain: businessDomain);
         }
       }
 
-      // Save to Local Only
+      // 3. Save to Local Only
       await _localDataSource.saveUser(updatedUser);
 
       return const Right(unit);
     } catch (e) {
       return Left(GeneralFailure(e.toString()));
     }
+  }
+
+  Future<UserProfile> _persistImageIfNeeded(
+    UserProfile user,
+    String? Function(UserProfile) getPath,
+    String subDir,
+  ) async {
+    final path = getPath(user);
+    if (path == null || path.isEmpty || path.startsWith('http') || path.startsWith('zip://')) {
+      return user;
+    }
+
+    final file = File(path);
+    if (!file.existsSync()) return user;
+
+    final appDir = await getApplicationDocumentsDirectory();
+    final tempDir = await getTemporaryDirectory();
+
+    // Check if path is in temp directory
+    if (path.startsWith(tempDir.path)) {
+      final fileName = p.basename(path);
+      final targetDir = Directory(p.join(appDir.path, subDir));
+      if (!targetDir.existsSync()) {
+        await targetDir.create(recursive: true);
+      }
+      
+      final targetPath = p.join(targetDir.path, fileName);
+      await file.copy(targetPath);
+      
+      // Return updated user with new path
+      if (getPath(user) == user.photoUrl) return user.copyWith(photoUrl: targetPath);
+      if (getPath(user) == user.originalImagePath) return user.copyWith(originalImagePath: targetPath);
+      if (getPath(user) == user.flatImagePath) return user.copyWith(flatImagePath: targetPath);
+      if (getPath(user) == user.cardFrontPath) return user.copyWith(cardFrontPath: targetPath);
+      if (getPath(user) == user.cardBackPath) return user.copyWith(cardBackPath: targetPath);
+    }
+
+    return user;
   }
 
   Future<Either<Failure, Unit>> markEmailAsVerified(String uid) async {

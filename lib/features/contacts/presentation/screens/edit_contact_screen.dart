@@ -6,6 +6,11 @@ import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'package:intl/intl.dart';
 import 'package:secbizcard/core/utils/field_formatter.dart';
+import 'package:secbizcard/core/utils/dialog_utils.dart';
+import 'package:secbizcard/core/presentation/widgets/full_screen_image_viewer.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class EditContactScreen extends ConsumerStatefulWidget {
   final UserProfile user;
@@ -24,9 +29,11 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
   late TextEditingController _companyController;
   late TextEditingController _phoneController;
   late TextEditingController _emailController;
+  File? _cardFrontImage;
+  File? _cardBackImage;
 
   // For dynamic fields
-  late Map<String, TextEditingController> _customFieldControllers;
+  final Map<String, TextEditingController> _customFieldControllers = {};
 
   // Available field types
   final Map<String, List<String>> _fieldTypes = {
@@ -41,6 +48,38 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
 
   bool _isSaving = false;
 
+  bool get _hasChanges {
+    if (_cardFrontImage != null) return true;
+    if (_cardBackImage != null) return true;
+
+    if (_nameController.text.trim() != widget.user.displayName) return true;
+    if (_nicknameController.text.trim() != (widget.user.customFields['Nickname'] ?? '')) return true;
+    if (_titleController.text.trim() != (widget.user.title ?? '')) return true;
+    if (_companyController.text.trim() != (widget.user.company ?? '')) return true;
+    if (_phoneController.text.trim() != (widget.user.phone ?? '')) return true;
+    if (_emailController.text.trim() != (widget.user.email ?? '')) return true;
+
+    // Compare custom fields
+    final currentCustomFields = <String, String>{};
+    _customFieldControllers.forEach((key, controller) {
+      final value = controller.text.trim();
+      if (value.isNotEmpty) {
+        currentCustomFields[key] = value;
+      }
+    });
+
+    // Initial custom fields without Nickname
+    final initialCustomFields = Map<String, String>.from(widget.user.customFields)..remove('Nickname');
+
+    if (currentCustomFields.length != initialCustomFields.length) return true;
+
+    for (var entry in currentCustomFields.entries) {
+      if (initialCustomFields[entry.key] != entry.value) return true;
+    }
+
+    return false;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -53,12 +92,23 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
     _phoneController = TextEditingController(text: widget.user.phone);
     _emailController = TextEditingController(text: widget.user.email);
 
-    _customFieldControllers = {};
     widget.user.customFields.forEach((key, value) {
       if (key != 'Nickname') {
         _customFieldControllers[key] = TextEditingController(text: value);
+        _customFieldControllers[key]!.addListener(_onFieldChanged);
       }
     });
+
+    _nameController.addListener(_onFieldChanged);
+    _nicknameController.addListener(_onFieldChanged);
+    _titleController.addListener(_onFieldChanged);
+    _companyController.addListener(_onFieldChanged);
+    _phoneController.addListener(_onFieldChanged);
+    _emailController.addListener(_onFieldChanged);
+  }
+
+  void _onFieldChanged() {
+    setState(() {}); // Trigger rebuild to update save button
   }
 
   @override
@@ -96,6 +146,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
 
       setState(() {
         _customFieldControllers[key] = TextEditingController();
+        _customFieldControllers[key]!.addListener(_onFieldChanged);
       });
     }
   }
@@ -110,7 +161,6 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
   // Use shared FieldFormatter
   String _formatFieldLabel(String key) => FieldFormatter.formatLabel(key);
   IconData _getIconForInfoType(String key) => FieldFormatter.getIcon(key);
-
 
   Future<void> _save() async {
     if (_formKey.currentState!.validate()) {
@@ -148,6 +198,12 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
             ? null
             : _phoneController.text.trim(),
         email: _emailController.text.trim(),
+        cardFrontPath: (_cardFrontImage != null)
+            ? _cardFrontImage!.path
+            : widget.user.cardFrontPath,
+        cardBackPath: (_cardBackImage != null)
+            ? _cardBackImage!.path
+            : widget.user.cardBackPath,
         customFields: updatedCustomFields,
       );
 
@@ -173,27 +229,37 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
       );
     }
   }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit Contact'),
-        actions: [
-          IconButton(
-            icon: _isSaving
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.check),
-            onPressed: _isSaving ? null : _save,
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
+    final hasChanges = _hasChanges;
+
+    return PopScope(
+      canPop: !hasChanges || _isSaving,
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
+        if (didPop) return;
+        final bool shouldPop = await DialogUtils.showUnsavedChangesDialog(context) ?? false;
+        if (shouldPop && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Edit Contact'),
+          actions: [
+            IconButton(
+              icon: _isSaving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.check),
+              onPressed: (_isSaving || !hasChanges) ? null : _save,
+            ),
+          ],
+        ),
+        body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(
           key: _formKey,
@@ -313,12 +379,15 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
                 ),
               ),
               const SizedBox(height: 32),
+              _buildBusinessCardsSection(),
+              const SizedBox(height: 32),
             ],
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildTextField(
     TextEditingController controller,
@@ -363,6 +432,192 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
     if (picked != null) {
       setState(() {
         controller.text = DateFormat('yyyy/MM/dd').format(picked);
+      });
+    }
+  }
+
+  Widget _buildBusinessCardsSection() {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Divider(),
+        const SizedBox(height: 16),
+        Text(
+          'Business Cards',
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.w600,
+            color: theme.hintColor,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: _buildCardPicker(
+                label: 'Front Side',
+                imageFile: _cardFrontImage,
+                remotePath: widget.user.cardFrontPath ?? widget.user.flatImagePath,
+                onTap: () => _pickCardImage(true),
+                onRemove: () => setState(() {
+                  _cardFrontImage = null;
+                }),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildUnitializedCardPicker(), // Keep it simple for now, or add back
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // Simplified version for EditContact since we already have logic in EditProfile
+  // I'll make it consistent
+  Widget _buildUnitializedCardPicker() {
+      return Expanded(
+              child: _buildCardPicker(
+                label: 'Back Side',
+                imageFile: _cardBackImage,
+                remotePath: widget.user.cardBackPath,
+                onTap: () => _pickCardImage(false),
+                onRemove: () => setState(() {
+                  _cardBackImage = null;
+                }),
+              ),
+            );
+  }
+
+  Widget _buildCardPicker({
+    required String label,
+    required File? imageFile,
+    required String? remotePath,
+    required VoidCallback onTap,
+    required VoidCallback onRemove,
+  }) {
+    final theme = Theme.of(context);
+    
+    ImageProvider? imageProvider;
+    if (imageFile != null) {
+      imageProvider = FileImage(imageFile);
+    } else if (remotePath != null && remotePath.isNotEmpty) {
+      if (remotePath.startsWith('http')) {
+        imageProvider = CachedNetworkImageProvider(remotePath);
+      } else {
+        imageProvider = FileImage(File(remotePath));
+      }
+    }
+
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: imageProvider != null
+              ? () {
+                  final String currentPath = imageFile?.path ?? remotePath!;
+                  final String currentTag = 'card_edit_$currentPath';
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FullScreenImageViewer(
+                        imagePath: currentPath,
+                        tag: currentTag,
+                      ),
+                    ),
+                  );
+                }
+              : onTap,
+          child: Hero(
+            tag: imageProvider != null 
+                ? 'card_edit_${imageFile?.path ?? remotePath!}' 
+                : 'card_placeholder_$label',
+            child: Container(
+              height: 100,
+              decoration: BoxDecoration(
+                color: theme.canvasColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: theme.dividerColor),
+                image: imageProvider != null
+                    ? DecorationImage(image: imageProvider, fit: BoxFit.cover)
+                    : null,
+              ),
+              child: imageProvider == null
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.add_a_photo_outlined, color: theme.hintColor),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Upload',
+                            style: TextStyle(color: theme.hintColor, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    )
+                  : Stack(
+                      children: [
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: GestureDetector(
+                            onTap: onRemove,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                color: Colors.black54,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.close, size: 16, color: Colors.white),
+                            ),
+                          ),
+                        ),
+                        // Add an "Edit" overlay or just use the tap to view
+                        Positioned(
+                          bottom: 4,
+                          right: 4,
+                          child: GestureDetector(
+                            onTap: onTap,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                color: Colors.black54,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.edit, size: 12, color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          style: TextStyle(color: theme.hintColor, fontSize: 12),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _pickCardImage(bool isFront) async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 2000,
+      maxHeight: 2000,
+    );
+
+    if (image != null) {
+      setState(() {
+        if (isFront) {
+          _cardFrontImage = File(image.path);
+        } else {
+          _cardBackImage = File(image.path);
+        }
       });
     }
   }

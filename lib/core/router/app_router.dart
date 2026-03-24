@@ -44,15 +44,16 @@ GoRouter goRouter(Ref ref) {
     refreshListenable: authNotifier,
     redirect: (context, state) {
       final authState = authNotifier.value;
+      final isInitializing = ref.watch(authInitializationStateProvider);
       final user = authState.valueOrNull;
       final matchedLocation = state.matchedLocation;
       final loggingIn = matchedLocation == '/login';
       const isWeb = kIsWeb;
 
-      // When loading OR error: do not redirect — stay on current page.
+      // When loading OR initializing OR error: do not redirect — stay on current page.
       // This prevents a transient null (during Firebase Auth init or app
       // resume) from flashing the login screen.
-      if (authState.isLoading || authState.hasError) return null;
+      if (authState.isLoading || isInitializing || authState.hasError) return null;
 
       // WEB: Landing page '/' is public
       if (isWeb && matchedLocation == '/') return null;

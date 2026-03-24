@@ -3,48 +3,53 @@ import 'package:secbizcard/features/profile/domain/card_context.dart';
 
 extension UserProfileFilter on UserProfile {
   Map<String, dynamic> filterForContext(ContextType type) {
-    // Base identity fields present in all contexts
+    // 1. Get the context settings for this type
+    CardContext context;
+    if (contextsJson.containsKey(type.name)) {
+      try {
+        context = CardContext.fromJson(contextsJson[type.name] as Map<String, dynamic>);
+      } catch (e) {
+        context = CardContext.createDefaults()[type]!;
+      }
+    } else {
+      context = CardContext.createDefaults()[type]!;
+    }
+
+    // 2. Build the filtered map
     final Map<String, dynamic> filtered = {
       'uid': uid,
-      'displayName': displayName,
-      'photoUrl': photoUrl,
-      'contextsJson': contextsJson, // Keep contexts syncing for now
       'createdAt': createdAt.toIso8601String(),
       'isOnboardingComplete': isOnboardingComplete,
-      // Always include verification status, but maybe not the sensitive data
       'phoneVerified': phoneVerified,
       'emailVerified': emailVerified,
     };
 
-    if (type == ContextType.lite) {
-      // Lite: Only base identity
-      return filtered;
+    if (context.showName) filtered['displayName'] = displayName;
+    if (context.showEmail) filtered['email'] = email;
+    if (context.showPhone) filtered['phone'] = phone;
+    if (context.showTitle) filtered['title'] = title;
+    if (context.showCompany) filtered['company'] = company;
+    if (context.showAvatar) {
+      filtered['photoUrl'] = photoUrl;
+      filtered['avatarDriveFileId'] = avatarDriveFileId;
     }
+    
+    // Business Card Images
+    if (context.showCardFront) filtered['cardFrontUrl'] = cardFrontDriveFileId;
+    if (context.showCardBack) filtered['cardBackUrl'] = cardBackDriveFileId;
 
-    if (type == ContextType.social) {
-      // Social: Add fields appropriate for social context
-      // Assuming customFields might have social links.
-      // If we had specific fields for "personal phone" vs "work phone", we'd distinguish here.
-      // For now, let's include custom fields and maybe phone if it's generic.
-      filtered['customFields'] = customFields;
-      filtered['phone'] = phone;
-      // Exclude email, title, company in social context?
-      // Often people want to share everything in social too, but let's be restrictive as per "Social" naming.
-      // Or maybe Social includes everything EXCEPT strict business details?
-      // Let's assume Social includes basic contact info + social links.
-    }
-
-    if (type == ContextType.business) {
-      // Business: Full professional profile
-      filtered['email'] = email;
-      filtered['title'] = title;
-      filtered['company'] = company;
-      filtered['phone'] = phone; // Usually work phone or primary phone
-      filtered['businessEmailDomain'] = businessEmailDomain;
-      filtered['customFields'] =
-          customFields; // LinkedIn, Website etc. often business related
-
-      // If we had specific business address, etc.
+    // Custom Fields
+    if (customFields.isNotEmpty) {
+      final Map<String, String> filteredCustomFields = {};
+      customFields.forEach((key, value) {
+        // Check if this specific custom field should be shown
+        if (context.showCustomFields[key] ?? true) {
+          filteredCustomFields[key] = value;
+        }
+      });
+      if (filteredCustomFields.isNotEmpty) {
+        filtered['customFields'] = filteredCustomFields;
+      }
     }
 
     return filtered;

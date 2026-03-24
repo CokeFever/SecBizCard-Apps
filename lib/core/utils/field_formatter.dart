@@ -26,22 +26,22 @@ class FieldFormatter {
     if (lower.contains('website') ||
         lower.contains('url') ||
         lower.contains('link')) {
-      return Icons.language;
+      return Icons.language_outlined;
     }
     if (lower.contains('linkedin')) {
-      return Icons.business_center;
+      return Icons.work_outline;
     }
     if (lower.contains('twitter') || lower.contains('social') || lower.contains(' x ')) {
-      return Icons.group;
+      return Icons.people_outline;
     }
     if (lower.contains('address')) {
       return Icons.location_on_outlined;
     }
     if (lower.contains('birthday') || lower.contains('date')) {
-      return Icons.cake;
+      return Icons.cake_outlined;
     }
     if (lower.contains('note')) {
-      return Icons.note;
+      return Icons.note_outlined;
     }
     if (lower.contains('phone') ||
         lower.contains('mobile') ||
@@ -50,6 +50,12 @@ class FieldFormatter {
     }
     if (lower.contains('email')) {
       return Icons.email_outlined;
+    }
+    if (lower.contains('company') || lower.contains('business')) {
+      return Icons.business_outlined;
+    }
+    if (lower.contains('title') || lower.contains('job')) {
+      return Icons.work_outline;
     }
     return Icons.info_outline;
   }

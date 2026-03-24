@@ -4,7 +4,7 @@ import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
   static const _databaseName = "ixo_app.db";
-  static const _databaseVersion = 11;
+  static const _databaseVersion = 12;
 
   // Singleton pattern
   DatabaseHelper._privateConstructor();
@@ -58,7 +58,11 @@ class DatabaseHelper {
         flatImagePath TEXT,
         source TEXT,
         mobile TEXT,
-        website TEXT
+        website TEXT,
+        cardFrontPath TEXT,
+        cardBackPath TEXT,
+        cardFrontDriveFileId TEXT,
+        cardBackDriveFileId TEXT
       )
     ''');
 
@@ -145,6 +149,13 @@ class DatabaseHelper {
       
       if (oldVersion < 11) {
         await _safeAddColumn(db, 'handshake_requests', 'receiverProfileJson', 'TEXT');
+      }
+
+      if (oldVersion < 12) {
+        await _safeAddColumn(db, 'users', 'cardFrontPath', 'TEXT');
+        await _safeAddColumn(db, 'users', 'cardBackPath', 'TEXT');
+        await _safeAddColumn(db, 'users', 'cardFrontDriveFileId', 'TEXT');
+        await _safeAddColumn(db, 'users', 'cardBackDriveFileId', 'TEXT');
       }
     }
   }
