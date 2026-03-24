@@ -22,13 +22,12 @@ steps:
         echo "keyAlias=$$ANDROID_KEY_ALIAS" >> android/key.properties
         echo "storeFile=upload-keystore.jks" >> android/key.properties
         
-        # 設定 SSH Deploy Key，讓 Flutter 可以下載私密 Git Package (SecBizCard_OCR)
-        mkdir -p ~/.ssh
-        # 這裡假設 OCR_DEPLOY_KEY 是 Base64 編碼過的 (GCP 習慣)
-        echo "$$OCR_DEPLOY_KEY" | base64 -d > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        # 注入 Firebase 設定檔 (使用與 iOS 相同的強健腳本處理 Base64)
-        python3 ios/ci_scripts/decode_firebase_config.py
+        # 注入 Firebase 設定檔 (使用 Dart 注入器解決 Base64 偏移問題)
+        dart ios/ci_scripts/inject_secrets.dart
+        
+        # 設置 SSH Deploy Key (使用 Dart 注入器輸出的檔案或手動移動)
+        # inject_secrets.dart 已將 OCR_DEPLOY_KEY 寫入 .ssh_id_ed25519
+        mv .ssh_id_ed25519 ~/.ssh/id_rsa
         
         # 啟動 ssh-agent 並加入金鑰 (這比只放檔案更穩健)
         eval $(ssh-agent -s)
