@@ -27,7 +27,7 @@ if [ ! -d "$HOME/flutter" ]; then
 fi
 
 # Set Flutter path (prepend to override any pre-installed versions)
-export PATH="/Users/local/flutter/bin:$PATH"
+export PATH="$HOME/flutter/bin:$PATH"
 
 echo "Diagnostic: Toolchain check"
 flutter --version
