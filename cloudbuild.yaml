@@ -25,9 +25,12 @@ steps:
         # 注入 Firebase 設定檔 (使用 Dart 注入器解決 Base64 偏移問題)
         dart ios/ci_scripts/inject_secrets.dart
         
-        # 設置 SSH Deploy Key (使用 Dart 注入器輸出的檔案或手動移動)
-        # inject_secrets.dart 已將 OCR_DEPLOY_KEY 寫入 .ssh_id_ed25519
-        mv .ssh_id_ed25519 ~/.ssh/id_rsa
+        # 設置 SSH Deploy Key
+        mkdir -p ~/.ssh
+        if [ -f ".ssh_id_ed25519" ]; then
+            mv .ssh_id_ed25519 ~/.ssh/id_rsa
+            chmod 600 ~/.ssh/id_rsa
+        fi
         
         # 啟動 ssh-agent 並加入金鑰 (這比只放檔案更穩健)
         eval $(ssh-agent -s)
