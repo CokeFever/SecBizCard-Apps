@@ -12,20 +12,25 @@ import 'core/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  debugPrint('[Main] WidgetsFlutterBinding initialized');
+  
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+  
   try {
+    debugPrint('[Main] Initializing Firebase...');
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    debugPrint('[Main] Firebase initialized successfully');
 
-    // Initial silent sign-in is handled via authStateChanges in the router
-    // but the unified provider ensures we use the correct configuration.
-    
     runApp(const ProviderScope(child: IxoApp()));
-  } catch (e) {
+    debugPrint('[Main] runApp called');
+  } catch (e, stack) {
+    debugPrint('[Main] Firebase initialization failed: $e');
+    debugPrint('[Main] Stack trace: $stack');
     runApp(
       MaterialApp(
         home: Scaffold(body: Center(child: Text('Initialization Error: $e'))),
