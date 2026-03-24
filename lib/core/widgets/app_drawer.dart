@@ -9,6 +9,7 @@ import 'package:secbizcard/core/config/theme_controller.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:secbizcard/features/contacts/data/services/vcard_service.dart';
 import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
+import 'package:secbizcard/core/widgets/profile_avatar.dart';
 
 import 'package:google_fonts/google_fonts.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -38,21 +39,10 @@ class AppDrawer extends ConsumerWidget {
                     profile?.displayName ?? user.displayName ?? 'User',
                   ),
                   accountEmail: Text(user.email ?? ''),
-                  currentAccountPicture: CircleAvatar(
-                    backgroundImage: profile?.photoUrl != null
-                        ? (profile!.photoUrl!.startsWith('http')
-                              ? NetworkImage(profile.photoUrl!)
-                              : FileImage(File(profile.photoUrl!))
-                                    as ImageProvider)
-                        : (user.photoURL != null
-                              ? (user.photoURL!.startsWith('http')
-                                    ? NetworkImage(user.photoURL!)
-                                    : FileImage(File(user.photoURL!))
-                                          as ImageProvider)
-                              : null),
-                    child: (profile?.photoUrl == null && user.photoURL == null)
-                        ? const Icon(Icons.person)
-                        : null,
+                  currentAccountPicture: ProfileAvatar(
+                    profile: profile,
+                    radius: 36, // Appropriate for UserAccountsDrawerHeader
+                    backgroundColor: Colors.white24,
                   ),
                   decoration: BoxDecoration(
                     color: Theme.of(context).primaryColor,

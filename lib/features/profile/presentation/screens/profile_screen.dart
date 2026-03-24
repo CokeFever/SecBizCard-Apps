@@ -1,35 +1,22 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/core/database/database_helper.dart';
-
 import 'package:secbizcard/core/widgets/verification_badge.dart';
 import 'package:secbizcard/features/profile/data/profile_repository.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
-import 'package:secbizcard/features/storage/data/drive_repository.dart';
 import 'package:secbizcard/features/verification/presentation/screens/email_verification_screen.dart';
 import 'package:secbizcard/features/verification/presentation/screens/phone_verification_screen.dart';
 import 'package:secbizcard/core/utils/field_formatter.dart';
+import 'package:secbizcard/core/widgets/profile_avatar.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Fetch profile data
-    // In a real app, consider using a FutureProvider or StreamProvider for this
-    // to handle loading/error states better. For sprint 1, we keep it simple or fetch on init.
-    // However, since we sync on login, we might already have it or can fetch it now.
-    // A better pattern is a UserProfileProvider. Let's assume we fetch it here or use a provider.
-
-    // For MVP Sprint 1, let's just display what we have from Auth + fetch from Firestore
-    // But since we can't easily make build async, we usually use a provider.
-    // Let's create a temporary FutureBuilder for simplicity or just a provider call.
-
     final profileAsync = ref.watch(userProfileProvider);
 
     return Scaffold(
@@ -52,7 +39,7 @@ class ProfileScreen extends ConsumerWidget {
             child: Column(
               children: [
                 const SizedBox(height: 20),
-                _buildAvatar(ref, profile),
+                ProfileAvatar(profile: profile, radius: 50),
                 const SizedBox(height: 24),
                 Text(
                   profile.displayName,
@@ -97,11 +84,7 @@ class ProfileScreen extends ConsumerWidget {
                 if (profile.customFields.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   ...profile.customFields.entries.map((entry) {
-                    final isEmailField = entry.key.toLowerCase().contains(
-                      'email',
-                    );
-                    final isLoginEmail =
-                        isEmailField && entry.value == (profile.email ?? '');
+                    // Removed unused isEmailField
 
                     return _buildInfoTile(
                       FieldFormatter.getIcon(entry.key),
@@ -213,34 +196,6 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildAvatar(WidgetRef ref, UserProfile profile) {
-    final driveRepo = ref.read(driveRepositoryProvider);
-
-    // Priority: avatarDriveFileId > photoUrl (Google Sign-In) > placeholder
-    if (profile.avatarDriveFileId != null) {
-      return CircleAvatar(
-        radius: 50,
-        backgroundColor: Colors.grey.shade200,
-        backgroundImage: CachedNetworkImageProvider(
-          driveRepo.getFileUrl(profile.avatarDriveFileId!),
-        ),
-      );
-    } else if (profile.photoUrl != null) {
-      return CircleAvatar(
-        radius: 50,
-        backgroundColor: Colors.grey.shade200,
-        backgroundImage: profile.photoUrl!.startsWith('http')
-            ? CachedNetworkImageProvider(profile.photoUrl!)
-            : FileImage(File(profile.photoUrl!)) as ImageProvider,
-      );
-    } else {
-      return CircleAvatar(
-        radius: 50,
-        backgroundColor: Colors.grey.shade200,
-        child: const Icon(Icons.person, size: 50, color: Colors.grey),
-      );
-    }
-  }
 
   Widget _buildInfoTile(
     IconData icon,

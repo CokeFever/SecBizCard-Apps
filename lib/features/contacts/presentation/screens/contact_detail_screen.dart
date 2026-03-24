@@ -13,6 +13,9 @@ import 'package:secbizcard/features/contacts/data/services/vcard_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:secbizcard/core/utils/field_formatter.dart';
+import 'package:secbizcard/core/presentation/widgets/full_screen_image_viewer.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:secbizcard/features/storage/data/drive_repository.dart';
 
 class ContactDetailScreen extends ConsumerStatefulWidget {
   final UserProfile user;
@@ -279,11 +282,28 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
                 onLongPress: () => _copyToClipboard(_user.phone!, 'Phone'),
               ),
 
+            if (_user.title != null && _user.title!.isNotEmpty)
+              _buildContactTile(
+                icon: Icons.work_outline,
+                label: 'Job Title',
+                value: _user.title!,
+                onLongPress: () => _copyToClipboard(_user.title!, 'Job Title'),
+              ),
+
+            if (_user.company != null && _user.company!.isNotEmpty)
+              _buildContactTile(
+                icon: Icons.business_outlined,
+                label: 'Company',
+                value: _user.company!,
+                onLongPress: () => _copyToClipboard(_user.company!, 'Company'),
+              ),
+
             if (_user.department != null && _user.department!.isNotEmpty)
               _buildContactTile(
-                icon: Icons.business_center_outlined,
+                icon: Icons.business_outlined,
                 label: 'Department',
                 value: _user.department!,
+                onLongPress: () => _copyToClipboard(_user.department!, 'Department'),
               ),
 
             if (_user.address != null && _user.address!.isNotEmpty)
@@ -295,7 +315,6 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
                 onLongPress: () => _copyToClipboard(_user.address!, 'Address'),
               ),
 
-            // Custom Fields
             if (_user.customFields.isNotEmpty) ...[
               const SizedBox(height: 16),
               const Divider(),
@@ -317,6 +336,9 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
                     );
                   }),
             ],
+
+            const SizedBox(height: 32),
+            _buildBusinessCardsSection(),
 
             const SizedBox(height: 48),
             SizedBox(
@@ -364,26 +386,149 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
     VoidCallback? onTap,
     VoidCallback? onLongPress,
   }) {
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.blueGrey[50],
-          borderRadius: BorderRadius.circular(8),
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        borderRadius: BorderRadius.circular(8),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: theme.hintColor,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: theme.hintColor,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    value,
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: theme.textTheme.bodyLarge?.color,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-        child: Icon(icon, color: Colors.blueGrey[700]),
       ),
-      title: Text(
-        label,
-        style: const TextStyle(fontSize: 12, color: Colors.grey),
+    );
+  }
+
+  Widget _buildBusinessCardsSection() {
+    final List<Map<String, String>> cardImages = [];
+
+    // New explicit front/back
+    if (_user.cardFrontPath != null && _user.cardFrontPath!.isNotEmpty) {
+      cardImages.add({'path': _user.cardFrontPath!, 'label': 'Front Side'});
+    } else if (_user.cardFrontDriveFileId != null && _user.cardFrontDriveFileId!.isNotEmpty) {
+      final url = ref.read(driveRepositoryProvider).getFileUrl(_user.cardFrontDriveFileId!);
+      cardImages.add({'path': url, 'label': 'Front Side'});
+    }
+
+    if (_user.cardBackPath != null && _user.cardBackPath!.isNotEmpty) {
+      cardImages.add({'path': _user.cardBackPath!, 'label': 'Back Side'});
+    } else if (_user.cardBackDriveFileId != null && _user.cardBackDriveFileId!.isNotEmpty) {
+      final url = ref.read(driveRepositoryProvider).getFileUrl(_user.cardBackDriveFileId!);
+      cardImages.add({'path': url, 'label': 'Back Side'});
+    }
+
+    // Fallback for OCR results
+    if (cardImages.isEmpty) {
+      if (_user.flatImagePath != null && _user.flatImagePath!.isNotEmpty) {
+        cardImages.add({'path': _user.flatImagePath!, 'label': 'OCR Result'});
+      }
+      if (_user.originalImagePath != null && _user.originalImagePath!.isNotEmpty) {
+        cardImages.add({'path': _user.originalImagePath!, 'label': 'Original Scan'});
+      }
+    }
+
+    if (cardImages.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Divider(),
+        const SizedBox(height: 16),
+        Text(
+          'Business Cards',
+          style: GoogleFonts.outfit(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 150,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: cardImages.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 16),
+            itemBuilder: (context, index) {
+              final card = cardImages[index];
+              return _buildCardPreview(card['path']!, card['label']!);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCardPreview(String path, String label) {
+    ImageProvider imageProvider;
+    if (path.startsWith('http')) {
+      imageProvider = CachedNetworkImageProvider(path);
+    } else {
+      imageProvider = FileImage(File(path));
+    }
+
+    final String heroTag = 'card_$path';
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => FullScreenImageViewer(imagePath: path, tag: heroTag),
+          ),
+        );
+      },
+      child: Column(
+        children: [
+          Hero(
+            tag: heroTag,
+            child: Container(
+              width: 220,
+              height: 120,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey[300]!),
+                image: DecorationImage(
+                  image: imageProvider,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        ],
       ),
-      subtitle: Text(
-        value,
-        style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500),
-      ),
-      onTap: onTap,
-      onLongPress: onLongPress,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
     );
   }
 

@@ -8,21 +8,26 @@ import 'package:fpdart/fpdart.dart';
 import 'package:secbizcard/core/errors/failure.dart';
 
 import 'test_mocks.mocks.dart';
+import 'package:riverpod/riverpod.dart';
+import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'test_helper.dart';
 
+class MockRef extends Mock implements Ref {}
+
 void main() {
+  late AuthRepository authRepo;
   late MockFirebaseAuth mockFirebaseAuth;
   late MockGoogleSignIn mockGoogleSignIn;
   late MockProfileRepository mockProfileRepo;
-  late AuthRepository authRepo;
+  late MockRef mockRef;
 
   setUp(() {
     setupTestDummies();
     mockFirebaseAuth = MockFirebaseAuth();
     mockGoogleSignIn = MockGoogleSignIn();
     mockProfileRepo = MockProfileRepository();
-
-    authRepo = AuthRepository(mockFirebaseAuth, mockGoogleSignIn);
+    mockRef = MockRef();
+    authRepo = AuthRepository(mockFirebaseAuth, mockGoogleSignIn, mockRef);
   });
 
   group('AuthRepository', () {
@@ -61,16 +66,16 @@ void main() {
 
       // User doesn't exist in firestore
       when(
-        mockProfileRepo.getUser(any),
+        mockProfileRepo.getUser(argThat(isA<String>())),
       ).thenAnswer((_) async => const Left(GeneralFailure('Not found')));
       when(
-        mockProfileRepo.createOrUpdateUser(any),
+        mockProfileRepo.createOrUpdateUser(argThat(isA<UserProfile>())),
       ).thenAnswer((_) async => const Right(unit));
 
       final result = await authRepo.signInWithGoogle(mockProfileRepo);
 
       expect(result.isRight(), true);
-      verify(mockProfileRepo.createOrUpdateUser(any)).called(1);
+      verify(mockProfileRepo.createOrUpdateUser(argThat(isA<UserProfile>()))).called(1);
     });
 
     test('signInWithGoogle failure - user canceled', () async {

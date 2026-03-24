@@ -35,6 +35,11 @@ class UserProfile with _$UserProfile {
     @Default('handshake') String source, // 'handshake' | 'vcf' | 'ocr'
     String? mobile,
     String? website,
+    // Business Card Images
+    String? cardFrontPath,
+    String? cardBackPath,
+    String? cardFrontDriveFileId,
+    String? cardBackDriveFileId,
   }) = _UserProfile;
 
   factory UserProfile.fromJson(Map<String, dynamic> json) =>

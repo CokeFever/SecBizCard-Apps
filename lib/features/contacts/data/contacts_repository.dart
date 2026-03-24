@@ -15,11 +15,17 @@ import 'package:secbizcard/features/profile/data/datasources/profile_local_datas
 part 'contacts_repository.g.dart';
 
 @riverpod
-Future<List<UserProfile>> savedContacts(Ref ref) {
-  return ref
-      .watch(contactsRepositoryProvider)
-      .getSavedContacts()
-      .then((result) => result.fold((l) => [], (r) => r));
+Future<List<UserProfile>> savedContacts(Ref ref) async {
+  final currentUserId = ref.watch(authStateProvider).value?.uid;
+  final repository = ref.watch(contactsRepositoryProvider);
+  
+  final result = await repository.getSavedContacts();
+  return result.fold(
+    (l) => [], 
+    (r) => currentUserId != null 
+        ? r.where((profile) => profile.uid != currentUserId).toList()
+        : r,
+  );
 }
 
 @riverpod

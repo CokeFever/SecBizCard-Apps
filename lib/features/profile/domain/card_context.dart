@@ -15,6 +15,8 @@ class CardContext with _$CardContext {
     @Default(true) bool showTitle,
     @Default(true) bool showCompany,
     @Default(true) bool showAvatar,
+    @Default(true) bool showCardFront,
+    @Default(true) bool showCardBack,
     @Default({}) Map<String, bool> showCustomFields,
   }) = _CardContext;
 
@@ -32,6 +34,8 @@ class CardContext with _$CardContext {
         showTitle: true,
         showCompany: true,
         showAvatar: true,
+        showCardFront: true,
+        showCardBack: true,
       ),
       ContextType.social: const CardContext(
         type: ContextType.social,
@@ -41,6 +45,8 @@ class CardContext with _$CardContext {
         showTitle: false,
         showCompany: false,
         showAvatar: true,
+        showCardFront: false,
+        showCardBack: false,
       ),
       ContextType.lite: const CardContext(
         type: ContextType.lite,
@@ -50,6 +56,8 @@ class CardContext with _$CardContext {
         showTitle: false,
         showCompany: false,
         showAvatar: false,
+        showCardFront: false,
+        showCardBack: false,
       ),
     };
   }
