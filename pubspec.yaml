@@ -1,7 +1,7 @@
 name: secbizcard
 description: "A new Flutter project."
 publish_to: 'none'
-version: 1.4.5+155
+version: 1.4.5+156
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -70,12 +70,12 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
-  riverpod_generator: any
-  build_runner: any
-  freezed: any
-  json_serializable: any
+  riverpod_generator: ^4.0.3
+  build_runner: ^2.13.1
+  freezed: ^2.5.8
+  json_serializable: ^6.13.1
   mockito: ^5.4.6
-  analyzer: any
+  analyzer: ^12.0.0
   path_provider_platform_interface: ^2.1.2
   flutter_launcher_icons: ^0.13.1
 
