@@ -29,6 +29,17 @@ fi
 # Set Flutter path (prepend to override any pre-installed versions)
 export PATH="/Users/local/flutter/bin:$PATH"
 
+echo "Diagnostic: Toolchain check"
+flutter --version
+which flutter
+which dart
+which xxd || echo "xxd NOT FOUND"
+
+echo "Aggressively cleaning caches..."
+flutter clean
+rm -rf .dart_tool
+rm -rf pubspec.lock
+
 echo "Using Flutter from: $(which flutter)"
 flutter --version
 
@@ -69,8 +80,12 @@ echo "Verifying injected files content (first 100 bytes in hex):"
 [ -f "ios/Runner/GoogleService-Info.plist" ] && head -c 100 "ios/Runner/GoogleService-Info.plist" | xxd
 
 # Upgrade dependencies (ensures newest compatible transient dependencies like analyzer)
-echo "Running flutter pub upgrade..."
-flutter pub upgrade
+echo "Running flutter pub get (after cache clean)..."
+flutter pub get
+
+echo "Verifying injected files content (first 100 bytes in hex/od):"
+[ -f "lib/firebase_options.dart" ] && head -c 100 "lib/firebase_options.dart" | od -t x1
+[ -f "ios/Runner/GoogleService-Info.plist" ] && head -c 100 "ios/Runner/GoogleService-Info.plist" | od -t x1
 
 # Generate localization files (required before build)
 echo "Generating localization files..."
