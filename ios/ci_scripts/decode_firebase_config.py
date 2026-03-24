@@ -3,13 +3,24 @@ import os
 import re
 import sys
 
-def decode_and_save(env_name, file_path):
-    print(f"Checking environment variable: {env_name}")
-    data = os.environ.get(env_name, "")
+def decode_and_save(env_names, file_path):
+    if isinstance(env_names, str):
+        env_names = [env_names]
+    
+    data = ""
+    found_env = ""
+    for env_name in env_names:
+        print(f"Checking environment variable: {env_name}")
+        data = os.environ.get(env_name, "")
+        if data:
+            found_env = env_name
+            break
+
     if not data:
-        print(f"Warning: {env_name} is empty or not set. Skipping.")
+        print(f"Warning: None of {env_names} are set. Skipping {file_path}.")
         return
 
+    print(f"Found {found_env}. Processing...")
     # 1. Remove all characters that are not valid Base64 (A-Z, a-z, 0-9, +, /, =)
     # This handles internal and external whitespace, newlines, etc.
     clean_data = re.sub(r'[^a-zA-Z0-9+/=]', '', data)
@@ -19,7 +30,7 @@ def decode_and_save(env_name, file_path):
     if missing_padding:
         clean_data += "=" * (4 - missing_padding)
     
-    print(f"Writing {len(clean_data)} characters of decoded data to {file_path}...")
+    print(f"Writing {len(clean_data)} characters of decoded data (Base64) to {file_path}...")
     
     try:
         binary_data = base64.b64decode(clean_data)
@@ -34,10 +45,10 @@ def decode_and_save(env_name, file_path):
 if __name__ == "__main__":
     # The script is run from project root
     # iOS Configuration
-    decode_and_save("GOOGLE_SERVICE_INFO_PLIST", "ios/Runner/GoogleService-Info.plist")
+    decode_and_save(["GOOGLE_SERVICE_INFO_PLIST", "GOOGLE_SERVICES_INFO_PLIST", "IOS_GOOGLE_SERVICES_JSON"], "ios/Runner/GoogleService-Info.plist")
     
     # Android Configuration
-    decode_and_save("GOOGLE_SERVICES_JSON", "android/app/google-services.json")
+    decode_and_save(["GOOGLE_SERVICES_JSON", "ANDROID_GOOGLE_SERVICES_JSON"], "android/app/google-services.json")
     
     # Shared Configuration
-    decode_and_save("FIREBASE_OPTIONS_DART", "lib/firebase_options.dart")
+    decode_and_save(["FIREBASE_OPTIONS_DART"], "lib/firebase_options.dart")
