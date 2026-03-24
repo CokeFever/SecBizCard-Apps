@@ -27,7 +27,7 @@ google_sign_in.GoogleSignIn googleSignIn(Ref ref) {
   );
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 AuthRepository authRepository(Ref ref) {
   return AuthRepository(
     fire_auth.FirebaseAuth.instance,

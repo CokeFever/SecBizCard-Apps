@@ -59,12 +59,18 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   File? _selectedImage;
   File? _cardFrontImage;
   File? _cardBackImage;
+  bool _isCardFrontRemoved = false;
+  bool _isCardBackRemoved = false;
+  bool _isAvatarRemoved = false;
   bool _isUploadingImage = false;
 
   bool get _hasChanges {
-    if (_selectedImage != null) return true;
     if (_cardFrontImage != null) return true;
     if (_cardBackImage != null) return true;
+    if (_selectedImage != null) return true;
+    if (_isAvatarRemoved) return true;
+    if (_isCardFrontRemoved) return true;
+    if (_isCardBackRemoved) return true;
 
     if (_nameController.text.trim() != widget.user.displayName) return true;
     if (_titleController.text.trim() != (widget.user.title ?? '')) return true;
@@ -259,6 +265,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     if (croppedFile != null) {
       setState(() {
         _selectedImage = File(croppedFile.path);
+        _isAvatarRemoved = false;
       });
     }
   }
@@ -411,16 +418,24 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             : _companyController.text.trim(),
         department: widget.user.department,
         phone: newPhone.isEmpty ? null : newPhone,
-        avatarDriveFileId: avatarDriveFileId,
-        photoUrl: (_selectedImage != null)
-            ? _selectedImage!.path
-            : widget.user.photoUrl,
-        cardFrontPath: (_cardFrontImage != null)
-            ? _cardFrontImage!.path
-            : widget.user.cardFrontPath,
-        cardBackPath: (_cardBackImage != null)
-            ? _cardBackImage!.path
-            : widget.user.cardBackPath,
+        avatarDriveFileId: _isAvatarRemoved ? null : avatarDriveFileId,
+        photoUrl: _isAvatarRemoved
+            ? null
+            : (_selectedImage != null)
+                ? _selectedImage!.path
+                : widget.user.photoUrl,
+        cardFrontPath: _isCardFrontRemoved
+            ? null
+            : (_cardFrontImage != null)
+                ? _cardFrontImage!.path
+                : widget.user.cardFrontPath,
+        cardFrontDriveFileId: _isCardFrontRemoved ? null : widget.user.cardFrontDriveFileId,
+        cardBackPath: _isCardBackRemoved
+            ? null
+            : (_cardBackImage != null)
+                ? _cardBackImage!.path
+                : widget.user.cardBackPath,
+        cardBackDriveFileId: _isCardBackRemoved ? null : widget.user.cardBackDriveFileId,
         customFields: customFields,
         // Reset phone verification if phone was changed
         phoneVerified: (phoneChanged && wasPhoneVerified)
@@ -621,11 +636,34 @@ Widget _buildAvatarSection() {
               CircleAvatar(
                 radius: 60,
                 backgroundColor: theme.canvasColor,
-                backgroundImage: backgroundImage,
-                child: backgroundImage == null
+                backgroundImage: _isAvatarRemoved ? null : backgroundImage,
+                child: (_isAvatarRemoved || backgroundImage == null)
                     ? Icon(Icons.person, size: 60, color: theme.hintColor)
                     : null,
               ),
+              if (!_isAvatarRemoved && (backgroundImage != null))
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: GestureDetector(
+                    onTap: () => setState(() {
+                      _selectedImage = null;
+                      _isAvatarRemoved = true;
+                    }),
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.black54,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
               Positioned(
                 bottom: 0,
                 right: 0,
@@ -725,9 +763,12 @@ Widget _buildAvatarSection() {
                 label: 'Front Side',
                 imageFile: _cardFrontImage,
                 remotePath: widget.user.cardFrontPath,
+                driveFileId: widget.user.cardFrontDriveFileId,
+                isExplicitlyRemoved: _isCardFrontRemoved,
                 onTap: () => _pickCardImage(true),
                 onRemove: () => setState(() {
                   _cardFrontImage = null;
+                  _isCardFrontRemoved = true;
                 }),
               ),
             ),
@@ -737,9 +778,12 @@ Widget _buildAvatarSection() {
                 label: 'Back Side',
                 imageFile: _cardBackImage,
                 remotePath: widget.user.cardBackPath,
+                driveFileId: widget.user.cardBackDriveFileId,
+                isExplicitlyRemoved: _isCardBackRemoved,
                 onTap: () => _pickCardImage(false),
                 onRemove: () => setState(() {
                   _cardBackImage = null;
+                  _isCardBackRemoved = true;
                 }),
               ),
             ),
@@ -753,19 +797,40 @@ Widget _buildAvatarSection() {
     required String label,
     required File? imageFile,
     required String? remotePath,
+    required String? driveFileId,
+    required bool isExplicitlyRemoved,
     required VoidCallback onTap,
     required VoidCallback onRemove,
   }) {
     final theme = Theme.of(context);
+    final driveRepo = ref.read(driveRepositoryProvider);
     
     ImageProvider? imageProvider;
+    String? currentHeroPath;
+
     if (imageFile != null) {
       imageProvider = FileImage(imageFile);
-    } else if (remotePath != null && remotePath.isNotEmpty) {
-      if (remotePath.startsWith('http')) {
-        imageProvider = CachedNetworkImageProvider(remotePath);
-      } else {
-        imageProvider = FileImage(File(remotePath));
+      currentHeroPath = imageFile.path;
+    } else if (!isExplicitlyRemoved) {
+      // 1. Try local path if file exists
+      if (remotePath != null && remotePath.isNotEmpty) {
+        if (remotePath.startsWith('http')) {
+          imageProvider = CachedNetworkImageProvider(remotePath);
+          currentHeroPath = remotePath;
+        } else {
+          final file = File(remotePath);
+          if (file.existsSync()) {
+            imageProvider = FileImage(file);
+            currentHeroPath = remotePath;
+          }
+        }
+      }
+      
+      // 2. Fallback to Drive ID if local path is missing/dead
+      if (imageProvider == null && driveFileId != null && driveFileId.isNotEmpty) {
+        final url = driveRepo.getFileUrl(driveFileId);
+        imageProvider = CachedNetworkImageProvider(url);
+        currentHeroPath = url;
       }
     }
 
@@ -774,48 +839,55 @@ Widget _buildAvatarSection() {
         GestureDetector(
           onTap: imageProvider != null
               ? () {
-                  final String currentPath = imageFile?.path ?? remotePath!;
-                  final String currentTag = 'card_edit_$currentPath';
+                  final String currentTag = 'card_edit_${currentHeroPath!}';
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => FullScreenImageViewer(
-                        imagePath: currentPath,
+                        imagePath: currentHeroPath!,
                         tag: currentTag,
                       ),
                     ),
                   );
                 }
               : onTap,
-          child: Hero(
-            tag: imageProvider != null 
-                ? 'card_edit_${imageFile?.path ?? remotePath!}' 
-                : 'card_placeholder_$label',
-            child: Container(
-              height: 100,
-              decoration: BoxDecoration(
-                color: theme.canvasColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: theme.dividerColor),
-                image: imageProvider != null
-                    ? DecorationImage(image: imageProvider, fit: BoxFit.cover)
-                    : null,
+          child: Container(
+            height: 100,
+            decoration: BoxDecoration(
+              color: imageProvider == null ? theme.colorScheme.surfaceVariant.withOpacity(0.5) : theme.canvasColor,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: imageProvider == null ? theme.colorScheme.primary.withOpacity(0.2) : theme.dividerColor,
+                width: imageProvider == null ? 2 : 1,
+                style: imageProvider == null ? BorderStyle.solid : BorderStyle.solid,
               ),
-              child: imageProvider == null
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.add_a_photo_outlined, color: theme.hintColor),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Upload',
-                            style: TextStyle(color: theme.hintColor, fontSize: 12),
+              image: imageProvider != null
+                  ? DecorationImage(image: imageProvider, fit: BoxFit.cover)
+                  : null,
+            ),
+            child: imageProvider == null
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.add_a_photo_outlined, 
+                          color: theme.colorScheme.primary.withOpacity(0.6),
+                          size: 32,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Upload $label',
+                          style: TextStyle(
+                            color: theme.colorScheme.primary.withOpacity(0.6),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
                           ),
-                        ],
-                      ),
-                    )
-                  : Stack(
+                        ),
+                      ],
+                    ),
+                  )
+                : Stack(
                       children: [
                         Positioned(
                           top: 4,
@@ -874,8 +946,10 @@ Widget _buildAvatarSection() {
       setState(() {
         if (isFront) {
           _cardFrontImage = File(image.path);
+          _isCardFrontRemoved = false;
         } else {
           _cardBackImage = File(image.path);
+          _isCardBackRemoved = false;
         }
       });
     }
