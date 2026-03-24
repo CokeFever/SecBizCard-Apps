@@ -52,17 +52,31 @@ class AuthRepository {
   final Ref _ref;
 
   void _init() async {
-    // Wait for initial auth state
-    final firstUser = await _firebaseAuth.authStateChanges().first;
-    if (firstUser == null) {
-      debugPrint('[Auth] Initial state: No user. Trying silent sign-in...');
-      await _trySilentSignIn();
-    } else {
-      debugPrint('[Auth] Initial state: User ${firstUser.uid} already active.');
+    debugPrint('[Auth] _init started');
+    try {
+      // Wait for initial auth state
+      debugPrint('[Auth] Waiting for first authStateChange...');
+      final firstUser = await _firebaseAuth.authStateChanges().first.timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          debugPrint('[Auth] authStateChanges().first timed out!');
+          return null;
+        },
+      );
+      
+      if (firstUser == null) {
+        debugPrint('[Auth] Initial state: No user. Trying silent sign-in...');
+        await _trySilentSignIn();
+      } else {
+        debugPrint('[Auth] Initial state: User ${firstUser.uid} already active.');
+      }
+    } catch (e) {
+      debugPrint('[Auth] Error during _init: $e');
+    } finally {
+      // Mark initialization as complete
+      debugPrint('[Auth] Initialization complete, setting state to false');
+      _ref.read(authInitializationStateProvider.notifier).state = false;
     }
-    
-    // Mark initialization as complete
-    _ref.read(authInitializationStateProvider.notifier).state = false;
 
     _firebaseAuth.authStateChanges().listen((user) {
       if (user != null) {
