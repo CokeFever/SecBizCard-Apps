@@ -355,15 +355,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   Future<void> _save() async {
     if (_formKey.currentState!.validate()) {
-      String? avatarDriveFileId = widget.user.avatarDriveFileId;
-
-      // Upload new avatar if selected
-      if (_selectedImage != null) {
-        setState(() {
-          _isUploadingImage = true;
-        });
-        avatarDriveFileId = null;
-      }
+      String? avatarDriveFileId = _isAvatarRemoved ? null : (_selectedImage != null ? null : widget.user.avatarDriveFileId);
+      String? cardFrontDriveFileId = _isCardFrontRemoved ? null : (_cardFrontImage != null ? null : widget.user.cardFrontDriveFileId);
+      String? cardBackDriveFileId = _isCardBackRemoved ? null : (_cardBackImage != null ? null : widget.user.cardBackDriveFileId);
 
       // Collect custom fields
       final Map<String, String> customFields = {};
@@ -429,13 +423,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             : (_cardFrontImage != null)
                 ? _cardFrontImage!.path
                 : widget.user.cardFrontPath,
-        cardFrontDriveFileId: _isCardFrontRemoved ? null : widget.user.cardFrontDriveFileId,
+        cardFrontDriveFileId: cardFrontDriveFileId,
         cardBackPath: _isCardBackRemoved
             ? null
             : (_cardBackImage != null)
                 ? _cardBackImage!.path
                 : widget.user.cardBackPath,
-        cardBackDriveFileId: _isCardBackRemoved ? null : widget.user.cardBackDriveFileId,
+        cardBackDriveFileId: cardBackDriveFileId,
         customFields: customFields,
         // Reset phone verification if phone was changed
         phoneVerified: (phoneChanged && wasPhoneVerified)
@@ -924,7 +918,6 @@ Widget _buildAvatarSection() {
                     ),
             ),
           ),
-        ),
         const SizedBox(height: 8),
         Text(
           label,

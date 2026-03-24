@@ -10,7 +10,7 @@ import 'package:secbizcard/features/profile/domain/user_profile.dart';
 
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/contacts/data/datasources/contacts_local_datasource.dart';
-import 'package:secbizcard/features/profile/data/datasources/profile_local_datasource.dart';
+import 'package:secbizcard/features/profile/data/profile_repository.dart';
 
 part 'contacts_repository.g.dart';
 
@@ -32,32 +32,36 @@ Future<List<UserProfile>> savedContacts(Ref ref) async {
 ContactsRepository contactsRepository(Ref ref) {
   return ContactsRepository(
     ref.watch(googleSignInProvider),
-    ref.watch(profileLocalDataSourceProvider),
+    ref.watch(profileRepositoryProvider),
     ref.watch(contactsLocalDataSourceProvider),
   );
 }
 
 class ContactsRepository {
   final GoogleSignIn _googleSignIn;
-  final ProfileLocalDataSource _profileLocalDataSource;
+  final ProfileRepository _profileRepository;
   final ContactsLocalDataSource _contactsLocalDataSource;
 
   ContactsRepository(
     this._googleSignIn,
-    this._profileLocalDataSource,
+    this._profileRepository,
     this._contactsLocalDataSource,
   );
 
   /// Saves a contact to local database
   Future<Either<Failure, void>> saveContactLocally(UserProfile profile) async {
     try {
-      // 1. Save the profile data (using existing profile cache mechanism)
-      await _profileLocalDataSource.saveUser(profile);
-
-      // 2. Mark as saved contact
-      await _contactsLocalDataSource.saveContact(profile.uid);
-
-      return right(null);
+      // 1. Save the profile data using ProfileRepository (handles images and sync)
+      final result = await _profileRepository.createOrUpdateUser(profile);
+      
+      return result.fold(
+        (l) => left(l),
+        (r) async {
+          // 2. Mark as saved contact
+          await _contactsLocalDataSource.saveContact(profile.uid);
+          return right(null);
+        },
+      );
     } catch (e) {
       return left(GeneralFailure('Failed to save contact locally: $e'));
     }
@@ -179,10 +183,11 @@ class ContactsRepository {
       // Note: This could be optimized with a batch query if the Datasource supported it.
       final List<UserProfile> profiles = [];
       for (final uid in uids) {
-        final profile = await _profileLocalDataSource.getUser(uid);
-        if (profile != null) {
-          profiles.add(profile);
-        }
+        final result = await _profileRepository.getUser(uid);
+        result.fold(
+          (l) => null,
+          (profile) => profiles.add(profile),
+        );
       }
 
       return right(profiles);
