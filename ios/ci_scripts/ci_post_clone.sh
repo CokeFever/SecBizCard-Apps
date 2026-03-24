@@ -59,6 +59,7 @@ echo "Setting up SSH for private dependencies..."
 mkdir -p ~/.ssh
 ssh-keyscan github.com >> ~/.ssh/known_hosts
 
+if [ -n "$OCR_DEPLOY_KEY" ]; then
     # Use Dart for robust base64 decoding
     dart ios/ci_scripts/inject_secrets.dart
     mv .ssh_id_ed25519 ~/.ssh/id_ed25519
