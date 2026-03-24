@@ -5,7 +5,7 @@ import 'package:secbizcard/features/profile/data/profile_repository.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'package:secbizcard/core/errors/failure.dart';
 
-import 'mocks.mocks.dart';
+import 'test_mocks.mocks.dart';
 
 void main() {
   late ProfileRepository repository;
