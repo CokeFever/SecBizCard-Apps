@@ -64,6 +64,10 @@ fi
 echo "Injecting Firebase configuration files using robust script..."
 python3 ios/ci_scripts/decode_firebase_config.py
 
+echo "Verifying injected files content (first 100 bytes in hex):"
+[ -f "lib/firebase_options.dart" ] && head -c 100 "lib/firebase_options.dart" | xxd
+[ -f "ios/Runner/GoogleService-Info.plist" ] && head -c 100 "ios/Runner/GoogleService-Info.plist" | xxd
+
 # Upgrade dependencies (ensures newest compatible transient dependencies like analyzer)
 echo "Running flutter pub upgrade..."
 flutter pub upgrade

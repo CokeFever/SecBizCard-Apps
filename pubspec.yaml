@@ -70,10 +70,10 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
-  riverpod_generator: ^2.6.4
+  riverpod_generator: ^2.6.4 # Keeping this for now as 4.x has breaking changes
   build_runner: ^2.4.13
   freezed: ^2.5.8
-  json_serializable: ^6.9.3
+  json_serializable: ^6.9.5
   mockito: ^5.4.6
   path_provider_platform_interface: ^2.1.2
   flutter_launcher_icons: ^0.13.1
