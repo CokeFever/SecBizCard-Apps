@@ -50,10 +50,14 @@ GoRouter goRouter(Ref ref) {
       final loggingIn = matchedLocation == '/login';
       const isWeb = kIsWeb;
 
-      // When loading OR initializing OR error: do not redirect — stay on current page.
-      // This prevents a transient null (during Firebase Auth init or app
-      // resume) from flashing the login screen.
-      if (authState.isLoading || isInitializing || authState.hasError) return null;
+      // When loading OR initializing: do not redirect — stay on current page (SplashScreen).
+      // If there is an error, we allow it to fall through so it can redirect to /login.
+      if (authState.isLoading || isInitializing) return null;
+      
+      if (authState.hasError) {
+        debugPrint('[Router] authState has error: ${authState.error}');
+        // Optional: you could return '/login' explicitly here, but the user == null check below will handle it.
+      }
 
       // WEB: Landing page '/' is public
       if (isWeb && matchedLocation == '/') return null;
