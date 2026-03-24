@@ -26,7 +26,11 @@ if [ ! -d "$HOME/flutter" ]; then
     git clone https://github.com/flutter/flutter.git -b stable $HOME/flutter --depth 1
 fi
 
-export PATH="$PATH:$HOME/flutter/bin"
+# Set Flutter path (prepend to override any pre-installed versions)
+export PATH="/Users/local/flutter/bin:$PATH"
+
+echo "Using Flutter from: $(which flutter)"
+flutter --version
 
 # Check for missing files that might block the build
 if [ ! -f "ios/Runner/GoogleService-Info.plist" ]; then
