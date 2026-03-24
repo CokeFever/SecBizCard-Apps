@@ -43,9 +43,9 @@ steps:
         export GRADLE_OPTS="-Xmx3g -XX:MaxMetaspaceSize=512m -Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Dorg.gradle.workers.max=1"
         export JAVA_OPTS="-Xmx3g"
         
-        # 預先安裝 CMake 避免在 Flutter 建置中途觸發安裝導致 OOM
-        echo "Pre-installing CMake 3.22.1..."
-        yes | sdkmanager --install "cmake;3.22.1"
+        # 預先安裝必要的 SDK 組件，避免在 Gradle 執行中途觸發下載導致 OOM
+        echo "Updating Android SDK components..."
+        yes | sdkmanager --install "cmake;3.22.1" "platforms;android-34" "platforms;android-35" "build-tools;35.0.0" "ndk;28.2.13676358"
         
         flutter pub get
         flutter gen-l10n
