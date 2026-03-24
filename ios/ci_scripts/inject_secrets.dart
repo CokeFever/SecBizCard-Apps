@@ -24,21 +24,35 @@ void injectSecret(String envName, String filePath, {bool isBinary = false}) {
   try {
     // 1. Clean whitespace
     String cleanBase64 = rawBase64.trim().replaceAll(RegExp(r'\s+'), '');
+    print('  Raw length: ${rawBase64.length}, Cleaned length: ${cleanBase64.length}');
+
+    // 2. Validate characters
+    final validBase64Chars = RegExp(r'^[A-Za-z0-9+/=\-_]+$');
+    if (!validBase64Chars.hasMatch(cleanBase64)) {
+       print('  Warning: Found invalid Base64 characters!');
+       final List<String> invalidChars = [];
+       for (int i = 0; i < cleanBase64.length; i++) {
+         final char = cleanBase64[i];
+         if (!RegExp(r'[A-Za-z0-9+/=\-_]').hasMatch(char)) {
+           invalidChars.add('"$char" (0x${char.codeUnitAt(0).toRadixString(16)})');
+         }
+       }
+       print('  Invalid characters: ${invalidChars.toSet().join(", ")}');
+    }
     
-    // 2. Normalize URL-safe Base64 to Standard Base64
-    // '-' -> '+', '_' -> '/'
+    // 3. Normalize URL-safe Base64 to Standard Base64
     cleanBase64 = cleanBase64.replaceAll('-', '+').replaceAll('_', '/');
     
-    // 3. Proper padding
+    // 4. Proper padding
     while (cleanBase64.length % 4 != 0) {
       cleanBase64 += '=';
     }
 
-    // 4. Decode
+    // 5. Decode
     final List<int> decodedBytes = base64.decode(cleanBase64);
     
     if (decodedBytes.isEmpty) {
-      print('Error: Decoded data for $envName is empty.');
+      print('  Error: Decoded data for $envName is empty.');
       return;
     }
 
