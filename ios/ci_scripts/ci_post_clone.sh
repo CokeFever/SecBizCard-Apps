@@ -60,9 +60,9 @@ fi
 echo "Injecting Firebase configuration files using robust script..."
 python3 ios/ci_scripts/decode_firebase_config.py
 
-# Install dependencies
-echo "Running flutter pub get..."
-flutter pub get
+# Upgrade dependencies (ensures newest compatible transient dependencies like analyzer)
+echo "Running flutter pub upgrade..."
+flutter pub upgrade
 
 # Generate localization files (required before build)
 echo "Generating localization files..."
