@@ -42,7 +42,8 @@ jobs:
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
           FIREBASE_OPTIONS_DART: ${{ secrets.FIREBASE_OPTIONS_DART }}
-        run: python3 ios/ci_scripts/decode_firebase_config.py
+          OCR_DEPLOY_KEY: ${{ secrets.OCR_DEPLOY_KEY }}
+        run: dart ios/ci_scripts/inject_secrets.dart
 
       - name: Setup Java
         uses: actions/setup-java@v4
