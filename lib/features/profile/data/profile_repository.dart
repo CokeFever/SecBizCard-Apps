@@ -10,12 +10,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:secbizcard/core/errors/failure.dart';
 import 'package:secbizcard/features/profile/data/datasources/profile_local_datasource.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
+import 'package:secbizcard/features/storage/data/drive_repository.dart';
 
 part 'profile_repository.g.dart';
 
 @riverpod
 ProfileRepository profileRepository(Ref ref) {
-  return ProfileRepository(ref.watch(profileLocalDataSourceProvider));
+  return ProfileRepository(
+    ref.watch(profileLocalDataSourceProvider),
+    ref.watch(driveRepositoryProvider),
+  );
 }
 
 @riverpod
@@ -62,8 +66,9 @@ Stream<UserProfile?> userProfile(Ref ref) async* {
 
 class ProfileRepository {
   final ProfileLocalDataSource _localDataSource;
+  final DriveRepository _driveRepository;
 
-  ProfileRepository(this._localDataSource);
+  ProfileRepository(this._localDataSource, this._driveRepository);
 
   Future<Either<Failure, UserProfile>> getUser(String uid) async {
     try {
@@ -88,18 +93,59 @@ class ProfileRepository {
       processedUser = await _persistImageIfNeeded(processedUser, (u) => u.cardFrontPath, 'profile');
       processedUser = await _persistImageIfNeeded(processedUser, (u) => u.cardBackPath, 'profile');
 
-      // 2. Auto-detect business email domain
+      // 2. Upload to Google Drive for Cloud Persistence
+      // We only upload if there's a local path but no Drive ID yet
+      // OR if the path is actually a new local file (not already in Drive)
       UserProfile updatedUser = processedUser;
-      if (processedUser.email != null && processedUser.email!.isNotEmpty) {
-        final businessDomain = _detectBusinessEmail(processedUser.email!);
+      
+      // Avatar
+      if (processedUser.photoUrl != null && 
+          processedUser.photoUrl!.isNotEmpty && 
+          !processedUser.photoUrl!.startsWith('http') &&
+          processedUser.avatarDriveFileId == null) {
+        final result = await _driveRepository.uploadImage(
+          File(processedUser.photoUrl!), 
+          'avatar_${processedUser.uid}.jpg'
+        );
+        result.fold((l) => null, (id) => updatedUser = updatedUser.copyWith(avatarDriveFileId: id));
+      }
+      
+      // Card Front
+      if (processedUser.cardFrontPath != null && 
+          processedUser.cardFrontPath!.isNotEmpty && 
+          !processedUser.cardFrontPath!.startsWith('http') &&
+          processedUser.cardFrontDriveFileId == null) {
+        final result = await _driveRepository.uploadImage(
+          File(processedUser.cardFrontPath!), 
+          'card_front_${processedUser.uid}.jpg'
+        );
+        result.fold((l) => null, (id) => updatedUser = updatedUser.copyWith(cardFrontDriveFileId: id));
+      }
+      
+      // Card Back
+      if (processedUser.cardBackPath != null && 
+          processedUser.cardBackPath!.isNotEmpty && 
+          !processedUser.cardBackPath!.startsWith('http') &&
+          processedUser.cardBackDriveFileId == null) {
+        final result = await _driveRepository.uploadImage(
+          File(processedUser.cardBackPath!), 
+          'card_back_${processedUser.uid}.jpg'
+        );
+        result.fold((l) => null, (id) => updatedUser = updatedUser.copyWith(cardBackDriveFileId: id));
+      }
+
+      // 3. Auto-detect business email domain
+      UserProfile finalUser = updatedUser;
+      if (updatedUser.email != null && updatedUser.email!.isNotEmpty) {
+        final businessDomain = _detectBusinessEmail(updatedUser.email!);
         if (businessDomain != null &&
-            businessDomain != processedUser.businessEmailDomain) {
-          updatedUser = processedUser.copyWith(businessEmailDomain: businessDomain);
+            businessDomain != updatedUser.businessEmailDomain) {
+          finalUser = updatedUser.copyWith(businessEmailDomain: businessDomain);
         }
       }
 
-      // 3. Save to Local Only
-      await _localDataSource.saveUser(updatedUser);
+      // 4. Save to Local Only
+      await _localDataSource.saveUser(finalUser);
 
       return const Right(unit);
     } catch (e) {

@@ -208,13 +208,13 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
             : (_cardFrontImage != null)
                 ? _cardFrontImage!.path
                 : (widget.user.cardFrontPath ?? widget.user.flatImagePath),
-        cardFrontDriveFileId: _isCardFrontRemoved ? null : widget.user.cardFrontDriveFileId,
+        cardFrontDriveFileId: _isCardFrontRemoved ? null : (_cardFrontImage != null ? null : widget.user.cardFrontDriveFileId),
         cardBackPath: _isCardBackRemoved
             ? null
             : (_cardBackImage != null)
                 ? _cardBackImage!.path
                 : widget.user.cardBackPath,
-        cardBackDriveFileId: _isCardBackRemoved ? null : widget.user.cardBackDriveFileId,
+        cardBackDriveFileId: _isCardBackRemoved ? null : (_cardBackImage != null ? null : widget.user.cardBackDriveFileId),
         customFields: updatedCustomFields,
       );
 
@@ -507,9 +507,12 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
                 label: 'Back Side',
                 imageFile: _cardBackImage,
                 remotePath: widget.user.cardBackPath,
+                driveFileId: widget.user.cardBackDriveFileId,
+                isExplicitlyRemoved: _isCardBackRemoved,
                 onTap: () => _pickCardImage(false),
                 onRemove: () => setState(() {
                   _cardBackImage = null;
+                  _isCardBackRemoved = true;
                 }),
               ),
             );
@@ -650,7 +653,6 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
                     ),
             ),
           ),
-        ),
         const SizedBox(height: 8),
         Text(
           label,
