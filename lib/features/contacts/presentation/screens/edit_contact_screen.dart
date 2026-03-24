@@ -208,13 +208,13 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
             : (_cardFrontImage != null)
                 ? _cardFrontImage!.path
                 : (widget.user.cardFrontPath ?? widget.user.flatImagePath),
-        cardFrontDriveFileId: _isCardFrontRemoved ? null : (_cardFrontImage != null ? null : widget.user.cardFrontDriveFileId),
+        cardFrontDriveFileId: _isCardFrontRemoved ? null : widget.user.cardFrontDriveFileId,
         cardBackPath: _isCardBackRemoved
             ? null
             : (_cardBackImage != null)
                 ? _cardBackImage!.path
                 : widget.user.cardBackPath,
-        cardBackDriveFileId: _isCardBackRemoved ? null : (_cardBackImage != null ? null : widget.user.cardBackDriveFileId),
+        cardBackDriveFileId: _isCardBackRemoved ? null : widget.user.cardBackDriveFileId,
         customFields: updatedCustomFields,
       );
 

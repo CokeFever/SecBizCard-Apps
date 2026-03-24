@@ -18,6 +18,8 @@ import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'package:secbizcard/core/config/theme_controller.dart';
 import 'package:fpdart/fpdart.dart';
 
+import 'package:path/path.dart' as p;
+
 part 'backup_service.g.dart';
 
 @riverpod
@@ -71,15 +73,24 @@ class BackupService {
       for (final contact in contacts) {
         var contactJson = contact.toJson();
 
-        // Handle Contact Photo
-        if (contact.photoUrl != null && !contact.photoUrl!.startsWith('http')) {
-          final file = File(contact.photoUrl!);
-          if (await file.exists()) {
-            final filename =
-                'contacts/${contact.uid}_photo.jpg'; // Simple naming
-            final bytes = await file.readAsBytes();
-            archive.addFile(ArchiveFile(filename, bytes.length, bytes));
-            contactJson['photoUrl'] = 'zip://$filename';
+        // Handle Images
+        final imageFields = [
+          'photoUrl',
+          'originalImagePath',
+          'flatImagePath',
+          'cardFrontPath',
+          'cardBackPath'
+        ];
+        for (final field in imageFields) {
+          final path = contactJson[field] as String?;
+          if (path != null && !path.startsWith('http')) {
+            final file = File(path);
+            if (await file.exists()) {
+              final filename = 'contacts/${contact.uid}_$field${p.extension(path)}';
+              final bytes = await file.readAsBytes();
+              archive.addFile(ArchiveFile(filename, bytes.length, bytes));
+              contactJson[field] = 'zip://$filename';
+            }
           }
         }
         serializedContacts.add(contactJson);
@@ -94,13 +105,21 @@ class BackupService {
 
       if (profile != null) {
         var pJson = profile!.toJson();
-        if (profile!.photoUrl != null && !profile!.photoUrl!.startsWith('http')) {
-          final file = File(profile!.photoUrl!);
-          if (await file.exists()) {
-            const filename = 'profile/photo.jpg';
-            final bytes = await file.readAsBytes();
-            archive.addFile(ArchiveFile(filename, bytes.length, bytes));
-            pJson['photoUrl'] = 'zip://$filename';
+        final imageFields = [
+          'photoUrl',
+          'cardFrontPath',
+          'cardBackPath'
+        ];
+        for (final field in imageFields) {
+          final path = pJson[field] as String?;
+          if (path != null && !path.startsWith('http')) {
+            final file = File(path);
+            if (await file.exists()) {
+              final filename = 'profile/$field${p.extension(path)}';
+              final bytes = await file.readAsBytes();
+              archive.addFile(ArchiveFile(filename, bytes.length, bytes));
+              pJson[field] = 'zip://$filename';
+            }
           }
         }
         serializedProfile = pJson;
@@ -217,19 +236,27 @@ class BackupService {
                 .toList();
 
             for (var cJson in contactsJson) {
-              String? photoUrl = cJson['photoUrl'];
-              if (photoUrl != null && photoUrl.startsWith('zip://')) {
-                // Extract image
-                final zipPath = photoUrl.replaceFirst('zip://', '');
-                final imgFile = archive.findFile(zipPath);
-                if (imgFile != null) {
-                  final localPath = '${appDir.path}/$zipPath';
-                  final localFile = File(localPath);
-                  await localFile.create(recursive: true);
-                  await localFile.writeAsBytes(imgFile.content);
-                  cJson['photoUrl'] = localPath;
-                } else {
-                  cJson['photoUrl'] = null; // Image missing in zip?
+              final imageFields = [
+                'photoUrl',
+                'originalImagePath',
+                'flatImagePath',
+                'cardFrontPath',
+                'cardBackPath'
+              ];
+              for (final field in imageFields) {
+                String? path = cJson[field];
+                if (path != null && path.startsWith('zip://')) {
+                  final zipPath = path.replaceFirst('zip://', '');
+                  final imgFile = archive.findFile(zipPath);
+                  if (imgFile != null) {
+                    final localPath = '${appDir.path}/$zipPath';
+                    final localFile = File(localPath);
+                    await localFile.create(recursive: true);
+                    await localFile.writeAsBytes(imgFile.content);
+                    cJson[field] = localPath;
+                  } else {
+                    cJson[field] = null;
+                  }
                 }
               }
 
@@ -250,18 +277,25 @@ class BackupService {
             // 7. Restore User Profile
             if (data.containsKey('userProfile') && data['userProfile'] != null) {
               final pJson = data['userProfile'] as Map<String, dynamic>;
-              String? photoUrl = pJson['photoUrl'];
-              if (photoUrl != null && photoUrl.startsWith('zip://')) {
-                final zipPath = photoUrl.replaceFirst('zip://', '');
-                final imgFile = archive.findFile(zipPath);
-                if (imgFile != null) {
-                  final localPath = '${appDir.path}/$zipPath';
-                  final localFile = File(localPath);
-                  await localFile.create(recursive: true);
-                  await localFile.writeAsBytes(imgFile.content);
-                  pJson['photoUrl'] = localPath;
-                } else {
-                  pJson['photoUrl'] = null; // Image missing in zip
+              final imageFields = [
+                'photoUrl',
+                'cardFrontPath',
+                'cardBackPath'
+              ];
+              for (final field in imageFields) {
+                String? path = pJson[field];
+                if (path != null && path.startsWith('zip://')) {
+                  final zipPath = path.replaceFirst('zip://', '');
+                  final imgFile = archive.findFile(zipPath);
+                  if (imgFile != null) {
+                    final localPath = '${appDir.path}/$zipPath';
+                    final localFile = File(localPath);
+                    await localFile.create(recursive: true);
+                    await localFile.writeAsBytes(imgFile.content);
+                    pJson[field] = localPath;
+                  } else {
+                    pJson[field] = null;
+                  }
                 }
               }
               final profile = UserProfile.fromJson(pJson);
