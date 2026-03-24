@@ -26,8 +26,11 @@ def decode_and_save(env_names, file_path):
     # This is much more robust than simple regex.
     clean_data = "".join(data.split())
     
-    # 2. Remove all characters that are not valid Base64 (A-Z, a-z, 0-9, +, /, =)
-    clean_data = re.sub(r'[^a-zA-Z0-9+/=]', '', clean_data)
+    # 2. Allow standard and URL-safe Base64 characters (A-Z, a-z, 0-9, +, /, -, _, =)
+    clean_data = re.sub(r'[^a-zA-Z0-9+/=_ -]', '', clean_data)
+    
+    # 2b. Convert URL-safe characters to standard ones before decoding
+    clean_data = clean_data.replace('-', '+').replace('_', '/')
     
     # 3. Strip any existing trailing padding '=' signs
     # We will re-add them correctly based on the content length.
