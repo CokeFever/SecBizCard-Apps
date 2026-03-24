@@ -70,10 +70,10 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
-  riverpod_generator: ^2.4.0
-  build_runner: ^2.4.9 
-  freezed: ^2.5.2
-  json_serializable: ^6.8.0
+  riverpod_generator: ^2.6.4
+  build_runner: ^2.4.13
+  freezed: ^2.5.8
+  json_serializable: ^6.9.3
   mockito: ^5.4.6
   path_provider_platform_interface: ^2.1.2
   flutter_launcher_icons: ^0.13.1
