@@ -10,6 +10,7 @@ import 'package:secbizcard/core/utils/dialog_utils.dart';
 import 'package:secbizcard/core/presentation/widgets/full_screen_image_viewer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:secbizcard/features/storage/data/drive_repository.dart';
 import 'dart:io';
 
 class EditContactScreen extends ConsumerStatefulWidget {
@@ -31,6 +32,8 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
   late TextEditingController _emailController;
   File? _cardFrontImage;
   File? _cardBackImage;
+  bool _isCardFrontRemoved = false;
+  bool _isCardBackRemoved = false;
 
   // For dynamic fields
   final Map<String, TextEditingController> _customFieldControllers = {};
@@ -51,6 +54,8 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
   bool get _hasChanges {
     if (_cardFrontImage != null) return true;
     if (_cardBackImage != null) return true;
+    if (_isCardFrontRemoved) return true;
+    if (_isCardBackRemoved) return true;
 
     if (_nameController.text.trim() != widget.user.displayName) return true;
     if (_nicknameController.text.trim() != (widget.user.customFields['Nickname'] ?? '')) return true;
@@ -198,12 +203,18 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
             ? null
             : _phoneController.text.trim(),
         email: _emailController.text.trim(),
-        cardFrontPath: (_cardFrontImage != null)
-            ? _cardFrontImage!.path
-            : widget.user.cardFrontPath,
-        cardBackPath: (_cardBackImage != null)
-            ? _cardBackImage!.path
-            : widget.user.cardBackPath,
+        cardFrontPath: _isCardFrontRemoved
+            ? null
+            : (_cardFrontImage != null)
+                ? _cardFrontImage!.path
+                : (widget.user.cardFrontPath ?? widget.user.flatImagePath),
+        cardFrontDriveFileId: _isCardFrontRemoved ? null : widget.user.cardFrontDriveFileId,
+        cardBackPath: _isCardBackRemoved
+            ? null
+            : (_cardBackImage != null)
+                ? _cardBackImage!.path
+                : widget.user.cardBackPath,
+        cardBackDriveFileId: _isCardBackRemoved ? null : widget.user.cardBackDriveFileId,
         customFields: updatedCustomFields,
       );
 
@@ -458,15 +469,29 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
                 label: 'Front Side',
                 imageFile: _cardFrontImage,
                 remotePath: widget.user.cardFrontPath ?? widget.user.flatImagePath,
+                driveFileId: widget.user.cardFrontDriveFileId,
+                isExplicitlyRemoved: _isCardFrontRemoved,
                 onTap: () => _pickCardImage(true),
                 onRemove: () => setState(() {
                   _cardFrontImage = null;
+                  _isCardFrontRemoved = true;
                 }),
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: _buildUnitializedCardPicker(), // Keep it simple for now, or add back
+              child: _buildCardPicker(
+                label: 'Back Side',
+                imageFile: _cardBackImage,
+                remotePath: widget.user.cardBackPath,
+                driveFileId: widget.user.cardBackDriveFileId,
+                isExplicitlyRemoved: _isCardBackRemoved,
+                onTap: () => _pickCardImage(false),
+                onRemove: () => setState(() {
+                  _cardBackImage = null;
+                  _isCardBackRemoved = true;
+                }),
+              ),
             ),
           ],
         ),
@@ -494,19 +519,44 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
     required String label,
     required File? imageFile,
     required String? remotePath,
+    required String? driveFileId,
+    required bool isExplicitlyRemoved,
     required VoidCallback onTap,
     required VoidCallback onRemove,
   }) {
     final theme = Theme.of(context);
     
     ImageProvider? imageProvider;
+    String? currentHeroPath;
+
     if (imageFile != null) {
       imageProvider = FileImage(imageFile);
-    } else if (remotePath != null && remotePath.isNotEmpty) {
-      if (remotePath.startsWith('http')) {
-        imageProvider = CachedNetworkImageProvider(remotePath);
-      } else {
-        imageProvider = FileImage(File(remotePath));
+      currentHeroPath = imageFile.path;
+    } else if (!isExplicitlyRemoved) {
+      // 1. Try local path if file exists
+      if (remotePath != null && remotePath.isNotEmpty) {
+        if (remotePath.startsWith('http')) {
+          imageProvider = CachedNetworkImageProvider(remotePath);
+          currentHeroPath = remotePath;
+        } else {
+          final file = File(remotePath);
+          if (file.existsSync()) {
+            imageProvider = FileImage(file);
+            currentHeroPath = remotePath;
+          }
+        }
+      }
+      
+      // 2. Fallback to Drive ID if local path is missing/dead
+      if (imageProvider == null && driveFileId != null && driveFileId.isNotEmpty) {
+        // We'll need driveRepo here. I'll add driveRepositoryProvider import if needed, 
+        // but let's check if it's already there.
+        // It's a ConsumerStatefulWidget so we have ref.
+        // Wait, I need to check imports.
+        imageProvider = CachedNetworkImageProvider(
+          ref.read(driveRepositoryProvider).getFileUrl(driveFileId)
+        );
+        currentHeroPath = driveFileId; // Hero tag needs a unique string
       }
     }
 
@@ -515,48 +565,55 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
         GestureDetector(
           onTap: imageProvider != null
               ? () {
-                  final String currentPath = imageFile?.path ?? remotePath!;
-                  final String currentTag = 'card_edit_$currentPath';
+                  final String currentTag = 'card_edit_${currentHeroPath!}';
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => FullScreenImageViewer(
-                        imagePath: currentPath,
+                        imagePath: currentHeroPath!,
                         tag: currentTag,
                       ),
                     ),
                   );
                 }
               : onTap,
-          child: Hero(
-            tag: imageProvider != null 
-                ? 'card_edit_${imageFile?.path ?? remotePath!}' 
-                : 'card_placeholder_$label',
-            child: Container(
-              height: 100,
-              decoration: BoxDecoration(
-                color: theme.canvasColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: theme.dividerColor),
-                image: imageProvider != null
-                    ? DecorationImage(image: imageProvider, fit: BoxFit.cover)
-                    : null,
+          child: Container(
+            height: 100,
+            decoration: BoxDecoration(
+              color: imageProvider == null ? theme.colorScheme.surfaceVariant.withOpacity(0.5) : theme.canvasColor,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: imageProvider == null ? theme.colorScheme.primary.withOpacity(0.2) : theme.dividerColor,
+                width: imageProvider == null ? 2 : 1,
+                style: imageProvider == null ? BorderStyle.solid : BorderStyle.solid,
               ),
-              child: imageProvider == null
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.add_a_photo_outlined, color: theme.hintColor),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Upload',
-                            style: TextStyle(color: theme.hintColor, fontSize: 12),
+              image: imageProvider != null
+                  ? DecorationImage(image: imageProvider, fit: BoxFit.cover)
+                  : null,
+            ),
+            child: imageProvider == null
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.add_a_photo_outlined, 
+                          color: theme.colorScheme.primary.withOpacity(0.6),
+                          size: 32,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Upload $label',
+                          style: TextStyle(
+                            color: theme.colorScheme.primary.withOpacity(0.6),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
                           ),
-                        ],
-                      ),
-                    )
-                  : Stack(
+                        ),
+                      ],
+                    ),
+                  )
+                : Stack(
                       children: [
                         Positioned(
                           top: 4,
@@ -615,8 +672,10 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
       setState(() {
         if (isFront) {
           _cardFrontImage = File(image.path);
+          _isCardFrontRemoved = false;
         } else {
           _cardBackImage = File(image.path);
+          _isCardBackRemoved = false;
         }
       });
     }

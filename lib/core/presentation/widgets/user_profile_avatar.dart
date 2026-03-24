@@ -1,9 +1,14 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:secbizcard/features/storage/data/drive_repository.dart';
 
-class UserProfileAvatar extends StatelessWidget {
+class UserProfileAvatar extends ConsumerWidget {
   final String? photoUrl;
+  final String? driveFileId;
   final String displayName;
   final double radius;
   final Color? backgroundColor;
@@ -12,6 +17,7 @@ class UserProfileAvatar extends StatelessWidget {
   const UserProfileAvatar({
     super.key,
     required this.photoUrl,
+    this.driveFileId,
     required this.displayName,
     this.radius = 20,
     this.backgroundColor,
@@ -19,7 +25,7 @@ class UserProfileAvatar extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // Determine initials
     String initials = '';
     if (displayName.isNotEmpty) {
@@ -37,36 +43,32 @@ class UserProfileAvatar extends StatelessWidget {
 
     final bgColor = backgroundColor ?? Colors.blueGrey[100];
     final fgColor = foregroundColor ?? Colors.blueGrey[800];
+    
+    ImageProvider? imageProvider;
 
+    // 1. Try local path/network URL from photoUrl
     if (photoUrl != null && photoUrl!.isNotEmpty) {
-      return CachedNetworkImage(
-        imageUrl: photoUrl!,
-        imageBuilder: (context, imageProvider) => CircleAvatar(
-          radius: radius,
-          backgroundColor: bgColor,
-          backgroundImage: imageProvider,
-        ),
-        placeholder: (context, url) => CircleAvatar(
-          radius: radius,
-          backgroundColor: bgColor,
-          child: SizedBox(
-            width: radius,
-            height: radius,
-            child: const CircularProgressIndicator(strokeWidth: 2),
-          ),
-        ),
-        errorWidget: (context, url, error) => CircleAvatar(
-          radius: radius,
-          backgroundColor: bgColor,
-          child: Text(
-            initials,
-            style: GoogleFonts.inter(
-              color: fgColor,
-              fontWeight: FontWeight.bold,
-              fontSize: radius * 0.8,
-            ),
-          ),
-        ),
+      if (photoUrl!.startsWith('http')) {
+        imageProvider = CachedNetworkImageProvider(photoUrl!);
+      } else {
+        final file = File(photoUrl!);
+        if (file.existsSync()) {
+          imageProvider = FileImage(file);
+        }
+      }
+    }
+
+    // 2. Fallback to Drive ID if photoUrl failed/is missing
+    if (imageProvider == null && driveFileId != null && driveFileId!.isNotEmpty) {
+      final driveRepo = ref.read(driveRepositoryProvider);
+      imageProvider = CachedNetworkImageProvider(driveRepo.getFileUrl(driveFileId!));
+    }
+
+    if (imageProvider != null) {
+      return CircleAvatar(
+        radius: radius,
+        backgroundColor: bgColor,
+        backgroundImage: imageProvider,
       );
     }
 

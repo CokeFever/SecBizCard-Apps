@@ -21,25 +21,50 @@ def decode_and_save(env_names, file_path):
         return
 
     print(f"Found {found_env}. Processing...")
-    # 1. Remove all characters that are not valid Base64 (A-Z, a-z, 0-9, +, /, =)
-    # This handles internal and external whitespace, newlines, etc.
-    clean_data = re.sub(r'[^a-zA-Z0-9+/=]', '', data)
     
-    # 2. Add padding if missing
-    missing_padding = len(clean_data) % 4
-    if missing_padding:
-        clean_data += "=" * (4 - missing_padding)
+    # 1. Remove ALL whitespace characters (newlines, spaces, tabs, etc.)
+    # This is much more robust than simple regex.
+    clean_data = "".join(data.split())
+    
+    # 2. Remove all characters that are not valid Base64 (A-Z, a-z, 0-9, +, /, =)
+    clean_data = re.sub(r'[^a-zA-Z0-9+/=]', '', clean_data)
+    
+    # 3. Strip any existing trailing padding '=' signs
+    # We will re-add them correctly based on the content length.
+    clean_data = clean_data.rstrip('=')
+    
+    # 4. Add proper padding
+    # Base64 string length % 4 can be 0, 2, or 3.
+    # A remainder of 1 is invalid and indicates data corruption.
+    remainder = len(clean_data) % 4
+    if remainder == 1:
+        print(f"Error: Invalid Base64 length ({len(clean_data)}) for {found_env}.")
+        print("This usually means the environment variable is truncated or corrupted.")
+        print("Please re-encode your file and update the secret.")
+        sys.exit(1)
+    elif remainder == 2:
+        clean_data += "=="
+    elif remainder == 3:
+        clean_data += "="
     
     print(f"Writing {len(clean_data)} characters of decoded data (Base64) to {file_path}...")
     
     try:
+        # Standard Base64 decoding
         binary_data = base64.b64decode(clean_data)
+        
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, "wb") as f:
             f.write(binary_data)
         print(f"Successfully created {file_path}")
+        
+        # Verify it's not empty
+        if os.path.getsize(file_path) == 0:
+            print(f"Error: Resulting file {file_path} is empty!")
+            sys.exit(1)
+            
     except Exception as e:
-        print(f"Error decoding {env_name}: {e}")
+        print(f"Error decoding {found_env}: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":

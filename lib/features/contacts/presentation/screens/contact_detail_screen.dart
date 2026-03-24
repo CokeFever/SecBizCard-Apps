@@ -434,28 +434,39 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
     final List<Map<String, String>> cardImages = [];
 
     // New explicit front/back
-    if (_user.cardFrontPath != null && _user.cardFrontPath!.isNotEmpty) {
-      cardImages.add({'path': _user.cardFrontPath!, 'label': 'Front Side'});
-    } else if (_user.cardFrontDriveFileId != null && _user.cardFrontDriveFileId!.isNotEmpty) {
-      final url = ref.read(driveRepositoryProvider).getFileUrl(_user.cardFrontDriveFileId!);
-      cardImages.add({'path': url, 'label': 'Front Side'});
+    void addImage(String? localPath, String? driveFileId, String label) {
+      if (localPath != null && localPath.isNotEmpty) {
+        if (localPath.startsWith('http')) {
+          cardImages.add({'path': localPath, 'label': label});
+          return;
+        }
+        final file = File(localPath);
+        if (file.existsSync()) {
+          cardImages.add({'path': localPath, 'label': label});
+          return;
+        }
+      }
+      
+      if (driveFileId != null && driveFileId.isNotEmpty) {
+        final url = ref.read(driveRepositoryProvider).getFileUrl(driveFileId);
+        cardImages.add({'path': url, 'label': label});
+      }
     }
 
-    if (_user.cardBackPath != null && _user.cardBackPath!.isNotEmpty) {
-      cardImages.add({'path': _user.cardBackPath!, 'label': 'Back Side'});
-    } else if (_user.cardBackDriveFileId != null && _user.cardBackDriveFileId!.isNotEmpty) {
-      final url = ref.read(driveRepositoryProvider).getFileUrl(_user.cardBackDriveFileId!);
-      cardImages.add({'path': url, 'label': 'Back Side'});
-    }
+    addImage(_user.cardFrontPath, _user.cardFrontDriveFileId, 'Front Side');
+    addImage(_user.cardBackPath, _user.cardBackDriveFileId, 'Back Side');
 
-    // Fallback for OCR results
+    // Fallback for OCR results (only if front/back are missing)
     if (cardImages.isEmpty) {
-      if (_user.flatImagePath != null && _user.flatImagePath!.isNotEmpty) {
-        cardImages.add({'path': _user.flatImagePath!, 'label': 'OCR Result'});
+      void addFallback(String? path, String label) {
+        if (path != null && path.isNotEmpty) {
+          if (path.startsWith('http') || File(path).existsSync()) {
+            cardImages.add({'path': path, 'label': label});
+          }
+        }
       }
-      if (_user.originalImagePath != null && _user.originalImagePath!.isNotEmpty) {
-        cardImages.add({'path': _user.originalImagePath!, 'label': 'Original Scan'});
-      }
+      addFallback(_user.flatImagePath, 'OCR Result');
+      addFallback(_user.originalImagePath, 'Original Scan');
     }
 
     if (cardImages.isEmpty) return const SizedBox.shrink();

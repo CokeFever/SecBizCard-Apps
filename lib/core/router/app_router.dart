@@ -32,6 +32,9 @@ part 'app_router.g.dart';
 // briefly emit AsyncLoading and flash the login screen.
 @Riverpod(keepAlive: true)
 GoRouter goRouter(Ref ref) {
+  // Ensure AuthRepository is initialized at startup to mark initialization as complete
+  ref.watch(authRepositoryProvider);
+
   final authNotifier = ValueNotifier<AsyncValue<fire_auth.User?>>(
     ref.read(authStateProvider),
   );
