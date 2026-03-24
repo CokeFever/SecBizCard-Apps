@@ -76,7 +76,14 @@ class AuthRepository {
   Future<void> _trySilentSignIn() async {
     try {
       debugPrint('[Auth] Attempting Google Silent Sign-In...');
-      final googleUser = await _googleSignIn.signInSilently();
+      // Add a timeout to prevent initialization from hanging forever if silent sign-in stalls
+      final googleUser = await _googleSignIn.signInSilently().timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          debugPrint('[Auth] Google Silent Sign-In timed out');
+          return null;
+        },
+      );
       if (googleUser != null) {
         debugPrint('[Auth] Google Silent Sign-In success: ${googleUser.email}');
         final googleAuth = await googleUser.authentication;
@@ -86,7 +93,6 @@ class AuthRepository {
         );
         await _firebaseAuth.signInWithCredential(credential);
         debugPrint('[Auth] Firebase session restored via Silent Sign-In');
-      } else {
       }
     } catch (e) {
       debugPrint('[Auth] Google Silent Sign-In error: $e');
