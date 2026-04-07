@@ -25,6 +25,7 @@ import 'package:secbizcard/features/contacts/presentation/screens/scan_card_scre
 import 'package:secbizcard/features/contacts/presentation/screens/contact_review_screen.dart';
 import 'package:secbizcard/features/contacts/presentation/screens/manual_crop_screen.dart';
 import 'package:secbizcard/features/contacts/presentation/screens/contacts_list_screen.dart';
+import 'package:secbizcard/features/contacts/presentation/screens/vcard_import_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -159,6 +160,11 @@ GoRouter goRouter(Ref ref) {
       GoRoute(
         path: '/handshake-history',
         builder: (context, state) => const HandshakeHistoryScreen(),
+      ),
+
+      GoRoute(
+        path: '/import-vcard',
+        builder: (context, state) => const VCardImportScreen(),
       ),
 
       GoRoute(
