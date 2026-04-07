@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,9 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/profile/data/profile_repository.dart';
 import 'package:secbizcard/core/config/theme_controller.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:secbizcard/features/contacts/data/services/vcard_service.dart';
-import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
 import 'package:secbizcard/core/widgets/profile_avatar.dart';
 
 import 'package:google_fonts/google_fonts.dart';
@@ -92,123 +88,11 @@ class AppDrawer extends ConsumerWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.file_upload),
+            leading: const Icon(Icons.file_download),
             title: const Text('Import vCard'),
-            onTap: () async {
-              // Pick file BEFORE closing drawer to keep context valid
-              final result = await FilePicker.platform.pickFiles(
-                type: FileType.custom,
-                allowedExtensions: ['vcf'],
-              );
-
-              if (!context.mounted) return;
-
-              // Get all needed references BEFORE closing drawer (drawer context will be disposed)
-              final navigatorContext = Navigator.of(context).context;
-              final scaffoldMessenger = ScaffoldMessenger.of(context);
-              final router = GoRouter.of(context);
-              final contactsRepo = ref.read(contactsRepositoryProvider);
-              void invalidateSavedContacts() =>
-                  ref.invalidate(savedContactsProvider);
-
-              Navigator.pop(context); // Close drawer after file picked
-
-              if (result == null || result.files.single.path == null) {
-                return; // User cancelled
-              }
-
-              try {
-                final file = File(result.files.single.path!);
-                final content = await file.readAsString();
-                final contacts = VCardService.parse(content);
-
-                if (contacts.isEmpty) {
-                  scaffoldMessenger.showSnackBar(
-                    const SnackBar(
-                      content: Text('No contacts found in vCard file'),
-                    ),
-                  );
-                  return;
-                }
-
-                // Show preview dialog
-                if (!navigatorContext.mounted) return;
-
-                final shouldImport = await showDialog<bool>(
-                  context: navigatorContext,
-                  builder: (ctx) => AlertDialog(
-                    title: Text('Import ${contacts.length} Contact(s)?'),
-                    content: SizedBox(
-                      width: double.maxFinite,
-                      height: 300,
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: contacts.length,
-                        itemBuilder: (_, index) {
-                          final c = contacts[index];
-                          return ListTile(
-                            leading: CircleAvatar(
-                              child: Text(
-                                c.displayName.isNotEmpty
-                                    ? c.displayName[0].toUpperCase()
-                                    : '?',
-                              ),
-                            ),
-                            title: Text(c.displayName),
-                            subtitle: Text(
-                              (c.email?.isNotEmpty == true)
-                                  ? c.email!
-                                  : (c.phone?.isNotEmpty == true
-                                        ? c.phone!
-                                        : 'No contact info'),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(ctx, false),
-                        child: const Text('Cancel'),
-                      ),
-                      FilledButton(
-                        onPressed: () => Navigator.pop(ctx, true),
-                        child: const Text('Import'),
-                      ),
-                    ],
-                  ),
-                );
-
-                if (shouldImport != true) return;
-
-                // Import contacts
-                int savedCount = 0;
-                for (final contact in contacts) {
-                  final saveResult = await contactsRepo.saveContactLocally(
-                    contact,
-                  );
-                  if (saveResult.isRight()) savedCount++;
-                }
-
-                // Try to invalidate (may fail if ref is disposed, which is OK)
-                try {
-                  invalidateSavedContacts();
-                } catch (_) {}
-
-                scaffoldMessenger.showSnackBar(
-                  SnackBar(
-                    content: Text('Imported $savedCount contacts successfully'),
-                    action: SnackBarAction(
-                      label: 'View',
-                      onPressed: () => router.go('/home?tab=1'),
-                    ),
-                  ),
-                );
-              } catch (e) {
-                scaffoldMessenger.showSnackBar(
-                  SnackBar(content: Text('Failed to import vCard: $e')),
-                );
-              }
+            onTap: () {
+              Navigator.pop(context);
+              context.push('/import-vcard');
             },
           ),
           const Divider(),
