@@ -336,7 +336,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
                 'Email',
                 Icons.email,
                 keyboardType: TextInputType.emailAddress,
-                required: true,
+                required: false,
               ),
               const SizedBox(height: 24),
 
@@ -501,22 +501,6 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
 
   // Simplified version for EditContact since we already have logic in EditProfile
   // I'll make it consistent
-  Widget _buildUnitializedCardPicker() {
-      return Expanded(
-              child: _buildCardPicker(
-                label: 'Back Side',
-                imageFile: _cardBackImage,
-                remotePath: widget.user.cardBackPath,
-                driveFileId: widget.user.cardBackDriveFileId,
-                isExplicitlyRemoved: _isCardBackRemoved,
-                onTap: () => _pickCardImage(false),
-                onRemove: () => setState(() {
-                  _cardBackImage = null;
-                  _isCardBackRemoved = true;
-                }),
-              ),
-            );
-  }
 
   Widget _buildCardPicker({
     required String label,
@@ -583,10 +567,10 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
           child: Container(
             height: 100,
             decoration: BoxDecoration(
-              color: imageProvider == null ? theme.colorScheme.surfaceVariant.withOpacity(0.5) : theme.canvasColor,
+              color: imageProvider == null ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5) : theme.canvasColor,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: imageProvider == null ? theme.colorScheme.primary.withOpacity(0.2) : theme.dividerColor,
+                color: imageProvider == null ? theme.colorScheme.primary.withValues(alpha: 0.2) : theme.dividerColor,
                 width: imageProvider == null ? 2 : 1,
                 style: imageProvider == null ? BorderStyle.solid : BorderStyle.solid,
               ),
@@ -601,14 +585,14 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
                       children: [
                         Icon(
                           Icons.add_a_photo_outlined, 
-                          color: theme.colorScheme.primary.withOpacity(0.6),
+                          color: theme.colorScheme.primary.withValues(alpha: 0.6),
                           size: 32,
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Upload $label',
                           style: TextStyle(
-                            color: theme.colorScheme.primary.withOpacity(0.6),
+                            color: theme.colorScheme.primary.withValues(alpha: 0.6),
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                           ),

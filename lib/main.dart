@@ -8,7 +8,6 @@ import 'firebase_options.dart';
 import 'core/config/theme.dart'; // 引入 Skill 1 產生的 Theme
 import 'core/router/app_router.dart';
 import 'core/config/theme_controller.dart';
-import 'core/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,11 +43,6 @@ class IxoApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Initialize the Notification Service
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(notificationServiceProvider).initialize();
-    });
-
     final router = ref.watch(goRouterProvider);
     final themeMode =
         ref.watch(themeControllerProvider).valueOrNull ?? ThemeMode.system;

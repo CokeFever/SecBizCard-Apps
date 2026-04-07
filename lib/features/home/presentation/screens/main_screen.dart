@@ -7,6 +7,7 @@ import 'package:secbizcard/features/handshake/presentation/screens/qr_display_sc
 import 'package:secbizcard/features/contacts/presentation/screens/contacts_list_screen.dart';
 import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
 import 'package:secbizcard/features/handshake/data/handshake_history_repository.dart';
+import 'package:secbizcard/core/services/notification_service.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   final int initialTab;
@@ -39,6 +40,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         }
       });
     }
+
+    // Initialize notification service after home screen renders
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(notificationServiceProvider).initialize();
+    });
   }
 
   @override
@@ -87,7 +93,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = Theme.of(context).colorScheme.primary;
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
     final isSearching = ref.watch(contactsSearchModeProvider);
 
     final inactiveColor = Theme.of(
@@ -95,20 +102,42 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     ).colorScheme.onSurface.withValues(alpha: 0.6);
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       drawer: const AppDrawer(),
       appBar: AppBar(
         title: (_currentIndex == 1 && isSearching)
-            ? TextField(
-                controller: _searchController,
-                autofocus: true,
-                style: GoogleFonts.inter(fontSize: 18),
-                decoration: const InputDecoration(
-                  hintText: 'Search by name, company...',
-                  border: InputBorder.none,
-                  hintStyle: TextStyle(color: Colors.grey),
+            ? Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.5,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                onChanged: (v) =>
-                    ref.read(contactsSearchQueryProvider.notifier).state = v,
+                child: TextField(
+                  controller: _searchController,
+                  autofocus: true,
+                  style: GoogleFonts.inter(fontSize: 15),
+                  decoration: InputDecoration(
+                    hintText: 'Search contacts...',
+                    hintStyle: TextStyle(
+                      color: theme.colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.7,
+                      ),
+                      fontSize: 14,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      size: 20,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                  ),
+                  onChanged: (v) =>
+                      ref.read(contactsSearchQueryProvider.notifier).state = v,
+                ),
               )
             : Text(
                 _currentIndex == 0 ? 'Share' : 'Card',

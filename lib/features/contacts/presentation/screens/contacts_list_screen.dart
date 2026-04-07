@@ -40,6 +40,7 @@ class _ContactsListScreenState extends ConsumerState<ContactsListScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final theme = Theme.of(context);
     final contactsAsync = ref.watch(savedContactsProvider);
     final searchQuery = ref.watch(contactsSearchQueryProvider);
     final isSearching = ref.watch(contactsSearchModeProvider);
@@ -162,17 +163,38 @@ class _ContactsListScreenState extends ConsumerState<ContactsListScreen>
     return Scaffold(
       appBar: AppBar(
         title: isSearching
-            ? TextField(
-                controller: _searchController,
-                autofocus: true,
-                style: GoogleFonts.inter(fontSize: 18),
-                decoration: const InputDecoration(
-                  hintText: 'Search by name, company...',
-                  border: InputBorder.none,
-                  hintStyle: TextStyle(color: Colors.grey),
+            ? Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.5,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                onChanged: (v) =>
-                    ref.read(contactsSearchQueryProvider.notifier).state = v,
+                child: TextField(
+                  controller: _searchController,
+                  autofocus: true,
+                  style: GoogleFonts.inter(fontSize: 15),
+                  decoration: InputDecoration(
+                    hintText: 'Search contacts...',
+                    hintStyle: TextStyle(
+                      color: theme.colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.7,
+                      ),
+                      fontSize: 14,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      size: 20,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                  ),
+                  onChanged: (v) =>
+                      ref.read(contactsSearchQueryProvider.notifier).state = v,
+                ),
               )
             : Text(
                 'Card',
