@@ -10,7 +10,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:secbizcard/core/errors/failure.dart';
 import 'package:secbizcard/features/profile/data/datasources/profile_local_datasource.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
-import 'package:secbizcard/features/storage/data/drive_repository.dart';
 
 part 'profile_repository.g.dart';
 
@@ -18,7 +17,6 @@ part 'profile_repository.g.dart';
 ProfileRepository profileRepository(Ref ref) {
   return ProfileRepository(
     ref.watch(profileLocalDataSourceProvider),
-    ref.watch(driveRepositoryProvider),
   );
 }
 
@@ -66,9 +64,8 @@ Stream<UserProfile?> userProfile(Ref ref) async* {
 
 class ProfileRepository {
   final ProfileLocalDataSource _localDataSource;
-  final DriveRepository _driveRepository;
 
-  ProfileRepository(this._localDataSource, this._driveRepository);
+  ProfileRepository(this._localDataSource);
 
   Future<Either<Failure, UserProfile>> getUser(String uid) async {
     try {

@@ -9,6 +9,7 @@ import 'package:secbizcard/features/auth/presentation/screens/login_screen.dart'
 import 'package:secbizcard/features/handshake/presentation/screens/handshake_screen.dart';
 import 'package:secbizcard/features/handshake/presentation/screens/qr_display_screen.dart';
 import 'package:secbizcard/features/handshake/presentation/screens/qr_scanner_screen.dart';
+import 'package:secbizcard/features/handshake/data/handshake_repository.dart';
 import 'package:secbizcard/features/handshake/presentation/screens/handshake_history_screen.dart';
 import 'package:secbizcard/features/home/presentation/screens/main_screen.dart';
 import 'package:secbizcard/features/contacts/presentation/screens/edit_contact_screen.dart';
@@ -75,6 +76,8 @@ GoRouter goRouter(Ref ref) {
 
       // Logged in -> redirect based on location
       if (loggingIn || matchedLocation == '/') {
+        // Warm up Cloud Functions connection for faster QR code generation
+        _warmUpCloudFunctions(ref);
         return '/home';
       }
 
@@ -226,4 +229,17 @@ GoRouter goRouter(Ref ref) {
       ),
     ],
   );
+}
+
+/// Pre-warms the Cloud Functions HTTP connection so that the first
+/// `createHandshakeSession` call from QrDisplayScreen is faster.
+void _warmUpCloudFunctions(Ref ref) {
+  try {
+    // Simply reading the provider instantiates the FirebaseFunctions client
+    // and establishes the HTTP connection pool early.
+    ref.read(handshakeRepositoryProvider);
+    debugPrint('[Router] Cloud Functions warm-up triggered');
+  } catch (e) {
+    debugPrint('[Router] Cloud Functions warm-up error (non-fatal): $e');
+  }
 }

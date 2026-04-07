@@ -54,21 +54,27 @@ class AuthRepository {
   void _init() async {
     debugPrint('[Auth] _init started');
     try {
-      // Wait for initial auth state
-      debugPrint('[Auth] Waiting for first authStateChange...');
-      final firstUser = await _firebaseAuth.authStateChanges().first.timeout(
-        const Duration(seconds: 5),
-        onTimeout: () {
-          debugPrint('[Auth] authStateChanges().first timed out!');
-          return null;
-        },
-      );
-      
-      if (firstUser == null) {
-        debugPrint('[Auth] Initial state: No user. Trying silent sign-in...');
-        await _trySilentSignIn();
+      // Fast path: check if Firebase has a cached user (avoids stream wait)
+      final cachedUser = _firebaseAuth.currentUser;
+      if (cachedUser != null) {
+        debugPrint('[Auth] User ${cachedUser.uid} found from cache (fast path)');
       } else {
-        debugPrint('[Auth] Initial state: User ${firstUser.uid} already active.');
+        // No cached user — wait for auth stream (first launch or signed out)
+        debugPrint('[Auth] No cached user, waiting for authStateChange...');
+        final firstUser = await _firebaseAuth.authStateChanges().first.timeout(
+          const Duration(seconds: 3),
+          onTimeout: () {
+            debugPrint('[Auth] authStateChanges().first timed out!');
+            return null;
+          },
+        );
+
+        if (firstUser == null) {
+          debugPrint('[Auth] No user from stream. Trying silent sign-in...');
+          await _trySilentSignIn();
+        } else {
+          debugPrint('[Auth] User ${firstUser.uid} found from stream.');
+        }
       }
     } catch (e) {
       debugPrint('[Auth] Error during _init: $e');
@@ -92,7 +98,7 @@ class AuthRepository {
       debugPrint('[Auth] Attempting Google Silent Sign-In...');
       // Add a timeout to prevent initialization from hanging forever if silent sign-in stalls
       final googleUser = await _googleSignIn.signInSilently().timeout(
-        const Duration(seconds: 5),
+        const Duration(seconds: 3),
         onTimeout: () {
           debugPrint('[Auth] Google Silent Sign-In timed out');
           return null;

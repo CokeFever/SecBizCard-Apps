@@ -13,56 +13,131 @@ class ScanCardScreen extends StatefulWidget {
   State<ScanCardScreen> createState() => _ScanCardScreenState();
 }
 
-class _ScanCardScreenState extends State<ScanCardScreen> {
+class _ScanCardScreenState extends State<ScanCardScreen>
+    with WidgetsBindingObserver {
   CameraController? _controller;
   bool _isProcessing = false;
   final _ocrService = OCRService();
   bool _isVertical = false;
-  String? _capturedImagePath; // Frozen snapshot path
-  String _processingStatus = ''; // Status text for processing overlay
+  String? _capturedImagePath;
+  String _processingStatus = '';
+
+  // Permission state: null = still checking, true = denied, false = granted
+  bool? _isPermissionDenied;
+  bool _isPermanentlyDenied = false;
+  bool _isCameraError = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeCamera();
+    WidgetsBinding.instance.addObserver(this);
+    _checkAndRequestPermission();
   }
 
-  Future<void> _initializeCamera() async {
-    final status = await Permission.camera.request();
-    if (status.isDenied) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Camera permission is required')),
-        );
-        context.pop();
-      }
-      return;
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _recheckPermission();
+    } else if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused) {
+      // Dispose camera when app goes to background to prevent resource locks
+      _disposeCamera();
+    }
+  }
+
+  /// Called once on init – requests permission if needed, then starts camera.
+  Future<void> _checkAndRequestPermission() async {
+    var status = await Permission.camera.status;
+    debugPrint('[ScanCard] Initial status: $status');
+
+    if (!status.isGranted && !status.isPermanentlyDenied) {
+      status = await Permission.camera.request();
+      debugPrint('[ScanCard] After request: $status');
     }
 
-    final cameras = await availableCameras();
-    if (cameras.isEmpty) return;
+    if (!mounted) return;
 
-    final controller = CameraController(
-      cameras.first,
-      ResolutionPreset.high,
-      enableAudio: false,
-    );
+    if (status.isGranted) {
+      await _startCamera();
+    } else {
+      setState(() {
+        _isPermissionDenied = true;
+        _isPermanentlyDenied = status.isPermanentlyDenied;
+      });
+    }
+  }
+
+  /// Called on resume – only checks status, never prompts.
+  Future<void> _recheckPermission() async {
+    final status = await Permission.camera.status;
+    debugPrint('[ScanCard] Recheck status: $status');
+    if (!mounted) return;
+
+    if (status.isGranted) {
+      // Permission is granted – restart camera
+      await _startCamera();
+    } else {
+      // Permission was revoked
+      _disposeCamera();
+      setState(() {
+        _isPermissionDenied = true;
+        _isPermanentlyDenied = status.isPermanentlyDenied;
+      });
+    }
+  }
+
+  Future<void> _startCamera() async {
+    // Dispose any existing controller first
+    _disposeCamera();
 
     try {
+      final cameras = await availableCameras();
+      debugPrint('[ScanCard] Available cameras: ${cameras.length}');
+      if (cameras.isEmpty) {
+        if (mounted) {
+          setState(() {
+            _isCameraError = true;
+          });
+        }
+        return;
+      }
+
+      final controller = CameraController(
+        cameras.first,
+        ResolutionPreset.high,
+        enableAudio: false,
+      );
+
       await controller.initialize();
       if (mounted) {
         setState(() {
           _controller = controller;
+          _isPermissionDenied = false;
+          _isPermanentlyDenied = false;
+          _isCameraError = false;
         });
+      } else {
+        controller.dispose();
       }
     } catch (e) {
-      debugPrint('Camera initialization error: $e');
+      debugPrint('[ScanCard] Camera init error: $e');
+      if (mounted) {
+        setState(() {
+          _isCameraError = true;
+        });
+      }
     }
+  }
+
+  void _disposeCamera() {
+    _controller?.dispose();
+    _controller = null;
   }
 
   @override
   void dispose() {
-    _controller?.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    _disposeCamera();
     _ocrService.dispose();
     super.dispose();
   }
@@ -208,11 +283,33 @@ class _ScanCardScreenState extends State<ScanCardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_controller == null || !_controller!.value.isInitialized) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    final size = MediaQuery.of(context).size;
+
+    // 1. Still checking permission
+    if (_isPermissionDenied == null) {
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(child: CircularProgressIndicator(color: Colors.white)),
+      );
     }
 
-    final size = MediaQuery.of(context).size;
+    // 2. Permission Denied View
+    if (_isPermissionDenied == true) {
+      return _buildPermissionDeniedView();
+    }
+
+    // 3. Camera Error View
+    if (_isCameraError) {
+      return _buildCameraErrorView();
+    }
+
+    // 4. Camera loading
+    if (_controller == null || !_controller!.value.isInitialized) {
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(child: CircularProgressIndicator(color: Colors.white)),
+      );
+    }
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -365,6 +462,126 @@ class _ScanCardScreenState extends State<ScanCardScreen> {
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPermissionDeniedView() {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => context.pop(),
+        ),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.camera_alt_outlined,
+                size: 80,
+                color: Colors.white.withValues(alpha: 0.5),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Camera Permission Required',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'This feature requires camera access to scan and recognize business cards.',
+                style: TextStyle(color: Colors.white70, fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              if (_isPermanentlyDenied)
+                ElevatedButton.icon(
+                  onPressed: () => openAppSettings(),
+                  icon: const Icon(Icons.settings),
+                  label: const Text('Open Settings'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                  ),
+                )
+              else
+                ElevatedButton.icon(
+                  onPressed: _checkAndRequestPermission,
+                  icon: const Icon(Icons.security),
+                  label: const Text('Grant Permission'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCameraErrorView() {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => context.pop(),
+        ),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.error_outline,
+                size: 80,
+                color: Colors.redAccent,
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Camera Unavailable',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Could not access the camera. Please ensure it is not being used by another app.',
+                style: TextStyle(color: Colors.white70, fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton(
+                onPressed: _checkAndRequestPermission,
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

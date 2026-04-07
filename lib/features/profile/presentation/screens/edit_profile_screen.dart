@@ -62,7 +62,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   bool _isCardFrontRemoved = false;
   bool _isCardBackRemoved = false;
   bool _isAvatarRemoved = false;
-  bool _isUploadingImage = false;
+  final bool _isUploadingImage = false;
 
   bool get _hasChanges {
     if (_cardFrontImage != null) return true;
@@ -848,10 +848,10 @@ Widget _buildAvatarSection() {
           child: Container(
             height: 100,
             decoration: BoxDecoration(
-              color: imageProvider == null ? theme.colorScheme.surfaceVariant.withOpacity(0.5) : theme.canvasColor,
+              color: imageProvider == null ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5) : theme.canvasColor,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: imageProvider == null ? theme.colorScheme.primary.withOpacity(0.2) : theme.dividerColor,
+                color: imageProvider == null ? theme.colorScheme.primary.withValues(alpha: 0.2) : theme.dividerColor,
                 width: imageProvider == null ? 2 : 1,
                 style: imageProvider == null ? BorderStyle.solid : BorderStyle.solid,
               ),
@@ -866,14 +866,14 @@ Widget _buildAvatarSection() {
                       children: [
                         Icon(
                           Icons.add_a_photo_outlined, 
-                          color: theme.colorScheme.primary.withOpacity(0.6),
+                          color: theme.colorScheme.primary.withValues(alpha: 0.6),
                           size: 32,
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Upload $label',
                           style: TextStyle(
-                            color: theme.colorScheme.primary.withOpacity(0.6),
+                            color: theme.colorScheme.primary.withValues(alpha: 0.6),
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                           ),
