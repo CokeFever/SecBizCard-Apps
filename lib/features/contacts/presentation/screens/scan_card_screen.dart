@@ -223,6 +223,34 @@ class _ScanCardScreenState extends State<ScanCardScreen>
     }
   }
 
+  /// The on-screen alignment guide, expressed as a normalized rectangle
+  /// (0..1) relative to the image. The guide is always centered; its size
+  /// mirrors [CameraOverlayPainter] (vertical: 0.6 of the shorter side,
+  /// horizontal: 0.85 of the longer side, card aspect 55:90). Passing this to
+  /// the native detector lets it use the frame the user aimed with as a soft
+  /// prior — matching docs/card_detection_scoring.md (W_GUIDE).
+  Map<String, double> _normalizedGuideRect() {
+    // Fraction of the frame the card guide occupies, along width/height.
+    // These mirror CameraOverlayPainter's cardW/cardH ratios.
+    final double wFrac;
+    final double hFrac;
+    if (_isVertical) {
+      wFrac = 0.6;
+      hFrac = 0.6 * (90 / 55); // may exceed 1.0 on very tall guides; clamped
+    } else {
+      wFrac = 0.85;
+      hFrac = 0.85 * (55 / 90);
+    }
+    final clampedW = wFrac.clamp(0.0, 1.0);
+    final clampedH = hFrac.clamp(0.0, 1.0);
+    return {
+      'left': (0.5 - clampedW / 2).clamp(0.0, 1.0),
+      'top': (0.5 - clampedH / 2).clamp(0.0, 1.0),
+      'width': clampedW,
+      'height': clampedH,
+    };
+  }
+
   Future<String?> _processWithOpenCV(String inputPath) async {
     const channel = MethodChannel('app.ixo.secbizcard/opencv');
     final outputPath = inputPath.replaceFirst('.jpg', '_processed.jpg');
@@ -232,6 +260,7 @@ class _ScanCardScreenState extends State<ScanCardScreen>
         'inputPath': inputPath,
         'outputPath': outputPath,
         'isVertical': _isVertical,
+        'guideRect': _normalizedGuideRect(),
       });
 
       if (result is Map) {

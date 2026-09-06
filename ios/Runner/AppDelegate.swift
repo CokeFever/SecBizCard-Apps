@@ -24,9 +24,10 @@ import ImageIO
               return
             }
             let isVertical = args["isVertical"] as? Bool ?? false
+            let guideRect = args["guideRect"] as? [String: Double]
             // Execute on background thread to avoid blocking UI
             DispatchQueue.global(qos: .userInitiated).async {
-                self.processImage(inputPath: inputPath, outputPath: outputPath, isVertical: isVertical, result: result)
+                self.processImage(inputPath: inputPath, outputPath: outputPath, isVertical: isVertical, guideRect: guideRect, result: result)
             }
           } else {
             result(FlutterMethodNotImplemented)
@@ -44,7 +45,7 @@ import ImageIO
     .highQualityDownsample: false
   ])
 
-  private func processImage(inputPath: String, outputPath: String, isVertical: Bool, result: @escaping FlutterResult) {
+  private func processImage(inputPath: String, outputPath: String, isVertical: Bool, guideRect: [String: Double]?, result: @escaping FlutterResult) {
     let url = URL(fileURLWithPath: inputPath)
     guard let ciImage = CIImage(contentsOf: url) else {
          DispatchQueue.main.async { result(["success": false]) }
@@ -86,6 +87,16 @@ import ImageIO
     // ============================================================
     // STEP 2: Detect rectangle on the baked (upright) image
     // ============================================================
+    // Guide rect (normalized 0..1) mapped into pixel space, top-left origin,
+    // for the shared scoring model's guide prior.
+    let guidePixelRect: CGRect? = guideRect.map { g in
+        let l = (g["left"] ?? 0) * imgW
+        let t = (g["top"] ?? 0) * imgH
+        let w = (g["width"] ?? 0) * imgW
+        let h = (g["height"] ?? 0) * imgH
+        return CGRect(x: l, y: t, width: w, height: h)
+    }
+
     let handler = VNImageRequestHandler(ciImage: bakedImage, options: [:])
     let request = VNDetectRectanglesRequest { (req, err) in
         if let err = err {
@@ -93,51 +104,73 @@ import ImageIO
             DispatchQueue.main.async { result(["success": false]) }
             return
         }
-        
-        guard let observations = req.results as? [VNRectangleObservation],
-              let rect = observations.first else {
+
+        let imgArea = Double(imgW * imgH)
+
+        // Vision normalized coords: (0,0) = bottom-left, Y up.
+        // Convert to pixel coords with a TOP-LEFT origin so the geometry
+        // matches Android's coordinate space (and the guide rect).
+        func toPixelTL(_ pt: CGPoint) -> CGPoint {
+            return CGPoint(x: pt.x * imgW, y: (1.0 - pt.y) * imgH)
+        }
+
+        // Gather all candidate quads and score them with the SHARED model
+        // (mirror of OpenCVProcessor.kt / docs/card_detection_scoring.md).
+        let observations = (req.results as? [VNRectangleObservation]) ?? []
+        var bestQuad: [CGPoint]? = nil
+        var bestScore = 0.0
+        for obs in observations {
+            let raw = [
+                toPixelTL(obs.topLeft),
+                toPixelTL(obs.topRight),
+                toPixelTL(obs.bottomRight),
+                toPixelTL(obs.bottomLeft),
+            ]
+            let quad = CardScoring.sortPoints(raw)
+            let score = CardScoring.scoreQuad(quad, imgArea: imgArea, guide: guidePixelRect)
+            if score > bestScore {
+                bestScore = score
+                bestQuad = quad
+            }
+        }
+
+        guard let winner = bestQuad, bestScore >= CardScoring.minAcceptScore else {
+            // Fallback: hand off the GUIDE region (not whole image) to manual crop.
+            // Points are returned in TOP-LEFT origin pixels to match Android.
+            let pts: [Double]
+            if let g = guidePixelRect {
+                pts = [
+                    Double(g.minX), Double(g.minY),
+                    Double(g.maxX), Double(g.minY),
+                    Double(g.maxX), Double(g.maxY),
+                    Double(g.minX), Double(g.maxY),
+                ]
+            } else {
+                pts = [0.0, 0.0, imgW, 0.0, imgW, imgH, 0.0, imgH]
+            }
             DispatchQueue.main.async {
                 result([
                     "success": true,
                     "fallback": true,
+                    "score": bestScore,
                     "imageWidth": Int(imgW),
                     "imageHeight": Int(imgH),
-                    "points": [0.0, 0.0, imgW, 0.0, imgW, imgH, 0.0, imgH]
+                    "points": pts,
                 ])
             }
             return
         }
-        
-        // ============================================================
-        // STEP 3: Sort corners (Android-style, adapted for CoreImage)
-        // ============================================================
-        // Vision normalized coords: (0,0) = bottom-left, Y up
-        // CIImage pixel coords: (0,0) = bottom-left, Y up (same system)
-        
-        func toPixel(_ pt: CGPoint) -> CGPoint {
-            return CGPoint(x: pt.x * imgW, y: pt.y * imgH)
+
+        // winner corners are TL,TR,BR,BL in TOP-LEFT origin. Convert back to
+        // CoreImage's BOTTOM-LEFT origin for CIPerspectiveCorrection.
+        func toBottomLeft(_ p: CGPoint) -> CGPoint {
+            return CGPoint(x: p.x, y: imgH - p.y)
         }
-        
-        let pts = [
-            toPixel(rect.topLeft),
-            toPixel(rect.topRight),
-            toPixel(rect.bottomRight),
-            toPixel(rect.bottomLeft)
-        ]
-        
-        // Android-style Sum/Diff sort (adapted for bottom-left origin)
-        // In bottom-left origin: BL has min(x+y), TR has max(x+y)
-        let sortedBySum = pts.sorted { ($0.x + $0.y) < ($1.x + $1.y) }
-        let bl = sortedBySum[0]
-        let tr = sortedBySum[3]
-        
-        let remaining = [sortedBySum[1], sortedBySum[2]]
-        // TL: small x, large y → x-y is very negative (min diff)
-        // BR: large x, small y → x-y is very positive (max diff)
-        let sortedByDiff = remaining.sorted { ($0.x - $0.y) < ($1.x - $1.y) }
-        let tl = sortedByDiff[0]
-        let br = sortedByDiff[1]
-        
+        let tl = toBottomLeft(winner[0])
+        let tr = toBottomLeft(winner[1])
+        let br = toBottomLeft(winner[2])
+        let bl = toBottomLeft(winner[3])
+
         // ============================================================
         // STEP 4: Perspective Correction
         // ============================================================
@@ -212,12 +245,14 @@ import ImageIO
         }
     }
     
-    // Configure request for Business Cards
-    request.minimumConfidence = 0.6
-    request.minimumAspectRatio = 0.4
-    request.minimumSize = 0.2
+    // Configure Vision to PRODUCE CANDIDATES only; the shared CardScoring model
+    // does the real selection/validation. Thresholds are intentionally loose
+    // and maximumObservations high so we get several quads to score.
+    request.minimumConfidence = 0.3
+    request.minimumAspectRatio = 0.3
+    request.minimumSize = 0.15
     request.quadratureTolerance = 45.0
-    request.maximumObservations = 1
+    request.maximumObservations = 8
     
     do {
         try handler.perform([request])

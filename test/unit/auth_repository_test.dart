@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fire_auth;
 
 import 'package:fpdart/fpdart.dart';
 import 'package:secbizcard/core/errors/failure.dart';
@@ -12,22 +13,44 @@ import 'package:riverpod/riverpod.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'test_helper.dart';
 
-class MockRef extends Mock implements Ref {}
+/// A minimal fake [Ref] for AuthRepository. The repository's `_init()` only
+/// uses `ref.read(authInitializationStateProvider.notifier).state = false`, so
+/// we return a real StateController for that provider and throw for anything
+/// unexpected. Using a hand-written fake (instead of a mockito mock) avoids the
+/// "Cannot call when within a stub response" problem caused by evaluating the
+/// provider argument through a mock during stubbing.
+class FakeRef extends Fake implements Ref {
+  final StateController<bool> initController = StateController<bool>(true);
+
+  @override
+  T read<T>(ProviderListenable<T> provider) {
+    if (provider == authInitializationStateProvider.notifier) {
+      return initController as T;
+    }
+    throw UnimplementedError('Unexpected ref.read($provider) in AuthRepository test');
+  }
+}
 
 void main() {
   late AuthRepository authRepo;
   late MockFirebaseAuth mockFirebaseAuth;
   late MockGoogleSignIn mockGoogleSignIn;
   late MockProfileRepository mockProfileRepo;
-  late MockRef mockRef;
+  late FakeRef fakeRef;
 
   setUp(() {
     setupTestDummies();
     mockFirebaseAuth = MockFirebaseAuth();
     mockGoogleSignIn = MockGoogleSignIn();
     mockProfileRepo = MockProfileRepository();
-    mockRef = MockRef();
-    authRepo = AuthRepository(mockFirebaseAuth, mockGoogleSignIn, mockRef);
+    fakeRef = FakeRef();
+    // Ensure _init()'s stream path terminates deterministically: no cached
+    // user, empty auth stream (NiceMock returns an empty stream by default,
+    // but be explicit so the timeout path isn't hit).
+    when(mockFirebaseAuth.currentUser).thenReturn(null);
+    when(mockFirebaseAuth.authStateChanges())
+        .thenAnswer((_) => const Stream<fire_auth.User?>.empty());
+    authRepo = AuthRepository(mockFirebaseAuth, mockGoogleSignIn, fakeRef);
   });
 
   group('AuthRepository', () {

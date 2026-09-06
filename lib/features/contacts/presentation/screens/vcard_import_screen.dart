@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:secbizcard/core/responsive/adaptive_container.dart';
+import 'package:secbizcard/core/responsive/breakpoints.dart';
 import 'package:secbizcard/features/contacts/data/services/vcard_service.dart';
 import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
@@ -170,7 +172,9 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
-        child: Column(
+        child: AdaptiveContainer(
+          maxWidth: Breakpoints.maxContentWidth,
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Explanation Section
@@ -376,6 +380,7 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );

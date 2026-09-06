@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:secbizcard/core/widgets/app_drawer.dart';
+import 'package:secbizcard/core/responsive/breakpoints.dart';
+import 'package:secbizcard/core/responsive/two_pane.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:secbizcard/features/handshake/presentation/screens/qr_display_screen.dart';
 import 'package:secbizcard/features/contacts/presentation/screens/contacts_list_screen.dart';
@@ -91,112 +93,144 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     });
   }
 
+  /// The FAB action depends on which section is active:
+  /// Share tab -> scan a QR code, Card tab -> scan a business card.
+  void _onPrimaryAction(int forIndex) {
+    if (forIndex == 0) {
+      context.push('/qr-scanner');
+    } else {
+      context.push('/scan');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Adaptive shell: phones keep the original bottom-bar + FAB layout, while
+    // tablets / iPads / unfolded foldables use a navigation rail and, when wide
+    // enough, a two-pane layout showing Share and Card side by side.
+    if (context.useTwoPane) {
+      return _buildTwoPaneLayout(context);
+    }
+    if (context.useNavigationRail) {
+      return _buildRailLayout(context);
+    }
+    return _buildCompactLayout(context);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Shared AppBar (title + search field + contextual actions)
+  // ---------------------------------------------------------------------------
+
+  PreferredSizeWidget _buildAppBar(BuildContext context, {String? titleOverride}) {
     final theme = Theme.of(context);
-    final primaryColor = theme.colorScheme.primary;
     final isSearching = ref.watch(contactsSearchModeProvider);
 
-    final inactiveColor = Theme.of(
-      context,
-    ).colorScheme.onSurface.withValues(alpha: 0.6);
+    return AppBar(
+      title: (_currentIndex == 1 && isSearching && titleOverride == null)
+          ? _buildSearchField(theme)
+          : Text(
+              titleOverride ?? (_currentIndex == 0 ? 'Share' : 'Card'),
+              style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+            ),
+      actions: _buildAppBarActions(context),
+    );
+  }
+
+  Widget _buildSearchField(ThemeData theme) {
+    return Container(
+      height: 40,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: TextField(
+        controller: _searchController,
+        autofocus: true,
+        style: GoogleFonts.inter(fontSize: 15),
+        decoration: InputDecoration(
+          hintText: 'Search contacts...',
+          hintStyle: TextStyle(
+            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+            fontSize: 14,
+          ),
+          prefixIcon: Icon(
+            Icons.search,
+            size: 20,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          border: InputBorder.none,
+          isDense: true,
+          contentPadding: const EdgeInsets.symmetric(vertical: 10),
+        ),
+        onChanged: (v) =>
+            ref.read(contactsSearchQueryProvider.notifier).state = v,
+      ),
+    );
+  }
+
+  List<Widget> _buildAppBarActions(BuildContext context) {
+    final isSearching = ref.watch(contactsSearchModeProvider);
+    return [
+      if (_currentIndex == 0)
+        Consumer(
+          builder: (context, ref, child) {
+            final pendingCountAsync = ref.watch(pendingHandshakeCountProvider);
+            return pendingCountAsync.when(
+              data: (count) => Badge(
+                label: Text(count.toString()),
+                isLabelVisible: count > 0,
+                alignment: Alignment.topRight,
+                offset: const Offset(-4, 4),
+                child: IconButton(
+                  icon: const Icon(Icons.notifications_none),
+                  onPressed: () => context.push('/handshake-history'),
+                  tooltip: 'Notifications',
+                ),
+              ),
+              loading: () => IconButton(
+                icon: const Icon(Icons.notifications_none),
+                onPressed: () => context.push('/handshake-history'),
+              ),
+              error: (_, __) => IconButton(
+                icon: const Icon(Icons.notifications_none),
+                onPressed: () => context.push('/handshake-history'),
+              ),
+            );
+          },
+        ),
+      if (_currentIndex == 1)
+        isSearching
+            ? IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () {
+                  ref.read(contactsSearchModeProvider.notifier).state = false;
+                  ref.read(contactsSearchQueryProvider.notifier).state = '';
+                  _searchController.clear();
+                },
+              )
+            : IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  ref.read(contactsSearchModeProvider.notifier).state = true;
+                },
+              ),
+    ];
+  }
+
+  // ---------------------------------------------------------------------------
+  // Compact layout (phones, folded foldables) — original design preserved
+  // ---------------------------------------------------------------------------
+
+  Widget _buildCompactLayout(BuildContext context) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
+    final inactiveColor =
+        theme.colorScheme.onSurface.withValues(alpha: 0.6);
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
       drawer: const AppDrawer(),
-      appBar: AppBar(
-        title: (_currentIndex == 1 && isSearching)
-            ? Container(
-                height: 40,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest.withValues(
-                    alpha: 0.5,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  autofocus: true,
-                  style: GoogleFonts.inter(fontSize: 15),
-                  decoration: InputDecoration(
-                    hintText: 'Search contacts...',
-                    hintStyle: TextStyle(
-                      color: theme.colorScheme.onSurfaceVariant.withValues(
-                        alpha: 0.7,
-                      ),
-                      fontSize: 14,
-                    ),
-                    prefixIcon: Icon(
-                      Icons.search,
-                      size: 20,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                  ),
-                  onChanged: (v) =>
-                      ref.read(contactsSearchQueryProvider.notifier).state = v,
-                ),
-              )
-            : Text(
-                _currentIndex == 0 ? 'Share' : 'Card',
-                style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-              ),
-        actions: [
-          if (_currentIndex == 0)
-            Consumer(
-              builder: (context, ref, child) {
-                final pendingCountAsync = ref.watch(pendingHandshakeCountProvider);
-                return pendingCountAsync.when(
-                  data: (count) => Badge(
-                    label: Text(count.toString()),
-                    isLabelVisible: count > 0,
-                    alignment: Alignment.topRight,
-                    offset: const Offset(-4, 4), // Move slightly towards bottom-left
-                    child: IconButton(
-                      icon: const Icon(Icons.notifications_none),
-                      onPressed: () {
-                        context.push('/handshake-history');
-                      },
-                      tooltip: 'Notifications',
-                    ),
-                  ),
-                  loading: () => IconButton(
-                    icon: const Icon(Icons.notifications_none),
-                    onPressed: () {
-                      context.push('/handshake-history');
-                    },
-                  ),
-                  error: (_, __) => IconButton(
-                    icon: const Icon(Icons.notifications_none),
-                    onPressed: () {
-                      context.push('/handshake-history');
-                    },
-                  ),
-                );
-              },
-            ),
-          if (_currentIndex == 1)
-            isSearching
-                ? IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () {
-                      ref.read(contactsSearchModeProvider.notifier).state =
-                          false;
-                      ref.read(contactsSearchQueryProvider.notifier).state = '';
-                      _searchController.clear();
-                    },
-                  )
-                : IconButton(
-                    icon: const Icon(Icons.search),
-                    onPressed: () {
-                      ref.read(contactsSearchModeProvider.notifier).state =
-                          true;
-                    },
-                  ),
-        ],
-      ),
+      appBar: _buildAppBar(context),
       body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
@@ -204,53 +238,49 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         child: SafeArea(
           bottom: true,
           child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Expanded(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => _onTabTapped(0),
-                child: SizedBox(
-                  height: 48,
-                  child: Center(
-                    child: Icon(
-                      _currentIndex == 0 ? Icons.share : Icons.share_outlined,
-                      color: _currentIndex == 0 ? primaryColor : inactiveColor,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => _onTabTapped(0),
+                  child: SizedBox(
+                    height: 48,
+                    child: Center(
+                      child: Icon(
+                        _currentIndex == 0 ? Icons.share : Icons.share_outlined,
+                        color:
+                            _currentIndex == 0 ? primaryColor : inactiveColor,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(width: 56),
-            Expanded(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => _onTabTapped(1),
-                child: SizedBox(
-                  height: 48,
-                  child: Center(
-                    child: Icon(
-                      _currentIndex == 1
-                          ? Icons.storage
-                          : Icons.storage_outlined,
-                      color: _currentIndex == 1 ? primaryColor : inactiveColor,
+              const SizedBox(width: 56),
+              Expanded(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => _onTabTapped(1),
+                  child: SizedBox(
+                    height: 48,
+                    child: Center(
+                      child: Icon(
+                        _currentIndex == 1
+                            ? Icons.storage
+                            : Icons.storage_outlined,
+                        color:
+                            _currentIndex == 1 ? primaryColor : inactiveColor,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (_currentIndex == 0) {
-            context.push('/qr-scanner');
-          } else {
-            context.push('/scan');
-          }
-        },
+        onPressed: () => _onPrimaryAction(_currentIndex),
         backgroundColor: _currentIndex == 0 ? primaryColor : Colors.green,
         shape: const CircleBorder(),
         child: Icon(
@@ -260,6 +290,180 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Navigation rail (medium width: small tablets, unfolded foldables portrait)
+  // ---------------------------------------------------------------------------
+
+  Widget _buildRailLayout(BuildContext context) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
+
+    return Scaffold(
+      drawer: const AppDrawer(),
+      appBar: _buildAppBar(context),
+      body: Row(
+        children: [
+          _buildNavigationRail(context),
+          const VerticalDivider(width: 1, thickness: 1),
+          Expanded(
+            child: IndexedStack(index: _currentIndex, children: _pages),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _onPrimaryAction(_currentIndex),
+        backgroundColor: _currentIndex == 0 ? primaryColor : Colors.green,
+        shape: const CircleBorder(),
+        child: Icon(
+          _currentIndex == 0 ? Icons.qr_code_scanner : Icons.camera_alt,
+          size: 28,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavigationRail(BuildContext context) {
+    final theme = Theme.of(context);
+    return NavigationRail(
+      selectedIndex: _currentIndex,
+      onDestinationSelected: _onTabTapped,
+      labelType: NavigationRailLabelType.all,
+      leading: IconButton(
+        icon: const Icon(Icons.menu),
+        onPressed: () => Scaffold.of(context).openDrawer(),
+        tooltip: 'Menu',
+      ),
+      groupAlignment: -0.85,
+      destinations: [
+        NavigationRailDestination(
+          icon: const Icon(Icons.share_outlined),
+          selectedIcon: Icon(Icons.share, color: theme.colorScheme.primary),
+          label: const Text('Share'),
+        ),
+        NavigationRailDestination(
+          icon: const Icon(Icons.storage_outlined),
+          selectedIcon: Icon(Icons.storage, color: theme.colorScheme.primary),
+          label: const Text('Card'),
+        ),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Two-pane layout (expanded width: iPad, unfolded foldable landscape)
+  // Shows Share and Card side by side so the large screen is fully used.
+  // ---------------------------------------------------------------------------
+
+  Widget _buildTwoPaneLayout(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      drawer: const AppDrawer(),
+      appBar: AppBar(
+        title: Text(
+          'SecBizCard',
+          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+        ),
+        actions: [
+          Consumer(
+            builder: (context, ref, child) {
+              final pendingCountAsync =
+                  ref.watch(pendingHandshakeCountProvider);
+              return pendingCountAsync.maybeWhen(
+                data: (count) => Badge(
+                  label: Text(count.toString()),
+                  isLabelVisible: count > 0,
+                  offset: const Offset(-4, 4),
+                  child: IconButton(
+                    icon: const Icon(Icons.notifications_none),
+                    onPressed: () => context.push('/handshake-history'),
+                    tooltip: 'Notifications',
+                  ),
+                ),
+                orElse: () => IconButton(
+                  icon: const Icon(Icons.notifications_none),
+                  onPressed: () => context.push('/handshake-history'),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+      // Unified two-pane layout shared by iPad landscape, iPhone Fold and
+      // Z Fold-class foldables. TwoPane aligns the seam to a physical hinge
+      // when present, otherwise splits proportionally — so the left/right
+      // columns look and behave consistently across all these devices.
+      body: TwoPane(
+        startFlex: 5,
+        endFlex: 6,
+        start: _PaneHeader(
+          title: 'Share',
+          trailing: FloatingActionButton.small(
+            heroTag: 'sharePaneFab',
+            onPressed: () => context.push('/qr-scanner'),
+            backgroundColor: theme.colorScheme.primary,
+            child: const Icon(Icons.qr_code_scanner, color: Colors.white),
+          ),
+          child: const QrDisplayScreen(showAppBar: false),
+        ),
+        end: _PaneHeader(
+          title: 'Card',
+          trailing: FloatingActionButton.small(
+            heroTag: 'cardPaneFab',
+            onPressed: () => context.push('/scan'),
+            backgroundColor: Colors.green,
+            child: const Icon(Icons.camera_alt, color: Colors.white),
+          ),
+          child: const ContactsListScreen(showAppBar: false),
+        ),
+      ),
+    );
+  }
+}
+
+/// A lightweight header used above each pane in the two-pane layout, showing a
+/// section title and an action button.
+class _PaneHeader extends StatelessWidget {
+  const _PaneHeader({
+    required this.title,
+    required this.child,
+    this.trailing,
+  });
+
+  final String title;
+  final Widget child;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 12, 8),
+          child: Row(
+            children: [
+              Text(
+                title,
+                style: GoogleFonts.outfit(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              const Spacer(),
+              if (trailing != null) trailing!,
+            ],
+          ),
+        ),
+        const Divider(height: 1),
+        Expanded(child: child),
+      ],
     );
   }
 }

@@ -8,6 +8,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'package:secbizcard/core/responsive/adaptive_container.dart';
+import 'package:secbizcard/core/responsive/breakpoints.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/profile/data/profile_repository.dart';
 import 'package:secbizcard/core/utils/image_picker_service.dart';
@@ -491,7 +493,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         ),
         body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
-        child: Form(
+        child: AdaptiveContainer(
+          maxWidth: Breakpoints.maxFormWidth,
+          child: Form(
           key: _formKey,
           child: Column(
             children: [
@@ -590,6 +594,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               const SizedBox(height: 32),
             ],
           ),
+        ),
         ),
       ),
     ),

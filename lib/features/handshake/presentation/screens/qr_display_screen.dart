@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -8,6 +9,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'dart:convert';
 
 import 'package:secbizcard/features/handshake/data/handshake_repository.dart';
+import 'package:secbizcard/features/handshake/data/handshake_prewarm.dart';
 import 'package:secbizcard/features/profile/domain/card_context.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/profile/data/profile_repository.dart';
@@ -39,8 +41,13 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
 
   // Countdown timer
   Timer? _countdownTimer;
-  int _remainingSeconds = 600; // 10 minutes
+  int _remainingSeconds = 600; // 10 minutes (placeholder until expiresAt known)
   static const int _qrValidityDuration = 600;
+
+  /// Authoritative session expiry from the session document (server time).
+  /// When set, the countdown is derived from this instead of a local guess,
+  /// so a pre-warmed session shows its true remaining time.
+  DateTime? _expiresAt;
 
   StreamSubscription? _sessionSubscription;
   bool _showingRequestDialog = false;
@@ -52,7 +59,25 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
   @override
   void initState() {
     super.initState();
-    _generateQrCode();
+    _initSession();
+  }
+
+  /// Use a pre-warmed session if one is ready (instant QR); otherwise generate
+  /// one now.
+  void _initSession() {
+    final prewarmed = ref.read(handshakePrewarmProvider.notifier).consume();
+    if (prewarmed != null) {
+      _qrUrl = prewarmed.url;
+      _sessionId = prewarmed.sessionId;
+      _isLoading = false;
+      _error = null;
+      // Start with the placeholder duration; the real remaining time is
+      // corrected as soon as the session document's expiresAt arrives.
+      _startCountdown();
+      _listenToSession(prewarmed.sessionId);
+    } else {
+      _generateQrCode();
+    }
   }
 
   @override
@@ -64,7 +89,12 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
 
   void _startCountdown() {
     _countdownTimer?.cancel();
-    _remainingSeconds = _qrValidityDuration;
+    // Initialize without a local tick: use server expiry if known, else the
+    // nominal duration.
+    final expiresAt = _expiresAt;
+    _remainingSeconds = expiresAt != null
+        ? expiresAt.difference(DateTime.now()).inSeconds.clamp(0, _qrValidityDuration)
+        : _qrValidityDuration;
 
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) {
@@ -72,12 +102,11 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
         return;
       }
 
-      _remainingSeconds--;
+      _recomputeRemaining();
 
       if (_remainingSeconds <= 0) {
         timer.cancel();
-        // Auto-regenerate when expired
-        // Reset Batch Approval to Off
+        // Auto-regenerate when expired. Reset Batch Approval to Off.
         if (mounted) {
           setState(() => _batchApproval = false);
         }
@@ -90,6 +119,23 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
         setState(() {});
       }
     });
+  }
+
+  /// Computes remaining seconds. Prefers the server-authoritative [_expiresAt]
+  /// (so pre-warmed sessions show their true remaining time); falls back to a
+  /// local decrement from the nominal validity duration until expiresAt is
+  /// known (typically within the first second).
+  void _recomputeRemaining() {
+    final expiresAt = _expiresAt;
+    if (expiresAt != null) {
+      _remainingSeconds = expiresAt
+          .difference(DateTime.now())
+          .inSeconds
+          .clamp(0, _qrValidityDuration);
+    } else if (_remainingSeconds > 0) {
+      // Not yet corrected by server time — tick down locally.
+      _remainingSeconds -= 1;
+    }
   }
 
   String get _formattedCountdown {
@@ -115,6 +161,7 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
       _isLoading = true;
       _error = null;
       _sessionId = null;
+      _expiresAt = null;
     });
 
     _sessionSubscription?.cancel();
@@ -134,25 +181,15 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
           _isLoading = false;
         });
       },
-      (url) {
-        // Extract sessionId from URL for listening
-        // Format: https://ixo.app/{hash}
-        final uri = Uri.parse(url);
-        final sessionId = uri.pathSegments.isNotEmpty
-            ? uri.pathSegments.last
-            : null;
-
+      (session) {
         setState(() {
-          _qrUrl = url;
-          _sessionId = sessionId;
+          _qrUrl = session.url;
+          _sessionId = session.sessionId;
           _isLoading = false;
           _error = null;
         });
         _startCountdown();
-
-        if (sessionId != null) {
-          _listenToSession(sessionId);
-        }
+        _listenToSession(session.sessionId);
       },
     );
   }
@@ -171,6 +208,18 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
 
       final data = snapshot.data();
       if (data == null) return;
+
+      // Correct the countdown from the server-authoritative expiry. This makes
+      // a pre-warmed session show its true remaining time (e.g. 9:45).
+      final expiresRaw = data['expiresAt'];
+      if (expiresRaw is Timestamp) {
+        final serverExpiry = expiresRaw.toDate();
+        if (_expiresAt != serverExpiry) {
+          _expiresAt = serverExpiry;
+          _recomputeRemaining();
+          if (mounted) setState(() {});
+        }
+      }
 
       final status = data['status'] as String?;
 
@@ -495,12 +544,72 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
     return user.filterForContext(type);
   }
 
+  /// A placeholder that mirrors the real QR layout (title + framed QR box)
+  /// while the session is being created, so the transition to the live QR is
+  /// smooth rather than a bare spinner. Usually only briefly visible, since a
+  /// pre-warmed session shows the QR immediately.
+  Widget _buildLoadingSkeleton(BuildContext context) {
+    final theme = Theme.of(context);
+    final base = theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5);
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Scan to Exchange',
+            style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 32),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 10,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                color: base,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Center(
+                child: SizedBox(
+                  width: 36,
+                  height: 36,
+                  child: CircularProgressIndicator(strokeWidth: 3),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Container(
+            width: 140,
+            height: 16,
+            decoration: BoxDecoration(
+              color: base,
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
     final content = Center(
       child: _isLoading
-          ? const CircularProgressIndicator()
+          ? _buildLoadingSkeleton(context)
           : _error != null
           ? Column(
               mainAxisAlignment: MainAxisAlignment.center,

@@ -6,6 +6,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:secbizcard/core/errors/failure.dart';
+import 'package:secbizcard/features/handshake/data/handshake_session.dart';
 
 part 'handshake_repository.g.dart';
 
@@ -22,8 +23,10 @@ class HandshakeRepository {
 
   HandshakeRepository(this._functions);
 
-  /// Creates a handshake session and returns the deep link URL with 6-char hash
-  Future<Either<Failure, String>> createHandshakeSession({
+  /// Creates a handshake session and returns the deep-link URL (with 6-char
+  /// hash) plus the session id. The authoritative expiry is read separately
+  /// from the session document (server `expiresAt`).
+  Future<Either<Failure, HandshakeSession>> createHandshakeSession({
     bool batchApproval = true,
   }) async {
     try {
@@ -36,7 +39,15 @@ class HandshakeRepository {
         return left(const ServerFailure('Failed to generate URL'));
       }
 
-      return right(url);
+      // Prefer the server-provided sessionId; fall back to parsing the URL.
+      final segments = Uri.parse(url).pathSegments;
+      final sessionId = (result.data['sessionId'] as String?) ??
+          (segments.isNotEmpty ? segments.last : null);
+      if (sessionId == null || sessionId.isEmpty) {
+        return left(const ServerFailure('Failed to resolve session id'));
+      }
+
+      return right(HandshakeSession(url: url, sessionId: sessionId));
     } on FirebaseFunctionsException catch (e) {
       return left(ServerFailure('${e.code}: ${e.message ?? 'Unknown error'}'));
     } catch (e) {

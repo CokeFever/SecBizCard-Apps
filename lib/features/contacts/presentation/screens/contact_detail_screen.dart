@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:secbizcard/core/presentation/widgets/user_profile_avatar.dart';
+import 'package:secbizcard/core/responsive/adaptive_container.dart';
+import 'package:secbizcard/core/responsive/breakpoints.dart';
 import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
@@ -218,7 +220,9 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
-        child: Column(
+        child: AdaptiveContainer(
+          maxWidth: Breakpoints.maxContentWidth,
+          child: Column(
           children: [
             Center(
               child: UserProfileAvatar(
@@ -374,6 +378,7 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
             ),
             const SizedBox(height: 32),
           ],
+        ),
         ),
       ),
     );

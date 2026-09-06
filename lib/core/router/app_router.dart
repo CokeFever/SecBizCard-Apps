@@ -10,6 +10,7 @@ import 'package:secbizcard/features/handshake/presentation/screens/handshake_scr
 import 'package:secbizcard/features/handshake/presentation/screens/qr_display_screen.dart';
 import 'package:secbizcard/features/handshake/presentation/screens/qr_scanner_screen.dart';
 import 'package:secbizcard/features/handshake/data/handshake_repository.dart';
+import 'package:secbizcard/features/handshake/data/handshake_prewarm.dart';
 import 'package:secbizcard/features/handshake/presentation/screens/handshake_history_screen.dart';
 import 'package:secbizcard/features/home/presentation/screens/main_screen.dart';
 import 'package:secbizcard/features/contacts/presentation/screens/edit_contact_screen.dart';
@@ -237,14 +238,18 @@ GoRouter goRouter(Ref ref) {
   );
 }
 
-/// Pre-warms the Cloud Functions HTTP connection so that the first
-/// `createHandshakeSession` call from QrDisplayScreen is faster.
+/// Pre-warms the Cloud Functions HTTP connection AND speculatively generates a
+/// handshake session in the background so the Share screen can show its QR code
+/// almost instantly.
 void _warmUpCloudFunctions(Ref ref) {
   try {
-    // Simply reading the provider instantiates the FirebaseFunctions client
-    // and establishes the HTTP connection pool early.
+    // Reading the repository instantiates the FirebaseFunctions client and
+    // establishes the HTTP connection pool early.
     ref.read(handshakeRepositoryProvider);
-    debugPrint('[Router] Cloud Functions warm-up triggered');
+    // Speculatively pre-generate a session (fire-and-forget). Its countdown is
+    // still driven by the server `expiresAt`, so accuracy is preserved.
+    ref.read(handshakePrewarmProvider.notifier).prewarm();
+    debugPrint('[Router] Cloud Functions warm-up + session prewarm triggered');
   } catch (e) {
     debugPrint('[Router] Cloud Functions warm-up error (non-fatal): $e');
   }
