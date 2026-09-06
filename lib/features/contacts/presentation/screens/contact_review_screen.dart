@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:secbizcard/core/responsive/adaptive_container.dart';
+import 'package:secbizcard/core/responsive/breakpoints.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
 
@@ -91,7 +93,9 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        child: Column(
+        child: AdaptiveContainer(
+          maxWidth: Breakpoints.maxContentWidth,
+          child: Column(
           children: [
             // Scanned image preview
             AspectRatio(
@@ -132,6 +136,7 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );

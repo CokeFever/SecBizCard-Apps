@@ -80,7 +80,6 @@ jobs:
 
       - name: Run Tests
         run: flutter test
-        continue-on-error: true
 
       - name: Setup Keystore
         env:
