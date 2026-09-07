@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'dart:convert';
@@ -5,6 +6,19 @@ import 'dart:io';
 
 class VCardService {
   static const _uuid = Uuid();
+
+  /// Escapes a value for safe embedding in a vCard property (RFC 6350 §3.4).
+  /// Card data comes from OCR of untrusted business cards, so a value with a
+  /// newline or ';'/',' could otherwise inject additional vCard properties or
+  /// corrupt fields. Order matters: backslash first, then the delimiters.
+  static String _esc(String value) {
+    return value
+        .replaceAll('\\', '\\\\')
+        .replaceAll('\n', '\\n')
+        .replaceAll('\r', '')
+        .replaceAll(';', '\\;')
+        .replaceAll(',', '\\,');
+  }
 
   /// Parses a vCard string and returns a list of UserProfiles.
   /// Supports vCard 2.1, 3.0, and 4.0 (best-effort).
@@ -27,58 +41,59 @@ class VCardService {
     final sb = StringBuffer();
     sb.writeln('BEGIN:VCARD');
     sb.writeln('VERSION:3.0'); // Enforcing 3.0 as requested
-    sb.writeln('FN:${profile.displayName}');
+    sb.writeln('FN:${_esc(profile.displayName)}');
     sb.writeln('N:${_generateN(profile.displayName)}');
 
     if (profile.title?.isNotEmpty ?? false) {
-      sb.writeln('TITLE:${profile.title}');
+      sb.writeln('TITLE:${_esc(profile.title!)}');
     }
 
     if (profile.company?.isNotEmpty ?? false) {
       if (profile.department?.isNotEmpty ?? false) {
-        sb.writeln('ORG:${profile.company};${profile.department}');
+        // ';' between company and department is a structural separator, so we
+        // escape each part but keep the separator itself.
+        sb.writeln('ORG:${_esc(profile.company!)};${_esc(profile.department!)}');
       } else {
-        sb.writeln('ORG:${profile.company}');
+        sb.writeln('ORG:${_esc(profile.company!)}');
       }
     } else if (profile.department?.isNotEmpty ?? false) {
-      sb.writeln('ORG:;${profile.department}');
+      sb.writeln('ORG:;${_esc(profile.department!)}');
     }
 
     if (profile.email?.isNotEmpty ?? false) {
-      sb.writeln('EMAIL;TYPE=INTERNET:${profile.email}');
+      sb.writeln('EMAIL;TYPE=INTERNET:${_esc(profile.email!)}');
     }
 
     // Phone Priorities: Work, Mobile, Fax
 
     // Work Phone (mapped to 'phone')
     if (profile.phone?.isNotEmpty ?? false) {
-      sb.writeln('TEL;TYPE=WORK,VOICE:${profile.phone}');
+      sb.writeln('TEL;TYPE=WORK,VOICE:${_esc(profile.phone!)}');
     }
 
     // Mobile Phone
     if (profile.mobile?.isNotEmpty ?? false) {
-      sb.writeln('TEL;TYPE=CELL,VOICE:${profile.mobile}');
+      sb.writeln('TEL;TYPE=CELL,VOICE:${_esc(profile.mobile!)}');
     }
 
     // Custom Fields for other phones
     profile.customFields.forEach((key, value) {
       if (key.contains('fax')) {
-        sb.writeln('TEL;TYPE=FAX:$value');
+        sb.writeln('TEL;TYPE=FAX:${_esc(value)}');
       } else if (key.contains('home')) {
-        sb.writeln('TEL;TYPE=HOME,VOICE:$value');
+        sb.writeln('TEL;TYPE=HOME,VOICE:${_esc(value)}');
       }
     });
 
     if (profile.address?.isNotEmpty ?? false) {
-      // Escape newlines for vCard
-      final safeAddr = profile.address!
-          .replaceAll('\n', '\\n')
-          .replaceAll(',', '\\,');
+      // ADR has 7 structural ';' components; the address text goes in the
+      // "street" slot and must have its own ';'/','/newlines escaped.
+      final safeAddr = _esc(profile.address!);
       sb.writeln('ADR;TYPE=WORK:;;$safeAddr;;;;');
     }
 
     if (profile.website?.isNotEmpty ?? false) {
-      sb.writeln('URL:${profile.website}');
+      sb.writeln('URL:${_esc(profile.website!)}');
     }
 
     // Photo Support
@@ -101,7 +116,7 @@ class VCardService {
       }
     } catch (e) {
       // Ignore photo errors during export to prevent failure
-      print('Error exporting photo to vCard: $e');
+      if (kDebugMode) debugPrint('Error exporting photo to vCard: $e');
     }
 
     sb.writeln('END:VCARD');
@@ -115,11 +130,11 @@ class VCardService {
     // vCard 3.0 N is mandatory.
     final parts = fn.trim().split(' ');
     if (parts.length > 1) {
-      final family = parts.last;
-      final given = parts.sublist(0, parts.length - 1).join(' ');
+      final family = _esc(parts.last);
+      final given = _esc(parts.sublist(0, parts.length - 1).join(' '));
       return '$family;$given;;;';
     }
-    return '$fn;;;;';
+    return '${_esc(fn)};;;;';
   }
 
   static List<String> _splitIntoVCardBlocks(String content) {
