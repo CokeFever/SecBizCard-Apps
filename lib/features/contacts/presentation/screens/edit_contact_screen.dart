@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:secbizcard/core/responsive/adaptive_container.dart';
+import 'package:secbizcard/core/responsive/breakpoints.dart';
 import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'package:intl/intl.dart';
@@ -272,7 +274,9 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
         ),
         body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
-        child: Form(
+        child: AdaptiveContainer(
+          maxWidth: Breakpoints.maxFormWidth,
+          child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -394,6 +398,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
               const SizedBox(height: 32),
             ],
           ),
+        ),
         ),
       ),
     ),

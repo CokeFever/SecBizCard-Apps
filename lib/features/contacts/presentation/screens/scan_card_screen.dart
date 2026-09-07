@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:secbizcard/features/contacts/data/services/ocr_service.dart';
+import 'package:secbizcard/core/responsive/breakpoints.dart';
+import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 class ScanCardScreen extends StatefulWidget {
   const ScanCardScreen({super.key});
@@ -21,6 +23,7 @@ class _ScanCardScreenState extends State<ScanCardScreen>
   bool _isVertical = false;
   String? _capturedImagePath;
   String _processingStatus = '';
+  OcrPreScanStatus? _preScanStatus; // engine + remaining shared quota
 
   // Permission state: null = still checking, true = denied, false = granted
   bool? _isPermissionDenied;
@@ -32,6 +35,12 @@ class _ScanCardScreenState extends State<ScanCardScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _checkAndRequestPermission();
+    _loadPreScanStatus();
+  }
+
+  Future<void> _loadPreScanStatus() async {
+    final status = await _ocrService.preScanStatus();
+    if (mounted) setState(() => _preScanStatus = status);
   }
 
   @override
@@ -189,17 +198,31 @@ class _ScanCardScreenState extends State<ScanCardScreen>
         debugPrint('OpenCV processing failed, falling back to original: $e');
       }
 
-      // OCR Recognition
+      // OCR Recognition. We attempt Cloud Vision first (own key or shared),
+      // so reflect that in the status; if it falls back, the review screen's
+      // badge will show on-device instead.
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        final willUseCloud = await _ocrService.willAttemptCloudVision();
         setState(() {
-          _processingStatus = 'Recognizing text...';
+          _processingStatus = willUseCloud
+              ? l10n.ocrRecognizingCloudVision
+              : l10n.ocrRecognizingOnDevice;
         });
       }
 
-      final profile = await _ocrService.recognizeBusinessCard(finalImagePath);
+      final outcome = await _ocrService.recognize(finalImagePath);
 
       if (mounted) {
+        final profile = outcome.profile;
         if (profile != null) {
+          // Surface a brief note when we fell back or are near a usage limit.
+          final msg = _ocrNoteMessage(outcome);
+          if (msg != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(msg), duration: const Duration(seconds: 3)),
+            );
+          }
           context.push(
             '/review-contact',
             extra: {'profile': profile, 'imagePath': finalImagePath},
@@ -223,6 +246,101 @@ class _ScanCardScreenState extends State<ScanCardScreen>
     }
   }
 
+  /// The on-screen alignment guide, expressed as a normalized rectangle
+  /// (0..1) relative to the image. The guide is always centered; its size
+  /// mirrors [CameraOverlayPainter] (vertical: 0.6 of the shorter side,
+  /// horizontal: 0.85 of the longer side, card aspect 55:90). Passing this to
+  /// the native detector lets it use the frame the user aimed with as a soft
+  /// prior — matching docs/card_detection_scoring.md (W_GUIDE).
+  Map<String, double> _normalizedGuideRect() {
+    // Must mirror CameraOverlayPainter EXACTLY so the native detector's guide
+    // prior matches what the user sees. Large screens (tablet/iPad) use the new
+    // shortest-side 75% sizing; phones keep the ORIGINAL fractions untouched.
+    final size = MediaQuery.sizeOf(context);
+    final isLargeScreen = size.shortestSide >= Breakpoints.medium;
+
+    final double wFrac;
+    final double hFrac;
+    if (isLargeScreen) {
+      final longSide = size.shortestSide * 0.75;
+      final shortSideOfCard = longSide * (55 / 90);
+      final cardW = _isVertical ? shortSideOfCard : longSide;
+      final cardH = _isVertical ? longSide : shortSideOfCard;
+      wFrac = (cardW / size.width).clamp(0.0, 1.0);
+      hFrac = (cardH / size.height).clamp(0.0, 1.0);
+    } else {
+      // Phones — UNCHANGED original fractions.
+      final w = _isVertical ? 0.6 : 0.85;
+      wFrac = w.clamp(0.0, 1.0);
+      hFrac = (_isVertical ? w * (90 / 55) : w * (55 / 90)).clamp(0.0, 1.0);
+    }
+    return {
+      'left': (0.5 - wFrac / 2).clamp(0.0, 1.0),
+      'top': (0.5 - hFrac / 2).clamp(0.0, 1.0),
+      'width': wFrac,
+      'height': hFrac,
+    };
+  }
+
+  /// Camera-preview badge showing the engine that will be used and, for the
+  /// shared key, remaining monthly quota (e.g. "Cloud Vision · 2/5 this month").
+  Widget _buildPreScanBadge(BuildContext context, OcrPreScanStatus status) {
+    final l10n = AppLocalizations.of(context)!;
+    late final String label;
+    switch (status.engine) {
+      case OcrEngineUsed.ownKeyVision:
+        // BYOK: no numbers (usage is managed by the user in Cloud Console).
+        label = l10n.ocrSourceCloudVisionOwn;
+        break;
+      case OcrEngineUsed.sharedVision:
+        if (status.whitelisted &&
+            status.used != null &&
+            status.cap != null) {
+          // Owner/admin: show the shared key's global monthly usage.
+          label = l10n.ocrSharedKeyUsage(status.used!, status.cap!);
+        } else if (status.used != null && status.cap != null) {
+          label = l10n.ocrSourceCloudVisionShared(status.used!, status.cap!);
+        } else {
+          label = l10n.ocrRecognizingCloudVision;
+        }
+        break;
+      case OcrEngineUsed.mlKit:
+        label = l10n.ocrSourceOnDevice;
+        break;
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.black54,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.cloud_outlined, size: 14, color: Colors.white),
+          const SizedBox(width: 6),
+          Text(label, style: const TextStyle(color: Colors.white, fontSize: 12)),
+        ],
+      ),
+    );
+  }
+
+  /// A short, friendly message when OCR fell back or is near a usage limit.
+  /// Returns null when nothing needs to be surfaced (the common case).
+  String? _ocrNoteMessage(OcrOutcome outcome) {
+    switch (outcome.note) {
+      case 'own_key_near_limit':
+        return 'Your Cloud Vision key is near its monthly free limit (80%).';
+      case 'shared_near_limit':
+        return 'Shared recognition quota is running low this month.';
+    }
+    // If we ended on ML Kit while the user expected higher quality, hint gently.
+    if (outcome.engine == OcrEngineUsed.mlKit) {
+      return 'Used on-device recognition. Add a Cloud Vision key in Settings for best results.';
+    }
+    return null;
+  }
+
   Future<String?> _processWithOpenCV(String inputPath) async {
     const channel = MethodChannel('app.ixo.secbizcard/opencv');
     final outputPath = inputPath.replaceFirst('.jpg', '_processed.jpg');
@@ -232,6 +350,7 @@ class _ScanCardScreenState extends State<ScanCardScreen>
         'inputPath': inputPath,
         'outputPath': outputPath,
         'isVertical': _isVertical,
+        'guideRect': _normalizedGuideRect(),
       });
 
       if (result is Map) {
@@ -284,6 +403,9 @@ class _ScanCardScreenState extends State<ScanCardScreen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    // Landscape only ever happens on tablet/iPad (phones are portrait-locked
+    // in main.dart), so the landscape control layout never affects phones.
+    final isLandscape = size.width > size.height;
 
     // 1. Still checking permission
     if (_isPermissionDenied == null) {
@@ -324,10 +446,19 @@ class _ScanCardScreenState extends State<ScanCardScreen>
                     width: size.width,
                     height: size.height,
                   )
-                : AspectRatio(
-                    aspectRatio: 1 / _controller!.value.aspectRatio,
-                    child: CameraPreview(_controller!),
-                  ),
+                : (size.shortestSide >= Breakpoints.medium)
+                    // Tablet/iPad: fill the screen (cover) with NO distortion.
+                    // The camera reports its preview aspect as height/width in
+                    // portrait, so the on-screen aspect is 1/aspectRatio. We
+                    // give a correctly-proportioned box to a cover FittedBox,
+                    // which scales uniformly and clips — never stretches — and
+                    // works in both portrait and landscape. Phones keep the
+                    // original centered path below (untouched).
+                    ? _CoverCameraPreview(controller: _controller!)
+                    : AspectRatio(
+                        aspectRatio: 1 / _controller!.value.aspectRatio,
+                        child: CameraPreview(_controller!),
+                      ),
           ),
 
           // Processing Overlay (shown when processing)
@@ -369,42 +500,77 @@ class _ScanCardScreenState extends State<ScanCardScreen>
                 painter: CameraOverlayPainter(
                   isVertical: _isVertical,
                   size: size,
+                  isLargeScreen: size.shortestSide >= Breakpoints.medium,
                 ),
               ),
             ),
 
-          // Orientation Toggle Overlay (hidden during processing)
+          // Orientation Toggle Overlay (hidden during processing).
+          // Portrait (phones + iPad portrait): top-center, horizontal chips.
+          // Landscape (iPad only): left edge, vertically centered, stacked.
           if (!_isProcessing)
-            Positioned(
-              top: 100,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black54,
-                    borderRadius: BorderRadius.circular(30),
+            if (isLandscape)
+              Positioned(
+                left: 16,
+                top: 0,
+                bottom: 0,
+                child: Center(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black54,
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildToggleOption(
+                          label: 'Horizontal',
+                          icon: Icons.crop_landscape,
+                          isSelected: !_isVertical,
+                          onTap: () => setState(() => _isVertical = false),
+                        ),
+                        _buildToggleOption(
+                          label: 'Vertical',
+                          icon: Icons.crop_portrait,
+                          isSelected: _isVertical,
+                          onTap: () => setState(() => _isVertical = true),
+                        ),
+                      ],
+                    ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _buildToggleOption(
-                        label: 'Horizontal',
-                        icon: Icons.crop_landscape,
-                        isSelected: !_isVertical,
-                        onTap: () => setState(() => _isVertical = false),
-                      ),
-                      _buildToggleOption(
-                        label: 'Vertical',
-                        icon: Icons.crop_portrait,
-                        isSelected: _isVertical,
-                        onTap: () => setState(() => _isVertical = true),
-                      ),
-                    ],
+                ),
+              )
+            else
+              Positioned(
+                top: 100,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black54,
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildToggleOption(
+                          label: 'Horizontal',
+                          icon: Icons.crop_landscape,
+                          isSelected: !_isVertical,
+                          onTap: () => setState(() => _isVertical = false),
+                        ),
+                        _buildToggleOption(
+                          label: 'Vertical',
+                          icon: Icons.crop_portrait,
+                          isSelected: _isVertical,
+                          onTap: () => setState(() => _isVertical = true),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
 
           // Instruction Text (hidden during processing)
           if (!_isProcessing)
@@ -422,9 +588,29 @@ class _ScanCardScreenState extends State<ScanCardScreen>
                     color: Colors.black54,
                     borderRadius: BorderRadius.circular(24),
                   ),
-                  child: const Text(
-                    'Place Business Card in frame',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!.scanCardHint,
+                        style: const TextStyle(
+                            color: Colors.white, fontSize: 16),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.wallpaper_outlined,
+                              size: 13, color: Colors.white70),
+                          const SizedBox(width: 5),
+                          Text(
+                            AppLocalizations.of(context)!.scanCardBackgroundTip,
+                            style: const TextStyle(
+                                color: Colors.white70, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -443,24 +629,52 @@ class _ScanCardScreenState extends State<ScanCardScreen>
             ),
           ),
 
-          // Capture Button (hidden during processing)
-          if (!_isProcessing)
+          // Pre-scan engine + shared-quota indicator (top-right).
+          if (!_isProcessing && _preScanStatus != null)
             Positioned(
-              bottom: 48,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: FloatingActionButton.large(
-                  onPressed: _takePicture,
-                  backgroundColor: Colors.white,
-                  child: const Icon(
-                    Icons.camera_alt,
-                    color: Colors.black,
-                    size: 36,
+              top: 64,
+              right: 16,
+              child: _buildPreScanBadge(context, _preScanStatus!),
+            ),
+
+          // Capture Button (hidden during processing).
+          // Portrait: bottom-center (unchanged). Landscape (iPad): right edge,
+          // vertically centered.
+          if (!_isProcessing)
+            if (isLandscape)
+              Positioned(
+                right: 32,
+                top: 0,
+                bottom: 0,
+                child: Center(
+                  child: FloatingActionButton.large(
+                    onPressed: _takePicture,
+                    backgroundColor: Colors.white,
+                    child: const Icon(
+                      Icons.camera_alt,
+                      color: Colors.black,
+                      size: 36,
+                    ),
+                  ),
+                ),
+              )
+            else
+              Positioned(
+                bottom: 48,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: FloatingActionButton.large(
+                    onPressed: _takePicture,
+                    backgroundColor: Colors.white,
+                    child: const Icon(
+                      Icons.camera_alt,
+                      color: Colors.black,
+                      size: 36,
+                    ),
                   ),
                 ),
               ),
-            ),
         ],
       ),
     );
@@ -622,20 +836,89 @@ class _ScanCardScreenState extends State<ScanCardScreen>
   }
 }
 
+/// Full-bleed camera preview that fills its box (cover) WITHOUT distortion, in
+/// both portrait and landscape. It sizes a child with the preview's true
+/// aspect ratio, then lets a cover [FittedBox] scale it uniformly and clip the
+/// overflow. Using the layout constraints (not screen width) keeps it correct
+/// when the box is wide (landscape) or tall (portrait).
+class _CoverCameraPreview extends StatelessWidget {
+  const _CoverCameraPreview({required this.controller});
+
+  final CameraController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    // controller.value.aspectRatio is the sensor's long/short ratio (e.g. 4:3
+    // -> 1.333) and does NOT change with device rotation. The on-screen aspect
+    // therefore depends on orientation: in portrait the preview is tall
+    // (width/height = 1/aspectRatio); in landscape it's wide (= aspectRatio).
+    final controllerAspect = controller.value.aspectRatio;
+    final isLandscape =
+        MediaQuery.orientationOf(context) == Orientation.landscape;
+    final previewAspect =
+        isLandscape ? controllerAspect : 1 / controllerAspect;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final boxAspect = constraints.maxWidth / constraints.maxHeight;
+        // Size the child to COVER the box: if the box is relatively wider than
+        // the preview, match width and overflow height; otherwise match height
+        // and overflow width. FittedBox(cover) then scales uniformly + clips.
+        double w, h;
+        if (boxAspect > previewAspect) {
+          w = constraints.maxWidth;
+          h = w / previewAspect;
+        } else {
+          h = constraints.maxHeight;
+          w = h * previewAspect;
+        }
+        return ClipRect(
+          child: OverflowBox(
+            maxWidth: double.infinity,
+            maxHeight: double.infinity,
+            child: SizedBox(
+              width: w,
+              height: h,
+              child: CameraPreview(controller),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class CameraOverlayPainter extends CustomPainter {
   final bool isVertical;
   final Size size;
+  final bool isLargeScreen;
 
-  CameraOverlayPainter({required this.isVertical, required this.size});
+  CameraOverlayPainter({
+    required this.isVertical,
+    required this.size,
+    this.isLargeScreen = false,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = Colors.black.withValues(alpha: 0.6);
 
-    final cardW = isVertical ? (size.width * 0.6) : (size.width * 0.85);
-    final cardH = isVertical
-        ? (cardW * (90 / 55))
-        : (cardW * (55 / 90));
+    final double cardW;
+    final double cardH;
+    if (isLargeScreen) {
+      // Tablet/iPad ONLY: size the guide off the SHORTER screen dimension so it
+      // stays sensible in both portrait and landscape (sizing off width made
+      // the box overflow on wide iPad landscape). The card's LONG side spans
+      // 75% of the shorter dimension; short side follows ISO card aspect 90:55.
+      final longSide = size.shortestSide * 0.75;
+      final shortSideOfCard = longSide * (55 / 90);
+      cardW = isVertical ? shortSideOfCard : longSide;
+      cardH = isVertical ? longSide : shortSideOfCard;
+    } else {
+      // Phones — UNCHANGED original sizing (portrait-locked), so the phone
+      // scanning experience that's already tested stays exactly the same.
+      cardW = isVertical ? (size.width * 0.6) : (size.width * 0.85);
+      cardH = isVertical ? (cardW * (90 / 55)) : (cardW * (55 / 90));
+    }
 
     final rect = Rect.fromCenter(
       center: Offset(size.width / 2, size.height / 2),
@@ -663,6 +946,8 @@ class CameraOverlayPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CameraOverlayPainter oldDelegate) {
-    return oldDelegate.isVertical != isVertical;
+    return oldDelegate.isVertical != isVertical ||
+        oldDelegate.isLargeScreen != isLargeScreen ||
+        oldDelegate.size != size;
   }
 }

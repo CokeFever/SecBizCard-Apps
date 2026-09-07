@@ -13,10 +13,30 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   debugPrint('[Main] WidgetsFlutterBinding initialized');
   
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
+  // Adaptive orientation policy:
+  //  - Phones (shortest side < 600dp): keep the portrait-only experience the
+  //    app was designed around.
+  //  - Tablets / iPads / unfolded foldables (>= 600dp): allow all orientations
+  //    so large screens and Split View / Stage Manager work naturally.
+  final view = WidgetsBinding.instance.platformDispatcher.views.first;
+  final shortestSideDp =
+      view.physicalSize.shortestSide / view.devicePixelRatio;
+  if (shortestSideDp < 600) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  } else {
+    SystemChrome.setPreferredOrientations(DeviceOrientation.values);
+  }
+
+  // Cap the in-memory image cache. This app mostly shows avatars and card
+  // thumbnails, so Flutter's generous defaults (1000 images / 100 MB) are far
+  // more than needed. Tightening this reduces peak memory — important on newer
+  // Android memory limits and when multitasking on tablets/foldables.
+  PaintingBinding.instance.imageCache
+    ..maximumSize = 200
+    ..maximumSizeBytes = 50 << 20; // 50 MB
   
   try {
     debugPrint('[Main] Initializing Firebase...');

@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:secbizcard/core/responsive/adaptive_container.dart';
+import 'package:secbizcard/core/responsive/breakpoints.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
 
@@ -26,7 +28,11 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
   late TextEditingController _companyController;
   late TextEditingController _titleController;
   late TextEditingController _phoneController;
+  late TextEditingController _mobileController;
+  late TextEditingController _faxController;
+  late TextEditingController _websiteController;
   late TextEditingController _addressController;
+  late TextEditingController _taxIdController;
 
   @override
   void initState() {
@@ -36,7 +42,15 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
     _companyController = TextEditingController(text: widget.profile.company);
     _titleController = TextEditingController(text: widget.profile.title);
     _phoneController = TextEditingController(text: widget.profile.phone);
+    _mobileController = TextEditingController(text: widget.profile.mobile);
+    _faxController = TextEditingController(
+      text: widget.profile.customFields['fax'],
+    );
+    _websiteController = TextEditingController(text: widget.profile.website);
     _addressController = TextEditingController(text: widget.profile.address);
+    _taxIdController = TextEditingController(
+      text: widget.profile.customFields['taxId'],
+    );
   }
 
   @override
@@ -46,18 +60,42 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
     _companyController.dispose();
     _titleController.dispose();
     _phoneController.dispose();
+    _mobileController.dispose();
+    _faxController.dispose();
+    _websiteController.dispose();
     _addressController.dispose();
+    _taxIdController.dispose();
     super.dispose();
   }
 
   Future<void> _saveContact() async {
+    // Merge the (editable) fax back into customFields.
+    final mergedCustomFields = Map<String, String>.from(
+      widget.profile.customFields,
+    );
+    final fax = _faxController.text.trim();
+    if (fax.isEmpty) {
+      mergedCustomFields.remove('fax');
+    } else {
+      mergedCustomFields['fax'] = fax;
+    }
+    final taxId = _taxIdController.text.trim();
+    if (taxId.isEmpty) {
+      mergedCustomFields.remove('taxId');
+    } else {
+      mergedCustomFields['taxId'] = taxId;
+    }
+
     final updatedProfile = widget.profile.copyWith(
       displayName: _nameController.text.trim(),
       email: _emailController.text.trim(),
       company: _companyController.text.trim(),
       title: _titleController.text.trim(),
       phone: _phoneController.text.trim(),
+      mobile: _mobileController.text.trim(),
+      website: _websiteController.text.trim(),
       address: _addressController.text.trim(),
+      customFields: mergedCustomFields,
     );
 
     final result = await ref
@@ -91,7 +129,9 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        child: Column(
+        child: AdaptiveContainer(
+          maxWidth: Breakpoints.maxContentWidth,
+          child: Column(
           children: [
             // Scanned image preview
             AspectRatio(
@@ -102,6 +142,8 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
                 child: Image.file(File(widget.imagePath), fit: BoxFit.contain),
               ),
             ),
+
+
             Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
@@ -122,16 +164,33 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
                   _buildTextField(_phoneController, 'Phone', Icons.phone),
                   const SizedBox(height: 16),
                   _buildTextField(
+                    _mobileController,
+                    'Mobile',
+                    Icons.smartphone,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(_faxController, 'Fax', Icons.print),
+                  const SizedBox(height: 16),
+                  _buildTextField(_websiteController, 'Website', Icons.language),
+                  const SizedBox(height: 16),
+                  _buildTextField(
                     _addressController,
                     'Address',
                     Icons.location_on,
                     maxLines: 3,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    _taxIdController,
+                    'VAT / Tax ID',
+                    Icons.receipt_long,
                   ),
                   const SizedBox(height: 32),
                 ],
               ),
             ),
           ],
+        ),
         ),
       ),
     );

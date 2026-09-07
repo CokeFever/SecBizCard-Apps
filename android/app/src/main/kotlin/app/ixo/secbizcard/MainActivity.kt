@@ -41,9 +41,11 @@ class MainActivity : FlutterActivity() {
                 val inputPath = call.argument<String>("inputPath")
                 val outputPath = call.argument<String>("outputPath")
                 val isVertical = call.argument<Boolean>("isVertical") ?: false
+                @Suppress("UNCHECKED_CAST")
+                val guideRect = call.argument<Map<String, Double>>("guideRect")
 
                 if (inputPath != null && outputPath != null) {
-                    val resultMap = ocvProcessor.processBusinessCard(inputPath, outputPath, isVertical)
+                    val resultMap = ocvProcessor.processBusinessCard(inputPath, outputPath, isVertical, guideRect)
                     val success = resultMap["success"] as Boolean
                     if (success) {
                         result.success(resultMap)
