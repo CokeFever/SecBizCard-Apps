@@ -38,13 +38,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Inject Firebase Configuration & Options
-        env:
-          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
-          FIREBASE_OPTIONS_DART: ${{ secrets.FIREBASE_OPTIONS_DART }}
-          OCR_DEPLOY_KEY: ${{ secrets.OCR_DEPLOY_KEY }}
-        run: dart ios/ci_scripts/inject_secrets.dart
-
+      # Toolchain must be set up BEFORE any step that runs `dart`/`flutter`.
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -57,7 +51,7 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: 'stable'
           cache: true
-          
+
       - name: Setup SSH for Private Package
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -68,6 +62,15 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan github.com >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
+
+      # Runs `dart`, so it must come AFTER Setup Flutter (previously this ran
+      # first and failed with "dart: command not found").
+      - name: Inject Firebase Configuration & Options
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+          FIREBASE_OPTIONS_DART: ${{ secrets.FIREBASE_OPTIONS_DART }}
+          OCR_DEPLOY_KEY: ${{ secrets.OCR_DEPLOY_KEY }}
+        run: dart ios/ci_scripts/inject_secrets.dart
 
       - name: Install Dependencies
         run: flutter pub get
