@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:secbizcard/core/responsive/adaptive_container.dart';
+import 'package:secbizcard/core/responsive/breakpoints.dart';
 import 'package:secbizcard/core/utils/field_formatter.dart';
 import 'package:secbizcard/core/utils/dialog_utils.dart';
 
@@ -182,7 +184,9 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
             ),
           ],
         ),
-        body: ListView(
+        body: AdaptiveContainer(
+        maxWidth: Breakpoints.maxContentWidth,
+        child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Text(
@@ -199,6 +203,7 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
           const SizedBox(height: 16),
           _buildContextCard(ContextType.lite),
         ],
+      ),
       ),
     ),
   );

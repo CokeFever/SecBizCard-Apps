@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:secbizcard/core/responsive/adaptive_container.dart';
+import 'package:secbizcard/core/responsive/breakpoints.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/core/database/database_helper.dart';
 import 'package:secbizcard/core/widgets/verification_badge.dart';
@@ -36,7 +38,9 @@ class ProfileScreen extends ConsumerWidget {
           }
           return SingleChildScrollView(
             padding: const EdgeInsets.all(24),
-            child: Column(
+            child: AdaptiveContainer(
+              maxWidth: Breakpoints.maxContentWidth,
+              child: Column(
               children: [
                 const SizedBox(height: 20),
                 ProfileAvatar(profile: profile, radius: 50),
@@ -189,6 +193,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
               ],
+            ),
             ),
           );
         },

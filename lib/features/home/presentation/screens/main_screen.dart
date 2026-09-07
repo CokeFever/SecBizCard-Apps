@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:secbizcard/core/widgets/app_drawer.dart';
+import 'package:secbizcard/core/responsive/breakpoints.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:secbizcard/features/handshake/presentation/screens/qr_display_screen.dart';
 import 'package:secbizcard/features/contacts/presentation/screens/contacts_list_screen.dart';
@@ -91,166 +92,204 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     });
   }
 
+  /// The FAB action depends on which section is active:
+  /// Share tab -> scan a QR code, Card tab -> scan a business card.
+  void _onPrimaryAction(int forIndex) {
+    if (forIndex == 0) {
+      context.push('/qr-scanner');
+    } else {
+      context.push('/scan');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Single-pane everywhere — the layout is identical to phone on every
+    // device (iPad included). The ONLY large-screen adaptation is that on a
+    // wide landscape screen the hamburger Drawer is docked open beside the
+    // content instead of hidden behind a menu button. This applies only to the
+    // main shell (Share / Card); every pushed screen stays full-screen.
+    return _buildCompactLayout(context);
+  }
+
+  /// True when the main shell should show the Drawer permanently docked to the
+  /// left: only on large screens (tablet/iPad, >= medium) AND in landscape.
+  /// Portrait and phones keep the modal hamburger drawer.
+  bool _useDockedDrawer(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    final isLandscape = size.width > size.height;
+    return isLandscape && size.width >= Breakpoints.medium;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Shared AppBar (title + search field + contextual actions)
+  // ---------------------------------------------------------------------------
+
+  PreferredSizeWidget _buildAppBar(BuildContext context, {String? titleOverride}) {
     final theme = Theme.of(context);
-    final primaryColor = theme.colorScheme.primary;
     final isSearching = ref.watch(contactsSearchModeProvider);
 
-    final inactiveColor = Theme.of(
-      context,
-    ).colorScheme.onSurface.withValues(alpha: 0.6);
-
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      drawer: const AppDrawer(),
-      appBar: AppBar(
-        title: (_currentIndex == 1 && isSearching)
-            ? Container(
-                height: 40,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest.withValues(
-                    alpha: 0.5,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  autofocus: true,
-                  style: GoogleFonts.inter(fontSize: 15),
-                  decoration: InputDecoration(
-                    hintText: 'Search contacts...',
-                    hintStyle: TextStyle(
-                      color: theme.colorScheme.onSurfaceVariant.withValues(
-                        alpha: 0.7,
-                      ),
-                      fontSize: 14,
-                    ),
-                    prefixIcon: Icon(
-                      Icons.search,
-                      size: 20,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                  ),
-                  onChanged: (v) =>
-                      ref.read(contactsSearchQueryProvider.notifier).state = v,
-                ),
-              )
-            : Text(
-                _currentIndex == 0 ? 'Share' : 'Card',
-                style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-              ),
-        actions: [
-          if (_currentIndex == 0)
-            Consumer(
-              builder: (context, ref, child) {
-                final pendingCountAsync = ref.watch(pendingHandshakeCountProvider);
-                return pendingCountAsync.when(
-                  data: (count) => Badge(
-                    label: Text(count.toString()),
-                    isLabelVisible: count > 0,
-                    alignment: Alignment.topRight,
-                    offset: const Offset(-4, 4), // Move slightly towards bottom-left
-                    child: IconButton(
-                      icon: const Icon(Icons.notifications_none),
-                      onPressed: () {
-                        context.push('/handshake-history');
-                      },
-                      tooltip: 'Notifications',
-                    ),
-                  ),
-                  loading: () => IconButton(
-                    icon: const Icon(Icons.notifications_none),
-                    onPressed: () {
-                      context.push('/handshake-history');
-                    },
-                  ),
-                  error: (_, __) => IconButton(
-                    icon: const Icon(Icons.notifications_none),
-                    onPressed: () {
-                      context.push('/handshake-history');
-                    },
-                  ),
-                );
-              },
+    return AppBar(
+      title: (_currentIndex == 1 && isSearching && titleOverride == null)
+          ? _buildSearchField(theme)
+          : Text(
+              titleOverride ?? (_currentIndex == 0 ? 'Share' : 'Card'),
+              style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
             ),
-          if (_currentIndex == 1)
-            isSearching
-                ? IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () {
-                      ref.read(contactsSearchModeProvider.notifier).state =
-                          false;
-                      ref.read(contactsSearchQueryProvider.notifier).state = '';
-                      _searchController.clear();
-                    },
-                  )
-                : IconButton(
-                    icon: const Icon(Icons.search),
-                    onPressed: () {
-                      ref.read(contactsSearchModeProvider.notifier).state =
-                          true;
-                    },
-                  ),
-        ],
+      actions: _buildAppBarActions(context),
+    );
+  }
+
+  Widget _buildSearchField(ThemeData theme) {
+    return Container(
+      height: 40,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(20),
       ),
-      body: IndexedStack(index: _currentIndex, children: _pages),
+      child: TextField(
+        controller: _searchController,
+        autofocus: true,
+        style: GoogleFonts.inter(fontSize: 15),
+        decoration: InputDecoration(
+          hintText: 'Search contacts...',
+          hintStyle: TextStyle(
+            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+            fontSize: 14,
+          ),
+          prefixIcon: Icon(
+            Icons.search,
+            size: 20,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          border: InputBorder.none,
+          isDense: true,
+          contentPadding: const EdgeInsets.symmetric(vertical: 10),
+        ),
+        onChanged: (v) =>
+            ref.read(contactsSearchQueryProvider.notifier).state = v,
+      ),
+    );
+  }
+
+  List<Widget> _buildAppBarActions(BuildContext context) {
+    final isSearching = ref.watch(contactsSearchModeProvider);
+    return [
+      if (_currentIndex == 0)
+        Consumer(
+          builder: (context, ref, child) {
+            final pendingCountAsync = ref.watch(pendingHandshakeCountProvider);
+            return pendingCountAsync.when(
+              data: (count) => Badge(
+                label: Text(count.toString()),
+                isLabelVisible: count > 0,
+                alignment: Alignment.topRight,
+                offset: const Offset(-4, 4),
+                child: IconButton(
+                  icon: const Icon(Icons.notifications_none),
+                  onPressed: () => context.push('/handshake-history'),
+                  tooltip: 'Notifications',
+                ),
+              ),
+              loading: () => IconButton(
+                icon: const Icon(Icons.notifications_none),
+                onPressed: () => context.push('/handshake-history'),
+              ),
+              error: (_, __) => IconButton(
+                icon: const Icon(Icons.notifications_none),
+                onPressed: () => context.push('/handshake-history'),
+              ),
+            );
+          },
+        ),
+      if (_currentIndex == 1)
+        isSearching
+            ? IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () {
+                  ref.read(contactsSearchModeProvider.notifier).state = false;
+                  ref.read(contactsSearchQueryProvider.notifier).state = '';
+                  _searchController.clear();
+                },
+              )
+            : IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  ref.read(contactsSearchModeProvider.notifier).state = true;
+                },
+              ),
+    ];
+  }
+
+  // ---------------------------------------------------------------------------
+  // Compact layout (phones, folded foldables) — original design preserved
+  // ---------------------------------------------------------------------------
+
+  Widget _buildCompactLayout(BuildContext context) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
+    final inactiveColor =
+        theme.colorScheme.onSurface.withValues(alpha: 0.6);
+
+    final docked = _useDockedDrawer(context);
+    final pages = IndexedStack(index: _currentIndex, children: _pages);
+
+    final scaffold = Scaffold(
+      resizeToAvoidBottomInset: false,
+      // When docked, the drawer is a permanent left column OUTSIDE this
+      // Scaffold (see below), so the modal drawer is detached here.
+      drawer: docked ? null : const AppDrawer(),
+      appBar: _buildAppBar(context),
+      body: pages,
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         notchMargin: 8.0,
         child: SafeArea(
           bottom: true,
           child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Expanded(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => _onTabTapped(0),
-                child: SizedBox(
-                  height: 48,
-                  child: Center(
-                    child: Icon(
-                      _currentIndex == 0 ? Icons.share : Icons.share_outlined,
-                      color: _currentIndex == 0 ? primaryColor : inactiveColor,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => _onTabTapped(0),
+                  child: SizedBox(
+                    height: 48,
+                    child: Center(
+                      child: Icon(
+                        _currentIndex == 0 ? Icons.share : Icons.share_outlined,
+                        color:
+                            _currentIndex == 0 ? primaryColor : inactiveColor,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(width: 56),
-            Expanded(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => _onTabTapped(1),
-                child: SizedBox(
-                  height: 48,
-                  child: Center(
-                    child: Icon(
-                      _currentIndex == 1
-                          ? Icons.storage
-                          : Icons.storage_outlined,
-                      color: _currentIndex == 1 ? primaryColor : inactiveColor,
+              const SizedBox(width: 56),
+              Expanded(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => _onTabTapped(1),
+                  child: SizedBox(
+                    height: 48,
+                    child: Center(
+                      child: Icon(
+                        _currentIndex == 1
+                            ? Icons.storage
+                            : Icons.storage_outlined,
+                        color:
+                            _currentIndex == 1 ? primaryColor : inactiveColor,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (_currentIndex == 0) {
-            context.push('/qr-scanner');
-          } else {
-            context.push('/scan');
-          }
-        },
+        onPressed: () => _onPrimaryAction(_currentIndex),
         backgroundColor: _currentIndex == 0 ? primaryColor : Colors.green,
         shape: const CircleBorder(),
         child: Icon(
@@ -260,6 +299,28 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    );
+
+    if (!docked) return scaffold;
+
+    // Docked: the menu is a permanent left column spanning the FULL height
+    // (from the very top), and the app bar / content / bottom bar all live in
+    // the right-hand Scaffold. This keeps the "Share/Card" header attached to
+    // the right content only, not pushing the menu down.
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Row(
+          children: [
+            const SizedBox(
+              width: 300,
+              child: AppDrawer(isDocked: true),
+            ),
+            const VerticalDivider(width: 1, thickness: 1),
+            Expanded(child: scaffold),
+          ],
+        ),
+      ),
     );
   }
 }

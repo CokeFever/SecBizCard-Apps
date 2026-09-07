@@ -99,17 +99,8 @@ class ContactsRepository {
       // Create People API client
       final peopleApi = people.PeopleServiceApi(authenticatedClient);
 
-      // Create contact
-      final person = people.Person(
-        names: [people.Name(givenName: profile.displayName)],
-        emailAddresses: [people.EmailAddress(value: profile.email)],
-        phoneNumbers: profile.phone != null
-            ? [people.PhoneNumber(value: profile.phone)]
-            : null,
-        organizations: profile.company != null
-            ? [people.Organization(name: profile.company, title: profile.title)]
-            : null,
-      );
+      // Create contact — map every populated field, not just the name.
+      final person = _buildPerson(profile);
 
       // Save to Google Contacts
       await peopleApi.people.createContact(person);
@@ -118,6 +109,83 @@ class ContactsRepository {
     } catch (e) {
       return left(ServerFailure(e.toString()));
     }
+  }
+
+  /// Maps a [UserProfile] into a People API [Person], populating every field
+  /// we hold (not just the name). Phones are emitted as separate typed entries
+  /// (work / mobile / fax) and secondary/multi-country data stored in
+  /// customFields (altPhone / altAddress) is emitted too so nothing is lost on
+  /// export.
+  people.Person _buildPerson(UserProfile profile) {
+    final cf = profile.customFields;
+
+    // --- Phones (typed, multi-entry) ---
+    final phoneNumbers = <people.PhoneNumber>[];
+    void addPhone(String? value, String type) {
+      final v = value?.trim();
+      if (v != null && v.isNotEmpty) {
+        phoneNumbers.add(people.PhoneNumber(value: v, type: type));
+      }
+    }
+
+    addPhone(profile.phone, 'work');
+    addPhone(profile.mobile, 'mobile');
+    addPhone(cf['fax'], 'fax');
+    // Multi-country / secondary phone captured during OCR (option A).
+    addPhone(cf['altPhone'], 'other');
+
+    // --- Emails ---
+    final emailAddresses = <people.EmailAddress>[];
+    if (profile.email != null && profile.email!.trim().isNotEmpty) {
+      emailAddresses.add(
+        people.EmailAddress(value: profile.email!.trim(), type: 'work'),
+      );
+    }
+
+    // --- Addresses (typed, multi-entry) ---
+    final addresses = <people.Address>[];
+    void addAddress(String? formatted, String type) {
+      final v = formatted?.trim();
+      if (v != null && v.isNotEmpty) {
+        addresses.add(people.Address(
+          formattedValue: v,
+          type: type,
+          city: cf['city'],
+          postalCode: cf['postalCode'],
+        ));
+      }
+    }
+
+    addAddress(profile.address, 'work');
+    // Multi-country / secondary address captured during OCR (option A).
+    addAddress(cf['altAddress'], 'other');
+
+    // --- Website(s) ---
+    final urls = <people.Url>[];
+    if (profile.website != null && profile.website!.trim().isNotEmpty) {
+      urls.add(people.Url(value: profile.website!.trim(), type: 'work'));
+    }
+
+    // --- Organization ---
+    final organizations = <people.Organization>[];
+    if ((profile.company != null && profile.company!.trim().isNotEmpty) ||
+        (profile.title != null && profile.title!.trim().isNotEmpty) ||
+        (profile.department != null && profile.department!.trim().isNotEmpty)) {
+      organizations.add(people.Organization(
+        name: profile.company,
+        title: profile.title,
+        department: profile.department,
+      ));
+    }
+
+    return people.Person(
+      names: [people.Name(givenName: profile.displayName)],
+      emailAddresses: emailAddresses.isEmpty ? null : emailAddresses,
+      phoneNumbers: phoneNumbers.isEmpty ? null : phoneNumbers,
+      addresses: addresses.isEmpty ? null : addresses,
+      urls: urls.isEmpty ? null : urls,
+      organizations: organizations.isEmpty ? null : organizations,
+    );
   }
 
   /// Fetches the user's own profile from Google People API

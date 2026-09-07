@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:secbizcard/core/services/backup_service.dart';
+import 'package:secbizcard/core/responsive/breakpoints.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -166,7 +167,14 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
         ),
       ),
-      body: Container(
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: Breakpoints.maxContentWidth,
+            minHeight: double.infinity,
+          ),
+          child: Container(
         padding: const EdgeInsets.all(24),
         width: double.infinity,
         child: Column(
@@ -288,6 +296,8 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
             ),
             const SizedBox(height: 32),
           ],
+          ),
+        ),
         ),
       ),
     );
