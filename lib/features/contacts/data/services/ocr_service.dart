@@ -138,10 +138,10 @@ class OCRService {
           engine: OcrEngineUsed.ownKeyVision,
         );
       } on VisionFallbackException catch (e) {
-        debugPrint('[OCR] own-key Vision failed (${e.reason}) → next');
+        if (kDebugMode) debugPrint('[OCR] own-key Vision failed (${e.reason}) → next');
         // fall through to shared / ML Kit
       } catch (e) {
-        debugPrint('[OCR] own-key Vision unexpected error → next');
+        if (kDebugMode) debugPrint('[OCR] own-key Vision unexpected error → next');
       }
     }
 
@@ -160,9 +160,9 @@ class OCRService {
         usageCap: res.userCap,
       );
     } on VisionFallbackException catch (e) {
-      debugPrint('[OCR] shared Vision → fallback ML Kit (${e.reason})');
+      if (kDebugMode) debugPrint('[OCR] shared Vision → fallback ML Kit (${e.reason})');
     } catch (e) {
-      debugPrint('[OCR] shared Vision unexpected error → fallback ML Kit');
+      if (kDebugMode) debugPrint('[OCR] shared Vision unexpected error → fallback ML Kit');
     }
 
     // 3. ML Kit (offline safety net).
@@ -173,7 +173,7 @@ class OCRService {
         engine: OcrEngineUsed.mlKit,
       );
     } catch (e) {
-      debugPrint('[OCR] ML Kit failed: $e');
+      if (kDebugMode) debugPrint('[OCR] ML Kit failed: $e');
       return OcrOutcome(profile: null, engine: OcrEngineUsed.mlKit);
     }
   }
