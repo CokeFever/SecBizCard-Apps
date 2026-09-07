@@ -10,7 +10,10 @@ steps:
     secretEnv: ['ANDROID_KEYSTORE_BASE64']
 
   # 2. 執行 Flutter Build AAB
-  - name: 'ghcr.io/cirruslabs/flutter:stable'
+  # Pinned to 3.38.9 (verified locally). ":stable" pulls 3.47.x whose newer
+  # Dart analyzer crashes riverpod_generator 2.6.4 (visitDotShorthandProperty-
+  # Access), hanging build_runner until the build times out.
+  - name: 'ghcr.io/cirruslabs/flutter:3.38.9'
     id: 'build-aab'
     entrypoint: 'bash'
     args:
@@ -57,7 +60,7 @@ steps:
     secretEnv: ['ANDROID_KEYSTORE_PASSWORD', 'ANDROID_KEY_ALIAS', 'ANDROID_KEY_PASSWORD', 'OCR_DEPLOY_KEY', 'GOOGLE_SERVICES_JSON', 'FIREBASE_OPTIONS_DART']
 
   # 3. 上傳至 Google Play (使用 fastlane)
-  - name: 'ghcr.io/cirruslabs/flutter:stable'
+  - name: 'ghcr.io/cirruslabs/flutter:3.38.9'
     id: 'upload-to-play'
     entrypoint: 'bash'
     args:
