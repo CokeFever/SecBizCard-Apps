@@ -45,5 +45,7 @@
   "ocrSafety2": "• App 会用你的密钥把名片图像直接发送到 Google Cloud Vision，因此辨识费用计入你自己的账号。",
   "ocrSafety3": "• 建议在 Google Cloud 将此密钥限制为仅能使用 Cloud Vision API，并设定预算／配额上限以控制花费。",
   "ocrSafety4": "• 万一密钥外泄，请到 Cloud Console 删除它，再在此处粘贴新的密钥。",
-  "ocrSharedKeyUsage": "Cloud Vision · 共享密钥本月 {used}/{cap}"
+  "ocrSharedKeyUsage": "Cloud Vision · 共享密钥本月 {used}/{cap}",
+  "scanCardHint": "将名片放入框内",
+  "scanCardBackgroundTip": "请放在单色、无花纹的背景上"
 }

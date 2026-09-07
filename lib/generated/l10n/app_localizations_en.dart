@@ -166,4 +166,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String ocrSharedKeyUsage(int used, int cap) {
     return 'Cloud Vision · shared key $used/$cap this month';
   }
+
+  @override
+  String get scanCardHint => 'Place business card in frame';
+
+  @override
+  String get scanCardBackgroundTip => 'Use a plain, non-patterned background';
 }

@@ -140,5 +140,13 @@
       "used": { "type": "int" },
       "cap": { "type": "int" }
     }
+  },
+  "scanCardHint": "Place business card in frame",
+  "@scanCardHint": {
+    "description": "Primary instruction on the card scanning screen"
+  },
+  "scanCardBackgroundTip": "Use a plain, non-patterned background",
+  "@scanCardBackgroundTip": {
+    "description": "Secondary tip: a plain background improves card edge detection"
   }
 }

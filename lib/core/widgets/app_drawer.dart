@@ -14,7 +14,18 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'app_drawer.g.dart';
 
 class AppDrawer extends ConsumerWidget {
-  const AppDrawer({super.key});
+  /// When true, the drawer is rendered permanently docked (inline side panel)
+  /// rather than as a modal overlay. In docked mode, tapping an item must NOT
+  /// call Navigator.pop (there's no overlay to dismiss — popping would remove
+  /// the underlying route), so [_dismiss] becomes a no-op.
+  final bool isDocked;
+
+  const AppDrawer({super.key, this.isDocked = false});
+
+  /// Closes the drawer when it's a modal overlay; no-op when docked.
+  void _dismiss(BuildContext context) {
+    if (!isDocked) _dismiss(context);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,6 +34,12 @@ class AppDrawer extends ConsumerWidget {
     final profileRepo = ref.watch(profileRepositoryProvider);
 
     return Drawer(
+      // Docked (permanent side panel): drop the modal drawer's rounded corner
+      // and elevation so it reads as a flat left column, not a floating sheet.
+      elevation: isDocked ? 0 : null,
+      shape: isDocked
+          ? const RoundedRectangleBorder(borderRadius: BorderRadius.zero)
+          : null,
       child: Column(
         children: [
           if (user != null)
@@ -56,7 +73,7 @@ class AppDrawer extends ConsumerWidget {
             leading: const Icon(Icons.person_outline),
             title: const Text('My Profile'),
             onTap: () {
-              Navigator.pop(context);
+              _dismiss(context);
               context.push('/profile');
             },
           ),
@@ -68,7 +85,7 @@ class AppDrawer extends ConsumerWidget {
                 // Use userProfileProvider which has auto-create logic
                 final profile = await ref.read(userProfileProvider.future);
                 if (!context.mounted) return;
-                Navigator.pop(context);
+                _dismiss(context);
                 if (profile != null) {
                   context.push('/context-settings', extra: profile);
                 } else {
@@ -83,7 +100,7 @@ class AppDrawer extends ConsumerWidget {
             leading: const Icon(Icons.cloud_sync),
             title: const Text('Backup & Restore'),
             onTap: () {
-              Navigator.pop(context);
+              _dismiss(context);
               context.push('/backup');
             },
           ),
@@ -91,7 +108,7 @@ class AppDrawer extends ConsumerWidget {
             leading: const Icon(Icons.auto_awesome_outlined),
             title: const Text('AI Recognition'),
             onTap: () {
-              Navigator.pop(context);
+              _dismiss(context);
               context.push('/ocr-settings');
             },
           ),
@@ -99,7 +116,7 @@ class AppDrawer extends ConsumerWidget {
             leading: const Icon(Icons.file_download),
             title: const Text('Import vCard'),
             onTap: () {
-              Navigator.pop(context);
+              _dismiss(context);
               context.push('/import-vcard');
             },
           ),
@@ -191,7 +208,7 @@ class AppDrawer extends ConsumerWidget {
               children: [
                 GestureDetector(
                   onTap: () {
-                    Navigator.pop(context);
+                    _dismiss(context);
                     launchUrl(Uri.parse('https://ixo.app/privacy'), mode: LaunchMode.externalApplication);
                   },
                   child: Text(
@@ -205,7 +222,7 @@ class AppDrawer extends ConsumerWidget {
                 ),
                 GestureDetector(
                   onTap: () {
-                    Navigator.pop(context);
+                    _dismiss(context);
                     launchUrl(Uri.parse('https://ixo.app/eula'), mode: LaunchMode.externalApplication);
                   },
                   child: Text(
