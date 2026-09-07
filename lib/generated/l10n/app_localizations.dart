@@ -374,6 +374,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cloud Vision · shared key {used}/{cap} this month'**
   String ocrSharedKeyUsage(int used, int cap);
+
+  /// Primary instruction on the card scanning screen
+  ///
+  /// In en, this message translates to:
+  /// **'Place business card in frame'**
+  String get scanCardHint;
+
+  /// Secondary tip: a plain background improves card edge detection
+  ///
+  /// In en, this message translates to:
+  /// **'Use a plain, non-patterned background'**
+  String get scanCardBackgroundTip;
 }
 
 class _AppLocalizationsDelegate

@@ -159,6 +159,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String ocrSharedKeyUsage(int used, int cap) {
     return 'Cloud Vision · 共享密钥本月 $used/$cap';
   }
+
+  @override
+  String get scanCardHint => '将名片放入框内';
+
+  @override
+  String get scanCardBackgroundTip => '请放在单色、无花纹的背景上';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -316,4 +322,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String ocrSharedKeyUsage(int used, int cap) {
     return 'Cloud Vision · 共用金鑰本月 $used/$cap';
   }
+
+  @override
+  String get scanCardHint => '將名片放入框內';
+
+  @override
+  String get scanCardBackgroundTip => '請放在單色、無花紋的背景上';
 }
