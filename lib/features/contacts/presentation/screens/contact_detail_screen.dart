@@ -528,16 +528,22 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
         children: [
           Hero(
             tag: heroTag,
+            // Fixed height, but let the width follow the image's real aspect
+            // ratio and use BoxFit.contain so BOTH landscape and portrait
+            // cards are shown in full (no cropping).
             child: Container(
-              width: 220,
-              height: 120,
+              height: 150,
+              constraints: const BoxConstraints(maxWidth: 260, minWidth: 90),
+              clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
+                color: Colors.grey[100],
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.grey[300]!),
-                image: DecorationImage(
-                  image: imageProvider,
-                  fit: BoxFit.cover,
-                ),
+              ),
+              child: Image(
+                image: imageProvider,
+                fit: BoxFit.contain,
+                height: 150,
               ),
             ),
           ),

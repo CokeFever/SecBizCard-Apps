@@ -15,6 +15,7 @@ import 'package:secbizcard/features/handshake/presentation/screens/handshake_his
 import 'package:secbizcard/features/home/presentation/screens/main_screen.dart';
 import 'package:secbizcard/features/contacts/presentation/screens/edit_contact_screen.dart';
 import 'package:secbizcard/features/settings/presentation/screens/backup_screen.dart';
+import 'package:secbizcard/features/settings/presentation/screens/ocr_settings_screen.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'package:secbizcard/features/profile/presentation/screens/context_settings_screen.dart';
 import 'package:secbizcard/features/contacts/presentation/screens/contact_detail_screen.dart';
@@ -134,6 +135,10 @@ GoRouter goRouter(Ref ref) {
       GoRoute(
         path: '/backup',
         builder: (context, state) => const BackupScreen(),
+      ),
+      GoRoute(
+        path: '/ocr-settings',
+        builder: (context, state) => const OcrSettingsScreen(),
       ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(

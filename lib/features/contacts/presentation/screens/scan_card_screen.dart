@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:secbizcard/features/contacts/data/services/ocr_service.dart';
+import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 class ScanCardScreen extends StatefulWidget {
   const ScanCardScreen({super.key});
@@ -21,6 +22,7 @@ class _ScanCardScreenState extends State<ScanCardScreen>
   bool _isVertical = false;
   String? _capturedImagePath;
   String _processingStatus = '';
+  OcrPreScanStatus? _preScanStatus; // engine + remaining shared quota
 
   // Permission state: null = still checking, true = denied, false = granted
   bool? _isPermissionDenied;
@@ -32,6 +34,12 @@ class _ScanCardScreenState extends State<ScanCardScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _checkAndRequestPermission();
+    _loadPreScanStatus();
+  }
+
+  Future<void> _loadPreScanStatus() async {
+    final status = await _ocrService.preScanStatus();
+    if (mounted) setState(() => _preScanStatus = status);
   }
 
   @override
@@ -189,17 +197,31 @@ class _ScanCardScreenState extends State<ScanCardScreen>
         debugPrint('OpenCV processing failed, falling back to original: $e');
       }
 
-      // OCR Recognition
+      // OCR Recognition. We attempt Cloud Vision first (own key or shared),
+      // so reflect that in the status; if it falls back, the review screen's
+      // badge will show on-device instead.
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        final willUseCloud = await _ocrService.willAttemptCloudVision();
         setState(() {
-          _processingStatus = 'Recognizing text...';
+          _processingStatus = willUseCloud
+              ? l10n.ocrRecognizingCloudVision
+              : l10n.ocrRecognizingOnDevice;
         });
       }
 
-      final profile = await _ocrService.recognizeBusinessCard(finalImagePath);
+      final outcome = await _ocrService.recognize(finalImagePath);
 
       if (mounted) {
+        final profile = outcome.profile;
         if (profile != null) {
+          // Surface a brief note when we fell back or are near a usage limit.
+          final msg = _ocrNoteMessage(outcome);
+          if (msg != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(msg), duration: const Duration(seconds: 3)),
+            );
+          }
           context.push(
             '/review-contact',
             extra: {'profile': profile, 'imagePath': finalImagePath},
@@ -249,6 +271,65 @@ class _ScanCardScreenState extends State<ScanCardScreen>
       'width': clampedW,
       'height': clampedH,
     };
+  }
+
+  /// Camera-preview badge showing the engine that will be used and, for the
+  /// shared key, remaining monthly quota (e.g. "Cloud Vision · 2/5 this month").
+  Widget _buildPreScanBadge(BuildContext context, OcrPreScanStatus status) {
+    final l10n = AppLocalizations.of(context)!;
+    late final String label;
+    switch (status.engine) {
+      case OcrEngineUsed.ownKeyVision:
+        // BYOK: no numbers (usage is managed by the user in Cloud Console).
+        label = l10n.ocrSourceCloudVisionOwn;
+        break;
+      case OcrEngineUsed.sharedVision:
+        if (status.whitelisted &&
+            status.used != null &&
+            status.cap != null) {
+          // Owner/admin: show the shared key's global monthly usage.
+          label = l10n.ocrSharedKeyUsage(status.used!, status.cap!);
+        } else if (status.used != null && status.cap != null) {
+          label = l10n.ocrSourceCloudVisionShared(status.used!, status.cap!);
+        } else {
+          label = l10n.ocrRecognizingCloudVision;
+        }
+        break;
+      case OcrEngineUsed.mlKit:
+        label = l10n.ocrSourceOnDevice;
+        break;
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.black54,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.cloud_outlined, size: 14, color: Colors.white),
+          const SizedBox(width: 6),
+          Text(label, style: const TextStyle(color: Colors.white, fontSize: 12)),
+        ],
+      ),
+    );
+  }
+
+  /// A short, friendly message when OCR fell back or is near a usage limit.
+  /// Returns null when nothing needs to be surfaced (the common case).
+  String? _ocrNoteMessage(OcrOutcome outcome) {
+    switch (outcome.note) {
+      case 'own_key_near_limit':
+        return 'Your Cloud Vision key is near its monthly free limit (80%).';
+      case 'shared_near_limit':
+        return 'Shared recognition quota is running low this month.';
+    }
+    // If we ended on ML Kit while the user expected higher quality, hint gently.
+    if (outcome.engine == OcrEngineUsed.mlKit) {
+      return 'Used on-device recognition. Add a Cloud Vision key in Settings for best results.';
+    }
+    return null;
   }
 
   Future<String?> _processWithOpenCV(String inputPath) async {
@@ -471,6 +552,14 @@ class _ScanCardScreenState extends State<ScanCardScreen>
               ),
             ),
           ),
+
+          // Pre-scan engine + shared-quota indicator (top-right).
+          if (!_isProcessing && _preScanStatus != null)
+            Positioned(
+              top: 64,
+              right: 16,
+              child: _buildPreScanBadge(context, _preScanStatus!),
+            ),
 
           // Capture Button (hidden during processing)
           if (!_isProcessing)

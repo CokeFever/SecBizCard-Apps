@@ -37,5 +37,108 @@
   "onboardingWelcome": "Welcome to SecBizCard",
   "@onboardingWelcome": {
     "description": "Welcome message on onboarding"
+  },
+  "ocrRecognizingCloudVision": "Recognizing with Cloud Vision…",
+  "@ocrRecognizingCloudVision": {
+    "description": "Shown while recognizing a card via Cloud Vision"
+  },
+  "ocrRecognizingOnDevice": "Recognizing on-device…",
+  "@ocrRecognizingOnDevice": {
+    "description": "Shown while recognizing a card via on-device ML Kit"
+  },
+  "ocrSourceCloudVisionOwn": "Cloud Vision · Your key",
+  "@ocrSourceCloudVisionOwn": {
+    "description": "Result badge: recognized using the user's own Cloud Vision key"
+  },
+  "ocrSourceCloudVisionShared": "Cloud Vision · {used}/{cap} this month",
+  "@ocrSourceCloudVisionShared": {
+    "description": "Result badge: recognized using shared Cloud Vision with monthly usage",
+    "placeholders": {
+      "used": { "type": "int", "example": "3" },
+      "cap": { "type": "int", "example": "5" }
+    }
+  },
+  "ocrSourceOnDevice": "On-device recognition",
+  "@ocrSourceOnDevice": {
+    "description": "Result badge: recognized using on-device ML Kit"
+  },
+  "aiRecognitionTitle": "AI Recognition",
+  "@aiRecognitionTitle": {},
+  "ocrUsingOwnKey": "Using your Cloud Vision key",
+  "@ocrUsingOwnKey": {},
+  "ocrUsingOwnKeyDesc": "Best quality. Billed to your own Google Cloud account.",
+  "@ocrUsingOwnKeyDesc": {},
+  "ocrUsingSharedQuota": "Using shared quota",
+  "@ocrUsingSharedQuota": {},
+  "ocrUsingSharedQuotaDesc": "Up to {perUser} free AI scans per month, then it falls back to fast on-device recognition. Add your own key below for unlimited best-quality scans.",
+  "@ocrUsingSharedQuotaDesc": {
+    "placeholders": { "perUser": { "type": "int", "example": "5" } }
+  },
+  "ocrUsageThisMonth": "This month: {used} / {cap}",
+  "@ocrUsageThisMonth": {
+    "placeholders": {
+      "used": { "type": "int" },
+      "cap": { "type": "int" }
+    }
+  },
+  "ocrOwnKeyNearLimitWarn": "You have used 80%+ of the monthly free tier. Further scans this month may incur charges on your Google Cloud account.",
+  "@ocrOwnKeyNearLimitWarn": {},
+  "ocrUseOwnKeyHeading": "Use your own API key",
+  "@ocrUseOwnKeyHeading": {},
+  "ocrUpdateOwnKeyHeading": "Update your API key",
+  "@ocrUpdateOwnKeyHeading": {},
+  "ocrKeyHint": "Paste your Cloud Vision API key",
+  "@ocrKeyHint": {},
+  "ocrKeySaved": "Cloud Vision key saved securely on this device.",
+  "@ocrKeySaved": {},
+  "ocrKeyRemoved": "Cloud Vision key removed from this device.",
+  "@ocrKeyRemoved": {},
+  "ocrKeyMasked": "A key is saved on this device.",
+  "@ocrKeyMasked": {},
+  "save": "Save",
+  "@save": {},
+  "update": "Update",
+  "@update": {},
+  "remove": "Remove",
+  "@remove": {},
+  "cancel": "Cancel",
+  "@cancel": {},
+  "ocrReplaceKeyTitle": "Replace saved key?",
+  "@ocrReplaceKeyTitle": {},
+  "ocrReplaceKeyBody": "This will overwrite the API key currently stored on this device.",
+  "@ocrReplaceKeyBody": {},
+  "ocrRemoveKeyTitle": "Remove saved key?",
+  "@ocrRemoveKeyTitle": {},
+  "ocrRemoveKeyBody": "This device will go back to using the shared monthly quota. You can add your key again anytime.",
+  "@ocrRemoveKeyBody": {},
+  "ocrHowToTitle": "How to get a Cloud Vision API key",
+  "@ocrHowToTitle": {},
+  "ocrHowTo1": "1. Go to Google Cloud Console and create (or pick) a project.",
+  "@ocrHowTo1": {},
+  "ocrHowTo2": "2. Enable the \"Cloud Vision API\" for that project.",
+  "@ocrHowTo2": {},
+  "ocrHowTo3": "3. Under APIs & Services → Credentials, create an API key.",
+  "@ocrHowTo3": {},
+  "ocrHowTo4": "4. Copy the key and paste it above.",
+  "@ocrHowTo4": {},
+  "ocrOpenConsole": "Open Google Cloud Console",
+  "@ocrOpenConsole": {},
+  "ocrSafetyTitle": "Your key stays on your device",
+  "@ocrSafetyTitle": {},
+  "ocrSafety1": "• Your key is saved only in this device's secure keychain — it is never uploaded to our servers, never synced, and never leaves your phone.",
+  "@ocrSafety1": {},
+  "ocrSafety2": "• The app sends card images straight to Google Cloud Vision using your key, so recognition is billed to your own account.",
+  "@ocrSafety2": {},
+  "ocrSafety3": "• In Google Cloud, restrict the key to the Cloud Vision API only, and set a budget/quota limit to cap spending.",
+  "@ocrSafety3": {},
+  "ocrSafety4": "• If a key ever leaks, delete it in the Cloud Console and paste a new one here.",
+  "@ocrSafety4": {},
+  "ocrSharedKeyUsage": "Cloud Vision · shared key {used}/{cap} this month",
+  "@ocrSharedKeyUsage": {
+    "description": "Admin/owner view: global usage of the shared Cloud Vision key",
+    "placeholders": {
+      "used": { "type": "int" },
+      "cap": { "type": "int" }
+    }
   }
 }

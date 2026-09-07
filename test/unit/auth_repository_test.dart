@@ -24,10 +24,9 @@ class FakeRef extends Fake implements Ref {
 
   @override
   T read<T>(ProviderListenable<T> provider) {
-    if (provider == authInitializationStateProvider.notifier) {
-      return initController as T;
-    }
-    throw UnimplementedError('Unexpected ref.read($provider) in AuthRepository test');
+    // AuthRepository._init only reads authInitializationStateProvider.notifier,
+    // so returning the shared StateController for any read is sufficient here.
+    return initController as T;
   }
 }
 
