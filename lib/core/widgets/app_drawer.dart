@@ -88,6 +88,14 @@ class AppDrawer extends ConsumerWidget {
             },
           ),
           ListTile(
+            leading: const Icon(Icons.auto_awesome_outlined),
+            title: const Text('AI Recognition'),
+            onTap: () {
+              Navigator.pop(context);
+              context.push('/ocr-settings');
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.file_download),
             title: const Text('Import vCard'),
             onTap: () {

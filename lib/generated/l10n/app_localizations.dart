@@ -146,6 +146,234 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Welcome to SecBizCard'**
   String get onboardingWelcome;
+
+  /// Shown while recognizing a card via Cloud Vision
+  ///
+  /// In en, this message translates to:
+  /// **'Recognizing with Cloud Vision…'**
+  String get ocrRecognizingCloudVision;
+
+  /// Shown while recognizing a card via on-device ML Kit
+  ///
+  /// In en, this message translates to:
+  /// **'Recognizing on-device…'**
+  String get ocrRecognizingOnDevice;
+
+  /// Result badge: recognized using the user's own Cloud Vision key
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Vision · Your key'**
+  String get ocrSourceCloudVisionOwn;
+
+  /// Result badge: recognized using shared Cloud Vision with monthly usage
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Vision · {used}/{cap} this month'**
+  String ocrSourceCloudVisionShared(int used, int cap);
+
+  /// Result badge: recognized using on-device ML Kit
+  ///
+  /// In en, this message translates to:
+  /// **'On-device recognition'**
+  String get ocrSourceOnDevice;
+
+  /// No description provided for @aiRecognitionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Recognition'**
+  String get aiRecognitionTitle;
+
+  /// No description provided for @ocrUsingOwnKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Using your Cloud Vision key'**
+  String get ocrUsingOwnKey;
+
+  /// No description provided for @ocrUsingOwnKeyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Best quality. Billed to your own Google Cloud account.'**
+  String get ocrUsingOwnKeyDesc;
+
+  /// No description provided for @ocrUsingSharedQuota.
+  ///
+  /// In en, this message translates to:
+  /// **'Using shared quota'**
+  String get ocrUsingSharedQuota;
+
+  /// No description provided for @ocrUsingSharedQuotaDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {perUser} free AI scans per month, then it falls back to fast on-device recognition. Add your own key below for unlimited best-quality scans.'**
+  String ocrUsingSharedQuotaDesc(int perUser);
+
+  /// No description provided for @ocrUsageThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This month: {used} / {cap}'**
+  String ocrUsageThisMonth(int used, int cap);
+
+  /// No description provided for @ocrOwnKeyNearLimitWarn.
+  ///
+  /// In en, this message translates to:
+  /// **'You have used 80%+ of the monthly free tier. Further scans this month may incur charges on your Google Cloud account.'**
+  String get ocrOwnKeyNearLimitWarn;
+
+  /// No description provided for @ocrUseOwnKeyHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your own API key'**
+  String get ocrUseOwnKeyHeading;
+
+  /// No description provided for @ocrUpdateOwnKeyHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Update your API key'**
+  String get ocrUpdateOwnKeyHeading;
+
+  /// No description provided for @ocrKeyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste your Cloud Vision API key'**
+  String get ocrKeyHint;
+
+  /// No description provided for @ocrKeySaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Vision key saved securely on this device.'**
+  String get ocrKeySaved;
+
+  /// No description provided for @ocrKeyRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Vision key removed from this device.'**
+  String get ocrKeyRemoved;
+
+  /// No description provided for @ocrKeyMasked.
+  ///
+  /// In en, this message translates to:
+  /// **'A key is saved on this device.'**
+  String get ocrKeyMasked;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @update.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get update;
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @ocrReplaceKeyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace saved key?'**
+  String get ocrReplaceKeyTitle;
+
+  /// No description provided for @ocrReplaceKeyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This will overwrite the API key currently stored on this device.'**
+  String get ocrReplaceKeyBody;
+
+  /// No description provided for @ocrRemoveKeyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove saved key?'**
+  String get ocrRemoveKeyTitle;
+
+  /// No description provided for @ocrRemoveKeyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This device will go back to using the shared monthly quota. You can add your key again anytime.'**
+  String get ocrRemoveKeyBody;
+
+  /// No description provided for @ocrHowToTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How to get a Cloud Vision API key'**
+  String get ocrHowToTitle;
+
+  /// No description provided for @ocrHowTo1.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Go to Google Cloud Console and create (or pick) a project.'**
+  String get ocrHowTo1;
+
+  /// No description provided for @ocrHowTo2.
+  ///
+  /// In en, this message translates to:
+  /// **'2. Enable the \"Cloud Vision API\" for that project.'**
+  String get ocrHowTo2;
+
+  /// No description provided for @ocrHowTo3.
+  ///
+  /// In en, this message translates to:
+  /// **'3. Under APIs & Services → Credentials, create an API key.'**
+  String get ocrHowTo3;
+
+  /// No description provided for @ocrHowTo4.
+  ///
+  /// In en, this message translates to:
+  /// **'4. Copy the key and paste it above.'**
+  String get ocrHowTo4;
+
+  /// No description provided for @ocrOpenConsole.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Google Cloud Console'**
+  String get ocrOpenConsole;
+
+  /// No description provided for @ocrSafetyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your key stays on your device'**
+  String get ocrSafetyTitle;
+
+  /// No description provided for @ocrSafety1.
+  ///
+  /// In en, this message translates to:
+  /// **'• Your key is saved only in this device\'s secure keychain — it is never uploaded to our servers, never synced, and never leaves your phone.'**
+  String get ocrSafety1;
+
+  /// No description provided for @ocrSafety2.
+  ///
+  /// In en, this message translates to:
+  /// **'• The app sends card images straight to Google Cloud Vision using your key, so recognition is billed to your own account.'**
+  String get ocrSafety2;
+
+  /// No description provided for @ocrSafety3.
+  ///
+  /// In en, this message translates to:
+  /// **'• In Google Cloud, restrict the key to the Cloud Vision API only, and set a budget/quota limit to cap spending.'**
+  String get ocrSafety3;
+
+  /// No description provided for @ocrSafety4.
+  ///
+  /// In en, this message translates to:
+  /// **'• If a key ever leaks, delete it in the Cloud Console and paste a new one here.'**
+  String get ocrSafety4;
+
+  /// Admin/owner view: global usage of the shared Cloud Vision key
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Vision · shared key {used}/{cap} this month'**
+  String ocrSharedKeyUsage(int used, int cap);
 }
 
 class _AppLocalizationsDelegate
