@@ -18,6 +18,9 @@ import 'package:secbizcard/core/utils/field_formatter.dart';
 import 'package:secbizcard/core/presentation/widgets/full_screen_image_viewer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:secbizcard/features/storage/data/drive_repository.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:secbizcard/core/utils/image_picker_service.dart';
 
 class ContactDetailScreen extends ConsumerStatefulWidget {
   final UserProfile user;
@@ -32,6 +35,7 @@ class ContactDetailScreen extends ConsumerStatefulWidget {
 class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
   late UserProfile _user;
   bool _isExporting = false;
+  bool _isSavingPhoto = false;
 
   @override
   void initState() {
@@ -93,6 +97,128 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
         _user = updatedUser;
       });
     }
+  }
+
+  bool get _hasPhoto =>
+      (_user.photoUrl != null && _user.photoUrl!.isNotEmpty) ||
+      (_user.avatarDriveFileId != null && _user.avatarDriveFileId!.isNotEmpty);
+
+  /// Bottom sheet: choose a source (gallery / camera) or remove the photo.
+  void _showPhotoOptions() {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: const Text('Choose from Gallery'),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                _pickPhoto(ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt_outlined),
+              title: const Text('Take Photo'),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                _pickPhoto(ImageSource.camera);
+              },
+            ),
+            if (_hasPhoto)
+              ListTile(
+                leading: Icon(Icons.delete_outline, color: Colors.red[400]),
+                title: Text(
+                  'Remove Photo',
+                  style: TextStyle(color: Colors.red[400]),
+                ),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _removePhoto();
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickPhoto(ImageSource source) async {
+    final imagePickerService = ref.read(imagePickerServiceProvider);
+    final result = source == ImageSource.gallery
+        ? await imagePickerService.pickImageFromGallery()
+        : await imagePickerService.pickImageFromCamera();
+
+    if (!mounted) return;
+    result.fold(
+      (failure) {
+        // "No image selected" is a user cancel — stay quiet for that.
+        if (failure.message.toLowerCase().contains('no image')) return;
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(failure.message)));
+      },
+      (image) => _cropAndSavePhoto(image),
+    );
+  }
+
+  Future<void> _cropAndSavePhoto(File imageFile) async {
+    final croppedFile = await ImageCropper().cropImage(
+      sourcePath: imageFile.path,
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Edit Photo',
+          toolbarColor: Theme.of(context).primaryColor,
+          toolbarWidgetColor: Colors.white,
+          initAspectRatio: CropAspectRatioPreset.square,
+          lockAspectRatio: true,
+        ),
+        IOSUiSettings(title: 'Edit Photo', aspectRatioLockEnabled: true),
+      ],
+      aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+    );
+
+    if (croppedFile == null) return; // user cancelled crop
+
+    // Replace the photo. Clear the Drive id so the avatar can't fall back to a
+    // stale remote image once the user has chosen a local one.
+    final updated = _user.copyWith(
+      photoUrl: croppedFile.path,
+      avatarDriveFileId: null,
+    );
+    await _persistPhoto(updated);
+  }
+
+  Future<void> _removePhoto() async {
+    final updated = _user.copyWith(photoUrl: null, avatarDriveFileId: null);
+    await _persistPhoto(updated);
+  }
+
+  Future<void> _persistPhoto(UserProfile updated) async {
+    setState(() => _isSavingPhoto = true);
+    final repo = ref.read(contactsRepositoryProvider);
+    final result = await repo.saveContactLocally(updated);
+    if (!mounted) return;
+    result.fold(
+      (failure) {
+        setState(() => _isSavingPhoto = false);
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Error: ${failure.message}')));
+      },
+      (_) {
+        // saveContactLocally persists the image into the app dir and may have
+        // rewritten photoUrl; re-read the stored contact so _user reflects the
+        // final persisted path.
+        setState(() {
+          _user = updated;
+          _isSavingPhoto = false;
+        });
+        ref.invalidate(savedContactsProvider);
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Photo updated')));
+      },
+    );
   }
 
   void _exportToGoogle() async {
@@ -225,10 +351,55 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
           child: Column(
           children: [
             Center(
-              child: UserProfileAvatar(
-                photoUrl: _user.photoUrl,
-                displayName: _user.displayName,
-                radius: 60,
+              child: GestureDetector(
+                onTap: _isSavingPhoto ? null : _showPhotoOptions,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    UserProfileAvatar(
+                      photoUrl: _user.photoUrl,
+                      driveFileId: _user.avatarDriveFileId,
+                      displayName: _user.displayName,
+                      radius: 60,
+                    ),
+                    if (_isSavingPhoto)
+                      const Positioned.fill(
+                        child: CircleAvatar(
+                          radius: 60,
+                          backgroundColor: Colors.black38,
+                          child: SizedBox(
+                            width: 28,
+                            height: 28,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 3,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          ),
+                        ),
+                      ),
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                            width: 2,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          size: 18,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 24),
