@@ -26,7 +26,10 @@ permissions:
   contents: write
 
 env:
-  FLUTTER_VERSION: ""  # Use latest stable
+  # Pin to the version verified locally. "latest stable" (3.47.x) ships a newer
+  # Dart analyzer whose dot-shorthand node (visitDotShorthandPropertyAccess)
+  # crashes riverpod_generator 2.6.4, hanging build_runner until timeout.
+  FLUTTER_VERSION: "3.38.9"
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
