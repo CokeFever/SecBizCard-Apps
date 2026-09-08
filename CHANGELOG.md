@@ -1,5 +1,54 @@
 # Changelog
 
+## [1.5.1] - 2026-09-08
+
+### Added
+- **Scan**: New Android card-edge detection strategy (Otsu threshold + larger close/dilate to bridge broken edges) plus emitting each large contour's min-area rect as a candidate. Cards on busy or low-contrast backgrounds are detected far more reliably. iOS Vision detection unchanged.
+
+### Changed
+- **Handshake / QR**: Removed the speculative session pre-warm. The Share screen is mounted eagerly inside the tab stack and consumed the warm session before it was ready, which wasted an extra Cloud Function call and briefly showed a loading placeholder. The QR is now generated once when the Share screen initializes; the Cloud Functions HTTP connection is still warmed up on login.
+
+### Fixed
+- **Drawer**: Fixed infinite recursion where `_dismiss()` called itself instead of `Navigator.pop()` (introduced by a stray replace-all during the docked-drawer change). Tapping any drawer item recursed until Dart ran out of memory (SIGABRT). Verified on Pixel 9 Pro.
+
+### CI/CD
+- Pinned Flutter to 3.38.9 across Android APK/AAB pipelines and Xcode Cloud.
+- Set up the Flutter toolchain before secret injection on Android.
+
+## [1.5.0] - 2026-09-06
+
+### Added
+- **Cloud Vision OCR**: New recognition client with engine abstraction and fallback chain (own key → shared key via Cloud Function → ML Kit). BYOK stored in the secure keychain; camera preview shows engine + remaining shared quota; new "AI Recognition" settings screen (en/zh/zh_TW).
+- **iPad & Foldable support**: Adaptive layout with responsive breakpoints. Large landscape screens dock the drawer open as a left column; phones/portrait keep the modal drawer. iPad app icons and four-orientation support added.
+- **Scanner**: Full-bleed camera preview without distortion in portrait and landscape; guide box sized to the shorter side on tablets; landscape moves capture controls to the sides. Localized scan hints (en/zh/zh_TW).
+- **Contacts**: Export the full contact (typed phones, emails, addresses, website, organization) to Google Contacts. Edit a contact's profile photo (gallery/camera + square crop), including Drive-only photos.
+- **Card detection**: Shared geometric scoring model across Android (`OpenCVProcessor.kt`) and iOS (`CardScoring.swift`) using convexity, near-90° corners, parallel edges, aspect ratio, and the on-screen guide frame as a prior.
+
+### Changed
+- **Android 16 KB compliance** (Google Play, May 2026): Migrated OpenCV from the discontinued `quickbirdstudios:4.5.3.0` (4 KB-aligned) to the official `org.opencv:opencv:4.14.0` (16 KB-aligned); enabled prefab, `c++_shared` STL, and `jniLibs useLegacyPackaging=false`.
+- **Orientation**: Adaptive policy — phones (shortest side < 600dp) stay portrait-only; tablets/iPads/unfolded foldables allow all orientations for Split View / Stage Manager.
+- **Memory**: Capped the in-memory image cache to 200 images / 50 MB to reduce peak memory on newer Android limits and multitasking.
+
+### Security
+- **vCard export**: Escape all interpolated values (backslash, `;`, comma, newlines) so OCR'd card text can't inject forged vCard properties. Gated OCR debug logging behind `kDebugMode`.
+
+### Tooling & Tests
+- cloudbuild installs android-36 + build-tools 36.0.0.
+- Fixed `auth_repository_test` MockRef stubbing; added responsive breakpoint tests; enforced tests in CI.
+
+## [1.4.5] - 2026-03-24
+
+### Added
+- **Handshake**: Card privacy controls in the exchange flow.
+
+### Fixed
+- **Auth**: Fixed authentication persistence.
+- **Splash**: Resolved infinite splash-screen hang on auth error.
+- **Backup**: Robust image sync and Google Drive persistence; fixed undefined `pJson` in `BackupService`.
+
+### CI/CD
+- Switched to a Dart-based secret injector; unified Firebase config injection across Android/iOS; robust URL-safe Base64 decoding; pre-install Android SDKs in cloudbuild to prevent OOM.
+
 ## [1.3.9] - 2026-03-22
 
 ### Fixed
