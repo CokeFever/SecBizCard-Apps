@@ -24,7 +24,7 @@ class AppDrawer extends ConsumerWidget {
 
   /// Closes the drawer when it's a modal overlay; no-op when docked.
   void _dismiss(BuildContext context) {
-    if (!isDocked) _dismiss(context);
+    if (!isDocked) Navigator.pop(context);
   }
 
   @override
