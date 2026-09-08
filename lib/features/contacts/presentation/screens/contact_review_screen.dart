@@ -139,7 +139,19 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
               child: Container(
                 width: double.infinity,
                 color: Colors.grey.shade200,
-                child: Image.file(File(widget.imagePath), fit: BoxFit.contain),
+                child: Image.file(
+                  File(widget.imagePath),
+                  fit: BoxFit.contain,
+                  // This is only a preview thumbnail; its width is capped by
+                  // AdaptiveContainer (maxContentWidth). Decode to at most that
+                  // width in physical pixels so the full-res captured card photo
+                  // isn't held in memory. Passing only cacheWidth preserves the
+                  // image's aspect ratio.
+                  cacheWidth:
+                      (Breakpoints.maxContentWidth *
+                              MediaQuery.devicePixelRatioOf(context))
+                          .ceil(),
+                ),
               ),
             ),
 

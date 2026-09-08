@@ -183,7 +183,9 @@ class _QrScannerScreenState extends State<QrScannerScreen>
             ),
           ),
           Positioned(
-            bottom: 110,
+            // Offset by the bottom system inset so the hint stays clear of the
+            // gesture-nav area under Android 15+ edge-to-edge.
+            bottom: MediaQuery.paddingOf(context).bottom + 110,
             left: 0,
             right: 0,
             child: Center(

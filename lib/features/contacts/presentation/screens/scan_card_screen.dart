@@ -403,6 +403,13 @@ class _ScanCardScreenState extends State<ScanCardScreen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+    // System bar insets. On Android 15+ (targetSdk 35+) apps draw edge-to-edge
+    // by default, so status bar / gesture-nav areas overlap this full-screen
+    // camera. Offset the manually-positioned controls by these insets so they
+    // never sit under a system bar or camera cutout. On devices without insets
+    // (value 0) the layout is unchanged.
+    final padding = MediaQuery.paddingOf(context);
     // Landscape only ever happens on tablet/iPad (phones are portrait-locked
     // in main.dart), so the landscape control layout never affects phones.
     final isLandscape = size.width > size.height;
@@ -445,6 +452,13 @@ class _ScanCardScreenState extends State<ScanCardScreen>
                     fit: BoxFit.cover,
                     width: size.width,
                     height: size.height,
+                    // Decode only to the physical pixel size of the screen this
+                    // frozen snapshot fills. The captured card photo is far
+                    // larger than any display (phone/iPad/foldable), so
+                    // downsampling at decode time avoids loading the full-res
+                    // bitmap into memory. Rounded up to stay crisp on every DPR.
+                    cacheWidth: (size.width * devicePixelRatio).ceil(),
+                    cacheHeight: (size.height * devicePixelRatio).ceil(),
                   )
                 : (size.shortestSide >= Breakpoints.medium)
                     // Tablet/iPad: fill the screen (cover) with NO distortion.
@@ -542,7 +556,7 @@ class _ScanCardScreenState extends State<ScanCardScreen>
               )
             else
               Positioned(
-                top: 100,
+                top: padding.top + 52,
                 left: 0,
                 right: 0,
                 child: Center(
@@ -572,10 +586,12 @@ class _ScanCardScreenState extends State<ScanCardScreen>
                 ),
               ),
 
-          // Instruction Text (hidden during processing)
+          // Instruction Text (hidden during processing).
+          // Shifted up by the bottom inset to keep its spacing above the
+          // capture button, which is itself offset by the same inset.
           if (!_isProcessing)
             Positioned(
-              bottom: 160,
+              bottom: padding.bottom + 160,
               left: 0,
               right: 0,
               child: Center(
@@ -618,7 +634,7 @@ class _ScanCardScreenState extends State<ScanCardScreen>
 
           // Back Button (always visible)
           Positioned(
-            top: 60,
+            top: padding.top + 12,
             left: 16,
             child: CircleAvatar(
               backgroundColor: Colors.black45,
@@ -632,7 +648,7 @@ class _ScanCardScreenState extends State<ScanCardScreen>
           // Pre-scan engine + shared-quota indicator (top-right).
           if (!_isProcessing && _preScanStatus != null)
             Positioned(
-              top: 64,
+              top: padding.top + 16,
               right: 16,
               child: _buildPreScanBadge(context, _preScanStatus!),
             ),
@@ -660,7 +676,7 @@ class _ScanCardScreenState extends State<ScanCardScreen>
               )
             else
               Positioned(
-                bottom: 48,
+                bottom: padding.bottom + 48,
                 left: 0,
                 right: 0,
                 child: Center(
