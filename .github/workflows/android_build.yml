@@ -1,15 +1,12 @@
 name: Android Release Build
 
 on:
+  # Release builds are driven by tags only. We intentionally do NOT build on
+  # every push to main — a release APK/AAB is only needed when we cut a version
+  # (android/v* tag). This avoids a duplicate run every time main is pushed.
   push:
-    branches: [ "main" ]
     tags:
       - 'android/v*'
-    paths-ignore:
-      - 'website/**'
-      - 'docs/**'
-      - 'README.md'
-      - '.agent/**'
   pull_request:
     branches: [ "main" ]
     paths-ignore:
