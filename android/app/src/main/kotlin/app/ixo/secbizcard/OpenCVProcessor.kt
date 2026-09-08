@@ -203,13 +203,26 @@ class OpenCVProcessor {
         )
         edgeMaps.add(adaptive)
 
+        // Strategy D: Otsu global threshold. When the card and background
+        // differ in overall tone but the edge gradient is weak (busy/low-
+        // contrast backgrounds where Canny misses the border), Otsu often
+        // separates card-from-background cleanly. We take its edges via a
+        // second Canny on the thresholded image.
+        val otsu = Mat()
+        Imgproc.threshold(gray, otsu, 0.0, 255.0, Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU)
+        edgeMaps.add(otsu)
+
         val minArea = resized.rows() * resized.cols() / 8.0
         val candidates = ArrayList<Array<Point>>()
 
         for (edges in edgeMaps) {
-            // Close small gaps so card borders form continuous contours.
-            val kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, Size(3.0, 3.0))
+            // Close small gaps so card borders form continuous contours. A
+            // slightly larger kernel + a dilation bridges broken edges on low-
+            // contrast / textured backgrounds (the main reason Android missed
+            // cards that iOS's Vision detector found).
+            val kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, Size(5.0, 5.0))
             Imgproc.morphologyEx(edges, edges, Imgproc.MORPH_CLOSE, kernel)
+            Imgproc.dilate(edges, edges, kernel)
 
             val contours = ArrayList<MatOfPoint>()
             Imgproc.findContours(
@@ -223,6 +236,18 @@ class OpenCVProcessor {
 
                 val c2f = MatOfPoint2f(*contour.toArray())
                 val peri = Imgproc.arcLength(c2f, true)
+
+                // Always add the minimum-area rectangle of any large contour as
+                // a candidate. A real card is convex and rectangular, so its
+                // min-area rect is a strong candidate even when the contour is
+                // noisy, has rounded corners, or approxPolyDP doesn't land on
+                // exactly 4 points. The scorer discards off-card noise anyway.
+                run {
+                    val rot = Imgproc.minAreaRect(c2f)
+                    val box = arrayOfNulls<Point>(4)
+                    rot.points(box)
+                    candidates.add(sortPoints(box.map { it!! }.toTypedArray()))
+                }
 
                 // Try several epsilon fractions to approximate a 4-gon.
                 for (epsFrac in doubleArrayOf(0.02, 0.03, 0.05, 0.08)) {
