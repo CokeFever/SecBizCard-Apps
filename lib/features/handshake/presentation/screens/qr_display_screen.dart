@@ -9,7 +9,6 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'dart:convert';
 
 import 'package:secbizcard/features/handshake/data/handshake_repository.dart';
-import 'package:secbizcard/features/handshake/data/handshake_prewarm.dart';
 import 'package:secbizcard/features/profile/domain/card_context.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/profile/data/profile_repository.dart';
@@ -59,25 +58,7 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
   @override
   void initState() {
     super.initState();
-    _initSession();
-  }
-
-  /// Use a pre-warmed session if one is ready (instant QR); otherwise generate
-  /// one now.
-  void _initSession() {
-    final prewarmed = ref.read(handshakePrewarmProvider.notifier).consume();
-    if (prewarmed != null) {
-      _qrUrl = prewarmed.url;
-      _sessionId = prewarmed.sessionId;
-      _isLoading = false;
-      _error = null;
-      // Start with the placeholder duration; the real remaining time is
-      // corrected as soon as the session document's expiresAt arrives.
-      _startCountdown();
-      _listenToSession(prewarmed.sessionId);
-    } else {
-      _generateQrCode();
-    }
+    _generateQrCode();
   }
 
   @override
