@@ -22,8 +22,11 @@ fi
 # Install Flutter if not already present
 if [ ! -d "$HOME/flutter" ]; then
     echo "Cloning Flutter..."
-    # Using --depth 1 to speed up cloning
-    git clone https://github.com/flutter/flutter.git -b stable $HOME/flutter --depth 1
+    # Pin to 3.38.9 (verified locally). "stable" pulls 3.47.x whose newer Dart
+    # analyzer crashes riverpod_generator 2.6.4 (visitDotShorthandPropertyAccess)
+    # and hangs build_runner — same issue that broke the Android pipelines.
+    # --depth 1 on a tag ref keeps the clone fast.
+    git clone https://github.com/flutter/flutter.git -b 3.38.9 $HOME/flutter --depth 1
 fi
 
 # Set Flutter path (prepend to override any pre-installed versions)
