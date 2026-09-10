@@ -47,5 +47,21 @@
   "ocrSafety4": "• 萬一金鑰外洩，請到 Cloud Console 刪除它，再於此處貼上新的金鑰。",
   "ocrSharedKeyUsage": "Cloud Vision · 共用金鑰本月 {used}/{cap}",
   "scanCardHint": "將名片放入框內",
-  "scanCardBackgroundTip": "請放在單色、無花紋的背景上"
+  "scanCardBackgroundTip": "請放在單色、無花紋的背景上",
+  "ocrFeedbackPromptTitle": "辨識結果不理想嗎？",
+  "ocrFeedbackPromptBody": "如果這張名片辨識得不好，你可以協助我們改善。我們會退還你本月的一次掃描次數。",
+  "ocrFeedbackReport": "協助改善",
+  "ocrFeedbackDismiss": "不用了",
+  "ocrFeedbackDontAsk24h": "24 小時內不再詢問",
+  "ocrFeedbackConsentTitle": "協助我們改善辨識",
+  "ocrFeedbackConsentSummary": "送出這張名片的辨識資料以協助改善。僅用於改善辨識，分析後即刪除（未使用亦最多保留 90 天）。",
+  "ocrFeedbackConsentIncludePhoto": "一併附上名片照片（選填）",
+  "ocrFeedbackViewTerms": "查看完整條款",
+  "ocrFeedbackTermsBody": "佔位文字 — 待法務審閱。我們會收集名片的辨識文字與版面資料、辨識結果，以及（僅在你勾選時）名片照片。用途：重現並改善辨識準確度。我們不作其他用途，也不對外分享。資料在我們分析後即刪除，未使用的資料最多於 90 天內自動刪除。送出一律為選擇性，且每次都會詢問。名片可能包含他人的個人資料；送出即表示你同意為此用途分享。",
+  "ocrFeedbackSubmit": "同意並送出",
+  "ocrFeedbackCancel": "取消",
+  "ocrFeedbackThanks": "感謝！你的回饋有助於改善辨識。",
+  "ocrFeedbackThanksRefunded": "感謝！我們已退還你一次掃描次數。",
+  "ocrFeedbackLimitReached": "你已達本月回饋上限。感謝你的協助！",
+  "ocrFeedbackFailed": "回饋送出失敗，請稍後再試。"
 }

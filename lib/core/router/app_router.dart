@@ -196,6 +196,13 @@ GoRouter goRouter(Ref ref) {
           return ContactReviewScreen(
             profile: args['profile'] as UserProfile,
             imagePath: args['imagePath'] as String,
+            // Optional OCR metadata for the "report bad recognition" flow.
+            ocrEngine: args['ocrEngine'] as String?,
+            ocrRecognitionId: args['ocrRecognitionId'] as String?,
+            ocrRawLines: (args['ocrRawLines'] as List?)
+                ?.cast<Map<String, dynamic>>(),
+            ocrDetectionScore: args['ocrDetectionScore'] as double?,
+            ocrDetectionFallback: args['ocrDetectionFallback'] as bool?,
           );
         },
       ),

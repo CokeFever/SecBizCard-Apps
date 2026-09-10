@@ -148,5 +148,69 @@
   "scanCardBackgroundTip": "Use a plain, non-patterned background",
   "@scanCardBackgroundTip": {
     "description": "Secondary tip: a plain background improves card edge detection"
+  },
+  "ocrFeedbackPromptTitle": "Was the recognition off?",
+  "@ocrFeedbackPromptTitle": {
+    "description": "Title of the dialog shown on Back when a result looks poor"
+  },
+  "ocrFeedbackPromptBody": "If this card wasn't recognized well, you can help us improve. This uses one fewer of your monthly scans back.",
+  "@ocrFeedbackPromptBody": {
+    "description": "Body explaining the optional bad-result report and refund"
+  },
+  "ocrFeedbackReport": "Help improve",
+  "@ocrFeedbackReport": {
+    "description": "Button to proceed to report a poor recognition"
+  },
+  "ocrFeedbackDismiss": "No thanks",
+  "@ocrFeedbackDismiss": {
+    "description": "Button to dismiss the report prompt"
+  },
+  "ocrFeedbackDontAsk24h": "Don't ask again for 24 hours",
+  "@ocrFeedbackDontAsk24h": {
+    "description": "Checkbox to suppress the report prompt for a rolling 24 hours"
+  },
+  "ocrFeedbackConsentTitle": "Help us improve recognition",
+  "@ocrFeedbackConsentTitle": {
+    "description": "Title of the consent dialog before submitting a sample"
+  },
+  "ocrFeedbackConsentSummary": "Send this card's recognition data to help us improve. It is used only to improve recognition and is deleted after review (and within 90 days otherwise).",
+  "@ocrFeedbackConsentSummary": {
+    "description": "One-line consent summary shown by default"
+  },
+  "ocrFeedbackConsentIncludePhoto": "Also include the card photo (optional)",
+  "@ocrFeedbackConsentIncludePhoto": {
+    "description": "Checkbox to additionally consent to sending the card image"
+  },
+  "ocrFeedbackViewTerms": "View full terms",
+  "@ocrFeedbackViewTerms": {
+    "description": "Expander to show the full consent terms text"
+  },
+  "ocrFeedbackTermsBody": "PLACEHOLDER — pending legal review. We collect the card's recognized text and layout data, the recognition result, and (only if you tick the option) the card photo. Purpose: to reproduce and improve recognition accuracy. We do not use it for any other purpose and do not share it. Data is deleted immediately after we analyze it, and any unused data is automatically deleted within 90 days. Submitting is always optional and asked each time. The card may contain another person's personal data; by submitting you confirm you're comfortable sharing it for this purpose.",
+  "@ocrFeedbackTermsBody": {
+    "description": "Full consent terms. PLACEHOLDER text pending legal review."
+  },
+  "ocrFeedbackSubmit": "Agree and send",
+  "@ocrFeedbackSubmit": {
+    "description": "Button to consent and submit the sample"
+  },
+  "ocrFeedbackCancel": "Cancel",
+  "@ocrFeedbackCancel": {
+    "description": "Button to cancel the consent dialog"
+  },
+  "ocrFeedbackThanks": "Thanks! Your feedback helps improve recognition.",
+  "@ocrFeedbackThanks": {
+    "description": "Snackbar shown after a successful feedback submission"
+  },
+  "ocrFeedbackThanksRefunded": "Thanks! We've credited one scan back to you.",
+  "@ocrFeedbackThanksRefunded": {
+    "description": "Snackbar after a successful submission that also refunded a scan"
+  },
+  "ocrFeedbackLimitReached": "You've reached this month's feedback limit. Thanks for helping!",
+  "@ocrFeedbackLimitReached": {
+    "description": "Snackbar when the monthly submit cap is reached"
+  },
+  "ocrFeedbackFailed": "Couldn't send feedback. Please try again later.",
+  "@ocrFeedbackFailed": {
+    "description": "Snackbar when the submission failed"
   }
 }

@@ -13,6 +13,7 @@ class VisionRecognitionResult {
     this.globalCap,
     this.userUsage,
     this.userCap,
+    this.recognitionId,
   });
 
   final List<OcrLine> lines;
@@ -21,6 +22,11 @@ class VisionRecognitionResult {
   final int? globalCap;
   final int? userUsage;
   final int? userCap;
+
+  /// Server-issued id for this shared-key recognition, used to attribute a
+  /// later "report bad recognition" refund to exactly this call. Null for the
+  /// own-key path (no shared quota to refund). Additive; ignored elsewhere.
+  final String? recognitionId;
 }
 
 /// Signals that the caller should fall back to on-device ML Kit. Carries an
@@ -145,6 +151,7 @@ class CloudVisionRecognizer {
       globalCap: (usage['globalCap'] as num?)?.toInt(),
       userUsage: (usage['userMonth'] as num?)?.toInt(),
       userCap: (usage['userCap'] as num?)?.toInt(),
+      recognitionId: data['recognitionId']?.toString(),
     );
   }
 
