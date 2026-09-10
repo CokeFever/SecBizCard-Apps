@@ -6,6 +6,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
+import 'app_localizations_ja.dart';
+import 'app_localizations_ko.dart';
 import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
@@ -95,6 +97,8 @@ abstract class AppLocalizations {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
+    Locale('ja'),
+    Locale('ko'),
     Locale('zh'),
     Locale('zh', 'TW')
   ];
@@ -386,6 +390,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Use a plain, non-patterned background'**
   String get scanCardBackgroundTip;
+
+  /// Title of the dialog shown on Back when a result looks poor
+  ///
+  /// In en, this message translates to:
+  /// **'Was the recognition off?'**
+  String get ocrFeedbackPromptTitle;
+
+  /// Body explaining the optional bad-result report and refund
+  ///
+  /// In en, this message translates to:
+  /// **'If this card wasn\'t recognized well, you can help us improve. This uses one fewer of your monthly scans back.'**
+  String get ocrFeedbackPromptBody;
+
+  /// Button to proceed to report a poor recognition
+  ///
+  /// In en, this message translates to:
+  /// **'Help improve'**
+  String get ocrFeedbackReport;
+
+  /// Button to dismiss the report prompt
+  ///
+  /// In en, this message translates to:
+  /// **'No thanks'**
+  String get ocrFeedbackDismiss;
+
+  /// Checkbox to suppress the report prompt for a rolling 24 hours
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t ask again for 24 hours'**
+  String get ocrFeedbackDontAsk24h;
+
+  /// Title of the consent dialog before submitting a sample
+  ///
+  /// In en, this message translates to:
+  /// **'Help us improve recognition'**
+  String get ocrFeedbackConsentTitle;
+
+  /// One-line consent summary shown by default
+  ///
+  /// In en, this message translates to:
+  /// **'Send this card\'s recognition data to help us improve. It is used only to improve recognition and is deleted after review (and within 90 days otherwise).'**
+  String get ocrFeedbackConsentSummary;
+
+  /// Checkbox to additionally consent to sending the card image
+  ///
+  /// In en, this message translates to:
+  /// **'Also include the card photo (optional)'**
+  String get ocrFeedbackConsentIncludePhoto;
+
+  /// Expander to show the full consent terms text
+  ///
+  /// In en, this message translates to:
+  /// **'View full terms'**
+  String get ocrFeedbackViewTerms;
+
+  /// Full consent terms. PLACEHOLDER text pending legal review.
+  ///
+  /// In en, this message translates to:
+  /// **'PLACEHOLDER — pending legal review. We collect the card\'s recognized text and layout data, the recognition result, and (only if you tick the option) the card photo. Purpose: to reproduce and improve recognition accuracy. We do not use it for any other purpose and do not share it. Data is deleted immediately after we analyze it, and any unused data is automatically deleted within 90 days. Submitting is always optional and asked each time. The card may contain another person\'s personal data; by submitting you confirm you\'re comfortable sharing it for this purpose.'**
+  String get ocrFeedbackTermsBody;
+
+  /// Button to consent and submit the sample
+  ///
+  /// In en, this message translates to:
+  /// **'Agree and send'**
+  String get ocrFeedbackSubmit;
+
+  /// Button to cancel the consent dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get ocrFeedbackCancel;
+
+  /// Snackbar shown after a successful feedback submission
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks! Your feedback helps improve recognition.'**
+  String get ocrFeedbackThanks;
+
+  /// Snackbar after a successful submission that also refunded a scan
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks! We\'ve credited one scan back to you.'**
+  String get ocrFeedbackThanksRefunded;
+
+  /// Snackbar when the monthly submit cap is reached
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached this month\'s feedback limit. Thanks for helping!'**
+  String get ocrFeedbackLimitReached;
+
+  /// Snackbar when the submission failed
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t send feedback. Please try again later.'**
+  String get ocrFeedbackFailed;
 }
 
 class _AppLocalizationsDelegate
@@ -399,7 +499,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['en', 'zh'].contains(locale.languageCode);
+      <String>['en', 'ja', 'ko', 'zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -422,6 +522,10 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   switch (locale.languageCode) {
     case 'en':
       return AppLocalizationsEn();
+    case 'ja':
+      return AppLocalizationsJa();
+    case 'ko':
+      return AppLocalizationsKo();
     case 'zh':
       return AppLocalizationsZh();
   }

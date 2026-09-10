@@ -165,6 +165,56 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get scanCardBackgroundTip => '请放在单色、无花纹的背景上';
+
+  @override
+  String get ocrFeedbackPromptTitle => '识别结果不理想吗？';
+
+  @override
+  String get ocrFeedbackPromptBody => '如果这张名片识别得不好，你可以协助我们改善。我们会退还你本月的一次扫描次数。';
+
+  @override
+  String get ocrFeedbackReport => '协助改善';
+
+  @override
+  String get ocrFeedbackDismiss => '不用了';
+
+  @override
+  String get ocrFeedbackDontAsk24h => '24 小时内不再询问';
+
+  @override
+  String get ocrFeedbackConsentTitle => '协助我们改善识别';
+
+  @override
+  String get ocrFeedbackConsentSummary =>
+      '发送这张名片的识别数据以协助改善。仅用于改善识别，分析后即删除（未使用亦最多保留 90 天）。';
+
+  @override
+  String get ocrFeedbackConsentIncludePhoto => '一并附上名片照片（选填）';
+
+  @override
+  String get ocrFeedbackViewTerms => '查看完整条款';
+
+  @override
+  String get ocrFeedbackTermsBody =>
+      '占位文字 — 待法务审阅。我们会收集名片的识别文字与版面数据、识别结果，以及（仅在你勾选时）名片照片。用途：重现并改善识别准确度。我们不作其他用途，也不对外分享。数据在我们分析后即删除，未使用的数据最多于 90 天内自动删除。发送一律为可选，且每次都会询问。名片可能包含他人的个人数据；发送即表示你同意为此用途分享。';
+
+  @override
+  String get ocrFeedbackSubmit => '同意并发送';
+
+  @override
+  String get ocrFeedbackCancel => '取消';
+
+  @override
+  String get ocrFeedbackThanks => '感谢！你的反馈有助于改善识别。';
+
+  @override
+  String get ocrFeedbackThanksRefunded => '感谢！我们已退还你一次扫描次数。';
+
+  @override
+  String get ocrFeedbackLimitReached => '你已达本月反馈上限。感谢你的协助！';
+
+  @override
+  String get ocrFeedbackFailed => '反馈发送失败，请稍后再试。';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -328,4 +378,54 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get scanCardBackgroundTip => '請放在單色、無花紋的背景上';
+
+  @override
+  String get ocrFeedbackPromptTitle => '辨識結果不理想嗎？';
+
+  @override
+  String get ocrFeedbackPromptBody => '如果這張名片辨識得不好，你可以協助我們改善。我們會退還你本月的一次掃描次數。';
+
+  @override
+  String get ocrFeedbackReport => '協助改善';
+
+  @override
+  String get ocrFeedbackDismiss => '不用了';
+
+  @override
+  String get ocrFeedbackDontAsk24h => '24 小時內不再詢問';
+
+  @override
+  String get ocrFeedbackConsentTitle => '協助我們改善辨識';
+
+  @override
+  String get ocrFeedbackConsentSummary =>
+      '送出這張名片的辨識資料以協助改善。僅用於改善辨識，分析後即刪除（未使用亦最多保留 90 天）。';
+
+  @override
+  String get ocrFeedbackConsentIncludePhoto => '一併附上名片照片（選填）';
+
+  @override
+  String get ocrFeedbackViewTerms => '查看完整條款';
+
+  @override
+  String get ocrFeedbackTermsBody =>
+      '佔位文字 — 待法務審閱。我們會收集名片的辨識文字與版面資料、辨識結果，以及（僅在你勾選時）名片照片。用途：重現並改善辨識準確度。我們不作其他用途，也不對外分享。資料在我們分析後即刪除，未使用的資料最多於 90 天內自動刪除。送出一律為選擇性，且每次都會詢問。名片可能包含他人的個人資料；送出即表示你同意為此用途分享。';
+
+  @override
+  String get ocrFeedbackSubmit => '同意並送出';
+
+  @override
+  String get ocrFeedbackCancel => '取消';
+
+  @override
+  String get ocrFeedbackThanks => '感謝！你的回饋有助於改善辨識。';
+
+  @override
+  String get ocrFeedbackThanksRefunded => '感謝！我們已退還你一次掃描次數。';
+
+  @override
+  String get ocrFeedbackLimitReached => '你已達本月回饋上限。感謝你的協助！';
+
+  @override
+  String get ocrFeedbackFailed => '回饋送出失敗，請稍後再試。';
 }
