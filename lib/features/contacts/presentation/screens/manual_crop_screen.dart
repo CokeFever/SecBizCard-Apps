@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:secbizcard/features/contacts/data/card_detection_config.dart';
 
 class ManualCropScreen extends StatefulWidget {
   final String imagePath;
@@ -222,6 +223,9 @@ class _ManualCropScreenState extends State<ManualCropScreen> {
         'outputPath': outputPath,
         'points': pixelPoints, // Now sending true Quad points
         'isVertical': widget.isVertical,
+        // Remote-tunable params (e.g. enhancement). Native side falls back to
+        // built-in constants for any missing entry.
+        'tuning': CardDetectionConfig.current.toTuningMap(),
       });
 
       if (result == true) {

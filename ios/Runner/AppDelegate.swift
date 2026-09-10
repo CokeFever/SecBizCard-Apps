@@ -25,9 +25,11 @@ import ImageIO
             }
             let isVertical = args["isVertical"] as? Bool ?? false
             let guideRect = args["guideRect"] as? [String: Double]
+            // Remote-tunable detection params (route A). Absent/empty => built-in.
+            let tuning = CardScoring.CardTuning(map: args["tuning"] as? [String: Any])
             // Execute on background thread to avoid blocking UI
             DispatchQueue.global(qos: .userInitiated).async {
-                self.processImage(inputPath: inputPath, outputPath: outputPath, isVertical: isVertical, guideRect: guideRect, result: result)
+                self.processImage(inputPath: inputPath, outputPath: outputPath, isVertical: isVertical, guideRect: guideRect, tuning: tuning, result: result)
             }
           } else {
             result(FlutterMethodNotImplemented)
@@ -45,7 +47,7 @@ import ImageIO
     .highQualityDownsample: false
   ])
 
-  private func processImage(inputPath: String, outputPath: String, isVertical: Bool, guideRect: [String: Double]?, result: @escaping FlutterResult) {
+  private func processImage(inputPath: String, outputPath: String, isVertical: Bool, guideRect: [String: Double]?, tuning: CardScoring.CardTuning, result: @escaping FlutterResult) {
     let url = URL(fileURLWithPath: inputPath)
     guard let ciImage = CIImage(contentsOf: url) else {
          DispatchQueue.main.async { result(["success": false]) }
@@ -126,15 +128,15 @@ import ImageIO
                 toPixelTL(obs.bottomRight),
                 toPixelTL(obs.bottomLeft),
             ]
-            let quad = CardScoring.sortPoints(raw)
-            let score = CardScoring.scoreQuad(quad, imgArea: imgArea, guide: guidePixelRect)
+            let quad = CardScoring.sortPoints(raw, useCentroid: tuning.useCentroidCornerSort)
+            let score = CardScoring.scoreQuad(quad, imgArea: imgArea, guide: guidePixelRect, tuning: tuning)
             if score > bestScore {
                 bestScore = score
                 bestQuad = quad
             }
         }
 
-        guard let winner = bestQuad, bestScore >= CardScoring.minAcceptScore else {
+        guard let winner = bestQuad, bestScore >= tuning.minAcceptScore else {
             // Fallback: hand off the GUIDE region (not whole image) to manual crop.
             // Points are returned in TOP-LEFT origin pixels to match Android.
             let pts: [Double]

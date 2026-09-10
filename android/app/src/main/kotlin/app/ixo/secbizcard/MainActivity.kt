@@ -43,9 +43,10 @@ class MainActivity : FlutterActivity() {
                 val isVertical = call.argument<Boolean>("isVertical") ?: false
                 @Suppress("UNCHECKED_CAST")
                 val guideRect = call.argument<Map<String, Double>>("guideRect")
+                val tuning = call.argument<Map<*, *>>("tuning")
 
                 if (inputPath != null && outputPath != null) {
-                    val resultMap = ocvProcessor.processBusinessCard(inputPath, outputPath, isVertical, guideRect)
+                    val resultMap = ocvProcessor.processBusinessCard(inputPath, outputPath, isVertical, guideRect, tuning)
                     val success = resultMap["success"] as Boolean
                     if (success) {
                         result.success(resultMap)
@@ -60,9 +61,10 @@ class MainActivity : FlutterActivity() {
                 val outputPath = call.argument<String>("outputPath")
                 val points = call.argument<List<Double>>("points")
                 val isVertical = call.argument<Boolean>("isVertical") ?: false
+                val tuning = call.argument<Map<*, *>>("tuning")
                 
                 if (inputPath != null && outputPath != null && points != null) {
-                    val success = ocvProcessor.manualCrop(inputPath, points, outputPath, isVertical)
+                    val success = ocvProcessor.manualCrop(inputPath, points, outputPath, isVertical, tuning)
                     result.success(success)
                 } else {
                     result.error("INVALID_ARGUMENT", "Args missing", null)

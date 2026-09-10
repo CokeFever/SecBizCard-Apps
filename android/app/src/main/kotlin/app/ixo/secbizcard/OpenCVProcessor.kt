@@ -27,6 +27,10 @@ import kotlin.math.sqrt
 class OpenCVProcessor {
 
     // ---- Shared scoring constants (MUST match AppDelegate.swift) -----------
+    // These are the BUILT-IN DEFAULTS. They can be overridden per-invocation by
+    // a `tuning` map passed from Dart (Firebase Remote Config, route A). Any key
+    // absent from the map falls back to the default here, so behavior is
+    // identical to the shipped build when no tuning is supplied.
     private object S {
         const val CARD_ASPECT_RATIO = 1.586
         const val ANGLE_TOLERANCE_DEG = 35.0
@@ -39,6 +43,54 @@ class OpenCVProcessor {
         const val W_ASPECT = 0.15
         const val W_AREA = 0.10
         const val W_GUIDE = 0.15
+        const val CANNY_LOW_A = 75.0
+        const val CANNY_HIGH_A = 200.0
+        const val CANNY_LOW_B = 30.0
+        const val CANNY_HIGH_B = 120.0
+    }
+
+    /**
+     * Per-invocation resolved tuning. Populated from the optional `tuning` map
+     * (keys match `CardDetectionConfig` in Dart). Missing keys keep the S
+     * default, so an empty/absent map reproduces the shipped behavior exactly.
+     */
+    private class Tuning(private val map: Map<*, *>?) {
+        private fun d(key: String, def: Double): Double {
+            val v = map?.get(key)
+            return when (v) {
+                is Double -> v
+                is Float -> v.toDouble()
+                is Int -> v.toDouble()
+                is Number -> v.toDouble()
+                else -> def
+            }
+        }
+        private fun b(key: String, def: Boolean): Boolean {
+            val v = map?.get(key)
+            return v as? Boolean ?: def
+        }
+
+        val cardAspectRatio = d("cardAspectRatio", S.CARD_ASPECT_RATIO)
+        val angleToleranceDeg = d("angleToleranceDeg", S.ANGLE_TOLERANCE_DEG)
+        val minAreaRatio = d("minAreaRatio", S.MIN_AREA_RATIO)
+        val maxAreaRatio = d("maxAreaRatio", S.MAX_AREA_RATIO)
+        val parallelToleranceDeg = d("parallelToleranceDeg", S.PARALLEL_TOLERANCE_DEG)
+        val minAcceptScore = d("minAcceptScore", S.MIN_ACCEPT_SCORE)
+        val wAngle = d("wAngle", S.W_ANGLE)
+        val wParallel = d("wParallel", S.W_PARALLEL)
+        val wAspect = d("wAspect", S.W_ASPECT)
+        val wArea = d("wArea", S.W_AREA)
+        val wGuide = d("wGuide", S.W_GUIDE)
+        val cannyLowA = d("cannyLowA", S.CANNY_LOW_A)
+        val cannyHighA = d("cannyHighA", S.CANNY_HIGH_A)
+        val cannyLowB = d("cannyLowB", S.CANNY_LOW_B)
+        val cannyHighB = d("cannyHighB", S.CANNY_HIGH_B)
+
+        // Gradual-rollout flag. useCentroidCornerSort defaults ON: it fixes the
+        // tilted-card corner mislabeling bug and is the new default behavior;
+        // the flag lets it be turned OFF (back to legacy x+y) from the console
+        // as an emergency rollback. See docs/card_detection_scoring.md.
+        val useCentroidCornerSort = b("useCentroidCornerSort", true)
     }
 
     fun processBusinessCard(
@@ -46,8 +98,10 @@ class OpenCVProcessor {
         outputPath: String,
         isVertical: Boolean,
         guideRect: Map<String, Double>? = null,
+        tuningMap: Map<*, *>? = null,
     ): Map<String, Any> {
         val resultData = HashMap<String, Any>()
+        val t = Tuning(tuningMap)
         try {
             val src = loadMatWithExif(inputPath) ?: throw Exception("Failed to load")
             val originalWidth = src.cols()
@@ -75,20 +129,20 @@ class OpenCVProcessor {
             }
 
             // 1. Collect candidate quads from multiple edge strategies.
-            val candidates = collectCandidates(resized)
+            val candidates = collectCandidates(resized, t)
 
             // 2. Score every candidate with the shared model; pick the best.
             var bestQuad: Array<Point>? = null
             var bestScore = 0.0
             for (quad in candidates) {
-                val score = scoreQuad(quad, imgArea, guide)
+                val score = scoreQuad(quad, imgArea, guide, t)
                 if (score > bestScore) {
                     bestScore = score
                     bestQuad = quad
                 }
             }
 
-            if (bestQuad != null && bestScore >= S.MIN_ACCEPT_SCORE) {
+            if (bestQuad != null && bestScore >= t.minAcceptScore) {
                 // Scale corners back to original resolution.
                 val scaledPoints = ArrayList<Double>()
                 val origCorners = arrayOfNulls<Point>(4)
@@ -101,7 +155,7 @@ class OpenCVProcessor {
                 }
 
                 val cardContour = MatOfPoint2f(*origCorners.map { it!! }.toTypedArray())
-                val result = warpPerspective(src, cardContour)
+                val result = warpPerspective(src, cardContour, t.useCentroidCornerSort)
                 var processed = enhanceImage(result)
 
                 if (isVertical) {
@@ -177,7 +231,7 @@ class OpenCVProcessor {
      * so cards with rounded corners / inner borders (which yield 5+ vertices)
      * are still recovered via a 4-point minimum-area rectangle.
      */
-    private fun collectCandidates(resized: Mat): List<Array<Point>> {
+    private fun collectCandidates(resized: Mat, t: Tuning): List<Array<Point>> {
         val gray = Mat()
         Imgproc.cvtColor(resized, gray, Imgproc.COLOR_BGR2GRAY)
         Imgproc.GaussianBlur(gray, gray, Size(5.0, 5.0), 0.0)
@@ -186,12 +240,12 @@ class OpenCVProcessor {
 
         // Strategy A: Canny (standard thresholds).
         val cannyA = Mat()
-        Imgproc.Canny(gray, cannyA, 75.0, 200.0)
+        Imgproc.Canny(gray, cannyA, t.cannyLowA, t.cannyHighA)
         edgeMaps.add(cannyA)
 
         // Strategy B: Canny (lower thresholds for low-contrast backgrounds).
         val cannyB = Mat()
-        Imgproc.Canny(gray, cannyB, 30.0, 120.0)
+        Imgproc.Canny(gray, cannyB, t.cannyLowB, t.cannyHighB)
         edgeMaps.add(cannyB)
 
         // Strategy C: adaptive threshold (helps when the card edge has weak
@@ -246,7 +300,7 @@ class OpenCVProcessor {
                     val rot = Imgproc.minAreaRect(c2f)
                     val box = arrayOfNulls<Point>(4)
                     rot.points(box)
-                    candidates.add(sortPoints(box.map { it!! }.toTypedArray()))
+                    candidates.add(sortPoints(box.map { it!! }.toTypedArray(), t.useCentroidCornerSort))
                 }
 
                 // Try several epsilon fractions to approximate a 4-gon.
@@ -255,14 +309,14 @@ class OpenCVProcessor {
                     Imgproc.approxPolyDP(c2f, approx, epsFrac * peri, true)
                     val n = approx.total().toInt()
                     if (n == 4) {
-                        candidates.add(sortPoints(approx.toArray()))
+                        candidates.add(sortPoints(approx.toArray(), t.useCentroidCornerSort))
                         break
                     } else if (n in 5..8) {
                         // Reduce to a rotated bounding rectangle (4 points).
                         val rot = Imgproc.minAreaRect(approx)
                         val box = arrayOfNulls<Point>(4)
                         rot.points(box)
-                        candidates.add(sortPoints(box.map { it!! }.toTypedArray()))
+                        candidates.add(sortPoints(box.map { it!! }.toTypedArray(), t.useCentroidCornerSort))
                         break
                     }
                 }
@@ -276,25 +330,25 @@ class OpenCVProcessor {
     // ------------------------------------------------------------------------
 
     /** Full score for a candidate quad. Corners are TL,TR,BR,BL. */
-    private fun scoreQuad(quad: Array<Point>, imgArea: Double, guide: Rect?): Double {
+    private fun scoreQuad(quad: Array<Point>, imgArea: Double, guide: Rect?, t: Tuning): Double {
         if (!isConvex(quad)) return 0.0
 
-        val sAngle = angleScore(quad)
+        val sAngle = angleScore(quad, t)
         if (sAngle <= 0.0) return 0.0
-        val sParallel = parallelScore(quad)
-        val sAspect = aspectScore(quad)
-        val sArea = areaScore(quad, imgArea)
+        val sParallel = parallelScore(quad, t)
+        val sAspect = aspectScore(quad, t)
+        val sArea = areaScore(quad, imgArea, t)
         if (sArea <= 0.0) return 0.0
 
         return if (guide != null) {
             val sGuide = iou(boundingBox(quad), guide)
-            S.W_ANGLE * sAngle + S.W_PARALLEL * sParallel + S.W_ASPECT * sAspect +
-                S.W_AREA * sArea + S.W_GUIDE * sGuide
+            t.wAngle * sAngle + t.wParallel * sParallel + t.wAspect * sAspect +
+                t.wArea * sArea + t.wGuide * sGuide
         } else {
             // Renormalize without the guide weight.
-            val total = S.W_ANGLE + S.W_PARALLEL + S.W_ASPECT + S.W_AREA
-            (S.W_ANGLE * sAngle + S.W_PARALLEL * sParallel +
-                S.W_ASPECT * sAspect + S.W_AREA * sArea) / total
+            val total = t.wAngle + t.wParallel + t.wAspect + t.wArea
+            (t.wAngle * sAngle + t.wParallel * sParallel +
+                t.wAspect * sAspect + t.wArea * sArea) / total
         }
     }
 
@@ -313,7 +367,7 @@ class OpenCVProcessor {
         return true
     }
 
-    private fun angleScore(q: Array<Point>): Double {
+    private fun angleScore(q: Array<Point>, t: Tuning): Double {
         var sumDev = 0.0
         for (i in 0 until 4) {
             val prev = q[(i + 3) % 4]
@@ -323,14 +377,14 @@ class OpenCVProcessor {
             val v2 = Point(next.x - cur.x, next.y - cur.y)
             val ang = angleBetweenDeg(v1, v2)
             val dev = abs(ang - 90.0)
-            if (dev > S.ANGLE_TOLERANCE_DEG) return 0.0
+            if (dev > t.angleToleranceDeg) return 0.0
             sumDev += dev
         }
         val meanDev = sumDev / 4.0
-        return (1.0 - meanDev / S.ANGLE_TOLERANCE_DEG).coerceIn(0.0, 1.0)
+        return (1.0 - meanDev / t.angleToleranceDeg).coerceIn(0.0, 1.0)
     }
 
-    private fun parallelScore(q: Array<Point>): Double {
+    private fun parallelScore(q: Array<Point>, t: Tuning): Double {
         val top = Point(q[1].x - q[0].x, q[1].y - q[0].y)
         val bottom = Point(q[2].x - q[3].x, q[2].y - q[3].y)
         val left = Point(q[3].x - q[0].x, q[3].y - q[0].y)
@@ -338,14 +392,14 @@ class OpenCVProcessor {
 
         val dTB = directionDiffDeg(top, bottom)
         val dLR = directionDiffDeg(left, right)
-        val penalty = (dTB + dLR) / (2 * S.PARALLEL_TOLERANCE_DEG)
+        val penalty = (dTB + dLR) / (2 * t.parallelToleranceDeg)
 
         val lenTB = ratio(len(top), len(bottom))
         val lenLR = ratio(len(left), len(right))
         return ((1.0 - penalty).coerceIn(0.0, 1.0)) * ((lenTB + lenLR) / 2.0)
     }
 
-    private fun aspectScore(q: Array<Point>): Double {
+    private fun aspectScore(q: Array<Point>, t: Tuning): Double {
         val top = len(Point(q[1].x - q[0].x, q[1].y - q[0].y))
         val bottom = len(Point(q[2].x - q[3].x, q[2].y - q[3].y))
         val left = len(Point(q[3].x - q[0].x, q[3].y - q[0].y))
@@ -354,13 +408,13 @@ class OpenCVProcessor {
         val h = (left + right) / 2.0
         if (w <= 0 || h <= 0) return 0.0
         val ar = max(w, h) / min(w, h)
-        return (1.0 - abs(ar - S.CARD_ASPECT_RATIO) / S.CARD_ASPECT_RATIO)
+        return (1.0 - abs(ar - t.cardAspectRatio) / t.cardAspectRatio)
             .coerceIn(0.0, 1.0)
     }
 
-    private fun areaScore(q: Array<Point>, imgArea: Double): Double {
+    private fun areaScore(q: Array<Point>, imgArea: Double, t: Tuning): Double {
         val r = polygonArea(q) / imgArea
-        return if (r < S.MIN_AREA_RATIO || r > S.MAX_AREA_RATIO) 0.0 else 1.0
+        return if (r < t.minAreaRatio || r > t.maxAreaRatio) 0.0 else 1.0
     }
 
     // ---- geometry helpers --------------------------------------------------
@@ -424,11 +478,12 @@ class OpenCVProcessor {
     // Manual crop (unchanged behaviour)
     // ------------------------------------------------------------------------
 
-    fun manualCrop(inputPath: String, points: List<Double>, outputPath: String, isVertical: Boolean): Boolean {
+    fun manualCrop(inputPath: String, points: List<Double>, outputPath: String, isVertical: Boolean, tuningMap: Map<*, *>? = null): Boolean {
         try {
             val src = loadMatWithExif(inputPath) ?: return false
             if (points.size != 8) return false
 
+            val t = Tuning(tuningMap)
             val srcPoints = arrayOf(
                 Point(points[0], points[1]),
                 Point(points[2], points[3]),
@@ -436,7 +491,7 @@ class OpenCVProcessor {
                 Point(points[6], points[7]),
             )
             val matPoints = MatOfPoint2f(*srcPoints)
-            var warped = warpPerspective(src, matPoints)
+            var warped = warpPerspective(src, matPoints, t.useCentroidCornerSort)
 
             try {
                 warped = enhanceImage(warped)
@@ -508,9 +563,9 @@ class OpenCVProcessor {
         return dest
     }
 
-    private fun warpPerspective(src: Mat, contour: MatOfPoint2f): Mat {
+    private fun warpPerspective(src: Mat, contour: MatOfPoint2f, useCentroid: Boolean = true): Mat {
         val points = contour.toArray()
-        val sortedPoints = sortPoints(points)
+        val sortedPoints = sortPoints(points, useCentroid)
 
         val widthA = dist(sortedPoints[2], sortedPoints[3])
         val widthB = dist(sortedPoints[1], sortedPoints[0])
@@ -537,7 +592,20 @@ class OpenCVProcessor {
     private fun dist(a: Point, b: Point): Double =
         sqrt(Math.pow(a.x - b.x, 2.0) + Math.pow(a.y - b.y, 2.0))
 
-    private fun sortPoints(points: Array<Point>): Array<Point> {
+    /**
+     * Orders 4 corners as [TL, TR, BR, BL] in a TOP-LEFT origin space.
+     *
+     * @param useCentroid when true, uses a centroid + atan2 polar sort that is
+     *   stable under in-plane rotation (a card placed at an angle to avoid
+     *   glare). When false, uses the legacy x+y heuristic. Controlled by the
+     *   `useCentroidCornerSort` remote flag so it can be rolled back from the
+     *   console without a release. See docs/card_detection_scoring.md.
+     */
+    private fun sortPoints(points: Array<Point>, useCentroid: Boolean = true): Array<Point> {
+        if (useCentroid) return sortPointsCentroid(points)
+
+        // Legacy: "x+y min = top-left". Correct only when the card is roughly
+        // axis-aligned; mislabels corners for tilted/rotated cards.
         val result = Array(4) { Point(0.0, 0.0) }
         val pts = points.copyOf()
         pts.sortBy { it.x + it.y }
@@ -549,5 +617,40 @@ class OpenCVProcessor {
         result[1] = remaining[0]     // Top-right
         result[3] = remaining[1]     // Bottom-left
         return result
+    }
+
+    /**
+     * Rotation-stable corner ordering. Sort the four points by their polar
+     * angle about the centroid to get a consistent clockwise ring, then pick
+     * the corner in the centroid's upper-left quadrant as TL and walk clockwise
+     * (TOP-LEFT origin, so clockwise = increasing angle with y pointing down).
+     *
+     * If the card is near-square or so tilted that the TL choice is ambiguous,
+     * the downstream isVertical + aspect-ratio 90° correction resolves final
+     * orientation — matching the app's Horizontal/Vertical guide contract.
+     */
+    private fun sortPointsCentroid(points: Array<Point>): Array<Point> {
+        require(points.size == 4)
+        val cx = points.sumOf { it.x } / 4.0
+        val cy = points.sumOf { it.y } / 4.0
+
+        // Clockwise ring in top-left origin: sort by atan2(dy, dx) ascending.
+        val ring = points.sortedBy { Math.atan2(it.y - cy, it.x - cx) }
+
+        // Choose the start (TL) = the point in the upper-left quadrant relative
+        // to the centroid. Fall back to the smallest x+y if none qualifies
+        // (degenerate/near-square), which keeps a sensible deterministic order.
+        var startIdx = ring.indexOfFirst { it.x < cx && it.y < cy }
+        if (startIdx < 0) {
+            var best = 0
+            var bestSum = Double.MAX_VALUE
+            for (i in ring.indices) {
+                val s = ring[i].x + ring[i].y
+                if (s < bestSum) { bestSum = s; best = i }
+            }
+            startIdx = best
+        }
+
+        return Array(4) { ring[(startIdx + it) % 4] }
     }
 }
