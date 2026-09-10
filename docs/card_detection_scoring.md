@@ -32,6 +32,21 @@ Order corners as `[topLeft, topRight, bottomRight, bottomLeft]` (clockwise).
 Ordering must be done in a consistent coordinate space per platform; the scoring
 below assumes this clockwise ordering.
 
+**Algorithm (centroid polar sort, default since the `useCentroidCornerSort`
+flag).** Sort the four points by their polar angle (`atan2(y - cy, x - cx)`)
+about the centroid to form a stable clockwise ring in TOP-LEFT origin space,
+then start at the corner in the centroid's upper-left quadrant (`x < cx && y <
+cy`) and walk clockwise → TL, TR, BR, BL. This is stable under in-plane rotation
+(a card tilted to avoid glare). If no point is in the upper-left quadrant
+(near-square or extreme tilt), it falls back to the smallest `x + y` as the
+start; final orientation is then resolved by the downstream `isVertical` +
+aspect-ratio 90° correction, per the Horizontal/Vertical guide contract.
+
+The **legacy** ordering ("x + y min = top-left") is retained behind the flag for
+emergency rollback; it mislabels corners on tilted cards, producing a
+warped/flipped result. Both platforms implement both paths identically
+(`OpenCVProcessor.sortPoints` / `CardScoring.sortPoints`).
+
 ## Geometric metrics
 
 For quad corners `p0=TL, p1=TR, p2=BR, p3=BL`:
@@ -57,7 +72,71 @@ W_PARALLEL   = 0.20   // opposite edges parallel + similar length
 W_ASPECT     = 0.15   // closeness to card aspect ratio
 W_AREA       = 0.10   // sensible fill of the frame
 W_GUIDE      = 0.15   // overlap / alignment with the guide frame prior
+
+// Edge-detection thresholds (Android collectCandidates strategies A & B)
+CANNY_LOW_A  = 75.0    CANNY_HIGH_A = 200.0
+CANNY_LOW_B  = 30.0    CANNY_HIGH_B = 120.0
 ```
+
+## Remote Config (tuning without a release)
+
+The constants above are **built-in defaults**. They are also externalized to
+**Firebase Remote Config** so they can be tuned from the console without
+shipping a new app build. This is "route A": Dart reads Remote Config
+(`lib/features/contacts/data/card_detection_config.dart`), packs the values into
+a `tuning` map, and passes it into the native `processCard` / `manualCrop`
+method-channel calls. Both platforms read the SAME keys, which also keeps
+Android and iOS in lockstep.
+
+Rules:
+- **Restart-to-apply.** `minimumFetchInterval` is 24 h; a value set in the
+  console is activated on a subsequent launch, not mid-session.
+- **Defaults are authoritative offline.** Until a fetch activates (and on any
+  error), the in-app defaults — which MUST equal the constants above — are used.
+- **Native always falls back per-key.** If the `tuning` map is absent or a key
+  is missing, the native built-in constant is used, so behavior is identical to
+  the shipped build.
+- **Values are range-clamped in Dart.** Out-of-range console values are ignored
+  in favor of the default (a console typo cannot break field detection).
+
+Remote Config keys (double unless noted):
+```
+minAcceptScore, wAngle, wParallel, wAspect, wArea, wGuide,
+angleToleranceDeg, parallelToleranceDeg, cardAspectRatio,
+minAreaRatio, maxAreaRatio,
+cannyLowA, cannyHighA, cannyLowB, cannyHighB
+
+// Gradual-rollout flag (bool)
+useCentroidCornerSort    // default TRUE: centroid+atan2 corner sort (see below).
+                         // Flip false to roll back to the legacy x+y sort.
+```
+
+When changing a default here, change it in BOTH `OpenCVProcessor.kt` (`object S`)
+and `CardScoring.swift` (`static let`) AND in `CardDetectionConfig._defaults`.
+
+## Implemented / future work
+
+1. **`useCentroidCornerSort` — DONE, default ON.** Fixes the tilted-card corner
+   mislabeling (warped/flipped result) using the centroid polar sort described
+   under "Corner ordering". The flag defaults ON (new correct behavior) and can
+   be flipped OFF from the console to roll back to the legacy x+y sort without a
+   release. Assumption we rely on: the user places the card in the correct
+   orientation and picks the matching guide (Horizontal/Vertical), so
+   `isVertical` is trusted ground truth and we only need to handle mild
+   perspective tilt — NOT 180° flips or free rotation.
+2. **Contrast / illumination preprocessing (CLAHE) — NOT pursued.** Considered
+   for low-contrast backgrounds and uneven lighting from angled shots. Dropped
+   for now because it has **no equivalent on iOS**: Android runs its own OpenCV
+   edge detection (so a CLAHE pass could add an edge-map candidate source), but
+   iOS uses Apple Vision's `VNDetectRectanglesRequest`, a black box that can't
+   consume a custom preprocessed edge map. Adding it Android-only would break
+   the "both platforms behave identically" invariant this spec is built on, so
+   it was removed rather than shipped one-sided. Revisit only if an iOS-equivalent
+   approach is found.
+3. **Square / special-shape cards.** Rare. Current model handles them via the
+   fallback (low aspect score is outweighed by angle/parallel/guide, and truly
+   non-rectangular outlines fall through to manual crop). Deliberately NOT
+   special-cased to avoid adding main-flow complexity for a small minority.
 
 ## Sub-scores (each normalized to 0..1)
 

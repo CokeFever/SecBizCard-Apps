@@ -3,7 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'dart:async';
+
 import 'package:secbizcard/generated/l10n/app_localizations.dart';
+import 'package:secbizcard/features/contacts/data/card_detection_config.dart';
 import 'firebase_options.dart';
 import 'core/config/theme.dart'; // 引入 Skill 1 產生的 Theme
 import 'core/router/app_router.dart';
@@ -44,6 +47,10 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
     debugPrint('[Main] Firebase initialized successfully');
+
+    // Load remote-tunable card-detection config (non-blocking). Uses in-app
+    // defaults until a fetch activates; restart-to-apply. Never blocks startup.
+    unawaited(CardDetectionConfig.initialize());
 
     runApp(const ProviderScope(child: IxoApp()));
     debugPrint('[Main] runApp called');
