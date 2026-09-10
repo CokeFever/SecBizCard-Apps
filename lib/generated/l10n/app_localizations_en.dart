@@ -172,4 +172,60 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scanCardBackgroundTip => 'Use a plain, non-patterned background';
+
+  @override
+  String get ocrFeedbackPromptTitle => 'Was the recognition off?';
+
+  @override
+  String get ocrFeedbackPromptBody =>
+      'If this card wasn\'t recognized well, you can help us improve. This uses one fewer of your monthly scans back.';
+
+  @override
+  String get ocrFeedbackReport => 'Help improve';
+
+  @override
+  String get ocrFeedbackDismiss => 'No thanks';
+
+  @override
+  String get ocrFeedbackDontAsk24h => 'Don\'t ask again for 24 hours';
+
+  @override
+  String get ocrFeedbackConsentTitle => 'Help us improve recognition';
+
+  @override
+  String get ocrFeedbackConsentSummary =>
+      'Send this card\'s recognition data to help us improve. It is used only to improve recognition and is deleted after review (and within 90 days otherwise).';
+
+  @override
+  String get ocrFeedbackConsentIncludePhoto =>
+      'Also include the card photo (optional)';
+
+  @override
+  String get ocrFeedbackViewTerms => 'View full terms';
+
+  @override
+  String get ocrFeedbackTermsBody =>
+      'PLACEHOLDER — pending legal review. We collect the card\'s recognized text and layout data, the recognition result, and (only if you tick the option) the card photo. Purpose: to reproduce and improve recognition accuracy. We do not use it for any other purpose and do not share it. Data is deleted immediately after we analyze it, and any unused data is automatically deleted within 90 days. Submitting is always optional and asked each time. The card may contain another person\'s personal data; by submitting you confirm you\'re comfortable sharing it for this purpose.';
+
+  @override
+  String get ocrFeedbackSubmit => 'Agree and send';
+
+  @override
+  String get ocrFeedbackCancel => 'Cancel';
+
+  @override
+  String get ocrFeedbackThanks =>
+      'Thanks! Your feedback helps improve recognition.';
+
+  @override
+  String get ocrFeedbackThanksRefunded =>
+      'Thanks! We\'ve credited one scan back to you.';
+
+  @override
+  String get ocrFeedbackLimitReached =>
+      'You\'ve reached this month\'s feedback limit. Thanks for helping!';
+
+  @override
+  String get ocrFeedbackFailed =>
+      'Couldn\'t send feedback. Please try again later.';
 }

@@ -50,7 +50,7 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
-        resConfigs("en", "zh", "zh_TW")
+        resConfigs("en", "zh", "zh_TW", "ja", "ko")
 
         // The official OpenCV Prefab module (opencv_java4) links against the
         // shared C++ runtime, so the native build must use c++_shared instead
