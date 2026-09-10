@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:secbizcard/features/contacts/data/services/ocr_service.dart';
+import 'package:secbizcard/features/contacts/data/card_detection_config.dart';
 import 'package:secbizcard/core/responsive/breakpoints.dart';
 import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
@@ -24,6 +25,11 @@ class _ScanCardScreenState extends State<ScanCardScreen>
   String? _capturedImagePath;
   String _processingStatus = '';
   OcrPreScanStatus? _preScanStatus; // engine + remaining shared quota
+
+  // Detection confidence from the most recent processCard call, forwarded to
+  // the review screen for the "report bad recognition" low-confidence check.
+  double? _lastDetectionScore;
+  bool? _lastDetectionFallback;
 
   // Permission state: null = still checking, true = denied, false = granted
   bool? _isPermissionDenied;
@@ -225,7 +231,16 @@ class _ScanCardScreenState extends State<ScanCardScreen>
           }
           context.push(
             '/review-contact',
-            extra: {'profile': profile, 'imagePath': finalImagePath},
+            extra: {
+              'profile': profile,
+              'imagePath': finalImagePath,
+              // Metadata for the optional "report bad recognition" flow.
+              'ocrEngine': outcome.engineName,
+              'ocrRecognitionId': outcome.recognitionId,
+              'ocrRawLines': outcome.rawOcrLines,
+              'ocrDetectionScore': _lastDetectionScore,
+              'ocrDetectionFallback': _lastDetectionFallback,
+            },
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -351,11 +366,17 @@ class _ScanCardScreenState extends State<ScanCardScreen>
         'outputPath': outputPath,
         'isVertical': _isVertical,
         'guideRect': _normalizedGuideRect(),
+        // Remote-tunable detection params (route A). Native side treats every
+        // entry as optional and falls back to its built-in constants.
+        'tuning': CardDetectionConfig.current.toTuningMap(),
       });
 
       if (result is Map) {
         final success = result['success'] as bool? ?? false;
         final isFallback = result['fallback'] as bool? ?? false;
+        // Capture detection confidence for the feedback low-confidence check.
+        _lastDetectionScore = (result['score'] as num?)?.toDouble();
+        _lastDetectionFallback = isFallback;
 
         if (!success) {
           throw Exception('Processing failed');

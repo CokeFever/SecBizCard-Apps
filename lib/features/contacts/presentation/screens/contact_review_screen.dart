@@ -6,15 +6,31 @@ import 'package:secbizcard/core/responsive/adaptive_container.dart';
 import 'package:secbizcard/core/responsive/breakpoints.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
+import 'package:secbizcard/features/contacts/data/recognition_quality.dart';
+import 'package:secbizcard/features/contacts/data/ocr_feedback_service.dart';
+import 'package:secbizcard/features/contacts/presentation/widgets/ocr_feedback_dialogs.dart';
 
 class ContactReviewScreen extends ConsumerStatefulWidget {
   final UserProfile profile;
   final String imagePath;
 
+  // Optional OCR metadata for the "report bad recognition" flow. Null when the
+  // screen is reached from a path that doesn't carry it.
+  final String? ocrEngine;
+  final String? ocrRecognitionId;
+  final List<Map<String, dynamic>>? ocrRawLines;
+  final double? ocrDetectionScore;
+  final bool? ocrDetectionFallback;
+
   const ContactReviewScreen({
     super.key,
     required this.profile,
     required this.imagePath,
+    this.ocrEngine,
+    this.ocrRecognitionId,
+    this.ocrRawLines,
+    this.ocrDetectionScore,
+    this.ocrDetectionFallback,
   });
 
   @override
@@ -119,9 +135,79 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
     }
   }
 
+  bool _feedbackHandled = false;
+  final _feedbackService = OcrFeedbackService();
+
+  /// True if the recognition looked poor (per the predictor over the metadata
+  /// carried from the scan screen). Used to decide whether to offer the report
+  /// prompt when the user leaves without saving.
+  bool get _recognitionLikelyPoor {
+    return predictLikelyPoorRecognition(RecognitionSignals(
+      detectionFallback: widget.ocrDetectionFallback,
+      detectionScore: widget.ocrDetectionScore,
+      hasName: widget.profile.displayName.trim().isNotEmpty,
+      hasAnyPhone: (widget.profile.phone?.isNotEmpty ?? false) ||
+          (widget.profile.mobile?.isNotEmpty ?? false),
+    ));
+  }
+
+  /// Called on Back. If recognition looked poor, offer the (opt-in) report
+  /// prompt, then let the pop proceed. Returns after any dialog completes.
+  Future<void> _handleLeave() async {
+    if (_feedbackHandled) return;
+    _feedbackHandled = true;
+    // Only for shared-key / own-key with raw lines available, and only when the
+    // result looked poor. Nothing here blocks leaving.
+    if (widget.ocrRawLines == null || widget.ocrRawLines!.isEmpty) return;
+    if (!_recognitionLikelyPoor) return;
+    if (!mounted) return;
+
+    final proceed =
+        await OcrFeedbackDialogs.maybePromptOnLeave(context, _feedbackService);
+    if (!proceed || !mounted) return;
+
+    await OcrFeedbackDialogs.showConsentAndSubmit(
+      context,
+      _feedbackService,
+      OcrFeedbackSample(
+        engine: widget.ocrEngine ?? 'unknown',
+        recognitionId: widget.ocrRecognitionId,
+        cardLanguage: null,
+        rawOcrLines: widget.ocrRawLines!,
+        parsedResult: {
+          'displayName': widget.profile.displayName,
+          'company': widget.profile.company,
+          'title': widget.profile.title,
+          'email': widget.profile.email,
+          'phone': widget.profile.phone,
+          'mobile': widget.profile.mobile,
+          'website': widget.profile.website,
+          'address': widget.profile.address,
+        },
+        confidence: {
+          'detectionScore': widget.ocrDetectionScore,
+          'detectionFallback': widget.ocrDetectionFallback,
+        },
+        imagePath: widget.imagePath,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+      // Intercept Back so we can offer the (opt-in) report prompt BEFORE
+      // leaving, then pop manually. Saving uses context.go (not pop), so it
+      // bypasses this and never triggers the prompt.
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        await _handleLeave();
+        if (mounted && context.mounted && Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+      },
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Review Contact'),
         actions: [
@@ -204,6 +290,7 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
           ],
         ),
         ),
+      ),
       ),
     );
   }

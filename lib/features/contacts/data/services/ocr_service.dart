@@ -40,12 +40,36 @@ class OcrOutcome {
     this.note,
     this.usageUsed,
     this.usageCap,
+    this.rawOcrLines = const [],
+    this.recognitionId,
   });
   final UserProfile? profile;
   final OcrEngineUsed engine;
   final String? note;
   final int? usageUsed;
   final int? usageCap;
+
+  /// Raw recognized lines with geometry ({text, box:{x,y,w,h}}), for the
+  /// "report bad recognition" feature — this is what lets us re-run parsing on
+  /// a reported sample. Empty when unavailable. Additive; other consumers
+  /// ignore it.
+  final List<Map<String, dynamic>> rawOcrLines;
+
+  /// Server recognitionId for a shared-key call (enables the feedback refund).
+  /// Null for own-key / ML Kit.
+  final String? recognitionId;
+
+  /// Engine identifier string for the feedback payload.
+  String get engineName {
+    switch (engine) {
+      case OcrEngineUsed.ownKeyVision:
+        return 'cloud_vision_ownkey';
+      case OcrEngineUsed.sharedVision:
+        return 'cloud_vision_shared';
+      case OcrEngineUsed.mlKit:
+        return 'mlkit';
+    }
+  }
 }
 
 /// Orchestrates business-card OCR across engines with a strict fallback chain:
@@ -136,6 +160,8 @@ class OCRService {
         return OcrOutcome(
           profile: _parse(res, imagePath),
           engine: OcrEngineUsed.ownKeyVision,
+          rawOcrLines: _linesToMaps(res.lines),
+          // Own-key path has no shared recognitionId (nothing to refund).
         );
       } on VisionFallbackException catch (e) {
         if (kDebugMode) debugPrint('[OCR] own-key Vision failed (${e.reason}) → next');
@@ -158,6 +184,8 @@ class OCRService {
         // Show the per-user monthly quota (e.g. 3/5) on the result badge.
         usageUsed: res.userUsage,
         usageCap: res.userCap,
+        rawOcrLines: _linesToMaps(res.lines),
+        recognitionId: res.recognitionId,
       );
     } on VisionFallbackException catch (e) {
       if (kDebugMode) debugPrint('[OCR] shared Vision → fallback ML Kit (${e.reason})');
@@ -188,6 +216,22 @@ class OCRService {
   UserProfile? _parse(VisionRecognitionResult res, String imagePath) {
     final result = _ocr.parseLines(res.lines);
     return _mapToUserProfile(result, imagePath);
+  }
+
+  /// Serializes recognized lines to plain maps ({text, box:{x,y,w,h}}) for the
+  /// feedback payload — the raw material to re-run parsing on a reported card.
+  static List<Map<String, dynamic>> _linesToMaps(List<OcrLine> lines) {
+    return lines
+        .map((l) => <String, dynamic>{
+              'text': l.text,
+              'box': {
+                'x': l.box.left,
+                'y': l.box.top,
+                'w': l.box.width,
+                'h': l.box.height,
+              },
+            })
+        .toList();
   }
 
   UserProfile _mapToUserProfile(OcrResult result, String imagePath) {
