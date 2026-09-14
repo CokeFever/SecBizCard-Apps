@@ -58,3 +58,6 @@ test/unit/mocks.mocks.dart
 
 # Xcode build cache
 ios/build/
+
+# FVM Version Cache
+.fvm/
