@@ -186,17 +186,17 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ocrFeedbackConsentSummary =>
-      '发送这张名片的识别数据以协助改善。仅用于改善识别，分析后即删除（未使用亦最多保留 90 天）。';
+      '发送这张名片的识别数据以协助改善。仅用于改善识别，分析后即删除，且一律于 30 天内删除。';
 
   @override
-  String get ocrFeedbackConsentIncludePhoto => '一并附上名片照片（选填）';
+  String get ocrFeedbackConsentIncludePhoto => '附上名片照片（有助我们修正识别，取消勾选可略过）';
 
   @override
   String get ocrFeedbackViewTerms => '查看完整条款';
 
   @override
   String get ocrFeedbackTermsBody =>
-      '占位文字 — 待法务审阅。我们会收集名片的识别文字与版面数据、识别结果，以及（仅在你勾选时）名片照片。用途：重现并改善识别准确度。我们不作其他用途，也不对外分享。数据在我们分析后即删除，未使用的数据最多于 90 天内自动删除。发送一律为可选，且每次都会询问。名片可能包含他人的个人数据；发送即表示你同意为此用途分享。';
+      '数据控管者：SecBizCard 为你发送之反馈的数据控管者。联系邮箱：privacy@ixo.app。\n\n收集内容：名片的识别文字与版面数据、识别结果，以及名片照片——因为要重现并修正识别错误，照片是必要的。发送一律为可选，且每次都会询问。\n\n用途：仅用于重现并改善识别准确度。我们不作其他用途，也不会出售或为广告目的分享。\n\n数据会经过哪些对象：为处理你的反馈，我们会委由代为处理的服务供应商——Google Cloud Vision 与 Firebase（Google）进行识别与存储。这些数据可能在你所在国家以外处理；对欧盟用户，在必要时我们采用标准合同条款（SCC）。除此之外我们不会与任何其他人分享。\n\n法律依据：我们改善识别质量的正当利益，以及你对本次发送的同意。由于名片包含他人的个人数据，你确认你有合理依据为此用途分享该数据。\n\n保留期限：我们在完成分析后即删除你发送的数据，且一律于 30 天内删除。数据在传输与存储过程中均经加密。\n\n你的权利：你可通过 privacy@ixo.app 要求访问或删除你发送的反馈，或提出疑虑。完整说明请见我们的隐私政策。';
 
   @override
   String get ocrFeedbackSubmit => '同意并发送';
@@ -399,17 +399,17 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ocrFeedbackConsentSummary =>
-      '送出這張名片的辨識資料以協助改善。僅用於改善辨識，分析後即刪除（未使用亦最多保留 90 天）。';
+      '送出這張名片的辨識資料以協助改善。僅用於改善辨識，分析後即刪除，且一律於 30 天內刪除。';
 
   @override
-  String get ocrFeedbackConsentIncludePhoto => '一併附上名片照片（選填）';
+  String get ocrFeedbackConsentIncludePhoto => '附上名片照片（有助我們修正辨識，取消勾選可略過）';
 
   @override
   String get ocrFeedbackViewTerms => '查看完整條款';
 
   @override
   String get ocrFeedbackTermsBody =>
-      '佔位文字 — 待法務審閱。我們會收集名片的辨識文字與版面資料、辨識結果，以及（僅在你勾選時）名片照片。用途：重現並改善辨識準確度。我們不作其他用途，也不對外分享。資料在我們分析後即刪除，未使用的資料最多於 90 天內自動刪除。送出一律為選擇性，且每次都會詢問。名片可能包含他人的個人資料；送出即表示你同意為此用途分享。';
+      '資料控管者：SecBizCard 為你送出之回饋的資料控管者。聯絡信箱：privacy@ixo.app。\n\n收集內容：名片的辨識文字與版面資料、辨識結果，以及名片照片——因為要重現並修正辨識錯誤，照片是必要的。送出一律為選擇性，且每次都會詢問。\n\n用途：僅用於重現並改善辨識準確度。我們不作其他用途，也不會出售或為廣告目的分享。\n\n資料會經過哪些對象：為處理你的回饋，我們會委由代為處理的服務供應商——Google Cloud Vision 與 Firebase（Google）進行辨識與儲存。這些資料可能於你所在國家以外處理；對歐盟使用者，於必要時我們採用標準契約條款（SCC）。除此之外我們不會與任何其他人分享。\n\n法律依據：我們改善辨識品質的正當利益，以及你對本次送出的同意。由於名片包含他人的個人資料，你確認你有合理依據為此用途分享該資料。\n\n保留期限：我們在完成分析後即刪除你送出的資料，且一律於 30 天內刪除。資料在傳輸與儲存過程中均經加密。\n\n你的權利：你可透過 privacy@ixo.app 要求存取或刪除你送出的回饋，或提出疑慮。完整說明請見我們的隱私權政策。';
 
   @override
   String get ocrFeedbackSubmit => '同意並送出';

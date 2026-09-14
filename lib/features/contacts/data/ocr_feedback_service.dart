@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,17 +15,26 @@ import 'package:shared_preferences/shared_preferences.dart';
 ///  - Submit a feedback sample via the `submitOcrFeedback` Cloud Function.
 ///
 /// See docs/ocr_feedback_design.md. Everything here is opt-in and only invoked
-/// after the user consents in the UI. NOTE: this feature is unreleased; the
-/// backend function is not yet deployed. Image upload to Storage is a follow-up
-/// (firebase_storage is not yet a dependency) — for now [imagePath] is passed
-/// as metadata only and the server stores whatever path it's given, or null.
+/// after the user consents in the UI. When the user consents to include the
+/// card photo, the full-resolution image is uploaded to Firebase Storage at
+/// `ocr_feedback/{uid}/{id}.jpg` first; the resulting Storage object path is
+/// then passed to the callable as [imagePath]. If the upload fails, the
+/// feedback is still submitted as text-only (graceful degradation) so a poor
+/// network never blocks the report.
 class OcrFeedbackService {
-  OcrFeedbackService([FirebaseFunctions? functions])
-      : _functions = functions ??
+  OcrFeedbackService([
+    FirebaseFunctions? functions,
+    FirebaseStorage? storage,
+    FirebaseAuth? auth,
+  ])  : _functions = functions ??
             FirebaseFunctions.instanceFor(
-                app: Firebase.app(), region: 'us-central1');
+                app: Firebase.app(), region: 'us-central1'),
+        _storage = storage ?? FirebaseStorage.instance,
+        _auth = auth ?? FirebaseAuth.instance;
 
   final FirebaseFunctions _functions;
+  final FirebaseStorage _storage;
+  final FirebaseAuth _auth;
 
   static const _suppressKey = 'ocrFeedbackPromptSuppressedUntilMs';
 
@@ -59,6 +72,19 @@ class OcrFeedbackService {
     required bool consentData,
     required bool consentImage,
   }) async {
+    // If the user consented to include the photo, upload the full-resolution
+    // local image to Storage first and send the resulting Storage object path
+    // (not the local device path) to the server. On any upload failure we fall
+    // back to a text-only submission so a poor network never blocks the report.
+    String? storagePath;
+    bool imageConsented = consentImage;
+    if (consentImage && imagePath != null) {
+      storagePath = await _uploadImage(imagePath, recognitionId);
+      if (storagePath == null) {
+        imageConsented = false; // degrade to text-only
+      }
+    }
+
     try {
       final callable = _functions.httpsCallable('submitOcrFeedback');
       final res = await callable.call(<String, dynamic>{
@@ -71,9 +97,9 @@ class OcrFeedbackService {
         'rawOcrLines': rawOcrLines,
         if (parsedResult != null) 'parsedResult': parsedResult,
         if (confidence != null) 'confidence': confidence,
-        'imagePath': imagePath,
+        'imagePath': storagePath,
         'consentData': consentData,
-        'consentImage': consentImage,
+        'consentImage': imageConsented,
       }).timeout(const Duration(seconds: 20));
 
       final data = Map<String, dynamic>.from(res.data as Map);
@@ -90,6 +116,38 @@ class OcrFeedbackService {
     } catch (e) {
       debugPrint('[OcrFeedback] submit error: $e');
       return const FeedbackResult(success: false);
+    }
+  }
+
+  /// Upload the full-resolution card image to `ocr_feedback/{uid}/{id}.jpg`.
+  ///
+  /// Returns the Storage object path on success, or null on any failure
+  /// (not signed in, missing file, upload error) so the caller can degrade to
+  /// a text-only submission. The path is uid-scoped so the Storage rules can
+  /// restrict writes to the owner; images are never client-readable.
+  Future<String?> _uploadImage(String localPath, String? recognitionId) async {
+    try {
+      final uid = _auth.currentUser?.uid;
+      if (uid == null) return null;
+
+      final file = File(localPath);
+      if (!await file.exists()) return null;
+
+      // Use the recognitionId when available (ties the image to its ledger
+      // entry); otherwise fall back to a timestamp so uploads never collide.
+      final id = (recognitionId != null && recognitionId.isNotEmpty)
+          ? recognitionId
+          : DateTime.now().millisecondsSinceEpoch.toString();
+      final objectPath = 'ocr_feedback/$uid/$id.jpg';
+
+      final ref = _storage.ref(objectPath);
+      await ref
+          .putFile(file, SettableMetadata(contentType: 'image/jpeg'))
+          .timeout(const Duration(seconds: 30));
+      return objectPath;
+    } catch (e) {
+      debugPrint('[OcrFeedback] image upload failed: $e');
+      return null;
     }
   }
 }
