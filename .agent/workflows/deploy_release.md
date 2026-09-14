@@ -25,17 +25,29 @@ flutter test
 ## 發版
 
 ### 3. 確認版本號
-請告訴我這次的版本號（例如 `v1.3.3`）和簡短描述。
+請告訴我這次的版本號（例如 `1.5.5`）和簡短描述。先在 `pubspec.yaml` bump
+`version:`（格式 `X.Y.Z+build`，build number 必須比上一版高）。
 
-### 4. 建立 Tag 並推送
+### 4. 建立 Tag 並推送（平台各一個 tag）
+
+> **重要 — Tag 命名慣例（platform-prefixed）：**
+> 發版用「平台前綴」tag，**兩個平台各打一個**，通常指向同一個 commit：
+> - `android/v<版本號>` → 觸發 **GitHub Actions**（`.github/workflows/android_build.yml`，只監聽 `android/v*`）→ Build Android。
+> - `ios/v<版本號>` → 觸發 **Xcode Cloud**（其觸發規則設定在 App Store Connect 的 Xcode Cloud workflow，不在本 repo；ci 腳本為 `ios/ci_scripts/ci_post_clone.sh`）→ Build iOS → App Store Connect。
+>
+> 舊的無前綴 `v*` tag（如 `v1.3.x`）已淘汰，**不要再用** —— 它不會觸發現在的 Android workflow。
+> 歷史範例：`android/v1.5.1` + `ios/v1.5.1` 成對存在。
+
 ```bash
-git tag -a v<版本號> -m "<版本描述>"
-git push origin v<版本號>
+# 兩個 tag 指向目前 HEAD，分別觸發兩平台的 build
+git tag -a android/v<版本號> -m "<版本描述>"
+git tag -a ios/v<版本號>     -m "<版本描述>"
+git push origin android/v<版本號>
+git push origin ios/v<版本號>
 ```
 
-這會自動觸發：
-- **Xcode Cloud** → Build iOS → 上傳 App Store Connect
-- **GitHub Actions** → Build Android APK + AAB → 建立 GitHub Release
+建議：可先只推 `android/v*` 驗證 CI（尤其涉及 AGP/toolchain 變更時），
+Android 綠燈後再推 `ios/v*`。
 
 ### 5. 完成後動作
 - 到 [App Store Connect](https://appstoreconnect.apple.com) 提交 iOS 審核
