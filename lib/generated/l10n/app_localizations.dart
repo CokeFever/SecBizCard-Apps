@@ -430,13 +430,13 @@ abstract class AppLocalizations {
   /// One-line consent summary shown by default
   ///
   /// In en, this message translates to:
-  /// **'Send this card\'s recognition data to help us improve. It is used only to improve recognition and is deleted after review (and within 90 days otherwise).'**
+  /// **'Send this card\'s recognition data to help us improve. It is used only to improve recognition and is deleted after review, and in all cases within 30 days.'**
   String get ocrFeedbackConsentSummary;
 
   /// Checkbox to additionally consent to sending the card image
   ///
   /// In en, this message translates to:
-  /// **'Also include the card photo (optional)'**
+  /// **'Include the card photo (helps us fix the error — untick to skip)'**
   String get ocrFeedbackConsentIncludePhoto;
 
   /// Expander to show the full consent terms text
@@ -445,10 +445,10 @@ abstract class AppLocalizations {
   /// **'View full terms'**
   String get ocrFeedbackViewTerms;
 
-  /// Full consent terms. PLACEHOLDER text pending legal review.
+  /// Full consent terms for the OCR feedback feature (includes card photo; 30-day retention).
   ///
   /// In en, this message translates to:
-  /// **'PLACEHOLDER — pending legal review. We collect the card\'s recognized text and layout data, the recognition result, and (only if you tick the option) the card photo. Purpose: to reproduce and improve recognition accuracy. We do not use it for any other purpose and do not share it. Data is deleted immediately after we analyze it, and any unused data is automatically deleted within 90 days. Submitting is always optional and asked each time. The card may contain another person\'s personal data; by submitting you confirm you\'re comfortable sharing it for this purpose.'**
+  /// **'Who processes this: SecBizCard is the data controller for feedback you send. Contact us at privacy@ixo.app.\n\nWhat we collect: the card\'s recognized text and layout data, the recognition result, and — because it is essential to reproduce and fix recognition errors — the card photo. Sending is always optional and asked each time.\n\nWhy: solely to reproduce and improve recognition accuracy. We do not use it for any other purpose, and we do not sell it or share it for advertising.\n\nWho it reaches: to process your feedback we use service providers acting on our behalf — Google Cloud Vision and Firebase (Google) for recognition and storage. They may process it outside your country; where required for EU users we rely on Standard Contractual Clauses. We do not share it with anyone else.\n\nLegal basis: our legitimate interest in improving recognition quality, and your consent to this submission. Because a business card contains another person\'s personal data, you confirm you have a reasonable basis to share it for this purpose.\n\nRetention: we delete your submission as soon as we finish analyzing it, and in all cases within 30 days. It is encrypted in transit and at rest.\n\nYour rights: you can ask us to access or delete your submitted feedback, or raise a concern, at privacy@ixo.app. See our Privacy Policy for full details.'**
   String get ocrFeedbackTermsBody;
 
   /// Button to consent and submit the sample

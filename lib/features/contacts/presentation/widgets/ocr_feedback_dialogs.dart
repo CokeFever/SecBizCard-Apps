@@ -78,7 +78,11 @@ class OcrFeedbackDialogs {
     OcrFeedbackSample sample,
   ) async {
     final l10n = AppLocalizations.of(context)!;
-    bool includePhoto = false;
+    // Photo is included by DEFAULT (opt-out): the card image is what makes the
+    // feedback useful for fixing recognition. It stays a checkbox the user can
+    // untick, so consent remains specific and revocable (never bundled) — which
+    // is what the consent copy promises ("always optional, asked each time").
+    bool includePhoto = true;
     bool showTerms = false;
 
     final agreed = await showDialog<bool>(
