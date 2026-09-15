@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.5.5] - 2026-09-15
+### Added
+- **Languages**: Added Japanese (ja) and Korean (ko). The app now ships in English, 繁體中文, 简体中文, 日本語, and 한국어 (5 locales).
+- **Report bad recognition (opt-in)**: When a card scan is recognized poorly, you can optionally send a feedback sample — the recognized text, the result, and the card photo — to help us improve OCR accuracy. It is always opt-in and confirmed on each card; a submission credits one scan back. Submitted samples are encrypted, used only to improve recognition, and deleted within 30 days.
+### Changed
+- **Scan**: Card-edge detection is now remotely tunable (Firebase Remote Config), so detection can be improved without an app update.
+### Fixed
+- **Scan**: Rotation-stable corner ordering fixes tilted cards being warped or flipped upside-down after capture.
+### Privacy
+- New in-app consent screen (all languages) and an updated Privacy Policy describe exactly what the optional feedback collects, its processors, 30-day retention, and how to request deletion.
+### CI/CD
+- Android Gradle Plugin 8.11.1 → 8.13.0 with optimized resource shrinking (first release validated on CI).
+
 ## [1.5.1] - 2026-09-08
 
 ### Added
