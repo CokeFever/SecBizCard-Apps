@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.5.6] - 2026-09-16
+### Fixed
+- **Scan**: Cards that were captured rotated or upside-down are now automatically turned upright before review, using the recognized text's direction. This also stops the person's name from being misread as the job title on a flipped card.
+- **Scan**: Improved name detection so the real name wins over a large job title, even when the card is captured at an angle or the layout is unusual.
+- **QR / Share**: Replaced the empty grey placeholder shown while the exchange QR is being prepared with a simple spinner, so the brief wait no longer looks like a blank QR code.
+### Changed
+- **Report bad recognition**: The feedback prompt is now offered in more low-quality cases — when the card fills too little of the frame, when nothing looked like a real name, or when the capture had to be rotated upright — so poor scans are easier to report.
+### Security
+- **Feedback backend**: Hardened the feedback submission endpoint (validates the upload path belongs to the signed-in user, caps payload size and line counts) and moved feedback deletion behind a dedicated admin allow-list. Backward-compatible; no effect on existing users.
+
 ## [1.5.5] - 2026-09-15
 ### Added
 - **Languages**: Added Japanese (ja) and Korean (ko). The app now ships in English, 繁體中文, 简体中文, 日本語, and 한국어 (5 locales).

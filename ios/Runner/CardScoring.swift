@@ -238,7 +238,7 @@ enum CardScoring {
         return min(ang, 180.0 - ang)
     }
 
-    private static func polygonArea(_ q: [CGPoint]) -> Double {
+    static func polygonArea(_ q: [CGPoint]) -> Double {
         var area = 0.0
         for i in 0..<4 {
             let j = (i + 1) % 4
