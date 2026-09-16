@@ -1,8 +1,10 @@
 import 'dart:io';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
+import 'package:image/image.dart' as img;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:secbizcard/features/contacts/data/services/ocr_service.dart';
 import 'package:secbizcard/features/contacts/data/card_detection_config.dart';
@@ -30,6 +32,7 @@ class _ScanCardScreenState extends State<ScanCardScreen>
   // the review screen for the "report bad recognition" low-confidence check.
   double? _lastDetectionScore;
   bool? _lastDetectionFallback;
+  double? _lastAreaRatio;
 
   // Permission state: null = still checking, true = denied, false = granted
   bool? _isPermissionDenied;
@@ -219,6 +222,14 @@ class _ScanCardScreenState extends State<ScanCardScreen>
 
       final outcome = await _ocrService.recognize(finalImagePath);
 
+      // Auto-upright the preview using the server-detected text orientation
+      // (from Vision word baselines). Fixes cards that came out 90°/180° off
+      // even though detection succeeded. No-op when orientation is 0.
+      if (outcome.orientation != 0) {
+        final rotated = await _applyOrientation(finalImagePath, outcome.orientation);
+        if (rotated != null) finalImagePath = rotated;
+      }
+
       if (mounted) {
         final profile = outcome.profile;
         if (profile != null) {
@@ -240,6 +251,13 @@ class _ScanCardScreenState extends State<ScanCardScreen>
               'ocrRawLines': outcome.rawOcrLines,
               'ocrDetectionScore': _lastDetectionScore,
               'ocrDetectionFallback': _lastDetectionFallback,
+              'ocrBestNameScore': outcome.bestNameScore,
+              'ocrAreaRatio': _lastAreaRatio,
+              // Non-zero server orientation means the raw capture was tilted/
+              // flipped and we had to rotate it upright — the "looked fine
+              // geometrically but was misoriented" case the feedback predictor
+              // wants to catch. (Cloud Vision path only; 0 for own-key/ML Kit.)
+              'ocrOrientation': outcome.orientation,
             },
           );
         } else {
@@ -340,6 +358,26 @@ class _ScanCardScreenState extends State<ScanCardScreen>
     );
   }
 
+  /// Rotates the card image at [path] clockwise by [degrees] (0/90/180/270)
+  /// to make its text upright, overwriting the file. Returns the path on
+  /// success, or null on failure (caller keeps the original). Runs off the
+  /// main isolate to avoid jank on large captures.
+  Future<String?> _applyOrientation(String path, int degrees) async {
+    final d = ((degrees % 360) + 360) % 360;
+    if (d == 0) return path;
+    try {
+      final bytes = await File(path).readAsBytes();
+      final decoded = img.decodeImage(bytes);
+      if (decoded == null) return null;
+      final rotated = img.copyRotate(decoded, angle: d);
+      await File(path).writeAsBytes(img.encodeJpg(rotated, quality: 90));
+      return path;
+    } catch (e) {
+      debugPrint('[Scan] orientation rotate failed: $e');
+      return null;
+    }
+  }
+
   /// A short, friendly message when OCR fell back or is near a usage limit.
   /// Returns null when nothing needs to be surfaced (the common case).
   String? _ocrNoteMessage(OcrOutcome outcome) {
@@ -374,9 +412,10 @@ class _ScanCardScreenState extends State<ScanCardScreen>
       if (result is Map) {
         final success = result['success'] as bool? ?? false;
         final isFallback = result['fallback'] as bool? ?? false;
-        // Capture detection confidence for the feedback low-confidence check.
+        // Capture detection confidence + card coverage for the feedback checks.
         _lastDetectionScore = (result['score'] as num?)?.toDouble();
         _lastDetectionFallback = isFallback;
+        _lastAreaRatio = (result['areaRatio'] as num?)?.toDouble();
 
         if (!success) {
           throw Exception('Processing failed');

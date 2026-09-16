@@ -14,6 +14,7 @@ class RecognitionSignals {
     this.detectionScore,
     this.bestNameScore,
     this.orientationMismatch,
+    this.coverageRatio,
     this.hasName,
     this.hasAnyPhone,
   });
@@ -28,11 +29,17 @@ class RecognitionSignals {
   /// looked like a real name.
   final double? bestNameScore;
 
-  /// The corrected card orientation contradicts the user's Horizontal/Vertical
-  /// guide (e.g. picked Horizontal but result is taller than wide). Catches the
-  /// "high geometry score but wrong orientation" ambiguous-zone case that the
-  /// detection score alone cannot see.
+  /// The capture was misoriented: the server derived a non-zero text
+  /// orientation (0/90/180/270 from Vision word baselines) and the app had to
+  /// rotate it upright. Catches the "high geometry score but wrong orientation"
+  /// ambiguous-zone case the detection score alone cannot see. Cloud Vision path
+  /// only (own-key/ML Kit report 0); null/false when not applicable.
   final bool? orientationMismatch;
+
+  /// Fraction of the camera frame the detected card occupied (0..1) from
+  /// processCard. A small value means the card was found but tiny in frame —
+  /// often poor edge detection or the user too far away. Null when unknown.
+  final double? coverageRatio;
 
   /// Parsed result completeness: a name was extracted.
   final bool? hasName;
@@ -62,6 +69,15 @@ bool predictLikelyPoorRecognition(
 
   // 3. Orientation contradicts the user's guide — the ambiguous-zone signal.
   if (s.orientationMismatch == true) return true;
+
+  // 3b. Card found but occupies too little of the frame (poor edge detection /
+  //     user too far). Only meaningful when we have a positive ratio; 0 means
+  //     no card was detected (already covered by the fallback signal).
+  final coverage = s.coverageRatio;
+  if (coverage != null && coverage > 0 &&
+      coverage < cfg.value('poorCoverageBelow')) {
+    return true;
+  }
 
   // 4. Nothing looked like a real name.
   final nameScore = s.bestNameScore;

@@ -14,6 +14,7 @@ class VisionRecognitionResult {
     this.userUsage,
     this.userCap,
     this.recognitionId,
+    this.orientation = 0,
   });
 
   final List<OcrLine> lines;
@@ -27,6 +28,11 @@ class VisionRecognitionResult {
   /// later "report bad recognition" refund to exactly this call. Null for the
   /// own-key path (no shared quota to refund). Additive; ignored elsewhere.
   final String? recognitionId;
+
+  /// Clockwise degrees (0/90/180/270) to rotate the captured card so its text
+  /// is upright, derived server-side from Vision word baselines. 0 when there's
+  /// no signal or the card was already upright.
+  final int orientation;
 }
 
 /// Signals that the caller should fall back to on-device ML Kit. Carries an
@@ -152,6 +158,7 @@ class CloudVisionRecognizer {
       userUsage: (usage['userMonth'] as num?)?.toInt(),
       userCap: (usage['userCap'] as num?)?.toInt(),
       recognitionId: data['recognitionId']?.toString(),
+      orientation: (data['orientation'] as num?)?.toInt() ?? 0,
     );
   }
 

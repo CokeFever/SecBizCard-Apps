@@ -63,6 +63,9 @@ class CardDetectionConfig {
     // line looked like a real name. Tunable via Remote Config.
     'poorDetectionScoreBelow': 0.68,
     'poorNameScoreBelow': 40.0,
+    // Card detected but covering less than this fraction of the frame is
+    // treated as poor (likely bad edge detection / user too far). Tunable.
+    'poorCoverageBelow': 0.7,
   };
 
   static const Map<String, bool> _flagDefaults = <String, bool>{
@@ -89,6 +92,7 @@ class CardDetectionConfig {
     'maxAreaRatio': [0.0, 1.0],
     'poorDetectionScoreBelow': [0.0, 1.0],
     'poorNameScoreBelow': [0.0, 500.0],
+    'poorCoverageBelow': [0.0, 1.0],
     'cannyLowA': [1.0, 500.0],
     'cannyHighA': [1.0, 500.0],
     'cannyLowB': [1.0, 500.0],

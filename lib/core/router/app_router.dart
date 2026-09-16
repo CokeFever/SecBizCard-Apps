@@ -203,6 +203,9 @@ GoRouter goRouter(Ref ref) {
                 ?.cast<Map<String, dynamic>>(),
             ocrDetectionScore: args['ocrDetectionScore'] as double?,
             ocrDetectionFallback: args['ocrDetectionFallback'] as bool?,
+            ocrBestNameScore: args['ocrBestNameScore'] as double?,
+            ocrAreaRatio: args['ocrAreaRatio'] as double?,
+            ocrOrientation: args['ocrOrientation'] as int?,
           );
         },
       ),

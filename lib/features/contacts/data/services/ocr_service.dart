@@ -42,12 +42,23 @@ class OcrOutcome {
     this.usageCap,
     this.rawOcrLines = const [],
     this.recognitionId,
+    this.orientation = 0,
+    this.bestNameScore,
   });
   final UserProfile? profile;
   final OcrEngineUsed engine;
   final String? note;
   final int? usageUsed;
   final int? usageCap;
+
+  /// Clockwise degrees (0/90/180/270) to rotate the captured card so its text
+  /// is upright (from the shared-key Vision path). 0 for own-key / ML Kit or
+  /// when already upright.
+  final int orientation;
+
+  /// The winning name candidate's parser score. Low means nothing looked like a
+  /// real name — a quality signal for the feedback predictor. Null if unknown.
+  final double? bestNameScore;
 
   /// Raw recognized lines with geometry ({text, box:{x,y,w,h}}), for the
   /// "report bad recognition" feature — this is what lets us re-run parsing on
@@ -157,10 +168,12 @@ class OCRService {
     if (ownKey != null) {
       try {
         final res = await _vision.recognizeWithOwnKey(base64Image, ownKey);
+        final parsed = _parseResult(res);
         return OcrOutcome(
-          profile: _parse(res, imagePath),
+          profile: _mapToUserProfile(parsed, imagePath),
           engine: OcrEngineUsed.ownKeyVision,
           rawOcrLines: _linesToMaps(res.lines),
+          bestNameScore: parsed.bestNameScore,
           // Own-key path has no shared recognitionId (nothing to refund).
         );
       } on VisionFallbackException catch (e) {
@@ -174,8 +187,9 @@ class OCRService {
     // 2. Shared key path (Cloud Function with quota).
     try {
       final res = await _vision.recognizeWithSharedKey(base64Image);
+      final parsed = _parseResult(res);
       return OcrOutcome(
-        profile: _parse(res, imagePath),
+        profile: _mapToUserProfile(parsed, imagePath),
         engine: OcrEngineUsed.sharedVision,
         note: (res.globalUsage != null && res.globalCap != null &&
                 res.globalUsage! >= (res.globalCap! * 0.8))
@@ -186,6 +200,8 @@ class OCRService {
         usageCap: res.userCap,
         rawOcrLines: _linesToMaps(res.lines),
         recognitionId: res.recognitionId,
+        orientation: res.orientation,
+        bestNameScore: parsed.bestNameScore,
       );
     } on VisionFallbackException catch (e) {
       if (kDebugMode) debugPrint('[OCR] shared Vision → fallback ML Kit (${e.reason})');
@@ -213,10 +229,7 @@ class OCRService {
     return outcome.profile;
   }
 
-  UserProfile? _parse(VisionRecognitionResult res, String imagePath) {
-    final result = _ocr.parseLines(res.lines);
-    return _mapToUserProfile(result, imagePath);
-  }
+  OcrResult _parseResult(VisionRecognitionResult res) => _ocr.parseLines(res.lines);
 
   /// Serializes recognized lines to plain maps ({text, box:{x,y,w,h}}) for the
   /// feedback payload — the raw material to re-run parsing on a reported card.

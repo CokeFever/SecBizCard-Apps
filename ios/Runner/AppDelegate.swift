@@ -155,6 +155,7 @@ import ImageIO
                     "success": true,
                     "fallback": true,
                     "score": bestScore,
+                    "areaRatio": 0.0, // no card detected
                     "imageWidth": Int(imgW),
                     "imageHeight": Int(imgH),
                     "points": pts,
@@ -237,7 +238,27 @@ import ImageIO
         if let jpegData = enhancedImage.jpegData(compressionQuality: 0.9) {
             do {
                 try jpegData.write(to: URL(fileURLWithPath: outputPath))
-                DispatchQueue.main.async { result(["success": true]) }
+                // Detection metadata, matching Android's processCard result so
+                // the Dart feedback predictor gets the same signals on both
+                // platforms. winner corners are TL,TR,BR,BL (TOP-LEFT origin).
+                let areaRatio = imgArea > 0 ? CardScoring.polygonArea(winner) / imgArea : 0.0
+                let pts: [Double] = [
+                    Double(winner[0].x), Double(winner[0].y),
+                    Double(winner[1].x), Double(winner[1].y),
+                    Double(winner[2].x), Double(winner[2].y),
+                    Double(winner[3].x), Double(winner[3].y),
+                ]
+                DispatchQueue.main.async {
+                    result([
+                        "success": true,
+                        "fallback": false,
+                        "score": bestScore,
+                        "areaRatio": areaRatio,
+                        "imageWidth": Int(imgW),
+                        "imageHeight": Int(imgH),
+                        "points": pts,
+                    ])
+                }
             } catch {
                 print("Save Error: \(error)")
                 DispatchQueue.main.async { result(["success": false]) }

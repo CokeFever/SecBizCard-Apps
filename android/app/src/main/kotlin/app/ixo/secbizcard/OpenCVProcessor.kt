@@ -173,6 +173,11 @@ class OpenCVProcessor {
                 resultData["success"] = true
                 resultData["fallback"] = false
                 resultData["score"] = bestScore
+                // Fraction of the frame the detected card occupies. A small
+                // value means we found a card but it's tiny in the frame (poor
+                // edge detection / user too far), which the feedback predictor
+                // uses. Computed in the resized space (same scale as imgArea).
+                resultData["areaRatio"] = polygonArea(bestQuad) / imgArea
                 resultData["imageWidth"] = originalWidth
                 resultData["imageHeight"] = originalHeight
                 resultData["points"] = scaledPoints
@@ -185,6 +190,7 @@ class OpenCVProcessor {
             resultData["success"] = true
             resultData["fallback"] = true
             resultData["score"] = bestScore
+            resultData["areaRatio"] = 0.0 // no card detected
             resultData["imageWidth"] = originalWidth
             resultData["imageHeight"] = originalHeight
             resultData["points"] = fallbackPoints(guide, scale, originalWidth, originalHeight)

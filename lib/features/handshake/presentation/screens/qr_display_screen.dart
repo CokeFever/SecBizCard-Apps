@@ -525,13 +525,11 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
     return user.filterForContext(type);
   }
 
-  /// A placeholder that mirrors the real QR layout (title + framed QR box)
-  /// while the session is being created, so the transition to the live QR is
-  /// smooth rather than a bare spinner. Usually only briefly visible, since a
-  /// pre-warmed session shows the QR immediately.
+  /// Lightweight loading state while the session is being created: the title
+  /// (to keep the layout stable) plus a simple centered spinner. Deliberately
+  /// NOT a QR-sized filled box — a grey block that mirrors the QR frame reads
+  /// as an "empty QR" and makes the wait feel worse than a plain spinner.
   Widget _buildLoadingSkeleton(BuildContext context) {
-    final theme = Theme.of(context);
-    final base = theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
       child: Column(
@@ -541,45 +539,13 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
             'Scan to Exchange',
             style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 32),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 10,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            child: Container(
-              width: 250,
-              height: 250,
-              decoration: BoxDecoration(
-                color: base,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Center(
-                child: SizedBox(
-                  width: 36,
-                  height: 36,
-                  child: CircularProgressIndicator(strokeWidth: 3),
-                ),
-              ),
-            ),
+          const SizedBox(height: 48),
+          const SizedBox(
+            width: 40,
+            height: 40,
+            child: CircularProgressIndicator(strokeWidth: 3),
           ),
-          const SizedBox(height: 24),
-          Container(
-            width: 140,
-            height: 16,
-            decoration: BoxDecoration(
-              color: base,
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
+          const SizedBox(height: 48),
         ],
       ),
     );

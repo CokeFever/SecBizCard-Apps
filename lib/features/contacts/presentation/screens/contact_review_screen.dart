@@ -21,6 +21,13 @@ class ContactReviewScreen extends ConsumerStatefulWidget {
   final List<Map<String, dynamic>>? ocrRawLines;
   final double? ocrDetectionScore;
   final bool? ocrDetectionFallback;
+  final double? ocrBestNameScore;
+  final double? ocrAreaRatio;
+
+  /// Clockwise degrees (0/90/180/270) the server said the capture needed to be
+  /// rotated so its text is upright. Non-zero => the raw capture was misoriented
+  /// (a quality signal for the feedback predictor). Null/0 when not applicable.
+  final int? ocrOrientation;
 
   const ContactReviewScreen({
     super.key,
@@ -31,6 +38,9 @@ class ContactReviewScreen extends ConsumerStatefulWidget {
     this.ocrRawLines,
     this.ocrDetectionScore,
     this.ocrDetectionFallback,
+    this.ocrBestNameScore,
+    this.ocrAreaRatio,
+    this.ocrOrientation,
   });
 
   @override
@@ -145,6 +155,12 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
     return predictLikelyPoorRecognition(RecognitionSignals(
       detectionFallback: widget.ocrDetectionFallback,
       detectionScore: widget.ocrDetectionScore,
+      bestNameScore: widget.ocrBestNameScore,
+      coverageRatio: widget.ocrAreaRatio,
+      // The server had to rotate the capture upright => it was tilted/flipped,
+      // which the geometry score alone can miss. Feeds the ambiguous-zone rule.
+      orientationMismatch:
+          widget.ocrOrientation != null && widget.ocrOrientation != 0,
       hasName: widget.profile.displayName.trim().isNotEmpty,
       hasAnyPhone: (widget.profile.phone?.isNotEmpty ?? false) ||
           (widget.profile.mobile?.isNotEmpty ?? false),
