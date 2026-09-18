@@ -258,6 +258,10 @@ class _ScanCardScreenState extends State<ScanCardScreen>
               // geometrically but was misoriented" case the feedback predictor
               // wants to catch. (Cloud Vision path only; 0 for own-key/ML Kit.)
               'ocrOrientation': outcome.orientation,
+              // Detected language/region — feedback metadata for grouping
+              // reported cards. Null for ML Kit / undetermined.
+              'ocrCardLanguage': outcome.cardLanguage,
+              'ocrRegion': outcome.region,
             },
           );
         } else {
