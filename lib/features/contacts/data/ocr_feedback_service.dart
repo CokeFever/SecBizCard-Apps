@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Client service for the "report bad recognition" feature.
@@ -85,12 +86,25 @@ class OcrFeedbackService {
       }
     }
 
+    // Fill the app version centrally so every submit path records it (the
+    // caller usually doesn't pass one). Best-effort: a lookup failure must
+    // never block the report, so fall back to whatever the caller gave (null).
+    var resolvedAppVersion = appVersion;
+    if (resolvedAppVersion == null) {
+      try {
+        final info = await PackageInfo.fromPlatform();
+        resolvedAppVersion = '${info.version}+${info.buildNumber}';
+      } catch (e) {
+        debugPrint('[OcrFeedback] appVersion lookup failed: $e');
+      }
+    }
+
     try {
       final callable = _functions.httpsCallable('submitOcrFeedback');
       final res = await callable.call(<String, dynamic>{
         'engine': engine,
         if (recognitionId != null) 'recognitionId': recognitionId,
-        if (appVersion != null) 'appVersion': appVersion,
+        if (resolvedAppVersion != null) 'appVersion': resolvedAppVersion,
         if (ocrPkgVersion != null) 'ocrPkgVersion': ocrPkgVersion,
         if (cardLanguage != null) 'cardLanguage': cardLanguage,
         if (region != null) 'region': region,

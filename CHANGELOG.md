@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.7] - 2026-09-18
+### Fixed
+- **Scan**: A promotional line on a card (such as "Follow us" or a social handle) is no longer mistaken for the person's name.
+- **Scan**: Names written as initials plus characters (for example "HC Lo 羅宏哲") are now recognized correctly instead of losing out to other text on the card.
+- **Scan**: A postal code sitting on a city line (for example "Taipei 110016") is no longer captured as a phone number.
+
 ## [1.5.6] - 2026-09-16
 ### Fixed
 - **Scan**: Cards that were captured rotated or upside-down are now automatically turned upright before review, using the recognized text's direction. This also stops the person's name from being misread as the job title on a flipped card.
