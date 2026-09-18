@@ -206,6 +206,8 @@ GoRouter goRouter(Ref ref) {
             ocrBestNameScore: args['ocrBestNameScore'] as double?,
             ocrAreaRatio: args['ocrAreaRatio'] as double?,
             ocrOrientation: args['ocrOrientation'] as int?,
+            ocrCardLanguage: args['ocrCardLanguage'] as String?,
+            ocrRegion: args['ocrRegion'] as String?,
           );
         },
       ),

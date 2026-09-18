@@ -29,6 +29,12 @@ class ContactReviewScreen extends ConsumerStatefulWidget {
   /// (a quality signal for the feedback predictor). Null/0 when not applicable.
   final int? ocrOrientation;
 
+  /// Detected card language (`english`/`chinese`/`japanese`/`korean`) and
+  /// region (ISO-3166 alpha-2, e.g. `TW`) — feedback metadata. Null when
+  /// undetermined or reached from a path without OCR metadata.
+  final String? ocrCardLanguage;
+  final String? ocrRegion;
+
   const ContactReviewScreen({
     super.key,
     required this.profile,
@@ -41,6 +47,8 @@ class ContactReviewScreen extends ConsumerStatefulWidget {
     this.ocrBestNameScore,
     this.ocrAreaRatio,
     this.ocrOrientation,
+    this.ocrCardLanguage,
+    this.ocrRegion,
   });
 
   @override
@@ -188,7 +196,8 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
       OcrFeedbackSample(
         engine: widget.ocrEngine ?? 'unknown',
         recognitionId: widget.ocrRecognitionId,
-        cardLanguage: null,
+        cardLanguage: widget.ocrCardLanguage,
+        region: widget.ocrRegion,
         rawOcrLines: widget.ocrRawLines!,
         parsedResult: {
           'displayName': widget.profile.displayName,

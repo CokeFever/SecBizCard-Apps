@@ -44,6 +44,8 @@ class OcrOutcome {
     this.recognitionId,
     this.orientation = 0,
     this.bestNameScore,
+    this.cardLanguage,
+    this.region,
   });
   final UserProfile? profile;
   final OcrEngineUsed engine;
@@ -59,6 +61,13 @@ class OcrOutcome {
   /// The winning name candidate's parser score. Low means nothing looked like a
   /// real name — a quality signal for the feedback predictor. Null if unknown.
   final double? bestNameScore;
+
+  /// Detected card language (`english`/`chinese`/`japanese`/`korean`) and
+  /// region (ISO-3166 alpha-2, e.g. `TW`). Metadata for the "report bad
+  /// recognition" sample so reported cards can be grouped by language/region.
+  /// Null for ML Kit or when undetermined.
+  final String? cardLanguage;
+  final String? region;
 
   /// Raw recognized lines with geometry ({text, box:{x,y,w,h}}), for the
   /// "report bad recognition" feature — this is what lets us re-run parsing on
@@ -174,6 +183,8 @@ class OCRService {
           engine: OcrEngineUsed.ownKeyVision,
           rawOcrLines: _linesToMaps(res.lines),
           bestNameScore: parsed.bestNameScore,
+          cardLanguage: parsed.cardLanguage,
+          region: parsed.region,
           // Own-key path has no shared recognitionId (nothing to refund).
         );
       } on VisionFallbackException catch (e) {
@@ -202,6 +213,8 @@ class OCRService {
         recognitionId: res.recognitionId,
         orientation: res.orientation,
         bestNameScore: parsed.bestNameScore,
+        cardLanguage: parsed.cardLanguage,
+        region: parsed.region,
       );
     } on VisionFallbackException catch (e) {
       if (kDebugMode) debugPrint('[OCR] shared Vision → fallback ML Kit (${e.reason})');
