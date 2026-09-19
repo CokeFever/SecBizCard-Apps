@@ -20,7 +20,18 @@ import 'package:secbizcard/features/handshake/presentation/widgets/incoming_requ
 
 class QrDisplayScreen extends ConsumerStatefulWidget {
   final bool showAppBar;
-  const QrDisplayScreen({super.key, this.showAppBar = true});
+
+  /// When set, this screen does NOT generate a new QR session. Instead it
+  /// attaches to an EXISTING session (from a tapped handshake-request
+  /// notification) and drives the creator's approval flow for it. Used by the
+  /// `/incoming-handshake/:sessionId` deep link.
+  final String? incomingSessionId;
+
+  const QrDisplayScreen({
+    super.key,
+    this.showAppBar = true,
+    this.incomingSessionId,
+  });
 
   @override
   ConsumerState<QrDisplayScreen> createState() => _QrDisplayScreenState();
@@ -58,7 +69,26 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
   @override
   void initState() {
     super.initState();
-    _generateQrCode();
+    final incoming = widget.incomingSessionId;
+    if (incoming != null && incoming.isNotEmpty) {
+      // Deep-linked from a handshake notification: attach to the existing
+      // session and drive the approval flow, instead of creating a new QR.
+      _attachToIncomingSession(incoming);
+    } else {
+      _generateQrCode();
+    }
+  }
+
+  /// Attach to an existing session id (from a tapped notification) so the
+  /// creator can approve/decline it. Listens to the session doc; the shared
+  /// [_listenToSession] logic already shows the approval sheet on REQUESTED.
+  void _attachToIncomingSession(String sessionId) {
+    setState(() {
+      _sessionId = sessionId;
+      _isLoading = false;
+      _error = null;
+    });
+    _listenToSession(sessionId);
   }
 
   @override
