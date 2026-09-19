@@ -3,9 +3,11 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:secbizcard/core/router/app_router.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/profile/data/profile_repository.dart';
 import 'package:secbizcard/features/handshake/data/handshake_history_repository.dart';
+import 'package:secbizcard/features/handshake/data/handshake_repository.dart';
 
 part 'notification_service.g.dart';
 
@@ -73,44 +75,104 @@ class NotificationService {
       }
     });
 
-    // 5. Handle foreground messages
+    // 5. Handle foreground messages — log the incoming handshake so the bell
+    //    badge + Notifications list update even when the user is not on the
+    //    Share screen.
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-      debugPrint('[NotificationService] Got a message whilst in the foreground!');
-      debugPrint('Message data: ${message.data}');
+      debugPrint('[NotificationService] Foreground message: ${message.data}');
+      await _logHandshakeFromMessage(message);
+    });
 
-      // If it's a handshake request, log it to history!
-      if (message.data['type'] == 'handshake_request') {
-        final sessionId = message.data['sessionId'];
-        final payloadJson = message.data['payload'];
-        
-        if (sessionId != null && payloadJson != null) {
-          final data = jsonDecode(payloadJson) as Map<String, dynamic>;
-          final senderProfile = data['receiverProfile'] as Map<String, dynamic>?;
-          
-          final historyRepo = _ref.read(handshakeHistoryRepositoryProvider);
-          await historyRepo.logRequest(
-            HandshakeHistoryRecord(
-              sessionId: sessionId,
-              senderUid: senderProfile?['uid'],
-              senderName: senderProfile?['displayName'],
-              photoUrl: senderProfile?['photoUrl'],
-              status: HandshakeRequestStatus.pending,
-              timestamp: DateTime.now(),
-              receiverProfileJson: payloadJson,
-            ),
-          );
-          
-          // Invalidate counts so badge updates
-          _ref.invalidate(pendingHandshakeCountProvider);
-          _ref.invalidate(handshakeHistoryProvider);
-        }
+    // 6. App opened by TAPPING a notification (from background). Log it, then
+    //    deep-link the creator straight into the approval flow.
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
+      debugPrint('[NotificationService] Notification tapped: ${message.data}');
+      await _logHandshakeFromMessage(message);
+      _routeFromMessage(message);
+    });
+
+    // 7. App launched from TERMINATED state by tapping a notification.
+    final initialMessage = await _fcm.getInitialMessage();
+    if (initialMessage != null) {
+      debugPrint('[NotificationService] Launched from notification: ${initialMessage.data}');
+      await _logHandshakeFromMessage(initialMessage);
+      _routeFromMessage(initialMessage);
+    }
+  }
+
+  /// Case-insensitive handshake type check.
+  bool _isType(RemoteMessage m, String type) =>
+      (m.data['type'] as String?)?.toUpperCase() == type.toUpperCase();
+
+  /// Logs an incoming handshake push into the local history so the in-app
+  /// Notifications list + bell badge reflect it. Works for both a fresh request
+  /// (writes a pending row) and a returned-info event. Resilient to missing
+  /// requester metadata: uses the `requester` summary in the push data when
+  /// present, otherwise falls back to reading the session document. Never
+  /// throws — a logging failure must not break notification handling.
+  Future<void> _logHandshakeFromMessage(RemoteMessage message) async {
+    try {
+      final isRequest = _isType(message, 'HANDSHAKE_REQUEST');
+      final isReturn = _isType(message, 'HANDSHAKE_RETURN');
+      if (!isRequest && !isReturn) return;
+
+      final sessionId = message.data['sessionId'] as String?;
+      if (sessionId == null || sessionId.isEmpty) return;
+
+      // Requester summary: prefer the compact `requester` JSON now sent in the
+      // push data; fall back to the session doc's receiverProfile.
+      Map<String, dynamic>? requester;
+      final requesterRaw = message.data['requester'] as String?;
+      if (requesterRaw != null && requesterRaw.isNotEmpty) {
+        try {
+          requester = jsonDecode(requesterRaw) as Map<String, dynamic>;
+        } catch (_) {/* ignore malformed */}
       }
-    });
+      if (requester == null) {
+        try {
+          final repo = _ref.read(handshakeRepositoryProvider);
+          final snap = await repo.listenToSession(sessionId).first
+              .timeout(const Duration(seconds: 5));
+          final data = snap.data();
+          final rp = data?['receiverProfile'] as Map<String, dynamic>?;
+          if (rp != null) requester = rp;
+        } catch (_) {/* offline / not accessible — log without profile */}
+      }
 
-    // 5. Handle background/terminated state messages when app is opened
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      debugPrint('[NotificationService] Message clicked/opened app!');
-    });
+      final historyRepo = _ref.read(handshakeHistoryRepositoryProvider);
+      await historyRepo.logRequest(
+        HandshakeHistoryRecord(
+          sessionId: sessionId,
+          senderUid: requester?['uid'] as String?,
+          senderName: requester?['displayName'] as String?,
+          photoUrl: requester?['photoUrl'] as String?,
+          // A returned-info event means the exchange completed; a request is
+          // still pending the creator's approval.
+          status: isReturn
+              ? HandshakeRequestStatus.approved
+              : HandshakeRequestStatus.pending,
+          timestamp: DateTime.now(),
+        ),
+      );
+
+      _ref.invalidate(pendingHandshakeCountProvider);
+      _ref.invalidate(handshakeHistoryProvider);
+    } catch (e) {
+      debugPrint('[NotificationService] Failed to log handshake from push: $e');
+    }
+  }
+
+  /// After a tapped/launched handshake-request notification, deep-link the
+  /// creator into the approval flow for that specific session.
+  void _routeFromMessage(RemoteMessage message) {
+    if (!_isType(message, 'HANDSHAKE_REQUEST')) return;
+    final sessionId = message.data['sessionId'] as String?;
+    if (sessionId == null || sessionId.isEmpty) return;
+    try {
+      _ref.read(goRouterProvider).push('/incoming-handshake/$sessionId');
+    } catch (e) {
+      debugPrint('[NotificationService] Failed to route to approval: $e');
+    }
   }
 
   Future<void> _updateToken(String token) async {

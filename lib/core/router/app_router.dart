@@ -151,6 +151,14 @@ GoRouter goRouter(Ref ref) {
         path: '/qr-display',
         builder: (context, state) => const QrDisplayScreen(),
       ),
+      // Deep link from a tapped handshake-request notification: opens the
+      // creator's approval flow for that specific session.
+      GoRoute(
+        path: '/incoming-handshake/:sessionId',
+        builder: (context, state) => QrDisplayScreen(
+          incomingSessionId: state.pathParameters['sessionId'],
+        ),
+      ),
       GoRoute(
         path: '/qr-scanner',
         builder: (context, state) => const QrScannerScreen(),
