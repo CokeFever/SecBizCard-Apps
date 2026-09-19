@@ -10,6 +10,7 @@ import 'package:secbizcard/features/profile/domain/user_profile.dart';
 
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/contacts/data/datasources/contacts_local_datasource.dart';
+import 'package:secbizcard/features/contacts/data/services/contact_export_service.dart';
 import 'package:secbizcard/features/profile/data/profile_repository.dart';
 
 part 'contacts_repository.g.dart';
@@ -35,6 +36,11 @@ ContactsRepository contactsRepository(Ref ref) {
     ref.watch(profileRepositoryProvider),
     ref.watch(contactsLocalDataSourceProvider),
   );
+}
+
+@riverpod
+ContactExportService contactExportService(Ref ref) {
+  return ContactExportService(ref.watch(contactsRepositoryProvider));
 }
 
 class ContactsRepository {
