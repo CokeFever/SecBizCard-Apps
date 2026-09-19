@@ -230,6 +230,20 @@ class AppDrawer extends ConsumerWidget {
                     style: GoogleFonts.inter(color: Colors.grey, fontSize: 11, decoration: TextDecoration.underline),
                   ),
                 ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: Text('·', style: TextStyle(color: Colors.grey[400], fontSize: 11)),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    _dismiss(context);
+                    launchUrl(Uri.parse('https://ixo.app/manual'), mode: LaunchMode.externalApplication);
+                  },
+                  child: Text(
+                    'Guide',
+                    style: GoogleFonts.inter(color: Colors.grey, fontSize: 11, decoration: TextDecoration.underline),
+                  ),
+                ),
                 const Spacer(),
                 FutureBuilder(
                   future: ref.read(packageInfoProvider.future),
