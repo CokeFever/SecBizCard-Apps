@@ -342,6 +342,45 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
             onPressed: _editContact,
             tooltip: 'Edit Contact',
           ),
+          // Export / Share collapsed into an overflow menu so the same action
+          // names/icons are used here and in the list's multi-select mode
+          // (consistency), and the screen body is freed up for card content.
+          PopupMenuButton<String>(
+            tooltip: 'More actions',
+            onSelected: (value) {
+              switch (value) {
+                case 'google':
+                  _exportToGoogle();
+                  break;
+                case 'vcard':
+                  _shareAsVCard();
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'google',
+                enabled: !_isExporting,
+                child: const Row(
+                  children: [
+                    Icon(Icons.import_export, size: 20),
+                    SizedBox(width: 12),
+                    Text('Export to Google Contacts'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'vcard',
+                child: Row(
+                  children: [
+                    Icon(Icons.share, size: 20),
+                    SizedBox(width: 12),
+                    Text('Share as vCard (.vcf)'),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -515,38 +554,6 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
             const SizedBox(height: 32),
             _buildBusinessCardsSection(),
 
-            const SizedBox(height: 48),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: _isExporting ? null : _exportToGoogle,
-                icon: _isExporting
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.import_export),
-                label: Text(
-                  _isExporting ? 'Exporting...' : 'Export to Google Contacts',
-                ),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: _shareAsVCard,
-                icon: const Icon(Icons.share),
-                label: const Text('Share as vCard (.vcf)'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-              ),
-            ),
             const SizedBox(height: 32),
           ],
         ),

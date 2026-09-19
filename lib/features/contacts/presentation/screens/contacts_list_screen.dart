@@ -9,6 +9,12 @@ import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
 final contactsSearchQueryProvider = StateProvider<String>((ref) => '');
 final contactsSearchModeProvider = StateProvider<bool>((ref) => false);
 
+/// Multi-select state for the contacts list. Mirrors the search-mode pattern:
+/// shared providers so the embedded list AND the parent MainScreen AppBar stay
+/// in sync (the list toggles selection; the AppBar shows count + batch actions).
+final contactsSelectionModeProvider = StateProvider<bool>((ref) => false);
+final contactsSelectedIdsProvider = StateProvider<Set<String>>((ref) => {});
+
 class ContactsListScreen extends ConsumerStatefulWidget {
   final bool showAppBar;
   const ContactsListScreen({super.key, this.showAppBar = true});
@@ -35,6 +41,22 @@ class _ContactsListScreenState extends ConsumerState<ContactsListScreen>
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  /// Toggle a contact's membership in the current selection. Leaving the last
+  /// item deselected exits selection mode (matches the platform convention).
+  void _toggleSelection(String uid) {
+    final current = ref.read(contactsSelectedIdsProvider);
+    final next = Set<String>.from(current);
+    if (next.contains(uid)) {
+      next.remove(uid);
+    } else {
+      next.add(uid);
+    }
+    ref.read(contactsSelectedIdsProvider.notifier).state = next;
+    if (next.isEmpty) {
+      ref.read(contactsSelectionModeProvider.notifier).state = false;
+    }
   }
 
   @override
@@ -98,10 +120,57 @@ class _ContactsListScreenState extends ConsumerState<ContactsListScreen>
           );
         }
 
+        final selectionMode = ref.watch(contactsSelectionModeProvider);
+        final selectedIds = ref.watch(contactsSelectedIdsProvider);
+
         return ListView.builder(
           itemCount: filtered.length,
           itemBuilder: (context, index) {
             final contact = filtered[index];
+            final isSelected = selectedIds.contains(contact.uid);
+
+            final tile = ListTile(
+              selected: isSelected,
+              selectedTileColor:
+                  theme.colorScheme.primary.withValues(alpha: 0.08),
+              leading: selectionMode
+                  ? _SelectionAvatar(
+                      isSelected: isSelected,
+                      contact: contact,
+                    )
+                  : UserProfileAvatar(
+                      photoUrl: contact.photoUrl,
+                      displayName: contact.displayName,
+                      radius: 24,
+                    ),
+              title: Text(contact.displayName),
+              subtitle: Text(
+                [
+                  contact.title,
+                  contact.company,
+                ].where((e) => e != null && e.isNotEmpty).join(' • '),
+              ),
+              onTap: () {
+                if (selectionMode) {
+                  _toggleSelection(contact.uid);
+                } else {
+                  context.push('/contact-detail', extra: contact);
+                }
+              },
+              onLongPress: () {
+                // Long-press enters multi-select and picks this contact.
+                if (!selectionMode) {
+                  ref.read(contactsSelectionModeProvider.notifier).state = true;
+                }
+                _toggleSelection(contact.uid);
+              },
+            );
+
+            // Swipe-to-delete is the ONLY delete entry point, and it's disabled
+            // while selecting (delete is deliberately kept single-item, never
+            // batch — see the design decision).
+            if (selectionMode) return tile;
+
             return Slidable(
               key: ValueKey(contact.uid),
               endActionPane: ActionPane(
@@ -133,23 +202,7 @@ class _ContactsListScreenState extends ConsumerState<ContactsListScreen>
                   ),
                 ],
               ),
-              child: ListTile(
-                leading: UserProfileAvatar(
-                  photoUrl: contact.photoUrl,
-                  displayName: contact.displayName,
-                  radius: 24,
-                ),
-                title: Text(contact.displayName),
-                subtitle: Text(
-                  [
-                    contact.title,
-                    contact.company,
-                  ].where((e) => e != null && e.isNotEmpty).join(' • '),
-                ),
-                onTap: () {
-                  context.push('/contact-detail', extra: contact);
-                },
-              ),
+              child: tile,
             );
           },
         );
@@ -220,6 +273,32 @@ class _ContactsListScreenState extends ConsumerState<ContactsListScreen>
         ],
       ),
       body: content,
+    );
+  }
+}
+
+/// Leading widget shown while in multi-select mode: a filled check when
+/// selected, otherwise the normal avatar (so the row still reads as a contact).
+class _SelectionAvatar extends StatelessWidget {
+  const _SelectionAvatar({required this.isSelected, required this.contact});
+
+  final bool isSelected;
+  final dynamic contact;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    if (isSelected) {
+      return CircleAvatar(
+        radius: 24,
+        backgroundColor: theme.colorScheme.primary,
+        child: const Icon(Icons.check, color: Colors.white),
+      );
+    }
+    return UserProfileAvatar(
+      photoUrl: contact.photoUrl,
+      displayName: contact.displayName,
+      radius: 24,
     );
   }
 }

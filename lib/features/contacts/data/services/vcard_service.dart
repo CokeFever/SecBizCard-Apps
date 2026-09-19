@@ -36,8 +36,30 @@ class VCardService {
     return contacts;
   }
 
+  /// Generates a single `.vcf` string containing MULTIPLE contacts (each as its
+  /// own BEGIN/END:VCARD block, concatenated per the vCard spec).
+  ///
+  /// [includePhoto] defaults to FALSE here because a batch export of many
+  /// cards with inline base64 photos can balloon the file to many MB — too
+  /// large to email/share comfortably. Callers that want photos (e.g. a single
+  /// share) use [generate] directly, which keeps the photo.
+  static String generateMultiple(
+    List<UserProfile> profiles, {
+    bool includePhoto = false,
+  }) {
+    final sb = StringBuffer();
+    for (final profile in profiles) {
+      sb.write(generate(profile, includePhoto: includePhoto));
+    }
+    return sb.toString();
+  }
+
   /// Generates a vCard 3.0 string for a given UserProfile.
-  static String generate(UserProfile profile) {
+  ///
+  /// [includePhoto] embeds the card image as an inline base64 PHOTO property.
+  /// Kept true for single-contact shares; batch exports pass false to keep the
+  /// combined file small.
+  static String generate(UserProfile profile, {bool includePhoto = true}) {
     final sb = StringBuffer();
     sb.writeln('BEGIN:VCARD');
     sb.writeln('VERSION:3.0'); // Enforcing 3.0 as requested
@@ -96,27 +118,29 @@ class VCardService {
       sb.writeln('URL:${_esc(profile.website!)}');
     }
 
-    // Photo Support
-    try {
-      String? imagePath = profile.flatImagePath;
-      if (imagePath == null || imagePath.isEmpty) {
-        imagePath = profile.originalImagePath;
-      }
-
-      if (imagePath != null && imagePath.isNotEmpty) {
-        final file = File(imagePath);
-        if (file.existsSync()) {
-          final bytes = file.readAsBytesSync();
-          final b64 = base64Encode(bytes);
-          // vCard 3.0 standard for inline photo
-          // Clean base64 strings often need to be folded, but modern readers usually handle long lines.
-          // Standard says folding is recommended. Dart's base64Encode produces one long line.
-          sb.writeln('PHOTO;ENCODING=b;TYPE=JPEG:$b64');
+    // Photo Support (skipped for batch exports to keep the combined file small)
+    if (includePhoto) {
+      try {
+        String? imagePath = profile.flatImagePath;
+        if (imagePath == null || imagePath.isEmpty) {
+          imagePath = profile.originalImagePath;
         }
+
+        if (imagePath != null && imagePath.isNotEmpty) {
+          final file = File(imagePath);
+          if (file.existsSync()) {
+            final bytes = file.readAsBytesSync();
+            final b64 = base64Encode(bytes);
+            // vCard 3.0 standard for inline photo
+            // Clean base64 strings often need to be folded, but modern readers usually handle long lines.
+            // Standard says folding is recommended. Dart's base64Encode produces one long line.
+            sb.writeln('PHOTO;ENCODING=b;TYPE=JPEG:$b64');
+          }
+        }
+      } catch (e) {
+        // Ignore photo errors during export to prevent failure
+        if (kDebugMode) debugPrint('Error exporting photo to vCard: $e');
       }
-    } catch (e) {
-      // Ignore photo errors during export to prevent failure
-      if (kDebugMode) debugPrint('Error exporting photo to vCard: $e');
     }
 
     sb.writeln('END:VCARD');
