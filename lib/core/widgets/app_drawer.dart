@@ -236,8 +236,20 @@ class AppDrawer extends ConsumerWidget {
                 ),
                 GestureDetector(
                   onTap: () {
+                    // Pass the app's current locale so the web guide opens in
+                    // the reader's language (?lang=). The web page normalizes
+                    // the value (e.g. zh_TW → Traditional) and falls back to
+                    // English for anything it doesn't recognize.
+                    final locale = Localizations.localeOf(context);
+                    final lang = locale.countryCode != null &&
+                            locale.countryCode!.isNotEmpty
+                        ? '${locale.languageCode}_${locale.countryCode}'
+                        : locale.languageCode;
                     _dismiss(context);
-                    launchUrl(Uri.parse('https://ixo.app/manual'), mode: LaunchMode.externalApplication);
+                    launchUrl(
+                      Uri.parse('https://ixo.app/guide?lang=$lang'),
+                      mode: LaunchMode.externalApplication,
+                    );
                   },
                   child: Text(
                     'Guide',
