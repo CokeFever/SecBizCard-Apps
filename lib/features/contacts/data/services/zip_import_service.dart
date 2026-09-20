@@ -39,6 +39,18 @@ class ZipImportService {
 
   static const _imageExtensions = {'.jpg', '.jpeg', '.png', '.webp'};
 
+  // --- Resource limits (DoS / zip-bomb guards) -----------------------------
+  // The package is user-chosen, but a malicious or accidentally huge archive
+  // must not be able to hang the app or exhaust memory. These bound the work.
+  /// Max contacts in one package.
+  static const int maxContacts = 2000;
+  /// Max size of a single extracted image; larger ones are skipped (the
+  /// contact still imports, just without that image).
+  static const int maxImageBytes = 10 * 1024 * 1024; // 10 MB
+  /// Max total decompressed image bytes across the whole package; once
+  /// exceeded, no further images are extracted.
+  static const int maxTotalImageBytes = 200 * 1024 * 1024; // 200 MB
+
   /// Parses [zipBytes] and returns the built contacts + skipped count.
   ///
   /// Throws [FormatException] when the package is structurally invalid (not a
@@ -66,8 +78,13 @@ class ZipImportService {
       throw const FormatException('manifest.json is not valid JSON.');
     }
 
+    // Version must be present and an int. A missing/non-int version is treated
+    // as invalid (rather than silently skipping the compatibility check).
     final version = manifest['version'];
-    if (version is int && version > supportedVersion) {
+    if (version is! int) {
+      throw const FormatException('manifest.json has an invalid "version".');
+    }
+    if (version > supportedVersion) {
       throw FormatException(
         'This package needs a newer app version (manifest version $version).',
       );
@@ -76,6 +93,12 @@ class ZipImportService {
     final rawContacts = manifest['contacts'];
     if (rawContacts is! List) {
       throw const FormatException('manifest.json has no "contacts" array.');
+    }
+    if (rawContacts.length > maxContacts) {
+      throw FormatException(
+        'This package has too many contacts '
+        '(${rawContacts.length}; the limit is $maxContacts).',
+      );
     }
 
     // Extract images into a unique temp dir so multiple imports don't collide.
@@ -87,6 +110,8 @@ class ZipImportService {
 
     final contacts = <UserProfile>[];
     var skipped = 0;
+    // Tracks cumulative decompressed image bytes across the whole package.
+    final budget = _ExtractBudget();
 
     for (final entry in rawContacts) {
       if (entry is! Map) {
@@ -94,7 +119,7 @@ class ZipImportService {
         continue;
       }
       final map = Map<String, dynamic>.from(entry);
-      final profile = await _buildContact(map, archive, workDir);
+      final profile = await _buildContact(map, archive, workDir, budget);
       if (profile == null) {
         skipped++;
       } else {
@@ -112,6 +137,7 @@ class ZipImportService {
     Map<String, dynamic> map,
     Archive archive,
     Directory workDir,
+    _ExtractBudget budget,
   ) async {
     String? str(String key) {
       final v = map[key];
@@ -154,10 +180,11 @@ class ZipImportService {
     }
 
     final frontPath =
-        await _extractImage(str('frontImage'), archive, workDir);
-    final backPath = await _extractImage(str('backImage'), archive, workDir);
+        await _extractImage(str('frontImage'), archive, workDir, budget);
+    final backPath =
+        await _extractImage(str('backImage'), archive, workDir, budget);
     final originalPath =
-        await _extractImage(str('originalImage'), archive, workDir);
+        await _extractImage(str('originalImage'), archive, workDir, budget);
 
     return UserProfile(
       uid: _uuid.v4(),
@@ -186,8 +213,12 @@ class ZipImportService {
     String? ref,
     Archive archive,
     Directory workDir,
+    _ExtractBudget budget,
   ) async {
     if (ref == null || ref.isEmpty) return null;
+
+    // Once the whole-package budget is spent, stop extracting images.
+    if (budget.exhausted) return null;
 
     // Normalise and guard against path traversal (e.g. "../../etc").
     final normalized = p.normalize(ref).replaceAll('\\', '/');
@@ -205,11 +236,28 @@ class ZipImportService {
       return null;
     }
 
+    final bytes = file.content as List<int>;
+
+    // Per-image cap: skip an oversized image (the contact still imports).
+    if (bytes.length > maxImageBytes) {
+      if (kDebugMode) {
+        debugPrint('zip import: image "$normalized" exceeds per-file limit');
+      }
+      return null;
+    }
+    // Whole-package cap: stop if this image would push us over the total.
+    if (!budget.tryConsume(bytes.length)) {
+      if (kDebugMode) {
+        debugPrint('zip import: total image budget exceeded, skipping rest');
+      }
+      return null;
+    }
+
     // Flatten to a unique filename in workDir to avoid nested-dir surprises.
     final outName = '${_uuid.v4()}$ext';
     final outPath = p.join(workDir.path, outName);
     final outFile = File(outPath);
-    await outFile.writeAsBytes(file.content as List<int>);
+    await outFile.writeAsBytes(bytes);
     return outPath;
   }
 
@@ -236,5 +284,21 @@ class ZipImportService {
         .map((e) => e?.toString().trim() ?? '')
         .where((e) => e.isNotEmpty)
         .toList();
+  }
+}
+
+/// Running budget for total decompressed image bytes in one import, so a
+/// zip-bomb-style package can't extract unbounded data.
+class _ExtractBudget {
+  int _used = 0;
+
+  bool get exhausted => _used >= ZipImportService.maxTotalImageBytes;
+
+  /// Consumes [n] bytes if it stays within the total budget; returns false
+  /// (and consumes nothing) if it would exceed it.
+  bool tryConsume(int n) {
+    if (_used + n > ZipImportService.maxTotalImageBytes) return false;
+    _used += n;
+    return true;
   }
 }
