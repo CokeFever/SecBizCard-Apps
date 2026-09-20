@@ -8,6 +8,7 @@ import 'package:secbizcard/features/auth/data/auth_repository.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:secbizcard/core/errors/failure.dart';
+import 'package:secbizcard/core/services/backup_reminder_service.dart';
 import 'package:secbizcard/features/profile/data/datasources/profile_local_datasource.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
 
@@ -102,6 +103,13 @@ class ProfileRepository {
 
       // 3. Save to Local Only
       await _localDataSource.saveUser(finalUser);
+
+      // 4. Record that local data changed so the backup reminder can later
+      //    detect unbacked-up changes. This choke-point covers contact saves,
+      //    own-profile edits, and bulk import (each import row lands here).
+      //    System-only writes (FCM token, verification flags) bypass this
+      //    method and call saveUser directly, so they don't trip the reminder.
+      await BackupReminderService().markDataModified();
 
       return const Right(unit);
     } catch (e) {

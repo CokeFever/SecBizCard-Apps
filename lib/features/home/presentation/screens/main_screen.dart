@@ -10,6 +10,7 @@ import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'package:secbizcard/features/handshake/data/handshake_history_repository.dart';
 import 'package:secbizcard/core/services/notification_service.dart';
+import 'package:secbizcard/core/services/backup_reminder_service.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   final int initialTab;
@@ -22,6 +23,12 @@ class MainScreen extends ConsumerStatefulWidget {
 class _MainScreenState extends ConsumerState<MainScreen> {
   late int _currentIndex;
   bool _isProcessingTap = false;
+
+  // Ensures the backup reminder is evaluated at most once per app launch
+  // (process lifetime), not on every navigation to /home. Because it lives in
+  // memory it resets only on a true cold start — so a change made during a
+  // session is only surfaced on the NEXT launch, never the current one.
+  static bool _backupReminderCheckedThisLaunch = false;
 
   late final List<Widget> _pages;
 
@@ -46,7 +53,78 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     // Initialize notification service after home screen renders
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(notificationServiceProvider).initialize();
+      _maybeShowBackupReminder();
     });
+  }
+
+  /// Once per app launch, if the user has data with unbacked-up changes and
+  /// hasn't snoozed this month, gently suggest a Google Drive backup. Purely
+  /// local — never touches Drive/permissions.
+  Future<void> _maybeShowBackupReminder() async {
+    if (_backupReminderCheckedThisLaunch) return;
+    _backupReminderCheckedThisLaunch = true;
+
+    // Need a signed-in user with actual data. Load saved contacts (already
+    // cached by the provider) to decide "hasData".
+    final contactsResult =
+        await ref.read(contactsRepositoryProvider).getSavedContacts();
+    final hasData = contactsResult.fold((_) => false, (list) => list.isNotEmpty);
+    if (!hasData) return;
+
+    final reminder = ref.read(backupReminderServiceProvider);
+    final shouldRemind = await reminder.shouldRemind(hasData: hasData);
+    if (!shouldRemind || !mounted) return;
+
+    await _showBackupReminderDialog(reminder);
+  }
+
+  Future<void> _showBackupReminderDialog(BackupReminderService reminder) async {
+    var dontRemind = false;
+    final action = await showDialog<String>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocal) => AlertDialog(
+          title: const Text('Back up your contacts?'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Your contacts and card images are stored only on this device. '
+                'We recommend backing them up to your own Google Drive so you '
+                "don't lose them.",
+              ),
+              const SizedBox(height: 8),
+              CheckboxListTile(
+                value: dontRemind,
+                onChanged: (v) => setLocal(() => dontRemind = v ?? false),
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                title: const Text("Don't remind me this month"),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, 'later'),
+              child: const Text('Later'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, 'backup'),
+              child: const Text('Back up now'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Honour the checkbox regardless of which button was tapped.
+    if (dontRemind) {
+      await reminder.snoozeThisMonth();
+    }
+    if (action == 'backup' && mounted) {
+      context.push('/backup');
+    }
   }
 
   @override
