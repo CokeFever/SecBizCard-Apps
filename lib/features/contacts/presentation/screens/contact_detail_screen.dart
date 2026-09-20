@@ -10,9 +10,6 @@ import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:secbizcard/features/contacts/data/services/vcard_service.dart';
-import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:secbizcard/core/utils/field_formatter.dart';
 import 'package:secbizcard/core/presentation/widgets/full_screen_image_viewer.dart';
@@ -309,22 +306,26 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
 
   Future<void> _shareAsVCard() async {
     try {
-      final vcardString = VCardService.generate(_user);
-      final tempDir = await getTemporaryDirectory();
-      final file = File(
-        '${tempDir.path}/${_user.displayName.replaceAll(' ', '_')}.vcf',
-      );
-      await file.writeAsString(vcardString);
-
-      // ignore: deprecated_member_use
-      await Share.shareXFiles([
-        XFile(file.path),
-      ], subject: 'Business Card: ${_user.displayName}');
+      // Route through the shared service so single-card and multi-select
+      // exports behave identically (text-only vCard, no inline photo).
+      await ref.read(contactExportServiceProvider).shareAsVCard([_user]);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Failed to share vCard: $e')));
+      }
+    }
+  }
+
+  Future<void> _shareAsZip() async {
+    try {
+      await ref.read(contactExportServiceProvider).shareAsZip([_user]);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to share .zip: $e')));
       }
     }
   }
@@ -355,9 +356,32 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
                 case 'vcard':
                   _shareAsVCard();
                   break;
+                case 'zip':
+                  _shareAsZip();
+                  break;
               }
             },
             itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'vcard',
+                child: Row(
+                  children: [
+                    Icon(Icons.description_outlined, size: 20),
+                    SizedBox(width: 12),
+                    Text('Text only (vCard .vcf)'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'zip',
+                child: Row(
+                  children: [
+                    Icon(Icons.folder_zip_outlined, size: 20),
+                    SizedBox(width: 12),
+                    Text('Text + images (.zip)'),
+                  ],
+                ),
+              ),
               PopupMenuItem(
                 value: 'google',
                 enabled: !_isExporting,
@@ -365,17 +389,7 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
                   children: [
                     Icon(Icons.import_export, size: 20),
                     SizedBox(width: 12),
-                    Text('Export to Google Contacts'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'vcard',
-                child: Row(
-                  children: [
-                    Icon(Icons.share, size: 20),
-                    SizedBox(width: 12),
-                    Text('Share as vCard (.vcf)'),
+                    Text('Save to Google Contacts'),
                   ],
                 ),
               ),

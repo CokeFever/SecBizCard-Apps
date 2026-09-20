@@ -155,14 +155,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             onPressed: _selectAllContacts,
           ),
           IconButton(
-            icon: const Icon(Icons.import_export),
-            tooltip: 'Export to Google Contacts',
-            onPressed: count == 0 ? null : _batchExportToGoogle,
-          ),
-          IconButton(
-            icon: const Icon(Icons.share),
-            tooltip: 'Share as vCard',
-            onPressed: count == 0 ? null : _batchShareVCard,
+            icon: const Icon(Icons.ios_share),
+            tooltip: 'Export',
+            onPressed: count == 0 ? null : _showExportOptions,
           ),
         ],
       );
@@ -199,12 +194,82 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     return all.where((c) => ids.contains(c.uid)).toList();
   }
 
+  /// Presents the three export choices for the current selection:
+  /// text-only vCard, text + images (.zip), or Save to Google Contacts.
+  Future<void> _showExportOptions() async {
+    final count = _selectedProfiles().length;
+    if (count == 0) return;
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+              child: Text(
+                'Export $count contact(s)',
+                style: Theme.of(ctx).textTheme.titleMedium,
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.description_outlined),
+              title: const Text('Text only (vCard .vcf)'),
+              subtitle: const Text('Contact fields, no card images'),
+              onTap: () => Navigator.pop(ctx, 'vcf'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.folder_zip_outlined),
+              title: const Text('Text + images (.zip)'),
+              subtitle: const Text('Fields plus card photos, re-importable'),
+              onTap: () => Navigator.pop(ctx, 'zip'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.import_export),
+              title: const Text('Save to Google Contacts'),
+              onTap: () => Navigator.pop(ctx, 'google'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    switch (choice) {
+      case 'vcf':
+        await _batchShareVCard();
+        break;
+      case 'zip':
+        await _batchShareZip();
+        break;
+      case 'google':
+        await _batchExportToGoogle();
+        break;
+    }
+  }
+
   Future<void> _batchShareVCard() async {
     final profiles = _selectedProfiles();
     if (profiles.isEmpty) return;
     final service = ref.read(contactExportServiceProvider);
     try {
       await service.shareAsVCard(profiles);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Share failed: $e')),
+        );
+      }
+    }
+    _exitSelection();
+  }
+
+  Future<void> _batchShareZip() async {
+    final profiles = _selectedProfiles();
+    if (profiles.isEmpty) return;
+    final service = ref.read(contactExportServiceProvider);
+    try {
+      await service.shareAsZip(profiles);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
