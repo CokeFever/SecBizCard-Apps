@@ -8,6 +8,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:secbizcard/core/responsive/adaptive_container.dart';
 import 'package:secbizcard/core/responsive/breakpoints.dart';
 import 'package:secbizcard/features/contacts/data/services/vcard_service.dart';
+import 'package:secbizcard/features/contacts/data/services/zip_import_service.dart';
 import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
 
@@ -29,17 +30,26 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
   }
 
   Future<void> _pickFile() async {
+    // Accept both the public .vcf format and the advanced .zip package (a
+    // manifest.json + cropped card images — see docs/zip_import_format.md).
+    // We branch on extension so the zip path stays discoverable without being
+    // advertised in the UI.
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['vcf'],
+      allowedExtensions: ['vcf', 'zip'],
     );
 
     if (result == null || result.files.single.path == null) return;
 
+    final path = result.files.single.path!;
     try {
-      final file = File(result.files.single.path!);
-      final content = await file.readAsString();
-      _processVCardContent(content);
+      if (path.toLowerCase().endsWith('.zip')) {
+        final bytes = await File(path).readAsBytes();
+        await _processZipBytes(bytes);
+      } else {
+        final content = await File(path).readAsString();
+        await _processVCardContent(content);
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -47,6 +57,41 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
         );
       }
     }
+  }
+
+  /// Handles a `.zip` batch-import package: parse (on-device) into contacts,
+  /// preview, then persist through the same save path as vCard imports so
+  /// images land in permanent storage automatically.
+  Future<void> _processZipBytes(List<int> bytes) async {
+    ZipImportResult result;
+    try {
+      result = await ZipImportService.parse(bytes);
+    } on FormatException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Invalid package: ${e.message}')),
+        );
+      }
+      return;
+    }
+
+    if (result.contacts.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No contacts found in the package')),
+        );
+      }
+      return;
+    }
+
+    if (!mounted) return;
+    final shouldImport = await _showPreviewDialog(result.contacts);
+    if (shouldImport != true) return;
+
+    await _saveContacts(
+      result.contacts,
+      skipped: result.skipped,
+    );
   }
 
   void _importFromText() {
@@ -75,8 +120,18 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
     if (!mounted) return;
 
     final shouldImport = await _showPreviewDialog(contacts);
-    if (shouldImport != true || !mounted) return;
+    if (shouldImport != true) return;
 
+    await _saveContacts(contacts);
+  }
+
+  /// Persists the given contacts locally (shared by the vCard and zip paths)
+  /// and shows an "imported X (skipped Y)" summary.
+  Future<void> _saveContacts(
+    List<UserProfile> contacts, {
+    int skipped = 0,
+  }) async {
+    if (!mounted) return;
     setState(() => _isImporting = true);
 
     try {
@@ -90,9 +145,10 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
       ref.invalidate(savedContactsProvider);
 
       if (mounted) {
+        final skippedNote = skipped > 0 ? ' (skipped $skipped)' : '';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Imported $savedCount contact(s) successfully'),
+            content: Text('Imported $savedCount contact(s)$skippedNote'),
             action: SnackBarAction(
               label: 'View',
               onPressed: () => context.go('/home?tab=1'),
@@ -267,7 +323,7 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
 
             // Option 1: File Upload
             Text(
-              'Option 1: Upload .vcf File',
+              'Option 1: Upload File',
               style: GoogleFonts.outfit(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -280,7 +336,7 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
               child: OutlinedButton.icon(
                 onPressed: _isImporting ? null : _pickFile,
                 icon: const Icon(Icons.file_download),
-                label: const Text('Choose .vcf File'),
+                label: const Text('Choose File (.vcf)'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: theme.colorScheme.primary,
                   side: BorderSide(color: theme.colorScheme.outline),
