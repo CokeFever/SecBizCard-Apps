@@ -653,17 +653,25 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
     addImage(_user.cardFrontPath, _user.cardFrontDriveFileId, 'Front Side');
     addImage(_user.cardBackPath, _user.cardBackDriveFileId, 'Back Side');
 
-    // Fallback for OCR results (only if front/back are missing)
+    // Fallback for OCR-only contacts (no explicit front/back yet). The
+    // flattened OCR image is front-class, so when it exists we show ONLY it
+    // and suppress the original scan. The raw original scan surfaces here only
+    // when nothing front-class is available. (The original scan can always be
+    // viewed and deleted from the Edit screen.)
     if (cardImages.isEmpty) {
-      void addFallback(String? path, String label) {
+      bool addFallback(String? path, String label) {
         if (path != null && path.isNotEmpty) {
           if (path.startsWith('http') || File(path).existsSync()) {
             cardImages.add({'path': path, 'label': label});
+            return true;
           }
         }
+        return false;
       }
-      addFallback(_user.flatImagePath, 'OCR Result');
-      addFallback(_user.originalImagePath, 'Original Scan');
+      final shownFlat = addFallback(_user.flatImagePath, 'OCR Result');
+      if (!shownFlat) {
+        addFallback(_user.originalImagePath, 'Original Scan');
+      }
     }
 
     if (cardImages.isEmpty) return const SizedBox.shrink();

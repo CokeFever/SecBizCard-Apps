@@ -36,6 +36,9 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
   File? _cardBackImage;
   bool _isCardFrontRemoved = false;
   bool _isCardBackRemoved = false;
+  // Original OCR scan is view-and-delete only (it can only ever come from a
+  // scan, never uploaded), so we track deletion but there is no "add" path.
+  bool _isOriginalRemoved = false;
 
   // For dynamic fields
   final Map<String, TextEditingController> _customFieldControllers = {};
@@ -58,6 +61,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
     if (_cardBackImage != null) return true;
     if (_isCardFrontRemoved) return true;
     if (_isCardBackRemoved) return true;
+    if (_isOriginalRemoved) return true;
 
     if (_nameController.text.trim() != widget.user.displayName) return true;
     if (_nicknameController.text.trim() != (widget.user.customFields['Nickname'] ?? '')) return true;
@@ -217,6 +221,12 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
                 ? _cardBackImage!.path
                 : widget.user.cardBackPath,
         cardBackDriveFileId: _isCardBackRemoved ? null : widget.user.cardBackDriveFileId,
+        // Original scan is delete-only (it can only come from an OCR capture,
+        // never re-uploaded). Deleting it clears ONLY originalImagePath; the
+        // flattened OCR image is front-class and is preserved / handled by the
+        // front picker above.
+        originalImagePath:
+            _isOriginalRemoved ? null : widget.user.originalImagePath,
         customFields: updatedCustomFields,
       );
 
@@ -499,6 +509,86 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
               ),
             ),
           ],
+        ),
+        _buildOriginalScanTile(),
+      ],
+    );
+  }
+
+  /// Read-only tile for the original OCR scan. Unlike front/back it has NO
+  /// upload path — the scan can only come from an OCR capture — so this tile
+  /// only ever appears when one exists, and offers view + delete. Once deleted
+  /// (and saved) it is gone for good.
+  Widget _buildOriginalScanTile() {
+    final path = widget.user.originalImagePath;
+    final hasOriginal = path != null && path.isNotEmpty && !_isOriginalRemoved;
+    if (!hasOriginal) return const SizedBox.shrink();
+
+    final theme = Theme.of(context);
+    final isRemote = path.startsWith('http');
+    if (!isRemote && !File(path).existsSync()) {
+      // Dangling reference (file gone) — nothing to show.
+      return const SizedBox.shrink();
+    }
+    final ImageProvider imageProvider = isRemote
+        ? CachedNetworkImageProvider(path)
+        : FileImage(File(path)) as ImageProvider;
+    final heroTag = 'card_edit_original_$path';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    FullScreenImageViewer(imagePath: path, tag: heroTag),
+              ),
+            );
+          },
+          child: Container(
+            height: 120,
+            width: double.infinity,
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              color: theme.canvasColor,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: theme.dividerColor),
+            ),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Hero(
+                  tag: heroTag,
+                  child: Image(image: imageProvider, fit: BoxFit.contain),
+                ),
+                Positioned(
+                  top: 4,
+                  right: 4,
+                  child: GestureDetector(
+                    onTap: () => setState(() => _isOriginalRemoved = true),
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.black54,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.close,
+                          size: 16, color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Original Scan',
+          style: TextStyle(color: theme.hintColor, fontSize: 12),
         ),
       ],
     );
