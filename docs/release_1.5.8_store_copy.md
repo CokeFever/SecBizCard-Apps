@@ -88,10 +88,10 @@ Google sign-in works with any Google account; no demo account is required.
 ## Play Console — release notes (single field, tag blocks)
 ```
 <en-US>
-This update makes it easy to move a whole stack of cards in and out of SecBizCard:
-• Import a batch with AI: alongside a vCard (.vcf), you can now import a .zip that also contains the cropped card images, so contacts arrive with their photos.
-• More export choices: share a contact or a whole selection as a text-only vCard, a .zip that includes the card images (and can be re-imported), or straight to Google Contacts.
-• Backup reminder: a gentle reminder to back up to your own Google Drive when you have unsaved changes — never automatic, and you can turn it off for the month.
+Move whole stacks of cards in and out with ease:
+• Batch import with AI: import a .vcf (text) or a .zip that also includes the cropped card images, so contacts arrive with photos.
+• More export choices: text-only vCard, a .zip with card images (re-importable), or Google Contacts.
+• Backup reminder: a gentle nudge to back up to your own Google Drive — never automatic, snoozable per month.
 • Contacts can now keep front and back card photos.
 Thanks for using SecBizCard!
 </en-US>
