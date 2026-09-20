@@ -163,4 +163,59 @@ void main() {
       throwsA(isA<FormatException>()),
     );
   });
+
+  // --- security / resource-limit guards ---
+
+  test('rejects a manifest with a missing/non-int version', () async {
+    final zip = _buildZip({'contacts': []}, addImages: false); // no version
+    expect(
+      () => ZipImportService.parse(zip),
+      throwsA(isA<FormatException>()),
+    );
+  });
+
+  test('rejects a package with too many contacts', () async {
+    final many = List.generate(
+      ZipImportService.maxContacts + 1,
+      (i) => {'name': 'C$i'},
+    );
+    final zip = _buildZip({'version': 1, 'contacts': many}, addImages: false);
+    expect(
+      () => ZipImportService.parse(zip),
+      throwsA(isA<FormatException>()),
+    );
+  });
+
+  test('rejects an image path traversal attempt', () async {
+    final zip = _buildZip({
+      'version': 1,
+      'contacts': [
+        {'name': 'Evil', 'frontImage': '../../etc/passwd.jpg'},
+      ],
+    }, addImages: false);
+    final result = await ZipImportService.parse(zip);
+    expect(result.contacts, hasLength(1));
+    // Traversal path is rejected -> no image attached, contact still imported.
+    expect(result.contacts.first.cardFrontPath, isNull);
+  });
+
+  test('skips an oversized image but still imports the contact', () async {
+    final archive = Archive();
+    final manifest = {
+      'version': 1,
+      'contacts': [
+        {'name': 'Big', 'frontImage': 'images/big.jpg'},
+      ],
+    };
+    final mb = utf8.encode(jsonEncode(manifest));
+    archive.addFile(ArchiveFile('manifest.json', mb.length, mb));
+    // One byte over the per-image cap.
+    final huge = List<int>.filled(ZipImportService.maxImageBytes + 1, 0x41);
+    archive.addFile(ArchiveFile('images/big.jpg', huge.length, huge));
+    final zip = ZipEncoder().encode(archive)!;
+
+    final result = await ZipImportService.parse(zip);
+    expect(result.contacts, hasLength(1));
+    expect(result.contacts.first.cardFrontPath, isNull);
+  });
 }
