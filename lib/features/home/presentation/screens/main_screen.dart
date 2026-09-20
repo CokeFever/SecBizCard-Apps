@@ -228,11 +228,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.select_all),
-            tooltip: 'Select all',
-            onPressed: _selectAllContacts,
-          ),
-          IconButton(
             icon: const Icon(Icons.ios_share),
             tooltip: 'Export',
             onPressed: count == 0 ? null : _showExportOptions,
@@ -257,12 +252,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   void _exitSelection() {
     ref.read(contactsSelectionModeProvider.notifier).state = false;
     ref.read(contactsSelectedIdsProvider.notifier).state = {};
-  }
-
-  void _selectAllContacts() {
-    final all = ref.read(savedContactsProvider).valueOrNull ?? const [];
-    ref.read(contactsSelectedIdsProvider.notifier).state =
-        all.map((c) => c.uid).toSet();
   }
 
   /// Resolve the currently selected ids to full profiles (order-independent).

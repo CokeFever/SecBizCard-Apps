@@ -109,7 +109,13 @@ class ProfileRepository {
       //    own-profile edits, and bulk import (each import row lands here).
       //    System-only writes (FCM token, verification flags) bypass this
       //    method and call saveUser directly, so they don't trip the reminder.
-      await BackupReminderService().markDataModified();
+      //    Best-effort: the reminder timestamp must NEVER make a real save fail
+      //    (e.g. if SharedPreferences is unavailable), so swallow its errors.
+      try {
+        await BackupReminderService().markDataModified();
+      } catch (_) {
+        /* reminder bookkeeping is non-critical */
+      }
 
       return const Right(unit);
     } catch (e) {

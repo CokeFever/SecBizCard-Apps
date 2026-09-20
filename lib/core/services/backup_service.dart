@@ -173,8 +173,11 @@ class BackupService {
 
       if (uploadResult.isRight()) {
         // Data is now safely backed up — clears the "unbacked-up changes"
-        // reminder until the next local change.
-        await BackupReminderService().markBackedUp();
+        // reminder until the next local change. Best-effort: never let the
+        // reminder timestamp turn a successful backup into a failure.
+        try {
+          await BackupReminderService().markBackedUp();
+        } catch (_) {/* non-critical */}
       }
       return uploadResult.fold((l) => left(l), (r) => right(DateTime.now()));
     } catch (e) {
@@ -311,8 +314,10 @@ class BackupService {
             // A freshly restored install is "in sync". Stamp this AFTER the
             // per-contact/profile saves above (each of which marks data as
             // modified) so lastBackupAt >= lastModifiedAt and the reminder does
-            // not immediately nag a just-restored user.
-            await BackupReminderService().markBackedUp();
+            // not immediately nag a just-restored user. Best-effort.
+            try {
+              await BackupReminderService().markBackedUp();
+            } catch (_) {/* non-critical */}
 
             // Invalidate providers so UI updates
             _ref.invalidate(savedContactsProvider);
