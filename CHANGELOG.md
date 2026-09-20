@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.5.8] - 2026-09-20
+
+### Added
+- **Import**: Bring in a whole batch of cards at once with an AI assistant. Alongside a `.vcf` (text), the Import screen now also accepts a `.zip` package that carries the contact details **and** cropped card images, so imported contacts arrive with their card photos. Everything is processed on your device.
+- **Export**: Exporting a contact (or a multi-selection) now offers three choices — text-only vCard (`.vcf`), a `.zip` that also includes the card images and can be re-imported, or Save to Google Contacts.
+- **Backup reminder**: Because your data is stored on your device, the app now gives a gentle, occasional reminder to back up to your own Google Drive when you have unsaved changes. It never backs up automatically, and you can turn the reminder off for the month.
+
+### Changed
+- **Contact card images**: A contact can now hold a front and back card photo, edited in the Edit screen. When a card has front/back photos they are shown instead of the raw scan; a scanned card still keeps its original capture, which you can view and delete from Edit.
+
+### Fixed
+- **Contacts**: Removed a multi-select "select all" control that did not reliably clear the selection.
+
 ## [1.5.7] - 2026-09-18
 ### Fixed
 - **Scan**: A promotional line on a card (such as "Follow us" or a social handle) is no longer mistaken for the person's name.
