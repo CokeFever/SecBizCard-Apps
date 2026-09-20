@@ -165,3 +165,162 @@ If pulling images turns out to be impractical for your source, a valid fallback
 is to import **text only** (via `.vcf` or a manifest with no images) and later
 re-scan the physical or saved cards through SecBizCard's own OCR. You lose the
 convenience of bulk images but keep a clean, supported path.
+
+---
+
+## Appendix — AI-assisted walkthrough (Chrome DevTools MCP)
+
+This appendix turns the methodology above into concrete, runnable steps for an
+AI coding assistant (e.g. Kiro, Claude, Cursor) driving a browser via the
+**Chrome DevTools MCP** server. It is written to be adapted to any source; the
+placeholders `SOURCE_URL`, `IMAGE_HOST`, and the DOM selectors must be filled in
+for your specific card app by inspecting it.
+
+> Scope reminder: do this only for an account **you own**, respect the source's
+> Terms of Service, and keep all card data (third-party PII) on your local
+> machine. Session cookies are secrets — never commit them.
+
+### Step 0 — Install & connect Chrome DevTools MCP
+
+`chrome-devtools-mcp` lets the assistant read the DOM, run JS, and inspect
+network traffic in a real Chrome. Add it to your MCP config:
+
+```jsonc
+// ~/.kiro/settings/mcp.json  (or your client's MCP config)
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest", "--browserUrl", "http://127.0.0.1:9222"],
+      "disabled": false
+    }
+  }
+}
+```
+
+Requirements: Node.js (for `npx`) and Google Chrome installed. The
+`--browserUrl` tells the server to attach to a Chrome you start yourself (next
+step), which is more reliable than letting it auto-launch.
+
+### Step 1 — Launch Chrome with remote debugging (isolated profile)
+
+Start Chrome on the debugging port with a **throwaway profile** (avoids clashing
+with your everyday Chrome's locks/permissions), then log into the source once in
+that window:
+
+```sh
+# macOS
+nohup "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+  --remote-debugging-port=9222 \
+  --user-data-dir="$HOME/.chrome-mcp-scrape" \
+  "SOURCE_URL" >/tmp/chrome_mcp.log 2>&1 & disown
+```
+
+(Linux: `google-chrome --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-mcp-scrape SOURCE_URL`.)
+Log in manually in that window. The assistant then confirms the attach with the
+MCP `list_pages` tool and notes the page id.
+
+Troubleshooting we actually hit:
+- **`exit 21` / SingletonLock / permission prompts** when reusing your daily
+  profile → use the separate `--user-data-dir` above.
+- Auto-connect failing to find the tab → prefer the explicit
+  `--browserUrl http://127.0.0.1:9222` in the MCP config.
+
+### Step 2 — Set the list to the largest page size
+
+In the source's contact list, set "items per page" to its maximum to minimise
+pagination. Note how many pages that leaves (e.g. 200/page → 231 cards = 2 pages).
+
+### Step 3 — Extract the list index (id + name + image URL)
+
+Have the assistant run JS in the page via the MCP `evaluate_script` tool. You
+must adapt the selectors to the source's DOM (inspect one row first). Shape:
+
+```js
+// evaluate_script — returns one row per card
+() => {
+  const rows = [...document.querySelectorAll('ROW_SELECTOR')];
+  return rows.map(r => {
+    const key  = r.getAttribute('ID_ATTR');                 // stable id
+    const name = r.querySelector('NAME_SELECTOR')?.textContent?.trim() || '';
+    const img  = r.querySelector('img');
+    // thumbnails often carry a size token; swap to the largest variant:
+    let hi = img?.getAttribute('data-src') || img?.getAttribute('src') || '';
+    hi = hi.replace('.tXXu.jpg', '.rXXu.jpg');              // see Step 4
+    return { key, name, hi };
+  }).filter(x => x.key && x.hi);
+}
+```
+
+Save the returned rows to a JSON file per page.
+
+### Step 4 — Find the full-resolution URL
+
+Thumbnails usually encode a size in the filename. Load a couple of variants of
+one image (via the browser) and compare dimensions to find the largest that
+still returns the original scan. Example seen in the wild: list thumbnails were
+`....t80u.jpg`; swapping to `....r80u.jpg` returned the full card. Confirm by
+checking the loaded image's `naturalWidth/Height`.
+
+### Step 5 — Paginate
+
+A plain "next" click sometimes doesn't fire. Setting the page-number input and
+dispatching a keyboard Enter is more reliable:
+
+```js
+() => {
+  const inp = document.querySelector('PAGE_INPUT_SELECTOR');
+  inp.value = '2';
+  const ev = (t) => new KeyboardEvent(t, {key:'Enter', keyCode:13, which:13, bubbles:true});
+  inp.dispatchEvent(ev('keydown'));
+  inp.dispatchEvent(ev('keyup'));
+}
+```
+
+Wait, then re-run Step 3's extraction. Repeat for each page and concatenate.
+
+### Step 6 — Capture a fresh session cookie
+
+The image CDN needs your logged-in session. Two ways to get the exact header:
+
+- Read `document.cookie` via `evaluate_script` (covers non-HttpOnly cookies; on
+  many CDNs the session id is readable here), **or**
+- Use the MCP network tools: trigger one image load, `list_network_requests`
+  (filter to images), then `get_network_request` on an `IMAGE_HOST` request and
+  copy its full `Cookie` + `User-Agent` + `Referer` request headers.
+
+Re-capture right before the batch — cookies expire.
+
+### Step 7 — Batch download with the session
+
+Replay each full-res URL with `curl` carrying the captured headers. A small
+script (Python/shell) that: loops the merged list, downloads
+`IMAGE_HOST/<id>.rXXu.jpg` to `EXPORT_DIR/images/<id>__<name>.jpg`, verifies
+each file is a real image (`file` / magic bytes `FF D8 FF` for JPEG), and
+retries failures. Key each file to the `id` from Step 3 so text and images can
+be joined later.
+
+Why `curl` with the copied cookie works when naked `curl` doesn't: you're
+presenting the exact session (cookie + UA + referer) the CDN expects. Browser
+`fetch()` is blocked by CORS and a canvas `toDataURL()` is tainted — hence this
+approach.
+
+### Step 8 — Build mapping + package
+
+Produce `mapping.csv` (`id,name,image_filename,status`), then run the packaging
+step (§5) to emit `manifest.json` + `images/` and zip it. Import the `.zip` in
+SecBizCard.
+
+### Step 9 — Clean up
+
+Quit the isolated Chrome, delete the throwaway profile
+(`rm -rf ~/.chrome-mcp-scrape`), remove the MCP entry if you no longer need it,
+and delete working data you don't want to keep. Never commit cookies or card
+images.
+
+> Reference implementation: the Excel-parsing, vCard and `.zip` packaging
+> scripts used for one real migration live in the **private** companion repo
+> under `tools/camcard-migration/` (kept private precisely because they encode a
+> specific source's layout; the data itself is git-ignored). This public
+> appendix is the reusable method; adapt the selectors and URL tokens to your
+> own source.
