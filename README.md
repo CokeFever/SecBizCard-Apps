@@ -26,8 +26,9 @@ IXO is a privacy-first ecosystem for exchanging digital business cards. It lever
 
 - **The "IXO Handshake"**: A secure protocol for peer-to-peer card exchange with context-aware privacy.
 - **AI Card Scanner**: Cloud Vision OCR with a strict fallback chain (your own key → shared quota → on-device ML Kit). OpenCV detects the card and corrects perspective; a shared geometric scoring model picks the card consistently across platforms.
-- **Contact Management**: Integrated **search / filter** and **locale-aware sorting**; export full contacts to Google Contacts.
-- **vCard Interoperability**: Bulk import and export contacts via `.vcf` files.
+- **Contact Management**: Integrated **search / filter**, **locale-aware sorting**, and **multi-select** for batch actions. Each contact can hold front/back card images plus its original OCR scan.
+- **Import & Export**: Bulk **import** via `.vcf` (text) or a `.zip` package (structured `manifest.json` + card images) produced by any AI assistant — parsed entirely on-device. **Export** a contact or a whole selection as text-only vCard, a `.zip` with card images (re-importable), or straight to Google Contacts.
+- **Backup reminder**: Since data lives locally, a non-intrusive reminder (never auto-backup) suggests a Google Drive backup when there are unsaved changes; snoozable per month.
 - **Context Management**: Multiple personas (Business, Social, Lite) for different social environments.
 - **Field-Level Verification**: Verified badges for phone numbers and professional emails.
 - **Adaptive UI**: Optimized layouts for phones, iPad / iPad mini, and wide foldables.
@@ -35,8 +36,8 @@ IXO is a privacy-first ecosystem for exchanging digital business cards. It lever
 
 ## 🌐 Localization
 
-English, 简体中文, 繁體中文, 日本語, 한국어. (Japanese & Korean are being
-finalized with native-speaker review.)
+English, 简体中文, 繁體中文, 日本語, 한국어. English and Traditional Chinese are
+the source of truth; Japanese and Korean are machine-translated.
 
 ## 🔨 Development
 
