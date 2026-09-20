@@ -194,3 +194,55 @@ so they sum to 1.0.
 - If best score `>= MIN_ACCEPT_SCORE` → perspective-correct using that quad.
 - Otherwise → **fall back to the guide-frame region** (not the whole image) as
   the initial crop and hand off to the manual 4-corner adjuster.
+
+---
+
+## Tuning strategy: what's a Remote-Config value vs. what needs a release
+
+This project has two "scorers" — the **geometric card-detection** scorer above,
+and the **OCR text-field** scorer in the private `SecBizCard_OCR` package
+(`_scoreName`, etc.). Both raise the same recurring question: *"can this be
+tuned from the cloud, or does it need an app release?"* The answer follows a
+strict three-layer split. Keep it in mind before changing scoring code.
+
+### Layer 1 — Parameters / thresholds → Remote Config (hot-tunable, NO release)
+Numeric **weights and thresholds** live in `CardDetectionConfig` and are
+overridable from Firebase Remote Config, validated against a plausible range.
+Examples: geometry weights (`wAngle`…), `minAcceptScore`, the feedback-predictor
+thresholds (`poorNameScoreBelow`, `poorCoverageBelow`, `poorDetectionScoreBelow`),
+and OCR scorer weights such as `pureTitleNamePenalty`. Changing the *value* of an
+existing knob is a console change, not a release.
+
+OCR scorer weights reach the package via `SecBizCardOcr.parseLines(tuning: {...})`
+(the app builds that map from `CardDetectionConfig`). Only weights whose **rule
+already exists** in the package can be tuned this way.
+
+### Layer 2 — Recognition RULES → code, needs a release (unavoidable)
+A **new rule** — a new disqualifier, a new signal, a new pattern — is logic, not
+a value. Remote Config cannot add "detect a pure job-title line" or "penalize a
+social CTA"; it can only tune the weight *after* the rule ships. So the FIRST
+time a new misread pattern is handled, it goes in a release. This is inherent to
+any OCR system: business-card layouts are endless, and new misread patterns can
+only be met with new rules. Cloud config tunes sensitivity; it never teaches a
+new recognition behavior.
+
+**Corollary:** when you add a new rule, also expose its weight as a Layer-1
+config value (with a sensible hardcoded default as the fallback), so future
+sensitivity tweaks of that rule DON'T need another release. That's how
+`pureTitleNamePenalty` was added (default −120, tunable thereafter).
+
+### Layer 3 — Safety net: regression tests + a pinned OCR dependency
+- **Every rule change ships with a regression test** (see the OCR package's
+  `parsing_test.dart`, e.g. the AWS-CTA and Kantar pure-title cases). The
+  accumulating suite is what makes "add a new rule" low-risk — it proves old
+  cards still parse correctly.
+- **The app pins the `SecBizCard_OCR` git dependency to an explicit ref**, so a
+  given app version is locked to a known OCR version and a rebuild can't drift
+  onto a newer parser. Bump the ref deliberately when you want the new OCR.
+
+### Quick decision guide
+- "Make it slightly more/less aggressive" → Layer 1, Remote Config, no release.
+- "It misreads a NEW kind of line" → Layer 2, new rule + test + release; expose
+  its weight as Layer 1 while you're there.
+- Never chase a Play Console optimization score by loosening a rule; correctness
+  and the regression suite come first.

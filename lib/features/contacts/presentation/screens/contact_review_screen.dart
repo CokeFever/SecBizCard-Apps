@@ -172,7 +172,51 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
       hasName: widget.profile.displayName.trim().isNotEmpty,
       hasAnyPhone: (widget.profile.phone?.isNotEmpty ?? false) ||
           (widget.profile.mobile?.isNotEmpty ?? false),
+      nameLooksSuspicious: _nameLooksSuspicious(),
     ));
+  }
+
+  /// Content sanity on the chosen Name: catches the "confidently wrong" case
+  /// where a high-scoring candidate won the name slot but is actually a job
+  /// title (score-based signals miss this). Two cheap, low-false-positive
+  /// checks: the Name duplicates the Title field, or the whole Name reads as a
+  /// job-title phrase (every word is a title keyword/modifier).
+  bool _nameLooksSuspicious() {
+    final name = widget.profile.displayName.trim();
+    if (name.isEmpty) return false;
+
+    // (a) Name == Title (case-insensitive) — the exact Kantar failure.
+    final title = widget.profile.title?.trim() ?? '';
+    if (title.isNotEmpty && name.toLowerCase() == title.toLowerCase()) {
+      return true;
+    }
+
+    // (b) The Name is a pure job-title phrase (Latin). Every word is a title
+    //     keyword or a common title modifier. Kept English-only + short to
+    //     avoid false positives on real (esp. CJK) names.
+    const titleWords = {
+      'manager', 'director', 'ceo', 'cto', 'cfo', 'coo', 'cio',
+      'engineer', 'developer', 'designer', 'architect', 'founder',
+      'president', 'vp', 'officer', 'chief', 'consultant', 'advisor',
+      'analyst', 'coordinator', 'specialist', 'associate', 'supervisor',
+      'lead', 'head', 'partner', 'principal', 'representative', 'executive',
+      'assistant', 'secretary', 'managing', 'vice', 'senior', 'junior',
+      'staff', 'global', 'regional', 'technical', 'sales', 'marketing',
+      'product', 'strategic', 'business', 'general', 'deputy', 'operating',
+      'operations',
+    };
+    final words = name
+        .toLowerCase()
+        .split(RegExp(r'\s+'))
+        .map((w) => w.replaceAll(RegExp(r'[.,]'), ''))
+        .where((w) => w.isNotEmpty)
+        .toList();
+    if (words.isNotEmpty &&
+        words.length <= 4 &&
+        words.every(titleWords.contains)) {
+      return true;
+    }
+    return false;
   }
 
   /// Called on Back. If recognition looked poor, offer the (opt-in) report
