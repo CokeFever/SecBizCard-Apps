@@ -3,6 +3,24 @@
 This document records the key architectural and technical decisions made for the Business Card Management App.
 Its purpose is to preserve context, reduce repeated debates, and clarify trade-offs for future contributors.
 
+> **Historical note (2026-09-20).** This is an early-project ADR; several
+> decisions below have since evolved as the product matured. Kept for the
+> original rationale, but read these updates first:
+> - **#1 (No CamCard integration):** still no CamCard *API*, but a one-off
+>   CamCard→SecBizCard *migration* (Excel + browser-session image pull) was
+>   done. Tooling lives in the private repo; the public methodology is in
+>   `importing_from_other_card_apps.md`.
+> - **#6 / #10 (No LLM / No AI):** heuristic OCR parsing is still the on-device
+>   default, BUT an optional **AI-assisted batch import** now exists: users can
+>   have any LLM produce a `.zip` (structured `manifest.json` + cropped card
+>   images) that the app imports on-device. See `zip_import_format.md`.
+> - **#8 (Local-only, no sync):** still local-first, but **Google Drive
+>   backup/restore** exists (user-owned, encrypted) and a non-intrusive
+>   **backup reminder** now nudges users with unbacked-up local changes.
+> - **#9 (vCard 3.0 export):** unchanged, but export now also offers a
+>   `.zip` (text + card images) and Save-to-Google-Contacts; vCard is
+>   uniformly text-only.
+
 ---
 
 ## 1. No Official CamCard API Integration
