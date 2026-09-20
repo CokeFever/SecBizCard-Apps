@@ -10,6 +10,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:secbizcard/core/errors/failure.dart';
+import 'package:secbizcard/core/services/backup_reminder_service.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
 import 'package:secbizcard/features/profile/data/profile_repository.dart';
@@ -170,6 +171,11 @@ class BackupService {
         existingFileId: existingId,
       );
 
+      if (uploadResult.isRight()) {
+        // Data is now safely backed up — clears the "unbacked-up changes"
+        // reminder until the next local change.
+        await BackupReminderService().markBackedUp();
+      }
       return uploadResult.fold((l) => left(l), (r) => right(DateTime.now()));
     } catch (e) {
       return left(GeneralFailure('Backup failed: $e'));
@@ -301,6 +307,12 @@ class BackupService {
               final profile = UserProfile.fromJson(pJson);
               await _profileRepo.createOrUpdateUser(profile);
             }
+
+            // A freshly restored install is "in sync". Stamp this AFTER the
+            // per-contact/profile saves above (each of which marks data as
+            // modified) so lastBackupAt >= lastModifiedAt and the reminder does
+            // not immediately nag a just-restored user.
+            await BackupReminderService().markBackedUp();
 
             // Invalidate providers so UI updates
             _ref.invalidate(savedContactsProvider);
