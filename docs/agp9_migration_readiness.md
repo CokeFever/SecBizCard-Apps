@@ -3,7 +3,17 @@
 Status: **Not started — deliberately deferred.** This document is the plan and
 the trigger conditions, not an in-progress migration.
 
-Last reviewed: 2026-09-08 (against app version 1.5.1+161).
+Last reviewed: 2026-09-20 (against app version 1.5.8+168). Re-confirmed still
+blocked: we remain on Flutter 3.38.9 (built-in Kotlin needs 3.47+), AGP 8.13 /
+Gradle 8.14 / Build Tools 35. **Trigger conditions below are NOT yet met — do
+not start.** This review was prompted by Play Console flagging the R8
+"Repackage Classes" item (which only lands with AGP 9) and the ~47% R8
+optimization score. Decision: the AGP-9 half stays deferred; the R8 half was
+addressed separately by adding an explicit keep-rule SAFETY NET in
+`android/app/proguard-rules.pro` (correctness guard, not a score chase — see the
+2026-09-20 note in the R8 section below).
+
+Previously reviewed: 2026-09-08 (against app version 1.5.1+161).
 
 ## Why this is deferred
 
@@ -95,6 +105,36 @@ Nothing is required today. The only change that is compatible with the current
 AGP 8.13 + opt-out world AND reduces future work is app-side Kotlin
 modernization — but on AGP 8.13 removing `kotlin-android` would break the build,
 so we hold this until the AGP 9 branch work. **No action now.**
+
+## R8 optimization score (~47%) — evaluated 2026-09-20, deliberately NOT chased
+
+Play Console shows Optimization / Obfuscation / Shrinking at ~47% (red) and DEX
+code optimization "Medium". This was investigated and is **healthy, not a
+problem**:
+
+- R8 is already correctly enabled (`isMinifyEnabled` + `isShrinkResources` +
+  `proguard-android-optimize.txt` + `android.r8.optimizedResourceShrinking`).
+- Before 2026-09-20 the app had essentially **no** keep rules (only 3
+  `-dontwarn` lines), so ~47% was simply what R8 could safely infer for this
+  Flutter app — NOT the result of over-broad keeps blocking it.
+- Pushing the score higher would require aggressive R8 options
+  (e.g. `-allowaccessmodification`, extra optimization passes). For an app with
+  **OpenCV JNI + Firebase reflection + freezed/json_serializable + platform
+  channels**, that is exactly what causes **release-only crashes** — high risk,
+  and the memory/size payoff on an 8.28 MB DEX is negligible. Not worth it.
+- The score is a Google *recommendation*, not a policy gate; it does not block
+  submission or production.
+
+What we DID do instead (low-risk, long-term value): wrote a complete, commented
+`android/app/proguard-rules.pro` that keeps the reflection/JNI blind spots
+(OpenCV `org.opencv.**`, ML Kit, Play Integrity, Firebase, Flutter embedding +
+our MethodChannel classes, enums, Parcelable CREATORs). This is a **correctness
+safety net** so a future aggressive pass (ours or a dependency's) can't strip
+something reachable only via native/reflection. It does **not** raise the 47%
+score, and that's fine — the goal was protection, not the number.
+
+Bottom line for future sessions: **do not re-open the 47% score chase.** If the
+red text tempts you again, re-read this section.
 
 ## Trigger conditions (when to actually start)
 
