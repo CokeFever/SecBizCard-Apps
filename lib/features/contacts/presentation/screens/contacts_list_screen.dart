@@ -6,8 +6,27 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:secbizcard/core/presentation/widgets/user_profile_avatar.dart';
 import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
 
+import 'package:secbizcard/features/profile/domain/user_profile.dart';
+
 final contactsSearchQueryProvider = StateProvider<String>((ref) => '');
 final contactsSearchModeProvider = StateProvider<bool>((ref) => false);
+
+/// The contacts actually shown in the list: raw saved contacts filtered by the
+/// current search query and sorted alphabetically. Both the list AND the
+/// select-all action consume this, so "select all" always matches exactly what
+/// the user sees (no raw-vs-filtered mismatch).
+final filteredContactsProvider = Provider<List<UserProfile>>((ref) {
+  final raw = ref.watch(savedContactsProvider).valueOrNull ?? const [];
+  final query = ref.watch(contactsSearchQueryProvider).toLowerCase();
+  final filtered = raw.where((c) {
+    if (query.isEmpty) return true;
+    return c.displayName.toLowerCase().contains(query) ||
+        (c.company?.toLowerCase().contains(query) ?? false) ||
+        (c.title?.toLowerCase().contains(query) ?? false);
+  }).toList()
+    ..sort((a, b) => a.displayName.compareTo(b.displayName));
+  return filtered;
+});
 
 /// Multi-select state for the contacts list. Mirrors the search-mode pattern:
 /// shared providers so the embedded list AND the parent MainScreen AppBar stay
@@ -74,18 +93,9 @@ class _ContactsListScreenState extends ConsumerState<ContactsListScreen>
 
     final content = contactsAsync.when(
       data: (rawContacts) {
-        // 1. Filter
-        final filtered = rawContacts.where((c) {
-          if (searchQuery.isEmpty) return true;
-          final q = searchQuery.toLowerCase();
-          return c.displayName.toLowerCase().contains(q) ||
-              (c.company?.toLowerCase().contains(q) ?? false) ||
-              (c.title?.toLowerCase().contains(q) ?? false);
-        }).toList();
-
-        // 2. Sort (Alphabetical/Locale)
-        // Standard compareTo handles basic Unicode sorting (en, zh, etc)
-        filtered.sort((a, b) => a.displayName.compareTo(b.displayName));
+        // Single source of truth for the visible list (filter + sort) — shared
+        // with the select-all action via filteredContactsProvider.
+        final filtered = ref.watch(filteredContactsProvider);
 
         if (filtered.isEmpty) {
           if (searchQuery.isNotEmpty) {
