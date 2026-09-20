@@ -9,6 +9,7 @@ import 'package:uuid/uuid.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'package:secbizcard/features/settings/data/ocr_settings_service.dart';
 import 'package:secbizcard/features/contacts/data/services/cloud_vision_recognizer.dart';
+import 'package:secbizcard/features/contacts/data/card_detection_config.dart';
 import 'package:SecBizCard_OCR/secbizcard_ocr.dart';
 
 /// Which engine produced a recognition result (for UI messaging).
@@ -242,7 +243,18 @@ class OCRService {
     return outcome.profile;
   }
 
-  OcrResult _parseResult(VisionRecognitionResult res) => _ocr.parseLines(res.lines);
+  OcrResult _parseResult(VisionRecognitionResult res) =>
+      _ocr.parseLines(res.lines, tuning: _scorerTuning());
+
+  /// Remote-tunable scorer weights passed to the OCR parser. Only weights whose
+  /// RULE already exists in the package can be tuned here (see
+  /// docs/card_detection_scoring.md).
+  Map<String, double> _scorerTuning() {
+    final cfg = CardDetectionConfig.current;
+    return {
+      'pureTitleNamePenalty': cfg.value('pureTitleNamePenalty'),
+    };
+  }
 
   /// Serializes recognized lines to plain maps ({text, box:{x,y,w,h}}) for the
   /// feedback payload — the raw material to re-run parsing on a reported card.

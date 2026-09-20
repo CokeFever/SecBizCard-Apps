@@ -17,6 +17,7 @@ class RecognitionSignals {
     this.coverageRatio,
     this.hasName,
     this.hasAnyPhone,
+    this.nameLooksSuspicious,
   });
 
   /// Card detection fell back to manual corners (no card found). Strong signal.
@@ -46,6 +47,13 @@ class RecognitionSignals {
 
   /// Parsed result completeness: at least one phone/mobile/fax was extracted.
   final bool? hasAnyPhone;
+
+  /// The chosen Name field looks wrong on inspection — e.g. it duplicates the
+  /// Title field, or is itself a job-title / company phrase. Catches the
+  /// "confidently wrong" case where a high-scoring candidate won the name slot
+  /// but is actually a title (score-based signals miss this because the score
+  /// is high, not low).
+  final bool? nameLooksSuspicious;
 }
 
 /// Pure predictor: is this recognition likely poor enough to offer a report?
@@ -89,6 +97,11 @@ bool predictLikelyPoorRecognition(
   //    card yields at least a name plus one way to reach the person.
   if (s.hasName == false) return true;
   if (s.hasAnyPhone == false && s.hasName == false) return true;
+
+  // 6. The chosen Name looks wrong even though a name WAS extracted with a high
+  //    score (e.g. it equals the Title, or is itself a job-title phrase). This
+  //    is the "confidently wrong" blind spot the score-based rules (#4) miss.
+  if (s.nameLooksSuspicious == true) return true;
 
   return false;
 }

@@ -68,6 +68,11 @@ dependencies:
     git:
       url: git@github.com:CokeFever/SecBizCard.git
       path: packages/SecBizCard_OCR
+      # Pinned to an explicit commit so each app version locks to a known OCR
+      # version and a rebuild can't drift onto a newer parser (protects
+      # submitted/released builds). Bump this deliberately when adopting a new
+      # OCR change. See docs/card_detection_scoring.md (tuning layers §3).
+      ref: 18a39afc64d67922c55462450608b692a5de3577
 
 dev_dependencies:
   flutter_test:

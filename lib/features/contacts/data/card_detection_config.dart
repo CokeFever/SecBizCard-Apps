@@ -66,6 +66,12 @@ class CardDetectionConfig {
     // Card detected but covering less than this fraction of the frame is
     // treated as poor (likely bad edge detection / user too far). Tunable.
     'poorCoverageBelow': 0.7,
+    // OCR name-scorer weight: penalty applied when a candidate line is a PURE
+    // job-title phrase (every word a title keyword/modifier, e.g. "Managing
+    // Director"), so it can't win the Name slot over the real name. Passed to
+    // SecBizCardOcr.parseLines(tuning:). Negative. Tunable via Remote Config;
+    // the detection RULE itself is code in the OCR package.
+    'pureTitleNamePenalty': -120.0,
   };
 
   static const Map<String, bool> _flagDefaults = <String, bool>{
@@ -93,6 +99,7 @@ class CardDetectionConfig {
     'poorDetectionScoreBelow': [0.0, 1.0],
     'poorNameScoreBelow': [0.0, 500.0],
     'poorCoverageBelow': [0.0, 1.0],
+    'pureTitleNamePenalty': [-500.0, 0.0],
     'cannyLowA': [1.0, 500.0],
     'cannyHighA': [1.0, 500.0],
     'cannyLowB': [1.0, 500.0],
