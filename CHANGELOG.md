@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.9] - 2026-09-21
+
+### Fixed
+- **iOS 26 / iPadOS 26 and later (incl. iOS 27)**: Fixed a crash that closed the app immediately on launch. iOS now requires apps to adopt the UIScene lifecycle; the app has been migrated so it launches normally on the latest iOS and iPadOS. (iOS only)
+
+### Changed
+- **Backup**: Before backing up, the app now checks whether the copy in your Google Drive is newer than the data on this device. If it is — for example a backup made from another device — it warns you and asks for confirmation before overwriting, so an older device can no longer silently replace a newer backup. You can still choose to overwrite.
+
 ## [1.5.8] - 2026-09-20
 
 ### Added

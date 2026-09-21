@@ -5,40 +5,46 @@ import CoreImage
 import ImageIO
 
 @main
-@objc class AppDelegate: FlutterAppDelegate {
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    if let controller = self.window?.rootViewController as? FlutterViewController {
-        let channel = FlutterMethodChannel(name: "app.ixo.secbizcard/opencv",
-                                          binaryMessenger: controller.binaryMessenger)
-        
-        channel.setMethodCallHandler({
-          (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
-          if (call.method == "processCard") {
-            guard let args = call.arguments as? [String: Any],
-                  let inputPath = args["inputPath"] as? String,
-                  let outputPath = args["outputPath"] as? String else {
-              result(FlutterError(code: "INVALID_ARGS", message: "Missing paths", details: nil))
-              return
-            }
-            let isVertical = args["isVertical"] as? Bool ?? false
-            let guideRect = args["guideRect"] as? [String: Double]
-            // Remote-tunable detection params (route A). Absent/empty => built-in.
-            let tuning = CardScoring.CardTuning(map: args["tuning"] as? [String: Any])
-            // Execute on background thread to avoid blocking UI
-            DispatchQueue.global(qos: .userInitiated).async {
-                self.processImage(inputPath: inputPath, outputPath: outputPath, isVertical: isVertical, guideRect: guideRect, tuning: tuning, result: result)
-            }
-          } else {
-            result(FlutterMethodNotImplemented)
-          }
-        })
-    }
-
-    GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  // With the UIScene lifecycle (iOS 27+), the implicit FlutterEngine is
+  // initialized after `didFinishLaunchingWithOptions:` returns, so plugin
+  // registration and method-channel setup must happen here instead.
+  func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+
+    let channel = FlutterMethodChannel(
+      name: "app.ixo.secbizcard/opencv",
+      binaryMessenger: engineBridge.applicationRegistrar.messenger()
+    )
+
+    channel.setMethodCallHandler({
+      (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
+      if (call.method == "processCard") {
+        guard let args = call.arguments as? [String: Any],
+              let inputPath = args["inputPath"] as? String,
+              let outputPath = args["outputPath"] as? String else {
+          result(FlutterError(code: "INVALID_ARGS", message: "Missing paths", details: nil))
+          return
+        }
+        let isVertical = args["isVertical"] as? Bool ?? false
+        let guideRect = args["guideRect"] as? [String: Double]
+        // Remote-tunable detection params (route A). Absent/empty => built-in.
+        let tuning = CardScoring.CardTuning(map: args["tuning"] as? [String: Any])
+        // Execute on background thread to avoid blocking UI
+        DispatchQueue.global(qos: .userInitiated).async {
+            self.processImage(inputPath: inputPath, outputPath: outputPath, isVertical: isVertical, guideRect: guideRect, tuning: tuning, result: result)
+        }
+      } else {
+        result(FlutterMethodNotImplemented)
+      }
+    })
   }
 
   // Shared CIContext to avoid initialization lag during capture

@@ -54,6 +54,15 @@ class BackupReminderService {
     await prefs.setInt(keyLastBackup, _now().millisecondsSinceEpoch);
   }
 
+  /// The local timestamp of the last recorded data change, or null if nothing
+  /// has ever been marked modified on this device. Used by the backup flow to
+  /// detect when the cloud backup is newer than this device's data.
+  Future<DateTime?> lastModifiedAt() async {
+    final prefs = await _prefs;
+    final ms = prefs.getInt(keyLastModified);
+    return ms == null ? null : DateTime.fromMillisecondsSinceEpoch(ms);
+  }
+
   /// Snooze the reminder for the remainder of the current calendar month.
   Future<void> snoozeThisMonth() async {
     final prefs = await _prefs;

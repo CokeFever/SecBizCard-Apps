@@ -46,12 +46,44 @@ class BackupService {
   static const String _backupFileName = 'ixo_app_backup.zip';
   static const String _settingsKeyTheme = 'theme_mode'; // Example setting key
 
-  /// Creates a backup and uploads to Drive
-  Future<Either<Failure, DateTime>> backup() async {
+  /// Creates a backup and uploads to Drive.
+  ///
+  /// When [force] is false (default), the backup is aborted with a
+  /// [BackupConflictFailure] if the existing Drive backup is newer than this
+  /// device's local data — this guards against overwriting a more recent
+  /// backup made from another device (the classic "old device clobbers new
+  /// cloud data" mistake). Pass [force] = true after the user explicitly
+  /// confirms they want to overwrite.
+  Future<Either<Failure, DateTime>> backup({bool force = false}) async {
     try {
       final user = _authRepo.getCurrentUser();
       if (user == null) return left(const AuthFailure('No user logged in'));
       final uid = user.uid;
+
+      // Guard: don't let an older device silently overwrite a newer cloud
+      // backup. Compare the Drive file's server-side modifiedTime against this
+      // device's last local change. Uses the Drive server clock, so it is not
+      // fooled by device clock differences. Best-effort: if the check itself
+      // fails (network/permission), fall through and let the normal upload
+      // path surface any real error rather than blocking a legitimate backup.
+      if (!force) {
+        final cloudTimeResult =
+            await _driveRepo.getBackupModifiedTime(_backupFileName);
+        final cloudTime = cloudTimeResult.match((_) => null, (t) => t);
+        if (cloudTime != null) {
+          final localModified = await BackupReminderService().lastModifiedAt();
+          // Cloud is "newer" when the local data has never changed on this
+          // device, or last changed before the cloud backup was written.
+          final cloudIsNewer = localModified == null ||
+              cloudTime.toUtc().isAfter(localModified.toUtc());
+          if (cloudIsNewer) {
+            return left(BackupConflictFailure(
+              cloudModifiedTime: cloudTime,
+              localModifiedTime: localModified,
+            ));
+          }
+        }
+      }
 
       // 1. Gather Data
       final contactsResult = await _contactsRepo.getSavedContacts();
