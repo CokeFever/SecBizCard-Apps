@@ -135,6 +135,33 @@ class DriveRepository {
     return result.map((id) => id != null);
   }
 
+  /// Returns the server-side [modifiedTime] of the existing backup file, or
+  /// null if no backup exists yet. Uses Google Drive's server clock (not any
+  /// device clock), so it is reliable for "is the cloud copy newer than this
+  /// device?" checks across multiple devices.
+  Future<Either<Failure, DateTime?>> getBackupModifiedTime(
+    String fileName,
+  ) async {
+    try {
+      final apiResult = await _getDriveApi();
+      return apiResult.fold((l) => left(l), (driveApi) async {
+        final fileList = await driveApi.files.list(
+          q: "name = '$fileName' and trashed = false",
+          $fields: 'files(id, name, modifiedTime)',
+        );
+
+        final files = fileList.files;
+        if (files == null || files.isEmpty) {
+          return right(null);
+        }
+        // modifiedTime is a UTC DateTime from the Drive API.
+        return right(files.first.modifiedTime);
+      });
+    } catch (e) {
+      return left(ServerFailure(e.toString()));
+    }
+  }
+
   Future<Either<Failure, List<int>>> downloadFile(String fileId) async {
     try {
       final apiResult = await _getDriveApi();

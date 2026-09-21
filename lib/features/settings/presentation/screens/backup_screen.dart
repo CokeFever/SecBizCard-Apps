@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:secbizcard/core/services/backup_service.dart';
+import 'package:secbizcard/core/errors/failure.dart';
 import 'package:secbizcard/core/responsive/breakpoints.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -61,19 +62,32 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     setState(() => _hasRemoteBackup = true);
   }
 
-  Future<void> _performBackup() async {
+  Future<void> _performBackup({bool force = false}) async {
     setState(() {
       _isLoading = true;
       _statusMessage = 'Creating backup...';
     });
 
     final service = ref.read(backupServiceProvider);
-    final result = await service.backup();
+    final result = await service.backup(force: force);
 
     if (!mounted) return;
 
-    result.fold(
-      (l) {
+    await result.fold(
+      (l) async {
+        // A newer cloud backup exists (likely from another device). Don't
+        // overwrite silently — warn the user and only force on confirmation.
+        if (l is BackupConflictFailure) {
+          setState(() {
+            _isLoading = false;
+            _statusMessage = 'Cloud backup is newer than this device';
+          });
+          final overwrite = await _confirmOverwriteNewerBackup(l);
+          if (overwrite == true) {
+            await _performBackup(force: true);
+          }
+          return;
+        }
         setState(() {
           _isLoading = false;
           _statusMessage = 'Backup Failed: ${l.message}';
@@ -82,7 +96,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           context,
         ).showSnackBar(SnackBar(content: Text('Backup Failed: ${l.message}')));
       },
-      (time) {
+      (time) async {
         _saveLastBackupTime(time);
         setState(() {
           _isLoading = false;
@@ -92,6 +106,41 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           const SnackBar(content: Text('Backup saved to Google Drive')),
         );
       },
+    );
+  }
+
+  /// Warns that the Google Drive backup is newer than this device before
+  /// letting the user overwrite it. Returns true if they choose to overwrite.
+  Future<bool?> _confirmOverwriteNewerBackup(BackupConflictFailure conflict) {
+    final fmt = DateFormat('yyyy-MM-dd HH:mm');
+    final cloudLocal = conflict.cloudModifiedTime.toLocal();
+    final localStr = conflict.localModifiedTime == null
+        ? 'never changed on this device'
+        : 'last changed ${fmt.format(conflict.localModifiedTime!.toLocal())}';
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cloud backup is newer'),
+        content: Text(
+          'The backup in Google Drive was updated ${fmt.format(cloudLocal)}, '
+          'which is newer than the data on this device ($localStr).\n\n'
+          'Backing up now would overwrite that newer backup — likely a backup '
+          'made from another device. If you want the newer data on this '
+          'device, cancel and use Restore instead.\n\n'
+          'Overwrite the newer backup anyway?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Overwrite'),
+          ),
+        ],
+      ),
     );
   }
 
