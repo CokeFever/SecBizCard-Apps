@@ -4,6 +4,7 @@
 
 ### Fixed
 - **iOS 26 / iPadOS 26 and later (incl. iOS 27)**: Fixed a crash that closed the app immediately on launch. iOS now requires apps to adopt the UIScene lifecycle; the app has been migrated so it launches normally on the latest iOS and iPadOS. (iOS only)
+- **Scan**: Improved name recognition — a line the model was confidently wrong about (such as a slogan or job title picked as the name) is now caught and corrected more often, so the real name wins.
 
 ### Changed
 - **Backup**: Before backing up, the app now checks whether the copy in your Google Drive is newer than the data on this device. If it is — for example a backup made from another device — it warns you and asks for confirmation before overwriting, so an older device can no longer silently replace a newer backup. You can still choose to overwrite.
