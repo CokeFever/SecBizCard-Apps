@@ -162,6 +162,83 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get ocrTierBasic => 'Basic';
+
+  @override
+  String get ocrTierPlus => 'Plus';
+
+  @override
+  String get ocrTierPro => 'Pro';
+
+  @override
+  String get ocrTierVip => 'VIP';
+
+  @override
+  String get ocrTierFlex => 'Flex';
+
+  @override
+  String ocrTierUsageCount(int used, int cap) {
+    return '이번 달 $used/$cap';
+  }
+
+  @override
+  String get ocrUsageByok => 'BYOK';
+
+  @override
+  String ocrTierBadge(String tier, String usage) {
+    return '$tier · $usage';
+  }
+
+  @override
+  String get ocrUsageUnknown => '사용량을 불러올 수 없습니다';
+
+  @override
+  String get ocrYourPlan => '내 요금제';
+
+  @override
+  String get ocrSubscribe => '구독';
+
+  @override
+  String get ocrUpgradeToPro => 'Pro로 업그레이드';
+
+  @override
+  String get ocrSubscribeComingSoon => '구독 기능은 곧 제공됩니다.';
+
+  @override
+  String get ocrAdminObservability => '관리자 · 공유 키 사용량';
+
+  @override
+  String get ocrAdminShared800 => '무료 풀(Basic)';
+
+  @override
+  String get ocrAdminTotal => 'Vision 총 호출 수';
+
+  @override
+  String get ocrKeyLockedNote =>
+      '직접 등록한 키가 사용 중입니다. 변경하려면 먼저 삭제한 후 새 키를 추가하세요.';
+
+  @override
+  String get ocrRemoveKeyAction => '키 삭제';
+
+  @override
+  String get ocrPaywallTitle => '클라우드 인식 업그레이드';
+
+  @override
+  String get ocrPaywallSubtitle => '키 설정 없이 더 빠르고 정확한 명함 인식.';
+
+  @override
+  String get ocrPlanPlusPrice => 'US\$0.99/월';
+
+  @override
+  String get ocrPlanPlusDesc => '매월 20회 클라우드 스캔';
+
+  @override
+  String get ocrPlanProPrice => 'US\$4.99/월';
+
+  @override
+  String get ocrPlanProDesc => '매월 100회 클라우드 스캔';
+
+  @override
   String get scanCardHint => '명함을 프레임 안에 맞추세요';
 
   @override

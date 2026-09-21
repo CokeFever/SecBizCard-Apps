@@ -161,6 +161,82 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get ocrTierBasic => 'Basic';
+
+  @override
+  String get ocrTierPlus => 'Plus';
+
+  @override
+  String get ocrTierPro => 'Pro';
+
+  @override
+  String get ocrTierVip => 'VIP';
+
+  @override
+  String get ocrTierFlex => 'Flex';
+
+  @override
+  String ocrTierUsageCount(int used, int cap) {
+    return '本月 $used/$cap';
+  }
+
+  @override
+  String get ocrUsageByok => 'BYOK';
+
+  @override
+  String ocrTierBadge(String tier, String usage) {
+    return '$tier · $usage';
+  }
+
+  @override
+  String get ocrUsageUnknown => '无法获取用量';
+
+  @override
+  String get ocrYourPlan => '你的方案';
+
+  @override
+  String get ocrSubscribe => '订阅';
+
+  @override
+  String get ocrUpgradeToPro => '升级到 Pro';
+
+  @override
+  String get ocrSubscribeComingSoon => '订阅功能即将推出。';
+
+  @override
+  String get ocrAdminObservability => '管理者 · 共享密钥用量';
+
+  @override
+  String get ocrAdminShared800 => '免费额度池（Basic）';
+
+  @override
+  String get ocrAdminTotal => 'Vision 总调用次数';
+
+  @override
+  String get ocrKeyLockedNote => '已启用你自己的密钥。若要更换，请先移除再新增。';
+
+  @override
+  String get ocrRemoveKeyAction => '移除密钥';
+
+  @override
+  String get ocrPaywallTitle => '升级云端识别';
+
+  @override
+  String get ocrPaywallSubtitle => '更快、更准的名片识别，免设置密钥。';
+
+  @override
+  String get ocrPlanPlusPrice => 'US\$0.99/月';
+
+  @override
+  String get ocrPlanPlusDesc => '每月 20 次云端识别';
+
+  @override
+  String get ocrPlanProPrice => 'US\$4.99/月';
+
+  @override
+  String get ocrPlanProDesc => '每月 100 次云端识别';
+
+  @override
   String get scanCardHint => '将名片放入框内';
 
   @override
@@ -372,6 +448,82 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String ocrSharedKeyUsage(int used, int cap) {
     return 'Cloud Vision · 共用金鑰本月 $used/$cap';
   }
+
+  @override
+  String get ocrTierBasic => 'Basic';
+
+  @override
+  String get ocrTierPlus => 'Plus';
+
+  @override
+  String get ocrTierPro => 'Pro';
+
+  @override
+  String get ocrTierVip => 'VIP';
+
+  @override
+  String get ocrTierFlex => 'Flex';
+
+  @override
+  String ocrTierUsageCount(int used, int cap) {
+    return '本月 $used/$cap';
+  }
+
+  @override
+  String get ocrUsageByok => 'BYOK';
+
+  @override
+  String ocrTierBadge(String tier, String usage) {
+    return '$tier · $usage';
+  }
+
+  @override
+  String get ocrUsageUnknown => '無法取得用量';
+
+  @override
+  String get ocrYourPlan => '你的方案';
+
+  @override
+  String get ocrSubscribe => '訂閱';
+
+  @override
+  String get ocrUpgradeToPro => '升級到 Pro';
+
+  @override
+  String get ocrSubscribeComingSoon => '訂閱功能即將推出。';
+
+  @override
+  String get ocrAdminObservability => '管理者 · 共用金鑰用量';
+
+  @override
+  String get ocrAdminShared800 => '免費額度池（Basic）';
+
+  @override
+  String get ocrAdminTotal => 'Vision 總呼叫次數';
+
+  @override
+  String get ocrKeyLockedNote => '已啟用你自己的金鑰。若要更換，請先移除再新增。';
+
+  @override
+  String get ocrRemoveKeyAction => '移除金鑰';
+
+  @override
+  String get ocrPaywallTitle => '升級雲端辨識';
+
+  @override
+  String get ocrPaywallSubtitle => '更快、更準的名片辨識，免設定金鑰。';
+
+  @override
+  String get ocrPlanPlusPrice => 'US\$0.99/月';
+
+  @override
+  String get ocrPlanPlusDesc => '每月 20 次雲端辨識';
+
+  @override
+  String get ocrPlanProPrice => 'US\$4.99/月';
+
+  @override
+  String get ocrPlanProDesc => '每月 100 次雲端辨識';
 
   @override
   String get scanCardHint => '將名片放入框內';

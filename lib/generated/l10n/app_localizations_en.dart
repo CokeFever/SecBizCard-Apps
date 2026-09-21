@@ -168,6 +168,84 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get ocrTierBasic => 'Basic';
+
+  @override
+  String get ocrTierPlus => 'Plus';
+
+  @override
+  String get ocrTierPro => 'Pro';
+
+  @override
+  String get ocrTierVip => 'VIP';
+
+  @override
+  String get ocrTierFlex => 'Flex';
+
+  @override
+  String ocrTierUsageCount(int used, int cap) {
+    return '$used/$cap this month';
+  }
+
+  @override
+  String get ocrUsageByok => 'BYOK';
+
+  @override
+  String ocrTierBadge(String tier, String usage) {
+    return '$tier · $usage';
+  }
+
+  @override
+  String get ocrUsageUnknown => 'Usage unavailable';
+
+  @override
+  String get ocrYourPlan => 'Your plan';
+
+  @override
+  String get ocrSubscribe => 'Subscribe';
+
+  @override
+  String get ocrUpgradeToPro => 'Upgrade to Pro';
+
+  @override
+  String get ocrSubscribeComingSoon => 'Subscriptions are coming soon.';
+
+  @override
+  String get ocrAdminObservability => 'Admin · shared-key usage';
+
+  @override
+  String get ocrAdminShared800 => 'Free pool (Basic)';
+
+  @override
+  String get ocrAdminTotal => 'Total Vision calls';
+
+  @override
+  String get ocrKeyLockedNote =>
+      'Your own key is active. To change it, remove it first and add a new one.';
+
+  @override
+  String get ocrRemoveKeyAction => 'Remove key';
+
+  @override
+  String get ocrPaywallTitle => 'Upgrade cloud recognition';
+
+  @override
+  String get ocrPaywallSubtitle =>
+      'Faster, more accurate card recognition — no key setup needed.';
+
+  @override
+  String get ocrPlanPlusPrice => 'US\$0.99/mo';
+
+  @override
+  String get ocrPlanPlusDesc => '20 cloud scans per month';
+
+  @override
+  String get ocrPlanProPrice => 'US\$4.99/mo';
+
+  @override
+  String get ocrPlanProDesc => '100 cloud scans per month';
+
+  @override
   String get scanCardHint => 'Place business card in frame';
 
   @override
