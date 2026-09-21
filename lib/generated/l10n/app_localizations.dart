@@ -379,6 +379,150 @@ abstract class AppLocalizations {
   /// **'Cloud Vision · shared key {used}/{cap} this month'**
   String ocrSharedKeyUsage(int used, int cap);
 
+  /// Free OCR tier name
+  ///
+  /// In en, this message translates to:
+  /// **'Basic'**
+  String get ocrTierBasic;
+
+  /// Paid OCR tier name (Plus)
+  ///
+  /// In en, this message translates to:
+  /// **'Plus'**
+  String get ocrTierPlus;
+
+  /// Paid OCR tier name (Pro)
+  ///
+  /// In en, this message translates to:
+  /// **'Pro'**
+  String get ocrTierPro;
+
+  /// Internal unlimited OCR tier name
+  ///
+  /// In en, this message translates to:
+  /// **'VIP'**
+  String get ocrTierVip;
+
+  /// BYOK OCR tier name (user's own key)
+  ///
+  /// In en, this message translates to:
+  /// **'Flex'**
+  String get ocrTierFlex;
+
+  /// Monthly usage count for a finite OCR tier
+  ///
+  /// In en, this message translates to:
+  /// **'{used}/{cap} this month'**
+  String ocrTierUsageCount(int used, int cap);
+
+  /// Usage label for the Flex/BYOK tier (own key, untracked)
+  ///
+  /// In en, this message translates to:
+  /// **'BYOK'**
+  String get ocrUsageByok;
+
+  /// Combined tier badge, e.g. 'Plus · 12/20 this month' or 'VIP · ∞'
+  ///
+  /// In en, this message translates to:
+  /// **'{tier} · {usage}'**
+  String ocrTierBadge(String tier, String usage);
+
+  /// Shown when the monthly usage count can't be loaded (offline)
+  ///
+  /// In en, this message translates to:
+  /// **'Usage unavailable'**
+  String get ocrUsageUnknown;
+
+  /// Label above the current OCR tier name on the AI Recognition screen
+  ///
+  /// In en, this message translates to:
+  /// **'Your plan'**
+  String get ocrYourPlan;
+
+  /// Button that opens the subscription options
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe'**
+  String get ocrSubscribe;
+
+  /// Button for Plus subscribers to upgrade to Pro
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Pro'**
+  String get ocrUpgradeToPro;
+
+  /// Temporary notice until RevenueCat purchases are live
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions are coming soon.'**
+  String get ocrSubscribeComingSoon;
+
+  /// Header for the admin-only usage observability block
+  ///
+  /// In en, this message translates to:
+  /// **'Admin · shared-key usage'**
+  String get ocrAdminObservability;
+
+  /// Admin label for the shared 800 free budget counter
+  ///
+  /// In en, this message translates to:
+  /// **'Free pool (Basic)'**
+  String get ocrAdminShared800;
+
+  /// Admin label for the total monthly Vision usage counter
+  ///
+  /// In en, this message translates to:
+  /// **'Total Vision calls'**
+  String get ocrAdminTotal;
+
+  /// Explains why the key field is locked when a BYOK key is set
+  ///
+  /// In en, this message translates to:
+  /// **'Your own key is active. To change it, remove it first and add a new one.'**
+  String get ocrKeyLockedNote;
+
+  /// Button to delete the saved BYOK key
+  ///
+  /// In en, this message translates to:
+  /// **'Remove key'**
+  String get ocrRemoveKeyAction;
+
+  /// Title of the subscription options sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade cloud recognition'**
+  String get ocrPaywallTitle;
+
+  /// Subtitle of the subscription options sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Faster, more accurate card recognition — no key setup needed.'**
+  String get ocrPaywallSubtitle;
+
+  /// Plus plan price (placeholder until store pricing is live)
+  ///
+  /// In en, this message translates to:
+  /// **'US\$0.99/mo'**
+  String get ocrPlanPlusPrice;
+
+  /// Plus plan description
+  ///
+  /// In en, this message translates to:
+  /// **'20 cloud scans per month'**
+  String get ocrPlanPlusDesc;
+
+  /// Pro plan price (placeholder until store pricing is live)
+  ///
+  /// In en, this message translates to:
+  /// **'US\$4.99/mo'**
+  String get ocrPlanProPrice;
+
+  /// Pro plan description
+  ///
+  /// In en, this message translates to:
+  /// **'100 cloud scans per month'**
+  String get ocrPlanProDesc;
+
   /// Primary instruction on the card scanning screen
   ///
   /// In en, this message translates to:

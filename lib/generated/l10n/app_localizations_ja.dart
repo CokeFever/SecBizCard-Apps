@@ -162,6 +162,82 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get ocrTierBasic => 'Basic';
+
+  @override
+  String get ocrTierPlus => 'Plus';
+
+  @override
+  String get ocrTierPro => 'Pro';
+
+  @override
+  String get ocrTierVip => 'VIP';
+
+  @override
+  String get ocrTierFlex => 'Flex';
+
+  @override
+  String ocrTierUsageCount(int used, int cap) {
+    return '今月 $used/$cap';
+  }
+
+  @override
+  String get ocrUsageByok => 'BYOK';
+
+  @override
+  String ocrTierBadge(String tier, String usage) {
+    return '$tier · $usage';
+  }
+
+  @override
+  String get ocrUsageUnknown => '使用状況を取得できません';
+
+  @override
+  String get ocrYourPlan => '現在のプラン';
+
+  @override
+  String get ocrSubscribe => '登録する';
+
+  @override
+  String get ocrUpgradeToPro => 'Pro にアップグレード';
+
+  @override
+  String get ocrSubscribeComingSoon => 'サブスクリプションは近日提供予定です。';
+
+  @override
+  String get ocrAdminObservability => '管理者 · 共有キーの使用状況';
+
+  @override
+  String get ocrAdminShared800 => '無料枠（Basic）';
+
+  @override
+  String get ocrAdminTotal => 'Vision 呼び出し総数';
+
+  @override
+  String get ocrKeyLockedNote => '自分のキーが有効です。変更するには、先に削除してから新しいキーを追加してください。';
+
+  @override
+  String get ocrRemoveKeyAction => 'キーを削除';
+
+  @override
+  String get ocrPaywallTitle => 'クラウド認識をアップグレード';
+
+  @override
+  String get ocrPaywallSubtitle => 'キー設定不要で、より速く正確な名刺認識。';
+
+  @override
+  String get ocrPlanPlusPrice => 'US\$0.99/月';
+
+  @override
+  String get ocrPlanPlusDesc => '毎月 20 回のクラウドスキャン';
+
+  @override
+  String get ocrPlanProPrice => 'US\$4.99/月';
+
+  @override
+  String get ocrPlanProDesc => '毎月 100 回のクラウドスキャン';
+
+  @override
   String get scanCardHint => '名刺を枠内に収めてください';
 
   @override

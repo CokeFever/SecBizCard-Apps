@@ -9,6 +9,7 @@ import 'package:uuid/uuid.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'package:secbizcard/features/settings/data/ocr_settings_service.dart';
 import 'package:secbizcard/features/contacts/data/services/cloud_vision_recognizer.dart';
+import 'package:secbizcard/features/contacts/data/services/ocr_tier.dart';
 import 'package:secbizcard/features/contacts/data/card_detection_config.dart';
 import 'package:SecBizCard_OCR/secbizcard_ocr.dart';
 
@@ -16,19 +17,27 @@ import 'package:SecBizCard_OCR/secbizcard_ocr.dart';
 enum OcrEngineUsed { ownKeyVision, sharedVision, mlKit }
 
 /// Pre-scan status shown on the camera preview before recognition.
+///
+/// [tier] is the effective tier to display. For the shared-key path it's the
+/// backend tier (basic/plus/pro/vip); for BYOK it's [OcrTier.flex]. The badge
+/// shows [tierUsed]/[tierCap] for finite tiers, ∞ for VIP, and "BYOK" for Flex.
 class OcrPreScanStatus {
   OcrPreScanStatus({
     required this.engine,
-    this.used,
-    this.cap,
-    this.whitelisted = false,
+    this.tier,
+    this.tierUsed,
+    this.tierCap,
   });
   final OcrEngineUsed engine;
-  final int? used;
-  final int? cap;
-  /// True for owner/admin accounts: [used]/[cap] then refer to the shared
-  /// KEY's global monthly usage rather than a per-user cap.
-  final bool whitelisted;
+
+  /// Effective tier (null when unknown, e.g. offline before a scan).
+  final OcrTier? tier;
+
+  /// Scans used this month on the gating tier. Null = unknown/unlimited.
+  final int? tierUsed;
+
+  /// Cap for the gating tier. Null = unlimited (VIP) or unknown.
+  final int? tierCap;
 }
 
 /// Outcome of a business-card recognition, including which engine was used, an
@@ -128,32 +137,26 @@ class OCRService {
   Future<OcrPreScanStatus> preScanStatus() async {
     final hasOwn = await _settings.hasApiKey();
     if (hasOwn) {
-      // BYOK: no numbers — recognition goes straight to Google with the user's
-      // key, so we don't track usage here (they manage it in Cloud Console).
-      return OcrPreScanStatus(engine: OcrEngineUsed.ownKeyVision);
+      // BYOK: recognition goes straight to Google with the user's key, so we
+      // don't track usage here. Client-side tier = Flex; the badge shows "BYOK"
+      // rather than a count.
+      return OcrPreScanStatus(
+        engine: OcrEngineUsed.ownKeyVision,
+        tier: OcrTier.flex,
+      );
     }
-    // Shared: query the (non-billing) usage endpoint.
+    // Shared: query the (non-billing) usage endpoint for tier + usage.
     try {
       final callable = _functions.httpsCallable('getOcrUsage');
       final res = await callable
           .call()
           .timeout(const Duration(seconds: 8));
-      final data = Map<String, dynamic>.from(res.data as Map);
-      final whitelisted = data['whitelisted'] == true;
-      if (whitelisted) {
-        // Admin / owner: show the shared KEY's global monthly usage instead of
-        // a personal cap that doesn't apply to them.
-        return OcrPreScanStatus(
-          engine: OcrEngineUsed.sharedVision,
-          whitelisted: true,
-          used: (data['globalMonth'] as num?)?.toInt(),
-          cap: (data['globalCap'] as num?)?.toInt(),
-        );
-      }
+      final usage = OcrUsage.fromMap(Map<String, dynamic>.from(res.data as Map));
       return OcrPreScanStatus(
         engine: OcrEngineUsed.sharedVision,
-        used: (data['userMonth'] as num?)?.toInt(),
-        cap: (data['userCap'] as num?)?.toInt(),
+        tier: usage.tier,
+        tierUsed: usage.tierUsed,
+        tierCap: usage.tierCap,
       );
     } catch (_) {
       // Offline or error → we'll still attempt Vision, usage unknown.
@@ -203,13 +206,15 @@ class OCRService {
       return OcrOutcome(
         profile: _mapToUserProfile(parsed, imagePath),
         engine: OcrEngineUsed.sharedVision,
-        note: (res.globalUsage != null && res.globalCap != null &&
-                res.globalUsage! >= (res.globalCap! * 0.8))
+        // Near-limit warning only for finite tiers (VIP has null cap = ∞).
+        note: (res.tierUsed != null && res.tierCap != null &&
+                res.tierCap! > 0 &&
+                res.tierUsed! >= (res.tierCap! * 0.8))
             ? 'shared_near_limit'
             : null,
-        // Show the per-user monthly quota (e.g. 3/5) on the result badge.
-        usageUsed: res.userUsage,
-        usageCap: res.userCap,
+        // Show this tier's monthly quota (e.g. 3/5, 12/20) on the result badge.
+        usageUsed: res.tierUsed,
+        usageCap: res.tierCap,
         rawOcrLines: _linesToMaps(res.lines),
         recognitionId: res.recognitionId,
         orientation: res.orientation,

@@ -4,25 +4,32 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:http/http.dart' as http;
 import 'package:SecBizCard_OCR/secbizcard_ocr.dart';
 
+import 'ocr_tier.dart';
+
 /// Result of a Cloud Vision recognition attempt.
 class VisionRecognitionResult {
   VisionRecognitionResult({
     required this.lines,
     this.usedSharedKey = false,
-    this.globalUsage,
-    this.globalCap,
-    this.userUsage,
-    this.userCap,
+    this.tier,
+    this.tierUsed,
+    this.tierCap,
     this.recognitionId,
     this.orientation = 0,
   });
 
   final List<OcrLine> lines;
   final bool usedSharedKey;
-  final int? globalUsage;
-  final int? globalCap;
-  final int? userUsage;
-  final int? userCap;
+
+  /// Backend-resolved tier for this shared-key call (basic/plus/pro/vip). Null
+  /// for the own-key path (backend not involved).
+  final OcrTier? tier;
+
+  /// Scans used this month on the gating tier (from the shared-key response).
+  final int? tierUsed;
+
+  /// Cap for the gating tier; null = unlimited (VIP). Null on own-key path.
+  final int? tierCap;
 
   /// Server-issued id for this shared-key recognition, used to attribute a
   /// later "report bad recognition" refund to exactly this call. Null for the
@@ -153,10 +160,9 @@ class CloudVisionRecognizer {
     return VisionRecognitionResult(
       lines: lines,
       usedSharedKey: true,
-      globalUsage: (usage['globalMonth'] as num?)?.toInt(),
-      globalCap: (usage['globalCap'] as num?)?.toInt(),
-      userUsage: (usage['userMonth'] as num?)?.toInt(),
-      userCap: (usage['userCap'] as num?)?.toInt(),
+      tier: OcrTier.fromBackend(usage['tier']?.toString()),
+      tierUsed: (usage['tierUsed'] as num?)?.toInt(),
+      tierCap: (usage['tierCap'] as num?)?.toInt(),
       recognitionId: data['recognitionId']?.toString(),
       orientation: (data['orientation'] as num?)?.toInt() ?? 0,
     );

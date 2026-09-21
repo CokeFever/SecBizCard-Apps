@@ -141,6 +141,66 @@
       "cap": { "type": "int" }
     }
   },
+  "ocrTierBasic": "Basic",
+  "@ocrTierBasic": { "description": "Free OCR tier name" },
+  "ocrTierPlus": "Plus",
+  "@ocrTierPlus": { "description": "Paid OCR tier name (Plus)" },
+  "ocrTierPro": "Pro",
+  "@ocrTierPro": { "description": "Paid OCR tier name (Pro)" },
+  "ocrTierVip": "VIP",
+  "@ocrTierVip": { "description": "Internal unlimited OCR tier name" },
+  "ocrTierFlex": "Flex",
+  "@ocrTierFlex": { "description": "BYOK OCR tier name (user's own key)" },
+  "ocrTierUsageCount": "{used}/{cap} this month",
+  "@ocrTierUsageCount": {
+    "description": "Monthly usage count for a finite OCR tier",
+    "placeholders": {
+      "used": { "type": "int" },
+      "cap": { "type": "int" }
+    }
+  },
+  "ocrUsageByok": "BYOK",
+  "@ocrUsageByok": { "description": "Usage label for the Flex/BYOK tier (own key, untracked)" },
+  "ocrTierBadge": "{tier} · {usage}",
+  "@ocrTierBadge": {
+    "description": "Combined tier badge, e.g. 'Plus · 12/20 this month' or 'VIP · ∞'",
+    "placeholders": {
+      "tier": { "type": "String" },
+      "usage": { "type": "String" }
+    }
+  },
+  "ocrUsageUnknown": "Usage unavailable",
+  "@ocrUsageUnknown": { "description": "Shown when the monthly usage count can't be loaded (offline)" },
+  "ocrYourPlan": "Your plan",
+  "@ocrYourPlan": { "description": "Label above the current OCR tier name on the AI Recognition screen" },
+  "ocrSubscribe": "Subscribe",
+  "@ocrSubscribe": { "description": "Button that opens the subscription options" },
+  "ocrUpgradeToPro": "Upgrade to Pro",
+  "@ocrUpgradeToPro": { "description": "Button for Plus subscribers to upgrade to Pro" },
+  "ocrSubscribeComingSoon": "Subscriptions are coming soon.",
+  "@ocrSubscribeComingSoon": { "description": "Temporary notice until RevenueCat purchases are live" },
+  "ocrAdminObservability": "Admin · shared-key usage",
+  "@ocrAdminObservability": { "description": "Header for the admin-only usage observability block" },
+  "ocrAdminShared800": "Free pool (Basic)",
+  "@ocrAdminShared800": { "description": "Admin label for the shared 800 free budget counter" },
+  "ocrAdminTotal": "Total Vision calls",
+  "@ocrAdminTotal": { "description": "Admin label for the total monthly Vision usage counter" },
+  "ocrKeyLockedNote": "Your own key is active. To change it, remove it first and add a new one.",
+  "@ocrKeyLockedNote": { "description": "Explains why the key field is locked when a BYOK key is set" },
+  "ocrRemoveKeyAction": "Remove key",
+  "@ocrRemoveKeyAction": { "description": "Button to delete the saved BYOK key" },
+  "ocrPaywallTitle": "Upgrade cloud recognition",
+  "@ocrPaywallTitle": { "description": "Title of the subscription options sheet" },
+  "ocrPaywallSubtitle": "Faster, more accurate card recognition — no key setup needed.",
+  "@ocrPaywallSubtitle": { "description": "Subtitle of the subscription options sheet" },
+  "ocrPlanPlusPrice": "US$0.99/mo",
+  "@ocrPlanPlusPrice": { "description": "Plus plan price (placeholder until store pricing is live)" },
+  "ocrPlanPlusDesc": "20 cloud scans per month",
+  "@ocrPlanPlusDesc": { "description": "Plus plan description" },
+  "ocrPlanProPrice": "US$4.99/mo",
+  "@ocrPlanProPrice": { "description": "Pro plan price (placeholder until store pricing is live)" },
+  "ocrPlanProDesc": "100 cloud scans per month",
+  "@ocrPlanProDesc": { "description": "Pro plan description" },
   "scanCardHint": "Place business card in frame",
   "@scanCardHint": {
     "description": "Primary instruction on the card scanning screen"

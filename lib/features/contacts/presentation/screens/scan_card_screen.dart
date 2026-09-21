@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:secbizcard/features/contacts/data/services/ocr_service.dart';
+import 'package:secbizcard/features/contacts/data/services/ocr_tier.dart';
+import 'package:secbizcard/features/contacts/presentation/ocr_tier_display.dart';
 import 'package:secbizcard/features/contacts/data/card_detection_config.dart';
 import 'package:secbizcard/core/responsive/breakpoints.dart';
 import 'package:secbizcard/generated/l10n/app_localizations.dart';
@@ -326,17 +328,18 @@ class _ScanCardScreenState extends State<ScanCardScreen>
     late final String label;
     switch (status.engine) {
       case OcrEngineUsed.ownKeyVision:
-        // BYOK: no numbers (usage is managed by the user in Cloud Console).
-        label = l10n.ocrSourceCloudVisionOwn;
+        // BYOK → Flex tier. Show "Flex · BYOK".
+        label = OcrTierDisplay.badgeLabel(l10n, status.tier ?? OcrTier.flex);
         break;
       case OcrEngineUsed.sharedVision:
-        if (status.whitelisted &&
-            status.used != null &&
-            status.cap != null) {
-          // Owner/admin: show the shared key's global monthly usage.
-          label = l10n.ocrSharedKeyUsage(status.used!, status.cap!);
-        } else if (status.used != null && status.cap != null) {
-          label = l10n.ocrSourceCloudVisionShared(status.used!, status.cap!);
+        if (status.tier != null) {
+          // "<Tier> · x/cap this month", "VIP · ∞", etc.
+          label = OcrTierDisplay.badgeLabel(
+            l10n,
+            status.tier!,
+            used: status.tierUsed,
+            cap: status.tierCap,
+          );
         } else {
           label = l10n.ocrRecognizingCloudVision;
         }
