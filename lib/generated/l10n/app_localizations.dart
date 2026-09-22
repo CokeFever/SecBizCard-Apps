@@ -523,6 +523,30 @@ abstract class AppLocalizations {
   /// **'100 cloud scans per month'**
   String get ocrPlanProDesc;
 
+  /// Button to restore previous subscription purchases
+  ///
+  /// In en, this message translates to:
+  /// **'Restore purchases'**
+  String get ocrRestorePurchases;
+
+  /// Snackbar after a successful subscription purchase
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks for subscribing!'**
+  String get ocrSubscribeThanks;
+
+  /// Snackbar after restoring purchases
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases restored.'**
+  String get ocrRestoreDone;
+
+  /// Snackbar when a purchase or restore fails
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get ocrSubscribeFailed;
+
   /// Primary instruction on the card scanning screen
   ///
   /// In en, this message translates to:

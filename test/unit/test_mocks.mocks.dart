@@ -2147,6 +2147,33 @@ class MockDriveRepository extends _i1.Mock implements _i18.DriveRepository {
       ) as _i7.Future<_i13.Either<_i14.Failure, bool>>);
 
   @override
+  _i7.Future<_i13.Either<_i14.Failure, DateTime?>> getBackupModifiedTime(
+          String? fileName) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getBackupModifiedTime,
+          [fileName],
+        ),
+        returnValue: _i7.Future<_i13.Either<_i14.Failure, DateTime?>>.value(
+            _i10.dummyValue<_i13.Either<_i14.Failure, DateTime?>>(
+          this,
+          Invocation.method(
+            #getBackupModifiedTime,
+            [fileName],
+          ),
+        )),
+        returnValueForMissingStub:
+            _i7.Future<_i13.Either<_i14.Failure, DateTime?>>.value(
+                _i10.dummyValue<_i13.Either<_i14.Failure, DateTime?>>(
+          this,
+          Invocation.method(
+            #getBackupModifiedTime,
+            [fileName],
+          ),
+        )),
+      ) as _i7.Future<_i13.Either<_i14.Failure, DateTime?>>);
+
+  @override
   _i7.Future<_i13.Either<_i14.Failure, List<int>>> downloadFile(
           String? fileId) =>
       (super.noSuchMethod(

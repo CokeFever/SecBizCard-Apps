@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:secbizcard/core/responsive/adaptive_container.dart';
@@ -10,6 +12,7 @@ import 'package:secbizcard/core/responsive/breakpoints.dart';
 import 'package:secbizcard/features/settings/data/ocr_settings_service.dart';
 import 'package:secbizcard/features/contacts/data/services/ocr_tier.dart';
 import 'package:secbizcard/features/contacts/presentation/ocr_tier_display.dart';
+import 'package:secbizcard/features/subscription/data/subscription_providers.dart';
 import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 /// Unified, compact settings for AI-based business-card recognition (OCR).
@@ -477,16 +480,27 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
   }
 
   /// The subscribe/upgrade sheet: explains Plus vs Pro and lets the user pick.
-  /// The actual purchase is wired to RevenueCat later; for now the CTA shows a
-  /// "coming soon" notice so the flow is visible without a live store product.
+  /// The subscribe/upgrade sheet. Fetches the live RevenueCat offering; when
+  /// packages are available (SDK keys set + store products live) it shows real
+  /// prices and drives the purchase/restore flow. When the offering isn't
+  /// available yet (keys not provisioned or products not created), it falls
+  /// back to a static description + a "coming soon" notice — so the entry point
+  /// works end-to-end today and lights up automatically once RevenueCat is set.
   Future<void> _showSubscribeSheet() async {
     final l10n = AppLocalizations.of(context)!;
+    final service = ref.read(subscriptionServiceProvider);
+    final offering = await service.fetchCurrentOffering();
+    if (!mounted) return;
+
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
       builder: (ctx) {
         final theme = Theme.of(ctx);
+        final packages = offering?.availablePackages ?? const [];
+        final hasLivePackages = packages.isNotEmpty;
+
         return SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
@@ -503,23 +517,43 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
                         fontSize: 13,
                         color: theme.colorScheme.onSurfaceVariant)),
                 const SizedBox(height: 16),
-                _planTile(theme, l10n.ocrTierPlus, l10n.ocrPlanPlusPrice,
-                    l10n.ocrPlanPlusDesc),
-                const SizedBox(height: 10),
-                _planTile(theme, l10n.ocrTierPro, l10n.ocrPlanProPrice,
-                    l10n.ocrPlanProDesc),
-                const SizedBox(height: 20),
-                FilledButton(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    // TODO(revenuecat): launch RevenueCat purchase flow once
-                    // store products + entitlements are live.
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.ocrSubscribeComingSoon)),
-                    );
-                  },
-                  child: Text(l10n.ocrSubscribe),
-                ),
+
+                if (hasLivePackages) ...[
+                  // Live RevenueCat packages: real localized price + purchase.
+                  for (final pkg in packages) ...[
+                    _planTile(
+                      theme,
+                      pkg.storeProduct.title,
+                      pkg.storeProduct.priceString,
+                      pkg.storeProduct.description,
+                      onTap: () => _purchase(ctx, pkg),
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+                  const SizedBox(height: 10),
+                  TextButton(
+                    onPressed: () => _restore(ctx),
+                    child: Text(l10n.ocrRestorePurchases),
+                  ),
+                ] else ...[
+                  // Fallback: static plan info until the offering goes live.
+                  _planTile(theme, l10n.ocrTierPlus, l10n.ocrPlanPlusPrice,
+                      l10n.ocrPlanPlusDesc),
+                  const SizedBox(height: 10),
+                  _planTile(theme, l10n.ocrTierPro, l10n.ocrPlanProPrice,
+                      l10n.ocrPlanProDesc),
+                  const SizedBox(height: 20),
+                  FilledButton(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.ocrSubscribeComingSoon)),
+                      );
+                    },
+                    child: Text(l10n.ocrSubscribe),
+                  ),
+                ],
+
                 const SizedBox(height: 8),
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
@@ -533,36 +567,86 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
     );
   }
 
+  /// Run a purchase for [pkg]. Closes the sheet, then refreshes usage so the
+  /// tier card reflects the new entitlement. User-cancel is silent.
+  Future<void> _purchase(BuildContext sheetCtx, Package pkg) async {
+    final l10n = AppLocalizations.of(context)!;
+    final service = ref.read(subscriptionServiceProvider);
+    Navigator.pop(sheetCtx);
+    try {
+      await service.purchase(pkg);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.ocrSubscribeThanks)));
+      await _loadUsage(); // entitlement webhook updates the backend tier
+    } on PlatformException catch (e) {
+      // User cancellation is not an error worth surfacing.
+      final code = PurchasesErrorHelper.getErrorCode(e);
+      if (code == PurchasesErrorCode.purchaseCancelledError) return;
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.ocrSubscribeFailed)));
+    }
+  }
+
+  Future<void> _restore(BuildContext sheetCtx) async {
+    final l10n = AppLocalizations.of(context)!;
+    final service = ref.read(subscriptionServiceProvider);
+    Navigator.pop(sheetCtx);
+    try {
+      await service.restore();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.ocrRestoreDone)));
+      await _loadUsage();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.ocrSubscribeFailed)));
+    }
+  }
+
   Widget _planTile(
-      ThemeData theme, String name, String price, String desc) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.colorScheme.outlineVariant),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 15)),
-                const SizedBox(height: 2),
-                Text(desc,
-                    style: TextStyle(
-                        fontSize: 12,
-                        color: theme.colorScheme.onSurfaceVariant)),
-              ],
+      ThemeData theme, String name, String price, String desc,
+      {VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color:
+              theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: theme.colorScheme.outlineVariant),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(name,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 15)),
+                  const SizedBox(height: 2),
+                  Text(desc,
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: theme.colorScheme.onSurfaceVariant)),
+                ],
+              ),
             ),
-          ),
-          Text(price,
-              style: const TextStyle(
-                  fontWeight: FontWeight.w600, fontSize: 14)),
-        ],
+            Text(price,
+                style: const TextStyle(
+                    fontWeight: FontWeight.w600, fontSize: 14)),
+            if (onTap != null) ...[
+              const SizedBox(width: 8),
+              Icon(Icons.chevron_right,
+                  size: 18, color: theme.colorScheme.onSurfaceVariant),
+            ],
+          ],
+        ),
       ),
     );
   }

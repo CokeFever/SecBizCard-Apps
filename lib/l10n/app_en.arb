@@ -201,6 +201,14 @@
   "@ocrPlanProPrice": { "description": "Pro plan price (placeholder until store pricing is live)" },
   "ocrPlanProDesc": "100 cloud scans per month",
   "@ocrPlanProDesc": { "description": "Pro plan description" },
+  "ocrRestorePurchases": "Restore purchases",
+  "@ocrRestorePurchases": { "description": "Button to restore previous subscription purchases" },
+  "ocrSubscribeThanks": "Thanks for subscribing!",
+  "@ocrSubscribeThanks": { "description": "Snackbar after a successful subscription purchase" },
+  "ocrRestoreDone": "Purchases restored.",
+  "@ocrRestoreDone": { "description": "Snackbar after restoring purchases" },
+  "ocrSubscribeFailed": "Something went wrong. Please try again.",
+  "@ocrSubscribeFailed": { "description": "Snackbar when a purchase or restore fails" },
   "scanCardHint": "Place business card in frame",
   "@scanCardHint": {
     "description": "Primary instruction on the card scanning screen"

@@ -96,7 +96,10 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           ANDROID_KEYSTORE_PATH: "upload-keystore.jks"
-        run: flutter build apk --release
+          # RevenueCat public SDK key (safe in the client). Injected at build
+          # time via --dart-define; empty is fine (SDK init no-ops, no paywall).
+          REVENUECAT_ANDROID_KEY: ${{ secrets.REVENUECAT_ANDROID_KEY }}
+        run: flutter build apk --release --dart-define=REVENUECAT_ANDROID_KEY="$REVENUECAT_ANDROID_KEY"
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4

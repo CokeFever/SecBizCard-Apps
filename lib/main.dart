@@ -5,8 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:secbizcard/generated/l10n/app_localizations.dart';
 import 'package:secbizcard/features/contacts/data/card_detection_config.dart';
+import 'package:secbizcard/features/subscription/data/subscription_service.dart';
+import 'package:secbizcard/features/subscription/data/subscription_providers.dart';
 import 'firebase_options.dart';
 import 'core/config/theme.dart'; // 引入 Skill 1 產生的 Theme
 import 'core/router/app_router.dart';
@@ -52,7 +56,22 @@ void main() async {
     // defaults until a fetch activates; restart-to-apply. Never blocks startup.
     unawaited(CardDetectionConfig.initialize());
 
-    runApp(const ProviderScope(child: IxoApp()));
+    // Initialize RevenueCat (non-blocking). No-ops when SDK keys aren't
+    // provisioned yet, so it's safe to ship now. Keyed on the current Firebase
+    // uid; sign-in/sign-out flows can call logIn() to re-associate later.
+    final subscriptionService = SubscriptionService();
+    unawaited(subscriptionService.init(
+      firebaseUid: FirebaseAuth.instance.currentUser?.uid,
+    ));
+
+    runApp(
+      ProviderScope(
+        overrides: [
+          subscriptionServiceProvider.overrideWithValue(subscriptionService),
+        ],
+        child: const IxoApp(),
+      ),
+    );
     debugPrint('[Main] runApp called');
   } catch (e, stack) {
     debugPrint('[Main] Firebase initialization failed: $e');

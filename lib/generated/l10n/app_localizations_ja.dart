@@ -238,6 +238,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ocrPlanProDesc => '毎月 100 回のクラウドスキャン';
 
   @override
+  String get ocrRestorePurchases => '購入を復元';
+
+  @override
+  String get ocrSubscribeThanks => 'ご登録ありがとうございます！';
+
+  @override
+  String get ocrRestoreDone => '購入を復元しました。';
+
+  @override
+  String get ocrSubscribeFailed => 'エラーが発生しました。もう一度お試しください。';
+
+  @override
   String get scanCardHint => '名刺を枠内に収めてください';
 
   @override

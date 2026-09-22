@@ -237,6 +237,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ocrPlanProDesc => '每月 100 次云端识别';
 
   @override
+  String get ocrRestorePurchases => '恢复购买';
+
+  @override
+  String get ocrSubscribeThanks => '感谢订阅！';
+
+  @override
+  String get ocrRestoreDone => '购买已恢复。';
+
+  @override
+  String get ocrSubscribeFailed => '发生错误，请再试一次。';
+
+  @override
   String get scanCardHint => '将名片放入框内';
 
   @override
@@ -524,6 +536,18 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ocrPlanProDesc => '每月 100 次雲端辨識';
+
+  @override
+  String get ocrRestorePurchases => '還原購買';
+
+  @override
+  String get ocrSubscribeThanks => '感謝訂閱！';
+
+  @override
+  String get ocrRestoreDone => '購買已還原。';
+
+  @override
+  String get ocrSubscribeFailed => '發生錯誤，請再試一次。';
 
   @override
   String get scanCardHint => '將名片放入框內';
