@@ -87,5 +87,9 @@
   "ocrPlanPlusPrice": "US$0.99/月",
   "ocrPlanPlusDesc": "每月 20 次雲端辨識",
   "ocrPlanProPrice": "US$4.99/月",
-  "ocrPlanProDesc": "每月 100 次雲端辨識"
+  "ocrPlanProDesc": "每月 100 次雲端辨識",
+  "ocrRestorePurchases": "還原購買",
+  "ocrSubscribeThanks": "感謝訂閱！",
+  "ocrRestoreDone": "購買已還原。",
+  "ocrSubscribeFailed": "發生錯誤，請再試一次。"
 }

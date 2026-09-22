@@ -89,6 +89,15 @@ class FakeDriveRepository implements DriveRepository {
   Future<Either<Failure, void>> deleteFile(String fileId) async => right(null);
 
   @override
+  Future<Either<Failure, DateTime?>> getBackupModifiedTime(
+    String fileName,
+  ) async {
+    // No cloud modified-time in this fake → null ("no cloud backup"), which
+    // keeps the existing backup tests' behavior unchanged.
+    return right(null);
+  }
+
+  @override
   String getFileUrl(String fileId) => 'http://fake.url/$fileId';
 
   @override

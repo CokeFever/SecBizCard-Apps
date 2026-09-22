@@ -102,8 +102,11 @@ echo "Running build_runner..."
 dart run build_runner build --delete-conflicting-outputs
 
 # Build iOS release (also runs pod install internally)
+# RevenueCat public SDK key (safe in the client) is injected via --dart-define.
+# Set REVENUECAT_IOS_KEY as an environment variable in the Xcode Cloud workflow
+# (App Store Connect). Empty is fine — SDK init no-ops and no paywall shows.
 echo "Building iOS release..."
-flutter build ios --release --no-codesign
+flutter build ios --release --no-codesign --dart-define=REVENUECAT_IOS_KEY="$REVENUECAT_IOS_KEY"
 
 echo "ci_post_clone script completed successfully."
 exit 0

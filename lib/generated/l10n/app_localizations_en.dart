@@ -246,6 +246,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ocrPlanProDesc => '100 cloud scans per month';
 
   @override
+  String get ocrRestorePurchases => 'Restore purchases';
+
+  @override
+  String get ocrSubscribeThanks => 'Thanks for subscribing!';
+
+  @override
+  String get ocrRestoreDone => 'Purchases restored.';
+
+  @override
+  String get ocrSubscribeFailed => 'Something went wrong. Please try again.';
+
+  @override
   String get scanCardHint => 'Place business card in frame';
 
   @override

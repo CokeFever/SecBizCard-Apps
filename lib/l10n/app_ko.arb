@@ -96,5 +96,9 @@
   "ocrPlanPlusPrice": "US$0.99/월",
   "ocrPlanPlusDesc": "매월 20회 클라우드 스캔",
   "ocrPlanProPrice": "US$4.99/월",
-  "ocrPlanProDesc": "매월 100회 클라우드 스캔"
+  "ocrPlanProDesc": "매월 100회 클라우드 스캔",
+  "ocrRestorePurchases": "구매 복원",
+  "ocrSubscribeThanks": "구독해 주셔서 감사합니다!",
+  "ocrRestoreDone": "구매를 복원했습니다.",
+  "ocrSubscribeFailed": "오류가 발생했습니다. 다시 시도해 주세요."
 }

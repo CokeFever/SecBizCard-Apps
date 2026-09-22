@@ -239,6 +239,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ocrPlanProDesc => '매월 100회 클라우드 스캔';
 
   @override
+  String get ocrRestorePurchases => '구매 복원';
+
+  @override
+  String get ocrSubscribeThanks => '구독해 주셔서 감사합니다!';
+
+  @override
+  String get ocrRestoreDone => '구매를 복원했습니다.';
+
+  @override
+  String get ocrSubscribeFailed => '오류가 발생했습니다. 다시 시도해 주세요.';
+
+  @override
   String get scanCardHint => '명함을 프레임 안에 맞추세요';
 
   @override

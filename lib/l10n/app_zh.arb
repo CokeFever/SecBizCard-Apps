@@ -87,5 +87,9 @@
   "ocrPlanPlusPrice": "US$0.99/月",
   "ocrPlanPlusDesc": "每月 20 次云端识别",
   "ocrPlanProPrice": "US$4.99/月",
-  "ocrPlanProDesc": "每月 100 次云端识别"
+  "ocrPlanProDesc": "每月 100 次云端识别",
+  "ocrRestorePurchases": "恢复购买",
+  "ocrSubscribeThanks": "感谢订阅！",
+  "ocrRestoreDone": "购买已恢复。",
+  "ocrSubscribeFailed": "发生错误，请再试一次。"
 }
