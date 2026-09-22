@@ -1,0 +1,13 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Firebase deploy is manual — reminder",
+      "trigger": "SessionStart",
+      "action": {
+        "type": "command",
+        "command": "echo \"REMINDER: Firebase deploy (functions/hosting/rules/website) is MANUAL-ONLY in this repo (changed 2026-09-22). Push to main no longer deploys. When the subscription feature is ready to go live, you must: (1) firebase functions:secrets:set REVENUECAT_WEBHOOK_AUTH, then (2) GitHub -> Actions -> 'Deploy Firebase (Hosting & Functions)' -> Run workflow. Deploy backend TOGETHER with the matching app release (app<->functions contract is coupled). Also: website + firestore/storage rules no longer auto-deploy either.\""
+      }
+    }
+  ]
+}
