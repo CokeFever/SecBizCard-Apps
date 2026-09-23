@@ -249,5 +249,15 @@
   "scannerPermissionTitle": "需要相機權限",
   "scannerPermissionBody": "此功能需要相機存取權，以掃描 QR code 進行安全交換。",
   "scannerOpenSettings": "開啟設定",
-  "scannerGrantPermission": "授予權限"
+  "scannerGrantPermission": "授予權限",
+  "editContactTitle": "編輯聯絡人",
+  "editContactUpdated": "聯絡人已更新",
+  "editContactBasicInfo": "基本資訊",
+  "editContactDisplayName": "顯示名稱",
+  "editContactNickname": "暱稱（僅您可見）",
+  "editContactJobInfo": "工作資訊",
+  "editContactContact": "聯絡方式",
+  "editContactEmail": "電子郵件",
+  "editContactOriginalScan": "原始掃描",
+  "editContactFieldRequired": "{label} 為必填"
 }

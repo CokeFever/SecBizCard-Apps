@@ -839,4 +839,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scannerGrantPermission => 'Grant Permission';
+
+  @override
+  String get editContactTitle => 'Edit Contact';
+
+  @override
+  String get editContactUpdated => 'Contact updated';
+
+  @override
+  String get editContactBasicInfo => 'Basic Info';
+
+  @override
+  String get editContactDisplayName => 'Display Name';
+
+  @override
+  String get editContactNickname => 'Nickname (Only visible to you)';
+
+  @override
+  String get editContactJobInfo => 'Job Info';
+
+  @override
+  String get editContactContact => 'Contact';
+
+  @override
+  String get editContactEmail => 'Email';
+
+  @override
+  String get editContactOriginalScan => 'Original Scan';
+
+  @override
+  String editContactFieldRequired(String label) {
+    return '$label is required';
+  }
 }

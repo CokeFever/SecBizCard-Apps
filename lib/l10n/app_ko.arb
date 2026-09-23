@@ -258,5 +258,15 @@
   "scannerPermissionTitle": "카메라 권한 필요",
   "scannerPermissionBody": "이 기능은 안전한 교환을 위해 QR 코드를 스캔하는 카메라 접근 권한이 필요합니다.",
   "scannerOpenSettings": "설정 열기",
-  "scannerGrantPermission": "권한 허용"
+  "scannerGrantPermission": "권한 허용",
+  "editContactTitle": "연락처 편집",
+  "editContactUpdated": "연락처가 업데이트되었습니다",
+  "editContactBasicInfo": "기본 정보",
+  "editContactDisplayName": "표시 이름",
+  "editContactNickname": "별명 (나만 볼 수 있음)",
+  "editContactJobInfo": "직무 정보",
+  "editContactContact": "연락처",
+  "editContactEmail": "이메일",
+  "editContactOriginalScan": "원본 스캔",
+  "editContactFieldRequired": "{label}은(는) 필수입니다"
 }

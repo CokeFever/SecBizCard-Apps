@@ -258,5 +258,15 @@
   "scannerPermissionTitle": "カメラの許可が必要です",
   "scannerPermissionBody": "この機能では、安全な交換のために QR コードをスキャンするカメラへのアクセスが必要です。",
   "scannerOpenSettings": "設定を開く",
-  "scannerGrantPermission": "許可する"
+  "scannerGrantPermission": "許可する",
+  "editContactTitle": "連絡先を編集",
+  "editContactUpdated": "連絡先を更新しました",
+  "editContactBasicInfo": "基本情報",
+  "editContactDisplayName": "表示名",
+  "editContactNickname": "ニックネーム（自分のみ表示）",
+  "editContactJobInfo": "職務情報",
+  "editContactContact": "連絡先",
+  "editContactEmail": "メール",
+  "editContactOriginalScan": "元のスキャン",
+  "editContactFieldRequired": "{label} は必須です"
 }
