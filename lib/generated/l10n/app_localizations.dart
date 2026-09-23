@@ -469,11 +469,17 @@ abstract class AppLocalizations {
   /// **'Free pool (Basic)'**
   String get ocrAdminShared800;
 
-  /// Admin label for the total monthly Vision usage counter
+  /// Admin label for the total monthly Cloud Vision usage counter
   ///
   /// In en, this message translates to:
-  /// **'Total Vision calls'**
+  /// **'Total CV calls'**
   String get ocrAdminTotal;
+
+  /// Hint under the BYOK key field explaining the expected key format
+  ///
+  /// In en, this message translates to:
+  /// **'A Google Cloud API key starts with \"AIza\" and is 39 characters long.'**
+  String get ocrKeyFormatHint;
 
   /// Explains why the key field is locked when a BYOK key is set
   ///

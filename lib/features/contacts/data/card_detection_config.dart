@@ -33,10 +33,11 @@ import 'package:flutter/foundation.dart';
 /// in the passed map as optional — so if this map is empty or a key is missing,
 /// behavior is exactly the current shipped behavior.
 class CardDetectionConfig {
-  CardDetectionConfig._(this._values, this._flags);
+  CardDetectionConfig._(this._values, this._flags, this._strings);
 
   final Map<String, double> _values;
   final Map<String, bool> _flags;
+  final Map<String, String> _strings;
 
   // ---- In-app defaults: MUST match OpenCVProcessor.kt `object S` and
   //      CardScoring.swift `static let`. Keep in sync with the spec. ---------
@@ -82,6 +83,16 @@ class CardDetectionConfig {
     'useCentroidCornerSort': true,
   };
 
+  static const Map<String, String> _stringDefaults = <String, String>{
+    // Regex the BYOK settings screen uses to validate a pasted Google Cloud
+    // API key before enabling Save. Externalized so that if Google ever changes
+    // the key format we can update it from the console WITHOUT shipping a new
+    // build. Current format: "AIza" + 35 chars of [A-Za-z0-9_-] = 39 total.
+    // A remote value that isn't a compilable regex is rejected (see
+    // _fromRemoteConfig) so a console typo can't lock out all keys.
+    'byokKeyRegex': r'^AIza[A-Za-z0-9_-]{35}$',
+  };
+
   /// Plausible inclusive ranges for each numeric key. A remote value outside
   /// its range is rejected and the default is kept.
   static const Map<String, List<double>> _ranges = <String, List<double>>{
@@ -108,8 +119,11 @@ class CardDetectionConfig {
 
   /// Fallback instance using only in-app defaults. Used before any successful
   /// activation and whenever Remote Config is unavailable.
-  factory CardDetectionConfig.defaults() =>
-      CardDetectionConfig._(Map.of(_defaults), Map.of(_flagDefaults));
+  factory CardDetectionConfig.defaults() => CardDetectionConfig._(
+        Map.of(_defaults),
+        Map.of(_flagDefaults),
+        Map.of(_stringDefaults),
+      );
 
   /// The current activated configuration, or in-app defaults if init hasn't
   /// run / failed. Safe to read synchronously anywhere.
@@ -136,6 +150,7 @@ class CardDetectionConfig {
       await rc.setDefaults(<String, dynamic>{
         for (final e in _defaults.entries) e.key: e.value,
         for (final e in _flagDefaults.entries) e.key: e.value,
+        for (final e in _stringDefaults.entries) e.key: e.value,
       });
 
       // Activate values fetched on a previous launch, then fetch for next time.
@@ -165,11 +180,28 @@ class CardDetectionConfig {
     for (final key in _flagDefaults.keys) {
       flags[key] = rc.getBool(key);
     }
-    return CardDetectionConfig._(values, flags);
+    final strings = Map.of(_stringDefaults);
+    for (final key in _stringDefaults.keys) {
+      final raw = rc.getString(key);
+      if (raw.isEmpty) continue; // not set → keep default
+      // Reject a remote value that isn't a compilable regex, so a console typo
+      // can't break validation in the field (keep the shipped default instead).
+      if (key == 'byokKeyRegex') {
+        try {
+          RegExp(raw);
+        } catch (_) {
+          continue; // invalid regex → keep default
+        }
+      }
+      strings[key] = raw;
+    }
+    return CardDetectionConfig._(values, flags, strings);
   }
 
   double value(String key) => _values[key] ?? _defaults[key] ?? 0.0;
   bool flag(String key) => _flags[key] ?? _flagDefaults[key] ?? false;
+  String string(String key) =>
+      _strings[key] ?? _stringDefaults[key] ?? '';
 
   /// Packs the current tuning into a map for the native `processCard` /
   /// `manualCrop` method-channel calls. The native side treats every entry as
