@@ -2190,6 +2190,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Import from Text'**
   String get vcardImportFromText;
+
+  /// No description provided for @historyClearTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear History?'**
+  String get historyClearTitle;
+
+  /// No description provided for @historyClearBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This will delete all handshake records.'**
+  String get historyClearBody;
+
+  /// No description provided for @historyClearAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get historyClearAction;
+
+  /// No description provided for @historyClearTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear History'**
+  String get historyClearTooltip;
+
+  /// No description provided for @historyNoActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'No activity yet'**
+  String get historyNoActivity;
+
+  /// Snackbar after approving an incoming request
+  ///
+  /// In en, this message translates to:
+  /// **'Approved!'**
+  String get historyApproved;
+
+  /// Status badge
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get historyStatusApproved;
+
+  /// No description provided for @historyStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get historyStatusRejected;
+
+  /// No description provided for @historyStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get historyStatusPending;
+
+  /// No description provided for @historyStatusMissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed'**
+  String get historyStatusMissed;
+
+  /// No description provided for @historyStatusExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get historyStatusExpired;
 }
 
 class _AppLocalizationsDelegate

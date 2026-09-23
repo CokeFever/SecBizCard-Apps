@@ -356,5 +356,16 @@
   "vcardOr": "또는",
   "vcardOption2": "옵션 2: vCard 텍스트 붙여넣기",
   "vcardImporting": "가져오는 중…",
-  "vcardImportFromText": "텍스트에서 가져오기"
+  "vcardImportFromText": "텍스트에서 가져오기",
+  "historyClearTitle": "기록을 지울까요?",
+  "historyClearBody": "모든 교환 기록이 삭제됩니다.",
+  "historyClearAction": "지우기",
+  "historyClearTooltip": "기록 지우기",
+  "historyNoActivity": "아직 활동이 없습니다",
+  "historyApproved": "승인했습니다!",
+  "historyStatusApproved": "승인됨",
+  "historyStatusRejected": "거절됨",
+  "historyStatusPending": "대기 중",
+  "historyStatusMissed": "놓침",
+  "historyStatusExpired": "만료됨"
 }

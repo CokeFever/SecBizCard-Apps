@@ -1133,6 +1133,39 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get vcardImportFromText => '从文本导入';
+
+  @override
+  String get historyClearTitle => '清除记录？';
+
+  @override
+  String get historyClearBody => '这会删除所有交换记录。';
+
+  @override
+  String get historyClearAction => '清除';
+
+  @override
+  String get historyClearTooltip => '清除记录';
+
+  @override
+  String get historyNoActivity => '暂无活动';
+
+  @override
+  String get historyApproved => '已批准！';
+
+  @override
+  String get historyStatusApproved => '已批准';
+
+  @override
+  String get historyStatusRejected => '已拒绝';
+
+  @override
+  String get historyStatusPending => '待处理';
+
+  @override
+  String get historyStatusMissed => '已错过';
+
+  @override
+  String get historyStatusExpired => '已过期';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -2264,4 +2297,37 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get vcardImportFromText => '從文字匯入';
+
+  @override
+  String get historyClearTitle => '清除記錄？';
+
+  @override
+  String get historyClearBody => '這會刪除所有交換記錄。';
+
+  @override
+  String get historyClearAction => '清除';
+
+  @override
+  String get historyClearTooltip => '清除記錄';
+
+  @override
+  String get historyNoActivity => '尚無活動';
+
+  @override
+  String get historyApproved => '已核准！';
+
+  @override
+  String get historyStatusApproved => '已核准';
+
+  @override
+  String get historyStatusRejected => '已拒絕';
+
+  @override
+  String get historyStatusPending => '待處理';
+
+  @override
+  String get historyStatusMissed => '已錯過';
+
+  @override
+  String get historyStatusExpired => '已過期';
 }

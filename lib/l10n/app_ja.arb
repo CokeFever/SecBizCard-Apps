@@ -356,5 +356,16 @@
   "vcardOr": "または",
   "vcardOption2": "オプション 2：vCard テキストを貼り付け",
   "vcardImporting": "インポート中…",
-  "vcardImportFromText": "テキストからインポート"
+  "vcardImportFromText": "テキストからインポート",
+  "historyClearTitle": "履歴を消去しますか？",
+  "historyClearBody": "すべての交換記録が削除されます。",
+  "historyClearAction": "消去",
+  "historyClearTooltip": "履歴を消去",
+  "historyNoActivity": "アクティビティはまだありません",
+  "historyApproved": "承認しました！",
+  "historyStatusApproved": "承認済み",
+  "historyStatusRejected": "拒否済み",
+  "historyStatusPending": "保留中",
+  "historyStatusMissed": "見逃し",
+  "historyStatusExpired": "期限切れ"
 }

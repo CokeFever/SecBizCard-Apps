@@ -1172,4 +1172,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vcardImportFromText => 'Import from Text';
+
+  @override
+  String get historyClearTitle => 'Clear History?';
+
+  @override
+  String get historyClearBody => 'This will delete all handshake records.';
+
+  @override
+  String get historyClearAction => 'Clear';
+
+  @override
+  String get historyClearTooltip => 'Clear History';
+
+  @override
+  String get historyNoActivity => 'No activity yet';
+
+  @override
+  String get historyApproved => 'Approved!';
+
+  @override
+  String get historyStatusApproved => 'Approved';
+
+  @override
+  String get historyStatusRejected => 'Rejected';
+
+  @override
+  String get historyStatusPending => 'Pending';
+
+  @override
+  String get historyStatusMissed => 'Missed';
+
+  @override
+  String get historyStatusExpired => 'Expired';
 }
