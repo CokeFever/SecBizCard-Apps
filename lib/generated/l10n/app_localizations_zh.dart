@@ -1424,6 +1424,69 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get landingEula => 'EULA';
+
+  @override
+  String get mainCancelSelection => '取消选择';
+
+  @override
+  String mainSelectedCount(int count) {
+    return '已选择 $count 项';
+  }
+
+  @override
+  String get mainExportTooltip => '导出';
+
+  @override
+  String get mainBackupReminderTitle => '要备份您的联系人吗？';
+
+  @override
+  String get mainBackupReminderBody =>
+      '您的联系人与名片图片仅保存在此设备上。我们建议备份到您自己的 Google 云端硬盘，以免丢失。';
+
+  @override
+  String get mainBackupDontRemind => '本月不再提醒';
+
+  @override
+  String get mainBackupLater => '稍后';
+
+  @override
+  String get mainBackupNow => '立即备份';
+
+  @override
+  String mainExportCount(int count) {
+    return '导出 $count 位联系人';
+  }
+
+  @override
+  String get mainExportVcardSubtitle => '联系字段，不含名片图片';
+
+  @override
+  String get mainExportZipSubtitle => '字段加名片照片，可重新导入';
+
+  @override
+  String mainShareFailed(String error) {
+    return '分享失败：$error';
+  }
+
+  @override
+  String mainExporting(int count) {
+    return '正在导出 $count 位联系人…';
+  }
+
+  @override
+  String mainExportedToGoogle(int count) {
+    return '已将 $count 位联系人导出到 Google 通讯录';
+  }
+
+  @override
+  String mainExportFailed(String error) {
+    return '导出失败：$error';
+  }
+
+  @override
+  String mainExportedPartial(int succeeded, int total, int failed) {
+    return '已导出 $total 位中的 $succeeded 位；$failed 位失败';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -2846,4 +2909,67 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get landingEula => 'EULA';
+
+  @override
+  String get mainCancelSelection => '取消選取';
+
+  @override
+  String mainSelectedCount(int count) {
+    return '已選取 $count 項';
+  }
+
+  @override
+  String get mainExportTooltip => '匯出';
+
+  @override
+  String get mainBackupReminderTitle => '要備份您的聯絡人嗎？';
+
+  @override
+  String get mainBackupReminderBody =>
+      '您的聯絡人與名片圖片僅儲存在此裝置上。我們建議備份到您自己的 Google 雲端硬碟，以免遺失。';
+
+  @override
+  String get mainBackupDontRemind => '本月不再提醒';
+
+  @override
+  String get mainBackupLater => '稍後';
+
+  @override
+  String get mainBackupNow => '立即備份';
+
+  @override
+  String mainExportCount(int count) {
+    return '匯出 $count 位聯絡人';
+  }
+
+  @override
+  String get mainExportVcardSubtitle => '聯絡欄位，不含名片圖片';
+
+  @override
+  String get mainExportZipSubtitle => '欄位加名片照片，可重新匯入';
+
+  @override
+  String mainShareFailed(String error) {
+    return '分享失敗：$error';
+  }
+
+  @override
+  String mainExporting(int count) {
+    return '正在匯出 $count 位聯絡人…';
+  }
+
+  @override
+  String mainExportedToGoogle(int count) {
+    return '已將 $count 位聯絡人匯出到 Google 通訊錄';
+  }
+
+  @override
+  String mainExportFailed(String error) {
+    return '匯出失敗：$error';
+  }
+
+  @override
+  String mainExportedPartial(int succeeded, int total, int failed) {
+    return '已匯出 $total 位中的 $succeeded 位；$failed 位失敗';
+  }
 }

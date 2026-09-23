@@ -449,5 +449,21 @@
   "landingDownloadHeadline": "安全で高速な\n名刺交換を体験",
   "landingCopyright": "© {year} SecBizCard. All rights reserved.",
   "landingPrivacyPolicy": "プライバシーポリシー",
-  "landingEula": "EULA"
+  "landingEula": "EULA",
+  "mainCancelSelection": "選択をキャンセル",
+  "mainSelectedCount": "{count} 件選択中",
+  "mainExportTooltip": "エクスポート",
+  "mainBackupReminderTitle": "連絡先をバックアップしますか？",
+  "mainBackupReminderBody": "連絡先と名刺画像はこの端末にのみ保存されています。紛失しないよう、ご自身の Google ドライブへのバックアップをおすすめします。",
+  "mainBackupDontRemind": "今月は通知しない",
+  "mainBackupLater": "後で",
+  "mainBackupNow": "今すぐバックアップ",
+  "mainExportCount": "{count} 件の連絡先をエクスポート",
+  "mainExportVcardSubtitle": "連絡先項目のみ、名刺画像なし",
+  "mainExportZipSubtitle": "項目と名刺写真、再インポート可能",
+  "mainShareFailed": "共有に失敗しました：{error}",
+  "mainExporting": "{count} 件の連絡先をエクスポート中…",
+  "mainExportedToGoogle": "{count} 件の連絡先を Google 連絡先にエクスポートしました",
+  "mainExportFailed": "エクスポートに失敗しました：{error}",
+  "mainExportedPartial": "{total} 件中 {succeeded} 件をエクスポート、{failed} 件失敗"
 }

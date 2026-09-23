@@ -1441,4 +1441,67 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get landingEula => 'EULA';
+
+  @override
+  String get mainCancelSelection => '선택 취소';
+
+  @override
+  String mainSelectedCount(int count) {
+    return '$count개 선택됨';
+  }
+
+  @override
+  String get mainExportTooltip => '내보내기';
+
+  @override
+  String get mainBackupReminderTitle => '연락처를 백업할까요?';
+
+  @override
+  String get mainBackupReminderBody =>
+      '연락처와 명함 이미지는 이 기기에만 저장됩니다. 분실하지 않도록 본인의 Google 드라이브에 백업하는 것을 권장합니다.';
+
+  @override
+  String get mainBackupDontRemind => '이번 달에는 알리지 않기';
+
+  @override
+  String get mainBackupLater => '나중에';
+
+  @override
+  String get mainBackupNow => '지금 백업';
+
+  @override
+  String mainExportCount(int count) {
+    return '연락처 $count개 내보내기';
+  }
+
+  @override
+  String get mainExportVcardSubtitle => '연락처 필드, 명함 이미지 없음';
+
+  @override
+  String get mainExportZipSubtitle => '필드와 명함 사진, 다시 가져오기 가능';
+
+  @override
+  String mainShareFailed(String error) {
+    return '공유 실패: $error';
+  }
+
+  @override
+  String mainExporting(int count) {
+    return '연락처 $count개 내보내는 중…';
+  }
+
+  @override
+  String mainExportedToGoogle(int count) {
+    return '연락처 $count개를 Google 주소록으로 내보냈습니다';
+  }
+
+  @override
+  String mainExportFailed(String error) {
+    return '내보내기 실패: $error';
+  }
+
+  @override
+  String mainExportedPartial(int succeeded, int total, int failed) {
+    return '$total개 중 $succeeded개 내보냄, $failed개 실패';
+  }
 }
