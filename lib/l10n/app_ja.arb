@@ -242,5 +242,21 @@
   "handshakeContextBusiness": "ビジネス",
   "handshakeContextSocial": "ソーシャル",
   "handshakeContextLite": "ライト",
-  "handshakeShare": "共有"
+  "handshakeShare": "共有",
+  "incomingExpired": "期限切れ",
+  "incomingUnknownUser": "不明なユーザー",
+  "incomingTitle": "受信したリクエスト",
+  "incomingWantsToExchange": "{name} さんが連絡先情報の交換を希望しています。",
+  "incomingAddToContacts": "連絡先に追加",
+  "incomingChooseInfo": "共有する情報を選択：",
+  "incomingDecline": "拒否",
+  "incomingApprove": "承認",
+  "scannerInvalidQr": "無効な QR コード",
+  "scannerInvalidQrFormat": "QR コードの形式が無効です。想定形式：https://ixo.app/<id>",
+  "scannerTitle": "QR コードをスキャン",
+  "scannerPlaceInFrame": "QR コードを枠内に合わせてください",
+  "scannerPermissionTitle": "カメラの許可が必要です",
+  "scannerPermissionBody": "この機能では、安全な交換のために QR コードをスキャンするカメラへのアクセスが必要です。",
+  "scannerOpenSettings": "設定を開く",
+  "scannerGrantPermission": "許可する"
 }

@@ -766,4 +766,56 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get handshakeShare => '共有';
+
+  @override
+  String get incomingExpired => '期限切れ';
+
+  @override
+  String get incomingUnknownUser => '不明なユーザー';
+
+  @override
+  String get incomingTitle => '受信したリクエスト';
+
+  @override
+  String incomingWantsToExchange(String name) {
+    return '$name さんが連絡先情報の交換を希望しています。';
+  }
+
+  @override
+  String get incomingAddToContacts => '連絡先に追加';
+
+  @override
+  String get incomingChooseInfo => '共有する情報を選択：';
+
+  @override
+  String get incomingDecline => '拒否';
+
+  @override
+  String get incomingApprove => '承認';
+
+  @override
+  String get scannerInvalidQr => '無効な QR コード';
+
+  @override
+  String get scannerInvalidQrFormat =>
+      'QR コードの形式が無効です。想定形式：https://ixo.app/<id>';
+
+  @override
+  String get scannerTitle => 'QR コードをスキャン';
+
+  @override
+  String get scannerPlaceInFrame => 'QR コードを枠内に合わせてください';
+
+  @override
+  String get scannerPermissionTitle => 'カメラの許可が必要です';
+
+  @override
+  String get scannerPermissionBody =>
+      'この機能では、安全な交換のために QR コードをスキャンするカメラへのアクセスが必要です。';
+
+  @override
+  String get scannerOpenSettings => '設定を開く';
+
+  @override
+  String get scannerGrantPermission => '許可する';
 }

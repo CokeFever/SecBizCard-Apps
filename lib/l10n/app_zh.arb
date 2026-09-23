@@ -233,5 +233,21 @@
   "handshakeContextBusiness": "商务",
   "handshakeContextSocial": "社交",
   "handshakeContextLite": "精简",
-  "handshakeShare": "分享"
+  "handshakeShare": "分享",
+  "incomingExpired": "已过期",
+  "incomingUnknownUser": "未知用户",
+  "incomingTitle": "收到请求",
+  "incomingWantsToExchange": "{name} 想与您交换联系信息。",
+  "incomingAddToContacts": "加入我的联系人",
+  "incomingChooseInfo": "选择要分享的信息：",
+  "incomingDecline": "拒绝",
+  "incomingApprove": "批准",
+  "scannerInvalidQr": "QR code 无效",
+  "scannerInvalidQrFormat": "QR code 格式无效。应为：https://ixo.app/<id>",
+  "scannerTitle": "扫描 QR code",
+  "scannerPlaceInFrame": "将 QR code 对准框内",
+  "scannerPermissionTitle": "需要相机权限",
+  "scannerPermissionBody": "此功能需要相机访问权限，以扫描 QR code 进行安全交换。",
+  "scannerOpenSettings": "打开设置",
+  "scannerGrantPermission": "授予权限"
 }

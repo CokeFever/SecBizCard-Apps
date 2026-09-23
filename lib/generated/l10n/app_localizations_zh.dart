@@ -758,6 +758,56 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get handshakeShare => '分享';
+
+  @override
+  String get incomingExpired => '已过期';
+
+  @override
+  String get incomingUnknownUser => '未知用户';
+
+  @override
+  String get incomingTitle => '收到请求';
+
+  @override
+  String incomingWantsToExchange(String name) {
+    return '$name 想与您交换联系信息。';
+  }
+
+  @override
+  String get incomingAddToContacts => '加入我的联系人';
+
+  @override
+  String get incomingChooseInfo => '选择要分享的信息：';
+
+  @override
+  String get incomingDecline => '拒绝';
+
+  @override
+  String get incomingApprove => '批准';
+
+  @override
+  String get scannerInvalidQr => 'QR code 无效';
+
+  @override
+  String get scannerInvalidQrFormat => 'QR code 格式无效。应为：https://ixo.app/<id>';
+
+  @override
+  String get scannerTitle => '扫描 QR code';
+
+  @override
+  String get scannerPlaceInFrame => '将 QR code 对准框内';
+
+  @override
+  String get scannerPermissionTitle => '需要相机权限';
+
+  @override
+  String get scannerPermissionBody => '此功能需要相机访问权限，以扫描 QR code 进行安全交换。';
+
+  @override
+  String get scannerOpenSettings => '打开设置';
+
+  @override
+  String get scannerGrantPermission => '授予权限';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -1514,4 +1564,54 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get handshakeShare => '分享';
+
+  @override
+  String get incomingExpired => '已過期';
+
+  @override
+  String get incomingUnknownUser => '未知使用者';
+
+  @override
+  String get incomingTitle => '收到請求';
+
+  @override
+  String incomingWantsToExchange(String name) {
+    return '$name 想與您交換聯絡資訊。';
+  }
+
+  @override
+  String get incomingAddToContacts => '加入我的聯絡人';
+
+  @override
+  String get incomingChooseInfo => '選擇要分享的資訊：';
+
+  @override
+  String get incomingDecline => '拒絕';
+
+  @override
+  String get incomingApprove => '核准';
+
+  @override
+  String get scannerInvalidQr => 'QR code 無效';
+
+  @override
+  String get scannerInvalidQrFormat => 'QR code 格式無效。應為：https://ixo.app/<id>';
+
+  @override
+  String get scannerTitle => '掃描 QR code';
+
+  @override
+  String get scannerPlaceInFrame => '將 QR code 對準框內';
+
+  @override
+  String get scannerPermissionTitle => '需要相機權限';
+
+  @override
+  String get scannerPermissionBody => '此功能需要相機存取權，以掃描 QR code 進行安全交換。';
+
+  @override
+  String get scannerOpenSettings => '開啟設定';
+
+  @override
+  String get scannerGrantPermission => '授予權限';
 }

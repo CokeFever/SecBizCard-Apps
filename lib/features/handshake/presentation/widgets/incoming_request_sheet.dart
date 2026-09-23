@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'package:secbizcard/features/profile/domain/card_context.dart';
+import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 class IncomingRequestSheet extends StatefulWidget {
   final Map<String, dynamic> data;
@@ -75,7 +76,9 @@ class _IncomingRequestSheetState extends State<IncomingRequestSheet> {
       final diff = expiry.difference(DateTime.now());
       if (diff.isNegative) {
         timer.cancel();
-        setState(() => _timeRemaining = "Expired");
+        if (mounted) {
+          setState(() => _timeRemaining = AppLocalizations.of(context)!.incomingExpired);
+        }
         return;
       }
 
@@ -90,7 +93,8 @@ class _IncomingRequestSheetState extends State<IncomingRequestSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final name = _receiverProfile?.displayName ?? 'Unknown User';
+    final l10n = AppLocalizations.of(context)!;
+    final name = _receiverProfile?.displayName ?? l10n.incomingUnknownUser;
 
     return Container(
       padding: EdgeInsets.only(
@@ -106,7 +110,7 @@ class _IncomingRequestSheetState extends State<IncomingRequestSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Incoming Request',
+                  l10n.incomingTitle,
                   style: GoogleFonts.outfit(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -139,7 +143,7 @@ class _IncomingRequestSheetState extends State<IncomingRequestSheet> {
               ],
             ),
             const SizedBox(height: 16),
-            Text('$name wants to exchange contact info.'),
+            Text(l10n.incomingWantsToExchange(name)),
             if (_receiverProfile?.title != null)
               Text(
                 _receiverProfile!.title!,
@@ -153,34 +157,34 @@ class _IncomingRequestSheetState extends State<IncomingRequestSheet> {
                 onChanged: (val) {
                   setState(() => _saveToContacts = val ?? true);
                 },
-                title: const Text('Add to my contacts'),
+                title: Text(l10n.incomingAddToContacts),
                 contentPadding: EdgeInsets.zero,
                 controlAffinity: ListTileControlAffinity.leading,
               ),
 
             const SizedBox(height: 12),
             Text(
-              'Choose info to share:',
+              l10n.incomingChooseInfo,
               style: GoogleFonts.inter(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
 
             SegmentedButton<ContextType>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: ContextType.business,
-                  label: Text('Business'),
-                  icon: Icon(Icons.business),
+                  label: Text(l10n.handshakeContextBusiness),
+                  icon: const Icon(Icons.business),
                 ),
                 ButtonSegment(
                   value: ContextType.social,
-                  label: Text('Social'),
-                  icon: Icon(Icons.people),
+                  label: Text(l10n.handshakeContextSocial),
+                  icon: const Icon(Icons.people),
                 ),
                 ButtonSegment(
                   value: ContextType.lite,
-                  label: Text('Lite'),
-                  icon: Icon(Icons.person_outline),
+                  label: Text(l10n.handshakeContextLite),
+                  icon: const Icon(Icons.person_outline),
                 ),
               ],
               selected: {_selectedContext},
@@ -197,7 +201,7 @@ class _IncomingRequestSheetState extends State<IncomingRequestSheet> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: widget.onDecline,
-                    child: const Text('Decline'),
+                    child: Text(l10n.incomingDecline),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -209,7 +213,7 @@ class _IncomingRequestSheetState extends State<IncomingRequestSheet> {
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
                     ),
-                    child: const Text('Approve'),
+                    child: Text(l10n.incomingApprove),
                   ),
                 ),
               ],

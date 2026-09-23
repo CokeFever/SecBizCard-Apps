@@ -787,4 +787,56 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get handshakeShare => 'Share';
+
+  @override
+  String get incomingExpired => 'Expired';
+
+  @override
+  String get incomingUnknownUser => 'Unknown User';
+
+  @override
+  String get incomingTitle => 'Incoming Request';
+
+  @override
+  String incomingWantsToExchange(String name) {
+    return '$name wants to exchange contact info.';
+  }
+
+  @override
+  String get incomingAddToContacts => 'Add to my contacts';
+
+  @override
+  String get incomingChooseInfo => 'Choose info to share:';
+
+  @override
+  String get incomingDecline => 'Decline';
+
+  @override
+  String get incomingApprove => 'Approve';
+
+  @override
+  String get scannerInvalidQr => 'Invalid QR code';
+
+  @override
+  String get scannerInvalidQrFormat =>
+      'Invalid QR code format. Expected: https://ixo.app/<id>';
+
+  @override
+  String get scannerTitle => 'Scan QR Code';
+
+  @override
+  String get scannerPlaceInFrame => 'Place QR code in frame';
+
+  @override
+  String get scannerPermissionTitle => 'Camera Permission Required';
+
+  @override
+  String get scannerPermissionBody =>
+      'This feature requires camera access to scan QR codes for secure exchange.';
+
+  @override
+  String get scannerOpenSettings => 'Open Settings';
+
+  @override
+  String get scannerGrantPermission => 'Grant Permission';
 }
