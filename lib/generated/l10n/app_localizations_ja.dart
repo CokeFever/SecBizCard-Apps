@@ -1319,4 +1319,58 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get contextSettingsToggleCardBack => '名刺の裏面';
+
+  @override
+  String get homeYourBusinessCard => 'あなたの名刺';
+
+  @override
+  String get homeScanToExchange => 'Scan to exchange';
+
+  @override
+  String get homeShareMyInfo => '情報を共有';
+
+  @override
+  String get manualCropTitle => '範囲を調整';
+
+  @override
+  String get manualCropReset => 'デフォルトに戻す';
+
+  @override
+  String get manualCropFailed => '切り抜きに失敗しました';
+
+  @override
+  String get reviewTitle => '連絡先を確認';
+
+  @override
+  String get reviewSaved => '連絡先を保存しました！';
+
+  @override
+  String get reviewFieldName => '氏名';
+
+  @override
+  String get reviewFieldEmail => 'メール';
+
+  @override
+  String get reviewFieldCompany => '会社';
+
+  @override
+  String get reviewFieldTitle => '役職';
+
+  @override
+  String get reviewFieldPhone => '電話';
+
+  @override
+  String get reviewFieldMobile => '携帯';
+
+  @override
+  String get reviewFieldFax => 'FAX';
+
+  @override
+  String get reviewFieldWebsite => 'ウェブサイト';
+
+  @override
+  String get reviewFieldAddress => '住所';
+
+  @override
+  String get reviewFieldTaxId => '登録番号／税番号';
 }

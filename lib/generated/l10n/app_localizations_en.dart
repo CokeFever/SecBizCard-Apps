@@ -1350,4 +1350,58 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get contextSettingsToggleCardBack => 'Business Card Back';
+
+  @override
+  String get homeYourBusinessCard => 'Your Business Card';
+
+  @override
+  String get homeScanToExchange => 'Scan to exchange';
+
+  @override
+  String get homeShareMyInfo => 'Share My Info';
+
+  @override
+  String get manualCropTitle => 'Adjust Area';
+
+  @override
+  String get manualCropReset => 'Reset to Default';
+
+  @override
+  String get manualCropFailed => 'Crop Failed';
+
+  @override
+  String get reviewTitle => 'Review Contact';
+
+  @override
+  String get reviewSaved => 'Contact saved!';
+
+  @override
+  String get reviewFieldName => 'Name';
+
+  @override
+  String get reviewFieldEmail => 'Email';
+
+  @override
+  String get reviewFieldCompany => 'Company';
+
+  @override
+  String get reviewFieldTitle => 'Title';
+
+  @override
+  String get reviewFieldPhone => 'Phone';
+
+  @override
+  String get reviewFieldMobile => 'Mobile';
+
+  @override
+  String get reviewFieldFax => 'Fax';
+
+  @override
+  String get reviewFieldWebsite => 'Website';
+
+  @override
+  String get reviewFieldAddress => 'Address';
+
+  @override
+  String get reviewFieldTaxId => 'VAT / Tax ID';
 }

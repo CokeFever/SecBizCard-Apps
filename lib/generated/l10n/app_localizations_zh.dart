@@ -1304,6 +1304,60 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get contextSettingsToggleCardBack => '名片背面';
+
+  @override
+  String get homeYourBusinessCard => '您的名片';
+
+  @override
+  String get homeScanToExchange => 'Scan to exchange';
+
+  @override
+  String get homeShareMyInfo => '分享我的信息';
+
+  @override
+  String get manualCropTitle => '调整范围';
+
+  @override
+  String get manualCropReset => '重置为默认';
+
+  @override
+  String get manualCropFailed => '裁剪失败';
+
+  @override
+  String get reviewTitle => '查看联系人';
+
+  @override
+  String get reviewSaved => '联系人已保存！';
+
+  @override
+  String get reviewFieldName => '姓名';
+
+  @override
+  String get reviewFieldEmail => '电子邮件';
+
+  @override
+  String get reviewFieldCompany => '公司';
+
+  @override
+  String get reviewFieldTitle => '职务';
+
+  @override
+  String get reviewFieldPhone => '电话';
+
+  @override
+  String get reviewFieldMobile => '手机';
+
+  @override
+  String get reviewFieldFax => '传真';
+
+  @override
+  String get reviewFieldWebsite => '网站';
+
+  @override
+  String get reviewFieldAddress => '地址';
+
+  @override
+  String get reviewFieldTaxId => '统一编号／税号';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -2606,4 +2660,58 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get contextSettingsToggleCardBack => '名片背面';
+
+  @override
+  String get homeYourBusinessCard => '您的名片';
+
+  @override
+  String get homeScanToExchange => 'Scan to exchange';
+
+  @override
+  String get homeShareMyInfo => '分享我的資訊';
+
+  @override
+  String get manualCropTitle => '調整範圍';
+
+  @override
+  String get manualCropReset => '重設為預設';
+
+  @override
+  String get manualCropFailed => '裁切失敗';
+
+  @override
+  String get reviewTitle => '檢視聯絡人';
+
+  @override
+  String get reviewSaved => '聯絡人已儲存！';
+
+  @override
+  String get reviewFieldName => '姓名';
+
+  @override
+  String get reviewFieldEmail => '電子郵件';
+
+  @override
+  String get reviewFieldCompany => '公司';
+
+  @override
+  String get reviewFieldTitle => '職稱';
+
+  @override
+  String get reviewFieldPhone => '電話';
+
+  @override
+  String get reviewFieldMobile => '手機';
+
+  @override
+  String get reviewFieldFax => '傳真';
+
+  @override
+  String get reviewFieldWebsite => '網站';
+
+  @override
+  String get reviewFieldAddress => '地址';
+
+  @override
+  String get reviewFieldTaxId => '統一編號／稅號';
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:secbizcard/features/contacts/data/card_detection_config.dart';
+import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 class ManualCropScreen extends StatefulWidget {
   final String imagePath;
@@ -201,6 +202,7 @@ class _ManualCropScreenState extends State<ManualCropScreen> {
   }
 
   Future<void> _confirmCrop() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() => _isProcessing = true);
 
     final w = _realImageWidth;
@@ -232,9 +234,9 @@ class _ManualCropScreenState extends State<ManualCropScreen> {
         if (mounted) context.pop(outputPath);
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Crop Failed')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.manualCropFailed)),
+          );
         }
       }
     } catch (e) {
@@ -259,14 +261,15 @@ class _ManualCropScreenState extends State<ManualCropScreen> {
     const handleSize = 40.0;
     const halfHandle = handleSize / 2;
 
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Adjust Area'),
+        title: Text(l10n.manualCropTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _isProcessing ? null : _resetCrop,
-            tooltip: 'Reset to Default',
+            tooltip: l10n.manualCropReset,
           ),
           IconButton(
             icon: _isProcessing

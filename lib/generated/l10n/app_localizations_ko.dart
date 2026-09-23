@@ -1320,4 +1320,58 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get contextSettingsToggleCardBack => '명함 뒷면';
+
+  @override
+  String get homeYourBusinessCard => '내 명함';
+
+  @override
+  String get homeScanToExchange => 'Scan to exchange';
+
+  @override
+  String get homeShareMyInfo => '내 정보 공유';
+
+  @override
+  String get manualCropTitle => '영역 조정';
+
+  @override
+  String get manualCropReset => '기본값으로 재설정';
+
+  @override
+  String get manualCropFailed => '자르기 실패';
+
+  @override
+  String get reviewTitle => '연락처 검토';
+
+  @override
+  String get reviewSaved => '연락처를 저장했습니다!';
+
+  @override
+  String get reviewFieldName => '이름';
+
+  @override
+  String get reviewFieldEmail => '이메일';
+
+  @override
+  String get reviewFieldCompany => '회사';
+
+  @override
+  String get reviewFieldTitle => '직책';
+
+  @override
+  String get reviewFieldPhone => '전화';
+
+  @override
+  String get reviewFieldMobile => '휴대폰';
+
+  @override
+  String get reviewFieldFax => '팩스';
+
+  @override
+  String get reviewFieldWebsite => '웹사이트';
+
+  @override
+  String get reviewFieldAddress => '주소';
+
+  @override
+  String get reviewFieldTaxId => '사업자/세금 번호';
 }

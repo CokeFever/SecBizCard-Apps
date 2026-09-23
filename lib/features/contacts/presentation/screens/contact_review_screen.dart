@@ -9,6 +9,7 @@ import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
 import 'package:secbizcard/features/contacts/data/recognition_quality.dart';
 import 'package:secbizcard/features/contacts/data/ocr_feedback_service.dart';
 import 'package:secbizcard/features/contacts/presentation/widgets/ocr_feedback_dialogs.dart';
+import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 class ContactReviewScreen extends ConsumerStatefulWidget {
   final UserProfile profile;
@@ -103,6 +104,7 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
   }
 
   Future<void> _saveContact() async {
+    final l10n = AppLocalizations.of(context)!;
     // Merge the (editable) fax back into customFields.
     final mergedCustomFields = Map<String, String>.from(
       widget.profile.customFields,
@@ -138,14 +140,14 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
 
     if (mounted) {
       result.fold(
-        (failure) => ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: ${failure.message}'))),
+        (failure) => ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.commonErrorWithDetail(failure.message))),
+        ),
         (_) {
           ref.invalidate(savedContactsProvider);
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Contact saved!')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.reviewSaved)),
+          );
           // Navigate back to contacts list
           context.go('/home');
         },
@@ -264,6 +266,7 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return PopScope(
       // Intercept Back so we can offer the (opt-in) report prompt BEFORE
       // leaving, then pop manually. Saving uses context.go (not pop), so it
@@ -278,7 +281,7 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
       },
       child: Scaffold(
       appBar: AppBar(
-        title: const Text('Review Contact'),
+        title: Text(l10n.reviewTitle),
         actions: [
           IconButton(onPressed: _saveContact, icon: const Icon(Icons.check)),
         ],
@@ -316,40 +319,40 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _buildTextField(_nameController, 'Name', Icons.person),
+                  _buildTextField(_nameController, l10n.reviewFieldName, Icons.person),
                   const SizedBox(height: 16),
-                  _buildTextField(_emailController, 'Email', Icons.email),
+                  _buildTextField(_emailController, l10n.reviewFieldEmail, Icons.email),
                   const SizedBox(height: 16),
                   _buildTextField(
                     _companyController,
-                    'Company',
+                    l10n.reviewFieldCompany,
                     Icons.business,
                   ),
                   const SizedBox(height: 16),
-                  _buildTextField(_titleController, 'Title', Icons.badge),
+                  _buildTextField(_titleController, l10n.reviewFieldTitle, Icons.badge),
                   const SizedBox(height: 16),
-                  _buildTextField(_phoneController, 'Phone', Icons.phone),
+                  _buildTextField(_phoneController, l10n.reviewFieldPhone, Icons.phone),
                   const SizedBox(height: 16),
                   _buildTextField(
                     _mobileController,
-                    'Mobile',
+                    l10n.reviewFieldMobile,
                     Icons.smartphone,
                   ),
                   const SizedBox(height: 16),
-                  _buildTextField(_faxController, 'Fax', Icons.print),
+                  _buildTextField(_faxController, l10n.reviewFieldFax, Icons.print),
                   const SizedBox(height: 16),
-                  _buildTextField(_websiteController, 'Website', Icons.language),
+                  _buildTextField(_websiteController, l10n.reviewFieldWebsite, Icons.language),
                   const SizedBox(height: 16),
                   _buildTextField(
                     _addressController,
-                    'Address',
+                    l10n.reviewFieldAddress,
                     Icons.location_on,
                     maxLines: 3,
                   ),
                   const SizedBox(height: 16),
                   _buildTextField(
                     _taxIdController,
-                    'VAT / Tax ID',
+                    l10n.reviewFieldTaxId,
                     Icons.receipt_long,
                   ),
                   const SizedBox(height: 32),
