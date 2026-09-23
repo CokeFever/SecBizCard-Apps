@@ -850,4 +850,87 @@ class AppLocalizationsJa extends AppLocalizations {
   String editContactFieldRequired(String label) {
     return '$label は必須です';
   }
+
+  @override
+  String get contactDetailTitle => '連絡先の詳細';
+
+  @override
+  String contactDetailCopied(String label) {
+    return '$labelをクリップボードにコピーしました';
+  }
+
+  @override
+  String get contactDetailChooseGallery => 'ギャラリーから選択';
+
+  @override
+  String get contactDetailTakePhoto => '写真を撮る';
+
+  @override
+  String get contactDetailRemovePhoto => '写真を削除';
+
+  @override
+  String get contactDetailPhotoUpdated => '写真を更新しました';
+
+  @override
+  String get contactDetailCurrentAccount => '現在のアカウント';
+
+  @override
+  String get contactDetailExportTitle => 'Google 連絡先にエクスポート';
+
+  @override
+  String get contactDetailUseThisAccount => 'このアカウントを使用';
+
+  @override
+  String get contactDetailUseAnotherAccount => '別のアカウントを使用';
+
+  @override
+  String contactDetailExportFailed(String error) {
+    return 'エクスポートに失敗しました：$error';
+  }
+
+  @override
+  String get contactDetailExportSuccess => 'エクスポートに成功しました！';
+
+  @override
+  String contactDetailShareVcardFailed(String error) {
+    return 'vCard の共有に失敗しました：$error';
+  }
+
+  @override
+  String contactDetailShareZipFailed(String error) {
+    return '.zip の共有に失敗しました：$error';
+  }
+
+  @override
+  String get contactDetailMoreActions => 'その他の操作';
+
+  @override
+  String get contactDetailShareVcard => 'テキストのみ（vCard .vcf）';
+
+  @override
+  String get contactDetailShareZip => 'テキスト＋画像（.zip）';
+
+  @override
+  String get contactDetailSaveToGoogle => 'Google 連絡先に保存';
+
+  @override
+  String get contactDetailLabelEmail => 'メール';
+
+  @override
+  String get contactDetailLabelPhone => '電話';
+
+  @override
+  String get contactDetailLabelJobTitle => '役職';
+
+  @override
+  String get contactDetailLabelCompany => '会社';
+
+  @override
+  String get contactDetailLabelDepartment => '部署';
+
+  @override
+  String get contactDetailLabelAddress => '住所';
+
+  @override
+  String get contactDetailOcrResult => 'OCR 結果';
 }

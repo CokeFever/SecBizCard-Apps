@@ -840,6 +840,89 @@ class AppLocalizationsZh extends AppLocalizations {
   String editContactFieldRequired(String label) {
     return '$label 为必填';
   }
+
+  @override
+  String get contactDetailTitle => '联系人详情';
+
+  @override
+  String contactDetailCopied(String label) {
+    return '已复制$label到剪贴板';
+  }
+
+  @override
+  String get contactDetailChooseGallery => '从相册选择';
+
+  @override
+  String get contactDetailTakePhoto => '拍照';
+
+  @override
+  String get contactDetailRemovePhoto => '移除照片';
+
+  @override
+  String get contactDetailPhotoUpdated => '照片已更新';
+
+  @override
+  String get contactDetailCurrentAccount => '当前账号';
+
+  @override
+  String get contactDetailExportTitle => '导出到 Google 通讯录';
+
+  @override
+  String get contactDetailUseThisAccount => '使用此账号';
+
+  @override
+  String get contactDetailUseAnotherAccount => '或使用其他账号';
+
+  @override
+  String contactDetailExportFailed(String error) {
+    return '导出失败：$error';
+  }
+
+  @override
+  String get contactDetailExportSuccess => '导出成功！';
+
+  @override
+  String contactDetailShareVcardFailed(String error) {
+    return '分享 vCard 失败：$error';
+  }
+
+  @override
+  String contactDetailShareZipFailed(String error) {
+    return '分享 .zip 失败：$error';
+  }
+
+  @override
+  String get contactDetailMoreActions => '更多操作';
+
+  @override
+  String get contactDetailShareVcard => '仅文字（vCard .vcf）';
+
+  @override
+  String get contactDetailShareZip => '文字＋图片（.zip）';
+
+  @override
+  String get contactDetailSaveToGoogle => '保存到 Google 通讯录';
+
+  @override
+  String get contactDetailLabelEmail => '电子邮件';
+
+  @override
+  String get contactDetailLabelPhone => '电话';
+
+  @override
+  String get contactDetailLabelJobTitle => '职务';
+
+  @override
+  String get contactDetailLabelCompany => '公司';
+
+  @override
+  String get contactDetailLabelDepartment => '部门';
+
+  @override
+  String get contactDetailLabelAddress => '地址';
+
+  @override
+  String get contactDetailOcrResult => 'OCR 结果';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -1678,4 +1761,87 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String editContactFieldRequired(String label) {
     return '$label 為必填';
   }
+
+  @override
+  String get contactDetailTitle => '聯絡人詳情';
+
+  @override
+  String contactDetailCopied(String label) {
+    return '已複製$label到剪貼簿';
+  }
+
+  @override
+  String get contactDetailChooseGallery => '從相簿選擇';
+
+  @override
+  String get contactDetailTakePhoto => '拍照';
+
+  @override
+  String get contactDetailRemovePhoto => '移除相片';
+
+  @override
+  String get contactDetailPhotoUpdated => '相片已更新';
+
+  @override
+  String get contactDetailCurrentAccount => '目前帳號';
+
+  @override
+  String get contactDetailExportTitle => '匯出到 Google 通訊錄';
+
+  @override
+  String get contactDetailUseThisAccount => '使用此帳號';
+
+  @override
+  String get contactDetailUseAnotherAccount => '或使用其他帳號';
+
+  @override
+  String contactDetailExportFailed(String error) {
+    return '匯出失敗：$error';
+  }
+
+  @override
+  String get contactDetailExportSuccess => '匯出成功！';
+
+  @override
+  String contactDetailShareVcardFailed(String error) {
+    return '分享 vCard 失敗：$error';
+  }
+
+  @override
+  String contactDetailShareZipFailed(String error) {
+    return '分享 .zip 失敗：$error';
+  }
+
+  @override
+  String get contactDetailMoreActions => '更多操作';
+
+  @override
+  String get contactDetailShareVcard => '僅文字（vCard .vcf）';
+
+  @override
+  String get contactDetailShareZip => '文字＋圖片（.zip）';
+
+  @override
+  String get contactDetailSaveToGoogle => '儲存到 Google 通訊錄';
+
+  @override
+  String get contactDetailLabelEmail => '電子郵件';
+
+  @override
+  String get contactDetailLabelPhone => '電話';
+
+  @override
+  String get contactDetailLabelJobTitle => '職稱';
+
+  @override
+  String get contactDetailLabelCompany => '公司';
+
+  @override
+  String get contactDetailLabelDepartment => '部門';
+
+  @override
+  String get contactDetailLabelAddress => '地址';
+
+  @override
+  String get contactDetailOcrResult => 'OCR 結果';
 }

@@ -18,6 +18,7 @@ import 'package:secbizcard/features/storage/data/drive_repository.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:secbizcard/core/utils/image_picker_service.dart';
+import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 class ContactDetailScreen extends ConsumerStatefulWidget {
   final UserProfile user;
@@ -82,9 +83,9 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
 
   void _copyToClipboard(String text, String label) {
     Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('$label copied to clipboard')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AppLocalizations.of(context)!.contactDetailCopied(label))),
+    );
   }
 
   void _editContact() async {
@@ -102,6 +103,7 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
 
   /// Bottom sheet: choose a source (gallery / camera) or remove the photo.
   void _showPhotoOptions() {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet<void>(
       context: context,
       builder: (sheetContext) => SafeArea(
@@ -110,7 +112,7 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Choose from Gallery'),
+              title: Text(l10n.contactDetailChooseGallery),
               onTap: () {
                 Navigator.pop(sheetContext);
                 _pickPhoto(ImageSource.gallery);
@@ -118,7 +120,7 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.camera_alt_outlined),
-              title: const Text('Take Photo'),
+              title: Text(l10n.contactDetailTakePhoto),
               onTap: () {
                 Navigator.pop(sheetContext);
                 _pickPhoto(ImageSource.camera);
@@ -128,7 +130,7 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
               ListTile(
                 leading: Icon(Icons.delete_outline, color: Colors.red[400]),
                 title: Text(
-                  'Remove Photo',
+                  l10n.contactDetailRemovePhoto,
                   style: TextStyle(color: Colors.red[400]),
                 ),
                 onTap: () {
@@ -165,13 +167,16 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
       sourcePath: imageFile.path,
       uiSettings: [
         AndroidUiSettings(
-          toolbarTitle: 'Edit Photo',
+          toolbarTitle: AppLocalizations.of(context)!.editProfileEditPhoto,
           toolbarColor: Theme.of(context).primaryColor,
           toolbarWidgetColor: Colors.white,
           initAspectRatio: CropAspectRatioPreset.square,
           lockAspectRatio: true,
         ),
-        IOSUiSettings(title: 'Edit Photo', aspectRatioLockEnabled: true),
+        IOSUiSettings(
+          title: AppLocalizations.of(context)!.editProfileEditPhoto,
+          aspectRatioLockEnabled: true,
+        ),
       ],
       aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
     );
@@ -200,8 +205,11 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
     result.fold(
       (failure) {
         setState(() => _isSavingPhoto = false);
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Error: ${failure.message}')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.commonErrorWithDetail(failure.message)),
+          ),
+        );
       },
       (_) {
         // saveContactLocally persists the image into the app dir and may have
@@ -212,21 +220,23 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
           _isSavingPhoto = false;
         });
         ref.invalidate(savedContactsProvider);
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Photo updated')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.contactDetailPhotoUpdated)),
+        );
       },
     );
   }
 
   void _exportToGoogle() async {
+    final l10n = AppLocalizations.of(context)!;
     final currentUser = ref.read(authStateProvider).valueOrNull;
-    final String currentEmail = currentUser?.email ?? 'current account';
+    final String currentEmail = currentUser?.email ?? l10n.contactDetailCurrentAccount;
 
     // 1. Show choice dialog
     final choice = await showDialog<String>(
       context: context,
       builder: (context) => SimpleDialog(
-        title: const Text('Export to Google Contacts'),
+        title: Text(l10n.contactDetailExportTitle),
         contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
         children: [
           SimpleDialogOption(
@@ -244,9 +254,9 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
                         currentEmail,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      const Text(
-                        'Use this account',
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      Text(
+                        l10n.contactDetailUseThisAccount,
+                        style: const TextStyle(color: Colors.grey, fontSize: 12),
                       ),
                     ],
                   ),
@@ -258,11 +268,11 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
           SimpleDialogOption(
             onPressed: () => Navigator.pop(context, 'switch'),
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.switch_account_outlined, color: Colors.grey),
-                SizedBox(width: 12),
-                Text('Or use another account'),
+                const Icon(Icons.switch_account_outlined, color: Colors.grey),
+                const SizedBox(width: 12),
+                Text(l10n.contactDetailUseAnotherAccount),
               ],
             ),
           ),
@@ -272,7 +282,7 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
               alignment: Alignment.centerRight,
               child: TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
+                child: Text(l10n.commonCancel),
               ),
             ),
           ),
@@ -295,12 +305,14 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
     setState(() => _isExporting = false);
 
     result.fold(
-      (l) => ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Export Failed: ${l.message}'))),
-      (r) => ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Exported successfully!'))),
+      (l) => ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.contactDetailExportFailed(l.message)),
+        ),
+      ),
+      (r) => ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.contactDetailExportSuccess)),
+      ),
     );
   }
 
@@ -311,9 +323,11 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
       await ref.read(contactExportServiceProvider).shareAsVCard([_user]);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to share vCard: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.contactDetailShareVcardFailed('$e')),
+          ),
+        );
       }
     }
   }
@@ -323,31 +337,34 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
       await ref.read(contactExportServiceProvider).shareAsZip([_user]);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to share .zip: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.contactDetailShareZipFailed('$e')),
+          ),
+        );
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final nickname = _user.customFields['Nickname'];
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Contact Details'),
+        title: Text(l10n.contactDetailTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: _editContact,
-            tooltip: 'Edit Contact',
+            tooltip: l10n.editContactTitle,
           ),
           // Export / Share collapsed into an overflow menu so the same action
           // names/icons are used here and in the list's multi-select mode
           // (consistency), and the screen body is freed up for card content.
           PopupMenuButton<String>(
-            tooltip: 'More actions',
+            tooltip: l10n.contactDetailMoreActions,
             onSelected: (value) {
               switch (value) {
                 case 'google':
@@ -362,34 +379,34 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'vcard',
                 child: Row(
                   children: [
-                    Icon(Icons.description_outlined, size: 20),
-                    SizedBox(width: 12),
-                    Text('Text only (vCard .vcf)'),
+                    const Icon(Icons.description_outlined, size: 20),
+                    const SizedBox(width: 12),
+                    Text(l10n.contactDetailShareVcard),
                   ],
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'zip',
                 child: Row(
                   children: [
-                    Icon(Icons.folder_zip_outlined, size: 20),
-                    SizedBox(width: 12),
-                    Text('Text + images (.zip)'),
+                    const Icon(Icons.folder_zip_outlined, size: 20),
+                    const SizedBox(width: 12),
+                    Text(l10n.contactDetailShareZip),
                   ],
                 ),
               ),
               PopupMenuItem(
                 value: 'google',
                 enabled: !_isExporting,
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.import_export, size: 20),
-                    SizedBox(width: 12),
-                    Text('Save to Google Contacts'),
+                    const Icon(Icons.import_export, size: 20),
+                    const SizedBox(width: 12),
+                    Text(l10n.contactDetailSaveToGoogle),
                   ],
                 ),
               ),
@@ -495,52 +512,58 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
             if (_user.email != null && _user.email!.isNotEmpty)
               _buildContactTile(
                 icon: Icons.email_outlined,
-                label: 'Email',
+                label: l10n.contactDetailLabelEmail,
                 value: _user.email!,
                 onTap: () => _launchEmail(_user.email!),
-                onLongPress: () => _copyToClipboard(_user.email!, 'Email'),
+                onLongPress: () =>
+                    _copyToClipboard(_user.email!, l10n.contactDetailLabelEmail),
               ),
 
             if (_user.phone != null && _user.phone!.isNotEmpty)
               _buildContactTile(
                 icon: Icons.phone_outlined,
-                label: 'Phone',
+                label: l10n.contactDetailLabelPhone,
                 value: _user.phone!,
                 onTap: () => _launchPhone(_user.phone!),
-                onLongPress: () => _copyToClipboard(_user.phone!, 'Phone'),
+                onLongPress: () =>
+                    _copyToClipboard(_user.phone!, l10n.contactDetailLabelPhone),
               ),
 
             if (_user.title != null && _user.title!.isNotEmpty)
               _buildContactTile(
                 icon: Icons.work_outline,
-                label: 'Job Title',
+                label: l10n.contactDetailLabelJobTitle,
                 value: _user.title!,
-                onLongPress: () => _copyToClipboard(_user.title!, 'Job Title'),
+                onLongPress: () =>
+                    _copyToClipboard(_user.title!, l10n.contactDetailLabelJobTitle),
               ),
 
             if (_user.company != null && _user.company!.isNotEmpty)
               _buildContactTile(
                 icon: Icons.business_outlined,
-                label: 'Company',
+                label: l10n.contactDetailLabelCompany,
                 value: _user.company!,
-                onLongPress: () => _copyToClipboard(_user.company!, 'Company'),
+                onLongPress: () =>
+                    _copyToClipboard(_user.company!, l10n.contactDetailLabelCompany),
               ),
 
             if (_user.department != null && _user.department!.isNotEmpty)
               _buildContactTile(
                 icon: Icons.business_outlined,
-                label: 'Department',
+                label: l10n.contactDetailLabelDepartment,
                 value: _user.department!,
-                onLongPress: () => _copyToClipboard(_user.department!, 'Department'),
+                onLongPress: () =>
+                    _copyToClipboard(_user.department!, l10n.contactDetailLabelDepartment),
               ),
 
             if (_user.address != null && _user.address!.isNotEmpty)
               _buildContactTile(
                 icon: Icons.location_on_outlined,
-                label: 'Address',
+                label: l10n.contactDetailLabelAddress,
                 value: _user.address!,
                 onTap: () => _launchMap(_user.address!),
-                onLongPress: () => _copyToClipboard(_user.address!, 'Address'),
+                onLongPress: () =>
+                    _copyToClipboard(_user.address!, l10n.contactDetailLabelAddress),
               ),
 
             if (_user.customFields.isNotEmpty) ...[
@@ -650,8 +673,9 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
       }
     }
 
-    addImage(_user.cardFrontPath, _user.cardFrontDriveFileId, 'Front Side');
-    addImage(_user.cardBackPath, _user.cardBackDriveFileId, 'Back Side');
+    final l10n = AppLocalizations.of(context)!;
+    addImage(_user.cardFrontPath, _user.cardFrontDriveFileId, l10n.editProfileFrontSide);
+    addImage(_user.cardBackPath, _user.cardBackDriveFileId, l10n.editProfileBackSide);
 
     // Fallback for OCR-only contacts (no explicit front/back yet). The
     // flattened OCR image is front-class, so when it exists we show ONLY it
@@ -668,9 +692,9 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
         }
         return false;
       }
-      final shownFlat = addFallback(_user.flatImagePath, 'OCR Result');
+      final shownFlat = addFallback(_user.flatImagePath, l10n.contactDetailOcrResult);
       if (!shownFlat) {
-        addFallback(_user.originalImagePath, 'Original Scan');
+        addFallback(_user.originalImagePath, l10n.editContactOriginalScan);
       }
     }
 
@@ -682,7 +706,7 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
         const Divider(),
         const SizedBox(height: 16),
         Text(
-          'Business Cards',
+          l10n.editProfileBusinessCards,
           style: GoogleFonts.outfit(
             fontSize: 18,
             fontWeight: FontWeight.bold,
