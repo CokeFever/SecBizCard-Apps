@@ -808,6 +808,38 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get scannerGrantPermission => '授予权限';
+
+  @override
+  String get editContactTitle => '编辑联系人';
+
+  @override
+  String get editContactUpdated => '联系人已更新';
+
+  @override
+  String get editContactBasicInfo => '基本信息';
+
+  @override
+  String get editContactDisplayName => '显示名称';
+
+  @override
+  String get editContactNickname => '昵称（仅您可见）';
+
+  @override
+  String get editContactJobInfo => '工作信息';
+
+  @override
+  String get editContactContact => '联系方式';
+
+  @override
+  String get editContactEmail => '电子邮件';
+
+  @override
+  String get editContactOriginalScan => '原始扫描';
+
+  @override
+  String editContactFieldRequired(String label) {
+    return '$label 为必填';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -1614,4 +1646,36 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get scannerGrantPermission => '授予權限';
+
+  @override
+  String get editContactTitle => '編輯聯絡人';
+
+  @override
+  String get editContactUpdated => '聯絡人已更新';
+
+  @override
+  String get editContactBasicInfo => '基本資訊';
+
+  @override
+  String get editContactDisplayName => '顯示名稱';
+
+  @override
+  String get editContactNickname => '暱稱（僅您可見）';
+
+  @override
+  String get editContactJobInfo => '工作資訊';
+
+  @override
+  String get editContactContact => '聯絡方式';
+
+  @override
+  String get editContactEmail => '電子郵件';
+
+  @override
+  String get editContactOriginalScan => '原始掃描';
+
+  @override
+  String editContactFieldRequired(String label) {
+    return '$label 為必填';
+  }
 }

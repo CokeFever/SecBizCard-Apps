@@ -1602,6 +1602,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Grant Permission'**
   String get scannerGrantPermission;
+
+  /// No description provided for @editContactTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Contact'**
+  String get editContactTitle;
+
+  /// No description provided for @editContactUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact updated'**
+  String get editContactUpdated;
+
+  /// No description provided for @editContactBasicInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic Info'**
+  String get editContactBasicInfo;
+
+  /// No description provided for @editContactDisplayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Display Name'**
+  String get editContactDisplayName;
+
+  /// No description provided for @editContactNickname.
+  ///
+  /// In en, this message translates to:
+  /// **'Nickname (Only visible to you)'**
+  String get editContactNickname;
+
+  /// No description provided for @editContactJobInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Job Info'**
+  String get editContactJobInfo;
+
+  /// Section header for phone/email fields
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get editContactContact;
+
+  /// No description provided for @editContactEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get editContactEmail;
+
+  /// No description provided for @editContactOriginalScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Original Scan'**
+  String get editContactOriginalScan;
+
+  /// No description provided for @editContactFieldRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} is required'**
+  String editContactFieldRequired(String label);
 }
 
 class _AppLocalizationsDelegate

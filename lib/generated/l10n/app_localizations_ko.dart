@@ -819,4 +819,36 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get scannerGrantPermission => '권한 허용';
+
+  @override
+  String get editContactTitle => '연락처 편집';
+
+  @override
+  String get editContactUpdated => '연락처가 업데이트되었습니다';
+
+  @override
+  String get editContactBasicInfo => '기본 정보';
+
+  @override
+  String get editContactDisplayName => '표시 이름';
+
+  @override
+  String get editContactNickname => '별명 (나만 볼 수 있음)';
+
+  @override
+  String get editContactJobInfo => '직무 정보';
+
+  @override
+  String get editContactContact => '연락처';
+
+  @override
+  String get editContactEmail => '이메일';
+
+  @override
+  String get editContactOriginalScan => '원본 스캔';
+
+  @override
+  String editContactFieldRequired(String label) {
+    return '$label은(는) 필수입니다';
+  }
 }

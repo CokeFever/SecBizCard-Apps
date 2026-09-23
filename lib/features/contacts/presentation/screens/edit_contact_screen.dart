@@ -13,6 +13,7 @@ import 'package:secbizcard/core/presentation/widgets/full_screen_image_viewer.da
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:secbizcard/features/storage/data/drive_repository.dart';
+import 'package:secbizcard/generated/l10n/app_localizations.dart';
 import 'dart:io';
 
 class EditContactScreen extends ConsumerStatefulWidget {
@@ -238,15 +239,17 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
       result.fold(
         (l) {
           setState(() => _isSaving = false);
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Error: ${l.message}')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.commonErrorWithDetail(l.message)),
+            ),
+          );
         },
         (r) {
           ref.invalidate(savedContactsProvider);
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Contact updated')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppLocalizations.of(context)!.editContactUpdated)),
+          );
           context.pop(updatedProfile);
         },
       );
@@ -255,6 +258,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final hasChanges = _hasChanges;
 
     return PopScope(
@@ -268,7 +272,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Edit Contact'),
+          title: Text(l10n.editContactTitle),
           actions: [
             IconButton(
               icon: _isSaving
@@ -292,7 +296,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Basic Info',
+                l10n.editContactBasicInfo,
                 style: GoogleFonts.inter(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -301,20 +305,20 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
               const SizedBox(height: 16),
               _buildTextField(
                 _nameController,
-                'Display Name',
+                l10n.editContactDisplayName,
                 Icons.person,
                 required: true,
               ),
               const SizedBox(height: 16),
               _buildTextField(
                 _nicknameController,
-                'Nickname (Only visible to you)',
+                l10n.editContactNickname,
                 Icons.label_outline,
               ),
               const SizedBox(height: 24),
 
               Text(
-                'Job Info',
+                l10n.editContactJobInfo,
                 style: GoogleFonts.inter(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -323,15 +327,15 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
               const SizedBox(height: 16),
               _buildTextField(
                 _titleController,
-                'Job Title',
+                l10n.editProfileJobTitle,
                 Icons.work_outline,
               ),
               const SizedBox(height: 16),
-              _buildTextField(_companyController, 'Company', Icons.business),
+              _buildTextField(_companyController, l10n.editProfileCompany, Icons.business),
               const SizedBox(height: 24),
 
               Text(
-                'Contact',
+                l10n.editContactContact,
                 style: GoogleFonts.inter(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -340,14 +344,14 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
               const SizedBox(height: 16),
               _buildTextField(
                 _phoneController,
-                'Phone',
+                l10n.editProfilePhone,
                 Icons.phone,
                 keyboardType: TextInputType.phone,
               ),
               const SizedBox(height: 16),
               _buildTextField(
                 _emailController,
-                'Email',
+                l10n.editContactEmail,
                 Icons.email,
                 keyboardType: TextInputType.emailAddress,
                 required: false,
@@ -356,7 +360,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
 
               if (_customFieldControllers.isNotEmpty) ...[
                 Text(
-                  'Additional Info',
+                  l10n.editProfileAdditionalInfo,
                   style: GoogleFonts.inter(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -397,7 +401,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
               OutlinedButton.icon(
                 onPressed: _addCustomField,
                 icon: const Icon(Icons.add),
-                label: const Text('Add Field'),
+                label: Text(l10n.editProfileAddField),
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 48),
                   side: BorderSide(color: theme.dividerColor),
@@ -435,7 +439,9 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
       ),
       keyboardType: keyboardType,
       validator: required
-          ? (v) => v == null || v.trim().isEmpty ? '$label is required' : null
+          ? (v) => v == null || v.trim().isEmpty
+              ? AppLocalizations.of(context)!.editContactFieldRequired(label)
+              : null
           : null,
     );
   }
@@ -470,7 +476,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
         const Divider(),
         const SizedBox(height: 16),
         Text(
-          'Business Cards',
+          AppLocalizations.of(context)!.editProfileBusinessCards,
           style: GoogleFonts.inter(
             fontWeight: FontWeight.w600,
             color: theme.hintColor,
@@ -481,7 +487,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
           children: [
             Expanded(
               child: _buildCardPicker(
-                label: 'Front Side',
+                label: AppLocalizations.of(context)!.editProfileFrontSide,
                 imageFile: _cardFrontImage,
                 remotePath: widget.user.cardFrontPath ?? widget.user.flatImagePath,
                 driveFileId: widget.user.cardFrontDriveFileId,
@@ -496,7 +502,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
             const SizedBox(width: 16),
             Expanded(
               child: _buildCardPicker(
-                label: 'Back Side',
+                label: AppLocalizations.of(context)!.editProfileBackSide,
                 imageFile: _cardBackImage,
                 remotePath: widget.user.cardBackPath,
                 driveFileId: widget.user.cardBackDriveFileId,
@@ -587,7 +593,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Original Scan',
+          AppLocalizations.of(context)!.editContactOriginalScan,
           style: TextStyle(color: theme.hintColor, fontSize: 12),
         ),
       ],
@@ -685,7 +691,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Upload $label',
+                          AppLocalizations.of(context)!.editProfileUpload(label),
                           style: TextStyle(
                             color: theme.colorScheme.primary.withValues(alpha: 0.6),
                             fontSize: 12,
@@ -786,14 +792,15 @@ class _AddFieldDialogState extends State<_AddFieldDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('Add Field'),
+      title: Text(l10n.editProfileAddField),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           DropdownButtonFormField<String>(
             initialValue: _selectedCategory,
-            decoration: const InputDecoration(labelText: 'Type'),
+            decoration: InputDecoration(labelText: l10n.editProfileFieldTypeLabel),
             items: widget.fieldTypes.keys.map((type) {
               return DropdownMenuItem(value: type, child: Text(type));
             }).toList(),
@@ -807,7 +814,7 @@ class _AddFieldDialogState extends State<_AddFieldDialog> {
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
             initialValue: _selectedLabel,
-            decoration: const InputDecoration(labelText: 'Label'),
+            decoration: InputDecoration(labelText: l10n.editProfileFieldLabelLabel),
             items: widget.fieldTypes[_selectedCategory]!.map((label) {
               return DropdownMenuItem(value: label, child: Text(label));
             }).toList(),
@@ -822,7 +829,7 @@ class _AddFieldDialogState extends State<_AddFieldDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n.commonCancel),
         ),
         FilledButton(
           onPressed: () {
@@ -831,7 +838,7 @@ class _AddFieldDialogState extends State<_AddFieldDialog> {
               'label': _selectedLabel!,
             });
           },
-          child: const Text('Add'),
+          child: Text(l10n.editProfileAdd),
         ),
       ],
     );

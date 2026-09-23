@@ -818,4 +818,36 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get scannerGrantPermission => '許可する';
+
+  @override
+  String get editContactTitle => '連絡先を編集';
+
+  @override
+  String get editContactUpdated => '連絡先を更新しました';
+
+  @override
+  String get editContactBasicInfo => '基本情報';
+
+  @override
+  String get editContactDisplayName => '表示名';
+
+  @override
+  String get editContactNickname => 'ニックネーム（自分のみ表示）';
+
+  @override
+  String get editContactJobInfo => '職務情報';
+
+  @override
+  String get editContactContact => '連絡先';
+
+  @override
+  String get editContactEmail => 'メール';
+
+  @override
+  String get editContactOriginalScan => '元のスキャン';
+
+  @override
+  String editContactFieldRequired(String label) {
+    return '$label は必須です';
+  }
 }

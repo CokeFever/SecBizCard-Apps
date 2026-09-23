@@ -249,5 +249,15 @@
   "scannerPermissionTitle": "需要相机权限",
   "scannerPermissionBody": "此功能需要相机访问权限，以扫描 QR code 进行安全交换。",
   "scannerOpenSettings": "打开设置",
-  "scannerGrantPermission": "授予权限"
+  "scannerGrantPermission": "授予权限",
+  "editContactTitle": "编辑联系人",
+  "editContactUpdated": "联系人已更新",
+  "editContactBasicInfo": "基本信息",
+  "editContactDisplayName": "显示名称",
+  "editContactNickname": "昵称（仅您可见）",
+  "editContactJobInfo": "工作信息",
+  "editContactContact": "联系方式",
+  "editContactEmail": "电子邮件",
+  "editContactOriginalScan": "原始扫描",
+  "editContactFieldRequired": "{label} 为必填"
 }
