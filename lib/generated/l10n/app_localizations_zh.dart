@@ -1166,6 +1166,97 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get historyStatusExpired => '已过期';
+
+  @override
+  String get verifyEmailTitle => '验证电子邮件';
+
+  @override
+  String emailVerifyCustomSent(String email) {
+    return '验证邮件已发送至 $email！点击链接以更新您的登录电子邮件。';
+  }
+
+  @override
+  String get emailVerifySent => '验证邮件已发送！请查看您的收件箱。';
+
+  @override
+  String get emailNotVerifiedYet => '电子邮件尚未验证。请查看收件箱并点击验证链接。';
+
+  @override
+  String get emailCheckYourEmail => '查看您的电子邮件';
+
+  @override
+  String get emailVerifyYourEmail => '验证您的电子邮件';
+
+  @override
+  String get emailSentBody => '我们已发送验证链接到您的电子邮件。点击链接以验证您的电子邮件地址。';
+
+  @override
+  String get emailWillSendBody => '我们将给您发送一个验证链接，以确认您的电子邮件地址。';
+
+  @override
+  String get emailSendButton => '发送验证邮件';
+
+  @override
+  String get emailIveVerified => '我已验证';
+
+  @override
+  String get emailResend => '重新发送邮件';
+
+  @override
+  String get emailTips => '提示';
+
+  @override
+  String get emailTipsBody =>
+      '• 若没看到邮件，请检查垃圾邮件夹\n• 验证链接将于 1 小时后失效\n• 需要时可重新发送邮件';
+
+  @override
+  String get verifyPhoneTitle => '验证电话号码';
+
+  @override
+  String get phoneSmsTimeout => 'SMS 请求超时。此号码可能已被使用、无效，或被服务器屏蔽。';
+
+  @override
+  String get phoneEnter6Digit => '请输入 6 位数验证码';
+
+  @override
+  String get phoneVerifiedAuto => '电话已自动验证！';
+
+  @override
+  String get phoneEnterNumber => '输入您的电话号码';
+
+  @override
+  String get phoneWillSendSms => '我们将通过短信发送验证码给您';
+
+  @override
+  String get phoneNumberLabel => '电话号码';
+
+  @override
+  String get phoneSendCode => '发送验证码';
+
+  @override
+  String get phoneEnterCode => '输入验证码';
+
+  @override
+  String phoneSentCodeTo(String phone) {
+    return '我们已将 6 位数验证码发送至 $phone';
+  }
+
+  @override
+  String get phoneVerify => '验证';
+
+  @override
+  String get phoneDidntReceive => '没有收到验证码？ ';
+
+  @override
+  String phoneResendIn(int seconds) {
+    return '$seconds 秒后可重新发送';
+  }
+
+  @override
+  String get phoneResendCode => '重新发送验证码';
+
+  @override
+  String get phoneChangeNumber => '更改电话号码';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -2330,4 +2421,95 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get historyStatusExpired => '已過期';
+
+  @override
+  String get verifyEmailTitle => '驗證電子郵件';
+
+  @override
+  String emailVerifyCustomSent(String email) {
+    return '驗證郵件已寄至 $email！點擊連結以更新您的登入電子郵件。';
+  }
+
+  @override
+  String get emailVerifySent => '驗證郵件已寄出！請查看您的收件匣。';
+
+  @override
+  String get emailNotVerifiedYet => '電子郵件尚未驗證。請查看收件匣並點擊驗證連結。';
+
+  @override
+  String get emailCheckYourEmail => '查看您的電子郵件';
+
+  @override
+  String get emailVerifyYourEmail => '驗證您的電子郵件';
+
+  @override
+  String get emailSentBody => '我們已寄出驗證連結到您的電子郵件。點擊連結以驗證您的電子郵件地址。';
+
+  @override
+  String get emailWillSendBody => '我們將寄給您一個驗證連結，以確認您的電子郵件地址。';
+
+  @override
+  String get emailSendButton => '寄送驗證郵件';
+
+  @override
+  String get emailIveVerified => '我已驗證';
+
+  @override
+  String get emailResend => '重新寄送郵件';
+
+  @override
+  String get emailTips => '提示';
+
+  @override
+  String get emailTipsBody =>
+      '• 若沒看到郵件，請檢查垃圾郵件夾\n• 驗證連結將於 1 小時後失效\n• 需要時可重新寄送郵件';
+
+  @override
+  String get verifyPhoneTitle => '驗證電話號碼';
+
+  @override
+  String get phoneSmsTimeout => 'SMS 請求逾時。此號碼可能已被使用、無效，或被伺服器封鎖。';
+
+  @override
+  String get phoneEnter6Digit => '請輸入 6 位數驗證碼';
+
+  @override
+  String get phoneVerifiedAuto => '電話已自動驗證！';
+
+  @override
+  String get phoneEnterNumber => '輸入您的電話號碼';
+
+  @override
+  String get phoneWillSendSms => '我們將透過簡訊寄送驗證碼給您';
+
+  @override
+  String get phoneNumberLabel => '電話號碼';
+
+  @override
+  String get phoneSendCode => '寄送驗證碼';
+
+  @override
+  String get phoneEnterCode => '輸入驗證碼';
+
+  @override
+  String phoneSentCodeTo(String phone) {
+    return '我們已將 6 位數驗證碼寄至 $phone';
+  }
+
+  @override
+  String get phoneVerify => '驗證';
+
+  @override
+  String get phoneDidntReceive => '沒有收到驗證碼？ ';
+
+  @override
+  String phoneResendIn(int seconds) {
+    return '$seconds 秒後可重新寄送';
+  }
+
+  @override
+  String get phoneResendCode => '重新寄送驗證碼';
+
+  @override
+  String get phoneChangeNumber => '更改電話號碼';
 }

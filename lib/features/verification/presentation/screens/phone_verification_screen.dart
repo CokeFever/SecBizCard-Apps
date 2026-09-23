@@ -8,6 +8,7 @@ import 'package:intl_phone_field/countries.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/profile/data/profile_repository.dart';
 import 'package:secbizcard/features/verification/data/phone_verification_repository.dart';
+import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 class PhoneVerificationScreen extends ConsumerStatefulWidget {
   final String? initialPhoneNumber;
@@ -112,6 +113,7 @@ class _PhoneVerificationScreenState
   Future<void> _sendVerificationCode() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -123,8 +125,7 @@ class _PhoneVerificationScreenState
       if (mounted && _isLoading && !_codeSent) {
         setState(() {
           _isLoading = false;
-          _errorMessage =
-              'SMS request timed out. The number might be already used, invalid, or blocked by the server.';
+          _errorMessage = l10n.phoneSmsTimeout;
         });
       }
     });
@@ -180,10 +181,10 @@ class _PhoneVerificationScreenState
           if (mounted) {
             // Show success message briefly before closing
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Phone verified automatically!'),
+              SnackBar(
+                content: Text(l10n.phoneVerifiedAuto),
                 backgroundColor: Colors.green,
-                duration: Duration(seconds: 2),
+                duration: const Duration(seconds: 2),
               ),
             );
             // Invalidate profile provider to refresh profile screen
@@ -218,7 +219,7 @@ class _PhoneVerificationScreenState
   Future<void> _verifyCode() async {
     if (_otpController.text.length != 6) {
       setState(() {
-        _errorMessage = 'Please enter 6-digit code';
+        _errorMessage = AppLocalizations.of(context)!.phoneEnter6Digit;
       });
       return;
     }
@@ -263,10 +264,11 @@ class _PhoneVerificationScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Verify Phone Number',
+          l10n.verifyPhoneTitle,
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
         ),
       ),
@@ -279,7 +281,7 @@ class _PhoneVerificationScreenState
             children: [
               if (!_codeSent) ...[
                 Text(
-                  'Enter your phone number',
+                  l10n.phoneEnterNumber,
                   style: GoogleFonts.outfit(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -287,7 +289,7 @@ class _PhoneVerificationScreenState
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'We\'ll send you a verification code via SMS',
+                  l10n.phoneWillSendSms,
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     color: Colors.grey[600],
@@ -297,7 +299,7 @@ class _PhoneVerificationScreenState
                 IntlPhoneField(
                   controller: _phoneController,
                   decoration: InputDecoration(
-                    labelText: 'Phone Number',
+                    labelText: l10n.phoneNumberLabel,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -348,7 +350,7 @@ class _PhoneVerificationScreenState
                           ),
                         )
                       : Text(
-                          'Send Code',
+                          l10n.phoneSendCode,
                           style: GoogleFonts.inter(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -357,7 +359,7 @@ class _PhoneVerificationScreenState
                 ),
               ] else ...[
                 Text(
-                  'Enter verification code',
+                  l10n.phoneEnterCode,
                   style: GoogleFonts.outfit(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -365,7 +367,7 @@ class _PhoneVerificationScreenState
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'We sent a 6-digit code to $_completePhoneNumber',
+                  l10n.phoneSentCodeTo(_completePhoneNumber),
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     color: Colors.grey[600],
@@ -438,7 +440,7 @@ class _PhoneVerificationScreenState
                           ),
                         )
                       : Text(
-                          'Verify',
+                          l10n.phoneVerify,
                           style: GoogleFonts.inter(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -450,7 +452,7 @@ class _PhoneVerificationScreenState
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Didn't receive the code? ",
+                      l10n.phoneDidntReceive,
                       style: GoogleFonts.inter(fontSize: 14),
                     ),
                     TextButton(
@@ -460,8 +462,8 @@ class _PhoneVerificationScreenState
                               : _sendVerificationCode,
                       child: Text(
                         _resendCountdown > 0
-                            ? 'Resend in ${_resendCountdown}s'
-                            : 'Resend Code',
+                            ? l10n.phoneResendIn(_resendCountdown)
+                            : l10n.phoneResendCode,
                         style: GoogleFonts.inter(fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -479,7 +481,7 @@ class _PhoneVerificationScreenState
                     });
                   },
                   child: Text(
-                    'Change phone number',
+                    l10n.phoneChangeNumber,
                     style: GoogleFonts.inter(),
                   ),
                 ),

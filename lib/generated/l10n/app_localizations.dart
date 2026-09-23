@@ -2256,6 +2256,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Expired'**
   String get historyStatusExpired;
+
+  /// No description provided for @verifyEmailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Email'**
+  String get verifyEmailTitle;
+
+  /// No description provided for @emailVerifyCustomSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification email sent to {email}! Click the link to update your login email.'**
+  String emailVerifyCustomSent(String email);
+
+  /// No description provided for @emailVerifySent.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification email sent! Please check your inbox.'**
+  String get emailVerifySent;
+
+  /// No description provided for @emailNotVerifiedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Email not verified yet. Please check your inbox and click the verification link.'**
+  String get emailNotVerifiedYet;
+
+  /// No description provided for @emailCheckYourEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your email'**
+  String get emailCheckYourEmail;
+
+  /// No description provided for @emailVerifyYourEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your email'**
+  String get emailVerifyYourEmail;
+
+  /// No description provided for @emailSentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a verification link to your email. Click the link to verify your email address.'**
+  String get emailSentBody;
+
+  /// No description provided for @emailWillSendBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll send you a verification link to confirm your email address.'**
+  String get emailWillSendBody;
+
+  /// No description provided for @emailSendButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Verification Email'**
+  String get emailSendButton;
+
+  /// No description provided for @emailIveVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ve Verified'**
+  String get emailIveVerified;
+
+  /// No description provided for @emailResend.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend Email'**
+  String get emailResend;
+
+  /// No description provided for @emailTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips'**
+  String get emailTips;
+
+  /// No description provided for @emailTipsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'• Check your spam folder if you don\'t see the email\n• The verification link expires after 1 hour\n• You can resend the email if needed'**
+  String get emailTipsBody;
+
+  /// No description provided for @verifyPhoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Phone Number'**
+  String get verifyPhoneTitle;
+
+  /// No description provided for @phoneSmsTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'SMS request timed out. The number might be already used, invalid, or blocked by the server.'**
+  String get phoneSmsTimeout;
+
+  /// No description provided for @phoneEnter6Digit.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter 6-digit code'**
+  String get phoneEnter6Digit;
+
+  /// No description provided for @phoneVerifiedAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone verified automatically!'**
+  String get phoneVerifiedAuto;
+
+  /// No description provided for @phoneEnterNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your phone number'**
+  String get phoneEnterNumber;
+
+  /// No description provided for @phoneWillSendSms.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll send you a verification code via SMS'**
+  String get phoneWillSendSms;
+
+  /// No description provided for @phoneNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone Number'**
+  String get phoneNumberLabel;
+
+  /// No description provided for @phoneSendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Code'**
+  String get phoneSendCode;
+
+  /// No description provided for @phoneEnterCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter verification code'**
+  String get phoneEnterCode;
+
+  /// No description provided for @phoneSentCodeTo.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a 6-digit code to {phone}'**
+  String phoneSentCodeTo(String phone);
+
+  /// No description provided for @phoneVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get phoneVerify;
+
+  /// No description provided for @phoneDidntReceive.
+  ///
+  /// In en, this message translates to:
+  /// **'Didn\'t receive the code? '**
+  String get phoneDidntReceive;
+
+  /// No description provided for @phoneResendIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend in {seconds}s'**
+  String phoneResendIn(int seconds);
+
+  /// No description provided for @phoneResendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend Code'**
+  String get phoneResendCode;
+
+  /// No description provided for @phoneChangeNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Change phone number'**
+  String get phoneChangeNumber;
 }
 
 class _AppLocalizationsDelegate
