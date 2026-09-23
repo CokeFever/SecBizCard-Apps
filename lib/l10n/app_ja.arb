@@ -293,5 +293,17 @@
   "contactDetailLabelCompany": "会社",
   "contactDetailLabelDepartment": "部署",
   "contactDetailLabelAddress": "住所",
-  "contactDetailOcrResult": "OCR 結果"
+  "contactDetailOcrResult": "OCR 結果",
+  "scanCapturing": "撮影中…",
+  "scanDetectingEdges": "名刺の端を検出中…",
+  "scanRecognizeFailed": "名刺の文字を認識できませんでした",
+  "scanNoteOwnKeyNearLimit": "Cloud Vision キーが月間無料上限（80%）に近づいています。",
+  "scanNoteSharedNearLimit": "今月の共有認識クォータが残りわずかです。",
+  "scanNoteUsedOnDevice": "デバイス上の認識を使用しました。設定で Cloud Vision キーを追加すると最良の結果が得られます。",
+  "scanToggleHorizontal": "横向き",
+  "scanToggleVertical": "縦向き",
+  "scanCameraUnavailableTitle": "カメラを使用できません",
+  "scanCameraUnavailableBody": "カメラにアクセスできませんでした。他のアプリで使用されていないか確認してください。",
+  "scanRetry": "再試行",
+  "scanPermissionBody": "この機能では、名刺をスキャンして認識するためにカメラへのアクセスが必要です。"
 }

@@ -1812,6 +1812,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'OCR Result'**
   String get contactDetailOcrResult;
+
+  /// No description provided for @scanCapturing.
+  ///
+  /// In en, this message translates to:
+  /// **'Capturing...'**
+  String get scanCapturing;
+
+  /// No description provided for @scanDetectingEdges.
+  ///
+  /// In en, this message translates to:
+  /// **'Detecting card edges...'**
+  String get scanDetectingEdges;
+
+  /// No description provided for @scanRecognizeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to recognize text on card'**
+  String get scanRecognizeFailed;
+
+  /// No description provided for @scanNoteOwnKeyNearLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Cloud Vision key is near its monthly free limit (80%).'**
+  String get scanNoteOwnKeyNearLimit;
+
+  /// No description provided for @scanNoteSharedNearLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared recognition quota is running low this month.'**
+  String get scanNoteSharedNearLimit;
+
+  /// No description provided for @scanNoteUsedOnDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Used on-device recognition. Add a Cloud Vision key in Settings for best results.'**
+  String get scanNoteUsedOnDevice;
+
+  /// No description provided for @scanToggleHorizontal.
+  ///
+  /// In en, this message translates to:
+  /// **'Horizontal'**
+  String get scanToggleHorizontal;
+
+  /// No description provided for @scanToggleVertical.
+  ///
+  /// In en, this message translates to:
+  /// **'Vertical'**
+  String get scanToggleVertical;
+
+  /// No description provided for @scanCameraUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera Unavailable'**
+  String get scanCameraUnavailableTitle;
+
+  /// No description provided for @scanCameraUnavailableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not access the camera. Please ensure it is not being used by another app.'**
+  String get scanCameraUnavailableBody;
+
+  /// No description provided for @scanRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get scanRetry;
+
+  /// No description provided for @scanPermissionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This feature requires camera access to scan and recognize business cards.'**
+  String get scanPermissionBody;
 }
 
 class _AppLocalizationsDelegate

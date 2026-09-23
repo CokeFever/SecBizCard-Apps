@@ -173,7 +173,7 @@ class _ScanCardScreenState extends State<ScanCardScreen>
     HapticFeedback.lightImpact();
     setState(() {
       _isProcessing = true;
-      _processingStatus = 'Capturing...';
+      _processingStatus = AppLocalizations.of(context)!.scanCapturing;
     });
 
     try {
@@ -183,7 +183,7 @@ class _ScanCardScreenState extends State<ScanCardScreen>
       if (mounted) {
         setState(() {
           _capturedImagePath = image.path;
-          _processingStatus = 'Detecting card edges...';
+          _processingStatus = AppLocalizations.of(context)!.scanDetectingEdges;
         });
       }
 
@@ -236,7 +236,7 @@ class _ScanCardScreenState extends State<ScanCardScreen>
         final profile = outcome.profile;
         if (profile != null) {
           // Surface a brief note when we fell back or are near a usage limit.
-          final msg = _ocrNoteMessage(outcome);
+          final msg = _ocrNoteMessage(AppLocalizations.of(context)!, outcome);
           if (msg != null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(msg), duration: const Duration(seconds: 3)),
@@ -268,7 +268,7 @@ class _ScanCardScreenState extends State<ScanCardScreen>
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to recognize text on card')),
+            SnackBar(content: Text(AppLocalizations.of(context)!.scanRecognizeFailed)),
           );
         }
       }
@@ -387,16 +387,16 @@ class _ScanCardScreenState extends State<ScanCardScreen>
 
   /// A short, friendly message when OCR fell back or is near a usage limit.
   /// Returns null when nothing needs to be surfaced (the common case).
-  String? _ocrNoteMessage(OcrOutcome outcome) {
+  String? _ocrNoteMessage(AppLocalizations l10n, OcrOutcome outcome) {
     switch (outcome.note) {
       case 'own_key_near_limit':
-        return 'Your Cloud Vision key is near its monthly free limit (80%).';
+        return l10n.scanNoteOwnKeyNearLimit;
       case 'shared_near_limit':
-        return 'Shared recognition quota is running low this month.';
+        return l10n.scanNoteSharedNearLimit;
     }
     // If we ended on ML Kit while the user expected higher quality, hint gently.
     if (outcome.engine == OcrEngineUsed.mlKit) {
-      return 'Used on-device recognition. Add a Cloud Vision key in Settings for best results.';
+      return l10n.scanNoteUsedOnDevice;
     }
     return null;
   }
@@ -605,13 +605,13 @@ class _ScanCardScreenState extends State<ScanCardScreen>
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         _buildToggleOption(
-                          label: 'Horizontal',
+                          label: AppLocalizations.of(context)!.scanToggleHorizontal,
                           icon: Icons.crop_landscape,
                           isSelected: !_isVertical,
                           onTap: () => setState(() => _isVertical = false),
                         ),
                         _buildToggleOption(
-                          label: 'Vertical',
+                          label: AppLocalizations.of(context)!.scanToggleVertical,
                           icon: Icons.crop_portrait,
                           isSelected: _isVertical,
                           onTap: () => setState(() => _isVertical = true),
@@ -636,13 +636,13 @@ class _ScanCardScreenState extends State<ScanCardScreen>
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         _buildToggleOption(
-                          label: 'Horizontal',
+                          label: AppLocalizations.of(context)!.scanToggleHorizontal,
                           icon: Icons.crop_landscape,
                           isSelected: !_isVertical,
                           onTap: () => setState(() => _isVertical = false),
                         ),
                         _buildToggleOption(
-                          label: 'Vertical',
+                          label: AppLocalizations.of(context)!.scanToggleVertical,
                           icon: Icons.crop_portrait,
                           isSelected: _isVertical,
                           onTap: () => setState(() => _isVertical = true),
@@ -786,9 +786,9 @@ class _ScanCardScreenState extends State<ScanCardScreen>
                 color: Colors.white.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 24),
-              const Text(
-                'Camera Permission Required',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context)!.scannerPermissionTitle,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -796,9 +796,9 @@ class _ScanCardScreenState extends State<ScanCardScreen>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-              const Text(
-                'This feature requires camera access to scan and recognize business cards.',
-                style: TextStyle(color: Colors.white70, fontSize: 16),
+              Text(
+                AppLocalizations.of(context)!.scanPermissionBody,
+                style: const TextStyle(color: Colors.white70, fontSize: 16),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -806,7 +806,7 @@ class _ScanCardScreenState extends State<ScanCardScreen>
                 ElevatedButton.icon(
                   onPressed: () => openAppSettings(),
                   icon: const Icon(Icons.settings),
-                  label: const Text('Open Settings'),
+                  label: Text(AppLocalizations.of(context)!.scannerOpenSettings),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
@@ -818,7 +818,7 @@ class _ScanCardScreenState extends State<ScanCardScreen>
                 ElevatedButton.icon(
                   onPressed: _checkAndRequestPermission,
                   icon: const Icon(Icons.security),
-                  label: const Text('Grant Permission'),
+                  label: Text(AppLocalizations.of(context)!.scannerGrantPermission),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
@@ -856,9 +856,9 @@ class _ScanCardScreenState extends State<ScanCardScreen>
                 color: Colors.redAccent,
               ),
               const SizedBox(height: 24),
-              const Text(
-                'Camera Unavailable',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context)!.scanCameraUnavailableTitle,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -866,15 +866,15 @@ class _ScanCardScreenState extends State<ScanCardScreen>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Could not access the camera. Please ensure it is not being used by another app.',
-                style: TextStyle(color: Colors.white70, fontSize: 16),
+              Text(
+                AppLocalizations.of(context)!.scanCameraUnavailableBody,
+                style: const TextStyle(color: Colors.white70, fontSize: 16),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: _checkAndRequestPermission,
-                child: const Text('Retry'),
+                child: Text(AppLocalizations.of(context)!.scanRetry),
               ),
             ],
           ),
