@@ -1301,4 +1301,53 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get phoneChangeNumber => 'Change phone number';
+
+  @override
+  String get contextSettingsTitle => 'Card Contexts';
+
+  @override
+  String contextSettingsErrorSaving(String error) {
+    return 'Error saving: $error';
+  }
+
+  @override
+  String get contextSettingsSaved => 'Contexts saved successfully';
+
+  @override
+  String get contextSettingsIntro =>
+      'Customize what information to share in different contexts';
+
+  @override
+  String get contextSettingsBusinessDesc => 'Full professional information';
+
+  @override
+  String get contextSettingsSocialDesc =>
+      'Personal contact without work details';
+
+  @override
+  String get contextSettingsLiteDesc => 'Minimal information only';
+
+  @override
+  String get contextSettingsToggleName => 'Name';
+
+  @override
+  String get contextSettingsToggleEmail => 'Email';
+
+  @override
+  String get contextSettingsTogglePhone => 'Phone';
+
+  @override
+  String get contextSettingsToggleJobTitle => 'Job Title';
+
+  @override
+  String get contextSettingsToggleCompany => 'Company';
+
+  @override
+  String get contextSettingsToggleAvatar => 'Avatar';
+
+  @override
+  String get contextSettingsToggleCardFront => 'Business Card Front';
+
+  @override
+  String get contextSettingsToggleCardBack => 'Business Card Back';
 }

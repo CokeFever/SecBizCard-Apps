@@ -395,5 +395,20 @@
   "phoneDidntReceive": "コードが届きませんか？ ",
   "phoneResendIn": "{seconds} 秒後に再送信",
   "phoneResendCode": "コードを再送信",
-  "phoneChangeNumber": "電話番号を変更"
+  "phoneChangeNumber": "電話番号を変更",
+  "contextSettingsTitle": "カードコンテキスト",
+  "contextSettingsErrorSaving": "保存中にエラーが発生しました：{error}",
+  "contextSettingsSaved": "コンテキストを保存しました",
+  "contextSettingsIntro": "コンテキストごとに共有する情報をカスタマイズ",
+  "contextSettingsBusinessDesc": "すべての業務情報",
+  "contextSettingsSocialDesc": "仕事の詳細を含まない個人連絡先",
+  "contextSettingsLiteDesc": "最小限の情報のみ",
+  "contextSettingsToggleName": "氏名",
+  "contextSettingsToggleEmail": "メール",
+  "contextSettingsTogglePhone": "電話",
+  "contextSettingsToggleJobTitle": "役職",
+  "contextSettingsToggleCompany": "会社",
+  "contextSettingsToggleAvatar": "アバター",
+  "contextSettingsToggleCardFront": "名刺の表面",
+  "contextSettingsToggleCardBack": "名刺の裏面"
 }

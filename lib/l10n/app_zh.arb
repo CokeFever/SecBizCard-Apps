@@ -386,5 +386,20 @@
   "phoneDidntReceive": "没有收到验证码？ ",
   "phoneResendIn": "{seconds} 秒后可重新发送",
   "phoneResendCode": "重新发送验证码",
-  "phoneChangeNumber": "更改电话号码"
+  "phoneChangeNumber": "更改电话号码",
+  "contextSettingsTitle": "名片情境",
+  "contextSettingsErrorSaving": "保存时出错：{error}",
+  "contextSettingsSaved": "情境已成功保存",
+  "contextSettingsIntro": "自定义在不同情境下要分享的信息",
+  "contextSettingsBusinessDesc": "完整的专业信息",
+  "contextSettingsSocialDesc": "不含工作细节的个人联系方式",
+  "contextSettingsLiteDesc": "仅最少量的信息",
+  "contextSettingsToggleName": "姓名",
+  "contextSettingsToggleEmail": "电子邮件",
+  "contextSettingsTogglePhone": "电话",
+  "contextSettingsToggleJobTitle": "职务",
+  "contextSettingsToggleCompany": "公司",
+  "contextSettingsToggleAvatar": "头像",
+  "contextSettingsToggleCardFront": "名片正面",
+  "contextSettingsToggleCardBack": "名片背面"
 }

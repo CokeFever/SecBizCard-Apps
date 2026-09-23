@@ -1273,4 +1273,51 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get phoneChangeNumber => '전화번호 변경';
+
+  @override
+  String get contextSettingsTitle => '명함 컨텍스트';
+
+  @override
+  String contextSettingsErrorSaving(String error) {
+    return '저장 중 오류: $error';
+  }
+
+  @override
+  String get contextSettingsSaved => '컨텍스트를 저장했습니다';
+
+  @override
+  String get contextSettingsIntro => '컨텍스트별로 공유할 정보를 사용자 지정하세요';
+
+  @override
+  String get contextSettingsBusinessDesc => '전체 업무 정보';
+
+  @override
+  String get contextSettingsSocialDesc => '업무 세부 정보를 제외한 개인 연락처';
+
+  @override
+  String get contextSettingsLiteDesc => '최소한의 정보만';
+
+  @override
+  String get contextSettingsToggleName => '이름';
+
+  @override
+  String get contextSettingsToggleEmail => '이메일';
+
+  @override
+  String get contextSettingsTogglePhone => '전화';
+
+  @override
+  String get contextSettingsToggleJobTitle => '직책';
+
+  @override
+  String get contextSettingsToggleCompany => '회사';
+
+  @override
+  String get contextSettingsToggleAvatar => '아바타';
+
+  @override
+  String get contextSettingsToggleCardFront => '명함 앞면';
+
+  @override
+  String get contextSettingsToggleCardBack => '명함 뒷면';
 }
