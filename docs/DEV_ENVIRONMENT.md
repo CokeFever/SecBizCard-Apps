@@ -20,7 +20,12 @@
 - **程式碼**：GitHub ([CokeFever/SecBizCard](https://github.com/CokeFever/SecBizCard), `main` branch)
 - **待辦事項**：GitHub Issues + Labels
 - **開發進度**：GitHub Projects (Board View)
-- **CI/CD**：GitHub Actions (Android) + Xcode Cloud (iOS)
+- **CI/CD**（權威說明見 `.kiro/steering/cicd.md`；以下為摘要，勿再誤植）：
+  - **Android 發版** = **GCP Cloud Build**（trigger `android-release-build` @ us-central1，`android/v*` tag，`cloudbuild.yaml`）→ 出 AAB → fastlane 自動上 Play internal testing。**不是** GitHub Actions。
+  - GitHub Actions `android_build.yml` 只出 QA 用 APK artifact，**不上架**。
+  - **iOS 發版** = **Xcode Cloud**（`ios/v*` tag，`ios/ci_scripts/ci_post_clone.sh`）。
+  - Firebase 後端（private repo）= 手動 deploy（`workflow_dispatch`）。
+  - 各 pipeline 機密位置不同：Cloud Build→GCP Secret Manager；Xcode Cloud→Xcode Cloud env；GitHub Actions→GitHub Secrets。
 
 ## 每日同步 SOP
 

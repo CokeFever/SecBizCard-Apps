@@ -68,4 +68,7 @@ If you need to modify Cloud Functions or Firestore rules:
 - **State Management**: Riverpod
 - **Routing**: GoRouter
 - **Database**: Cloud Firestore + Local Storage (Isar/SQLite logic)
-- **CI/CD**: GitHub Actions (configured in `.github/workflows/android_build.yml`)
+- **CI/CD**: Android release = **GCP Cloud Build** (`cloudbuild.yaml`, `android/v*`
+  tag → AAB → Play internal testing); iOS = **Xcode Cloud** (`ios/v*` tag).
+  GitHub Actions `android_build.yml` is a QA-only APK build, not the release path.
+  Authoritative details: `.kiro/steering/cicd.md`.

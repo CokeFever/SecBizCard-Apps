@@ -32,10 +32,13 @@ flutter test
 
 > **重要 — Tag 命名慣例（platform-prefixed）：**
 > 發版用「平台前綴」tag，**兩個平台各打一個**，通常指向同一個 commit：
-> - `android/v<版本號>` → 觸發 **GitHub Actions**（`.github/workflows/android_build.yml`，只監聽 `android/v*`）→ Build Android。
+> - `android/v<版本號>` → 觸發 **GCP Cloud Build**（trigger `android-release-build`
+>   @ region `us-central1`，build config `cloudbuild.yaml`）→ `flutter build aab`
+>   → fastlane 自動上傳 **Play internal testing**。
+>   （注意：**不是** GitHub Actions。`.github/workflows/android_build.yml` 只會出一份 QA 用的 APK artifact，不上架。權威說明見 `.kiro/steering/cicd.md`。）
 > - `ios/v<版本號>` → 觸發 **Xcode Cloud**（其觸發規則設定在 App Store Connect 的 Xcode Cloud workflow，不在本 repo；ci 腳本為 `ios/ci_scripts/ci_post_clone.sh`）→ Build iOS → App Store Connect。
 >
-> 舊的無前綴 `v*` tag（如 `v1.3.x`）已淘汰，**不要再用** —— 它不會觸發現在的 Android workflow。
+> 舊的無前綴 `v*` tag（如 `v1.3.x`）已淘汰，**不要再用** —— 它不會觸發現在的發版流程。
 > 歷史範例：`android/v1.5.1` + `ios/v1.5.1` 成對存在。
 
 ```bash
