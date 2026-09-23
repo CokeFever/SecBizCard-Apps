@@ -100,10 +100,57 @@ class SubscriptionService {
 
   /// Purchase a package. Returns the resulting active tier. Throws on real
   /// purchase errors so the UI can distinguish user-cancel from failure.
-  Future<SubscriptionTier> purchase(Package package) async {
+  ///
+  /// [oldProductIdentifier] — Google Play ONLY. When the user already has an
+  /// active subscription and is switching plans (e.g. Plus → Pro), pass the
+  /// currently-owned product id so Play REPLACES it instead of opening a second
+  /// independent subscription. Without this, Play stacks a new subscription on
+  /// top (both remain active, double billing, duplicate order emails). Apple
+  /// handles replacement automatically via the subscription group, so this is a
+  /// no-op there.
+  Future<SubscriptionTier> purchase(
+    Package package, {
+    String? oldProductIdentifier,
+  }) async {
     if (!_configured) return SubscriptionTier.none;
-    final result = await Purchases.purchase(PurchaseParams.package(package));
+    final params = (oldProductIdentifier != null &&
+            oldProductIdentifier.isNotEmpty)
+        ? PurchaseParams.package(
+            package,
+            productChangeInfo: StoreProductChangeInfo(
+              oldProductIdentifier,
+              // Immediate switch, credit the unused time of the old plan —
+              // matches subscription_plan.md §3a "upgrade takes effect now".
+              replacementMode: StoreReplacementMode.withTimeProration,
+            ),
+          )
+        : PurchaseParams.package(package);
+    final result = await Purchases.purchase(params);
     return _tierFromCustomerInfo(result.customerInfo);
+  }
+
+  /// The store product identifier of the caller's currently-active paid
+  /// subscription (e.g. `secbizcard_plus_monthly`), or null if none / not
+  /// configured. Used to pass as [purchase]'s `oldProductIdentifier` when
+  /// upgrading so Play replaces rather than stacks.
+  Future<String?> currentActiveProductId() async {
+    if (!_configured) return null;
+    try {
+      final info = await Purchases.getCustomerInfo();
+      final active = info.entitlements.active;
+      // Prefer Pro's product if somehow both are active (shouldn't happen once
+      // replacement works, but be deterministic).
+      final ent = active[RevenueCatConfig.entitlementPro] ??
+          active[RevenueCatConfig.entitlementPlus];
+      final pid = ent?.productIdentifier;
+      if (pid == null || pid.isEmpty) return null;
+      // Google appends the base-plan id as "product:baseplan"; the product
+      // change API wants the SUBSCRIPTION product id only, so strip any suffix.
+      return pid.split(':').first;
+    } catch (e) {
+      if (kDebugMode) debugPrint('[RevenueCat] currentActiveProductId failed: $e');
+      return null;
+    }
   }
 
   /// Restore previous purchases (required by App Store review). Returns the
