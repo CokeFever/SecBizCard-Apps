@@ -71,6 +71,31 @@ class OcrUsageNotifier extends _$OcrUsageNotifier {
     await _revalidate(uid);
   }
 
+  /// Immediately reflect a locally-confirmed tier (from a RevenueCat
+  /// purchase/restore result) WITHOUT waiting for the backend webhook + a
+  /// getOcrUsage round-trip. The used/cap numbers aren't known client-side, so
+  /// they're left null (the tier card shows the new tier name, and usage
+  /// resolves to "unknown" / no progress bar) until the subsequent [refresh]
+  /// lands the authoritative counts. Also writes the cache so a quick screen
+  /// re-entry shows the new tier too. No-op when signed out or when the tier is
+  /// unchanged.
+  Future<void> setTierOptimistic(OcrTier tier) async {
+    final uid = ref.read(authStateProvider).valueOrNull?.uid;
+    if (uid == null) return;
+    final prev = state.valueOrNull;
+    if (prev?.tier == tier) return; // nothing to change
+    final optimistic = OcrUsage(
+      tier: tier,
+      // Unknown until the backend refresh; leaving null avoids showing a stale
+      // count against the new cap.
+      tierUsed: null,
+      tierCap: null,
+      admin: prev?.admin,
+    );
+    state = AsyncData(optimistic);
+    await _writeCache(uid, optimistic);
+  }
+
   Future<void> _revalidate(String uid) async {
     final fresh = await _fetch();
     if (fresh == null) return; // offline / error → keep whatever we have

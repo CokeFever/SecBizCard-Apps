@@ -9,6 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:secbizcard/generated/l10n/app_localizations.dart';
 import 'package:secbizcard/features/contacts/data/card_detection_config.dart';
+import 'package:secbizcard/features/contacts/data/ocr_usage_provider.dart';
 import 'package:secbizcard/features/subscription/data/subscription_service.dart';
 import 'package:secbizcard/features/subscription/data/subscription_providers.dart';
 import 'firebase_options.dart';
@@ -84,11 +85,39 @@ void main() async {
   }
 }
 
-class IxoApp extends ConsumerWidget {
+class IxoApp extends ConsumerStatefulWidget {
   const IxoApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<IxoApp> createState() => _IxoAppState();
+}
+
+class _IxoAppState extends ConsumerState<IxoApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // On return to foreground, re-check the OCR tier/usage. Cancellations,
+    // renewals, or plan changes made outside the app (Play/App Store) only
+    // reach us via a webhook → backend; refreshing here makes them show up
+    // promptly instead of after a manual screen re-entry or app restart.
+    if (state == AppLifecycleState.resumed) {
+      ref.read(ocrUsageNotifierProvider.notifier).refresh();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(goRouterProvider);
     final themeMode =
         ref.watch(themeControllerProvider).valueOrNull ?? ThemeMode.system;

@@ -13,6 +13,7 @@ import 'package:secbizcard/features/contacts/data/ocr_usage_provider.dart';
 import 'package:secbizcard/features/contacts/data/card_detection_config.dart';
 import 'package:secbizcard/features/contacts/presentation/ocr_tier_display.dart';
 import 'package:secbizcard/features/subscription/data/subscription_providers.dart';
+import 'package:secbizcard/features/subscription/data/subscription_service.dart';
 import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 /// Unified, compact settings for AI-based business-card recognition (OCR).
@@ -413,7 +414,7 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                onPressed: _showSubscribeSheet,
+                onPressed: () => _showSubscribeSheet(tier),
                 icon: const Icon(Icons.arrow_upward, size: 18),
                 label: Text(tier == OcrTier.plus
                     ? l10n.ocrUpgradeToPro
@@ -503,7 +504,7 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
   /// available yet (keys not provisioned or products not created), it falls
   /// back to a static description + a "coming soon" notice — so the entry point
   /// works end-to-end today and lights up automatically once RevenueCat is set.
-  Future<void> _showSubscribeSheet() async {
+  Future<void> _showSubscribeSheet(OcrTier currentTier) async {
     final l10n = AppLocalizations.of(context)!;
     final service = ref.read(subscriptionServiceProvider);
     final offering = await service.fetchCurrentOffering();
@@ -515,8 +516,19 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
       showDragHandle: true,
       builder: (ctx) {
         final theme = Theme.of(ctx);
-        final packages = offering?.availablePackages ?? const [];
+        // Hide the tier the user already owns (and anything not an upgrade): a
+        // Plus subscriber only sees Pro, so they can't re-buy Plus (which threw
+        // the "already subscribed" error). Basic sees both.
+        final allLive = offering?.availablePackages ?? const [];
+        final packages = [
+          for (final pkg in allLive)
+            if (_isUpgradeFrom(currentTier, pkg)) pkg,
+        ];
         final hasLivePackages = packages.isNotEmpty;
+        // The offering exists but every plan was filtered out as already-owned
+        // (e.g. only Pro exists and the user is already Pro). Don't fall back to
+        // the misleading static Plus/Pro tiles in that case.
+        final offeringLiveButAllOwned = allLive.isNotEmpty && packages.isEmpty;
 
         return SafeArea(
           child: Padding(
@@ -556,6 +568,13 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
                     onPressed: () => _restore(ctx),
                     child: Text(l10n.ocrRestorePurchases),
                   ),
+                ] else if (offeringLiveButAllOwned) ...[
+                  // Offering is live but the user already owns the top plan —
+                  // still offer Restore, no misleading static tiles.
+                  TextButton(
+                    onPressed: () => _restore(ctx),
+                    child: Text(l10n.ocrRestorePurchases),
+                  ),
                 ] else ...[
                   // Fallback: static plan info until the offering goes live.
                   _planTile(theme, l10n.ocrTierPlus, l10n.ocrPlanPlusPrice,
@@ -588,6 +607,30 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
     );
   }
 
+  /// The paid tier a package represents, inferred from its identifier
+  /// (pro/plus). Null if unrecognized.
+  OcrTier? _packageTier(Package pkg) {
+    final id = pkg.identifier.toLowerCase();
+    if (id.contains('pro')) return OcrTier.pro;
+    if (id.contains('plus')) return OcrTier.plus;
+    return null;
+  }
+
+  /// Whether [pkg] is a strict upgrade relative to [currentTier], so the paywall
+  /// only offers plans above what the user already has. Basic → both Plus & Pro;
+  /// Plus → only Pro; Pro → nothing. Unknown-tier packages are shown (fail open,
+  /// so a mis-identified package is never silently hidden).
+  bool _isUpgradeFrom(OcrTier currentTier, Package pkg) {
+    final pkgTier = _packageTier(pkg);
+    if (pkgTier == null) return true;
+    int rank(OcrTier t) => switch (t) {
+          OcrTier.pro => 2,
+          OcrTier.plus => 1,
+          _ => 0, // basic/vip/flex treated as "no paid plan owned" baseline
+        };
+    return rank(pkgTier) > rank(currentTier);
+  }
+
   /// Clean display name for a package, keyed on its identifier (plus/pro), so
   /// we don't show the store's app-suffixed title. Falls back to the store
   /// title if the identifier is unrecognized.
@@ -613,12 +656,26 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
     final service = ref.read(subscriptionServiceProvider);
     Navigator.pop(sheetCtx);
     try {
-      await service.purchase(pkg);
+      // If the user already has a paid subscription and is switching plans
+      // (e.g. Plus → Pro), pass its product id so Google Play REPLACES the old
+      // subscription instead of opening a second one (which caused both to stay
+      // active + duplicate billing). Only when it differs from the target.
+      final oldProductId = await service.currentActiveProductId();
+      final targetProductId = pkg.storeProduct.identifier.split(':').first;
+      final upgradeFrom = (oldProductId != null &&
+              oldProductId.isNotEmpty &&
+              oldProductId != targetProductId)
+          ? oldProductId
+          : null;
+
+      final tier = await service.purchase(pkg, oldProductIdentifier: upgradeFrom);
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.ocrSubscribeThanks)));
-      // Entitlement webhook updates the backend tier → refresh the shared
-      // usage provider so the tier card re-syncs (also updates the cache).
+      // Optimistically reflect the new tier immediately (RevenueCat already
+      // confirmed it), then refresh for the authoritative used/cap numbers once
+      // the entitlement webhook has updated the backend.
+      _applyOptimisticTier(tier);
       await ref.read(ocrUsageNotifierProvider.notifier).refresh();
     } on PlatformException catch (e) {
       // User cancellation is not an error worth surfacing.
@@ -635,16 +692,33 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
     final service = ref.read(subscriptionServiceProvider);
     Navigator.pop(sheetCtx);
     try {
-      await service.restore();
+      final tier = await service.restore();
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.ocrRestoreDone)));
+      _applyOptimisticTier(tier);
       await ref.read(ocrUsageNotifierProvider.notifier).refresh();
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.ocrSubscribeFailed)));
     }
+  }
+
+  /// Map a RevenueCat [SubscriptionTier] result to our [OcrTier] and push it to
+  /// the shared usage provider for an instant UI update. Skipped when a BYOK
+  /// key is set (Flex overrides the backend tier) or when RevenueCat reports no
+  /// active entitlement (let the backend refresh decide, don't downgrade the
+  /// display optimistically).
+  void _applyOptimisticTier(SubscriptionTier tier) {
+    if (_hasKey) return;
+    final OcrTier? mapped = switch (tier) {
+      SubscriptionTier.plus => OcrTier.plus,
+      SubscriptionTier.pro => OcrTier.pro,
+      SubscriptionTier.none => null,
+    };
+    if (mapped == null) return;
+    ref.read(ocrUsageNotifierProvider.notifier).setTierOptimistic(mapped);
   }
 
   Widget _planTile(
