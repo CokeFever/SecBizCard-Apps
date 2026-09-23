@@ -6,6 +6,7 @@ import 'package:secbizcard/core/errors/failure.dart';
 import 'package:secbizcard/core/responsive/breakpoints.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 class BackupScreen extends ConsumerStatefulWidget {
   const BackupScreen({super.key});
@@ -19,6 +20,9 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   bool _checkingBackup = true;
   bool _hasRemoteBackup = false;
   String? _statusMessage;
+  // Tracks whether the current status message is an error, so the UI can color
+  // it red/green without inspecting the (now localized) message text.
+  bool _statusIsError = false;
   DateTime? _lastBackupTime;
 
   @override
@@ -63,9 +67,11 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   }
 
   Future<void> _performBackup({bool force = false}) async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _isLoading = true;
-      _statusMessage = 'Creating backup...';
+      _statusMessage = l10n.backupCreating;
+      _statusIsError = false;
     });
 
     final service = ref.read(backupServiceProvider);
@@ -80,7 +86,8 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         if (l is BackupConflictFailure) {
           setState(() {
             _isLoading = false;
-            _statusMessage = 'Cloud backup is newer than this device';
+            _statusMessage = l10n.backupCloudNewerStatus;
+            _statusIsError = true;
           });
           final overwrite = await _confirmOverwriteNewerBackup(l);
           if (overwrite == true) {
@@ -90,20 +97,22 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         }
         setState(() {
           _isLoading = false;
-          _statusMessage = 'Backup Failed: ${l.message}';
+          _statusMessage = l10n.backupFailed(l.message);
+          _statusIsError = true;
         });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Backup Failed: ${l.message}')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.backupFailed(l.message))),
+        );
       },
       (time) async {
         _saveLastBackupTime(time);
         setState(() {
           _isLoading = false;
-          _statusMessage = 'Backup Successful!';
+          _statusMessage = l10n.backupSuccessStatus;
+          _statusIsError = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Backup saved to Google Drive')),
+          SnackBar(content: Text(l10n.backupSavedToDrive)),
         );
       },
     );
@@ -112,32 +121,28 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   /// Warns that the Google Drive backup is newer than this device before
   /// letting the user overwrite it. Returns true if they choose to overwrite.
   Future<bool?> _confirmOverwriteNewerBackup(BackupConflictFailure conflict) {
+    final l10n = AppLocalizations.of(context)!;
     final fmt = DateFormat('yyyy-MM-dd HH:mm');
     final cloudLocal = conflict.cloudModifiedTime.toLocal();
     final localStr = conflict.localModifiedTime == null
-        ? 'never changed on this device'
-        : 'last changed ${fmt.format(conflict.localModifiedTime!.toLocal())}';
+        ? l10n.backupNeverChangedOnDevice
+        : l10n.backupLastChanged(fmt.format(conflict.localModifiedTime!.toLocal()));
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Cloud backup is newer'),
+        title: Text(l10n.backupCloudNewerTitle),
         content: Text(
-          'The backup in Google Drive was updated ${fmt.format(cloudLocal)}, '
-          'which is newer than the data on this device ($localStr).\n\n'
-          'Backing up now would overwrite that newer backup — likely a backup '
-          'made from another device. If you want the newer data on this '
-          'device, cancel and use Restore instead.\n\n'
-          'Overwrite the newer backup anyway?',
+          l10n.backupCloudNewerBody(fmt.format(cloudLocal), localStr),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Overwrite'),
+            child: Text(l10n.backupOverwrite),
           ),
         ],
       ),
@@ -145,24 +150,22 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   }
 
   Future<void> _performRestore() async {
+    final l10n = AppLocalizations.of(context)!;
     // Confirm dialog
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Restore Backup?'),
-        content: const Text(
-          'This will overwrite your current contacts and settings. '
-          'Make sure you have a recent backup. Continue?',
-        ),
+        title: Text(l10n.backupRestoreConfirmTitle),
+        content: Text(l10n.backupRestoreConfirmBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Restore'),
+            child: Text(l10n.backupRestoreAction),
           ),
         ],
       ),
@@ -172,7 +175,8 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
 
     setState(() {
       _isLoading = true;
-      _statusMessage = 'Restoring from Drive...';
+      _statusMessage = l10n.backupRestoringStatus;
+      _statusIsError = false;
     });
 
     final service = ref.read(backupServiceProvider);
@@ -184,23 +188,21 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       (l) {
         setState(() {
           _isLoading = false;
-          _statusMessage = 'Restore Failed: ${l.message}';
+          _statusMessage = l10n.backupRestoreFailed(l.message);
+          _statusIsError = true;
         });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Restore Failed: ${l.message}')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.backupRestoreFailed(l.message))),
+        );
       },
       (r) {
         setState(() {
           _isLoading = false;
-          _statusMessage = 'Restore Completed!';
+          _statusMessage = l10n.backupRestoreCompletedStatus;
+          _statusIsError = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Data restored successfully. Please restart app if needed.',
-            ),
-          ),
+          SnackBar(content: Text(l10n.backupRestoreSuccessBody)),
         );
         // Optionally navigate home or force refresh
       },
@@ -209,10 +211,11 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Backup & Restore',
+          l10n.drawerBackupRestore,
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
         ),
       ),
@@ -235,7 +238,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
             ),
             const SizedBox(height: 24),
             Text(
-              'Google Drive Backup',
+              l10n.backupDriveTitle,
               style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -243,7 +246,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Securely backup your contacts and settings to your Google Drive as an encrypted file.',
+              l10n.backupDriveDesc,
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(color: Colors.grey[600]),
             ),
@@ -267,10 +270,10 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                   if (_isLoading) ...[
                     const CircularProgressIndicator(),
                     const SizedBox(height: 16),
-                    Text(_statusMessage ?? 'Processing...'),
+                    Text(_statusMessage ?? l10n.backupProcessing),
                   ] else ...[
                     Text(
-                      'Last Backup',
+                      l10n.backupLastBackupLabel,
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontSize: 12,
@@ -280,7 +283,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                     Text(
                       _lastBackupTime != null
                           ? DateFormat.yMMMd().add_jm().format(_lastBackupTime!)
-                          : 'Never',
+                          : l10n.backupNever,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -292,9 +295,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                       Text(
                         _statusMessage!,
                         style: TextStyle(
-                          color: _statusMessage!.contains('Failed')
-                              ? Colors.red
-                              : Colors.green,
+                          color: _statusIsError ? Colors.red : Colors.green,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -311,7 +312,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
               child: ElevatedButton.icon(
                 onPressed: _isLoading ? null : _performBackup,
                 icon: const Icon(Icons.upload),
-                label: const Text('Back Up Now'),
+                label: Text(l10n.backupNowButton),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).primaryColor,
                   foregroundColor: Colors.white,
@@ -329,10 +330,10 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                 icon: const Icon(Icons.download),
                 label: Text(
                   _checkingBackup
-                      ? 'Checking...'
+                      ? l10n.backupChecking
                       : (_hasRemoteBackup
-                            ? 'Restore from Backup'
-                            : 'No Backup Found'),
+                            ? l10n.backupRestoreFromBackup
+                            : l10n.backupNoBackupFound),
                 ),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),

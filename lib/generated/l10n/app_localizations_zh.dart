@@ -959,6 +959,92 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get scanPermissionBody => '此功能需要相机访问权限，以扫描并识别名片。';
+
+  @override
+  String get backupCreating => '创建备份中…';
+
+  @override
+  String get backupCloudNewerStatus => '云端备份比此设备更新';
+
+  @override
+  String backupFailed(String error) {
+    return '备份失败：$error';
+  }
+
+  @override
+  String get backupSuccessStatus => '备份成功！';
+
+  @override
+  String get backupSavedToDrive => '备份已保存到 Google 云端硬盘';
+
+  @override
+  String get backupCloudNewerTitle => '云端备份较新';
+
+  @override
+  String get backupNeverChangedOnDevice => '此设备从未更改';
+
+  @override
+  String backupLastChanged(String time) {
+    return '上次更改于 $time';
+  }
+
+  @override
+  String backupCloudNewerBody(String cloudTime, String localState) {
+    return 'Google 云端硬盘中的备份更新于 $cloudTime，比此设备上的数据（$localState）更新。\n\n现在备份会覆盖较新的备份——很可能是从其他设备创建的。若您想在此设备获取较新的数据，请取消并改用「恢复」。\n\n仍要覆盖较新的备份吗？';
+  }
+
+  @override
+  String get backupOverwrite => '覆盖';
+
+  @override
+  String get backupRestoreConfirmTitle => '恢复备份？';
+
+  @override
+  String get backupRestoreConfirmBody => '这会覆盖您当前的联系人与设置。请确认您有近期的备份。要继续吗？';
+
+  @override
+  String get backupRestoreAction => '恢复';
+
+  @override
+  String get backupRestoringStatus => '从云端硬盘恢复中…';
+
+  @override
+  String backupRestoreFailed(String error) {
+    return '恢复失败：$error';
+  }
+
+  @override
+  String get backupRestoreCompletedStatus => '恢复完成！';
+
+  @override
+  String get backupRestoreSuccessBody => '数据恢复成功。必要时请重启应用。';
+
+  @override
+  String get backupDriveTitle => 'Google 云端硬盘备份';
+
+  @override
+  String get backupDriveDesc => '将您的联系人与设置以加密文件安全备份到 Google 云端硬盘。';
+
+  @override
+  String get backupProcessing => '处理中…';
+
+  @override
+  String get backupLastBackupLabel => '上次备份';
+
+  @override
+  String get backupNever => '从未';
+
+  @override
+  String get backupNowButton => '立即备份';
+
+  @override
+  String get backupChecking => '检查中…';
+
+  @override
+  String get backupRestoreFromBackup => '从备份恢复';
+
+  @override
+  String get backupNoBackupFound => '未找到备份';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -1916,4 +2002,90 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get scanPermissionBody => '此功能需要相機存取權，以掃描並辨識名片。';
+
+  @override
+  String get backupCreating => '建立備份中…';
+
+  @override
+  String get backupCloudNewerStatus => '雲端備份比此裝置更新';
+
+  @override
+  String backupFailed(String error) {
+    return '備份失敗：$error';
+  }
+
+  @override
+  String get backupSuccessStatus => '備份成功！';
+
+  @override
+  String get backupSavedToDrive => '備份已儲存到 Google 雲端硬碟';
+
+  @override
+  String get backupCloudNewerTitle => '雲端備份較新';
+
+  @override
+  String get backupNeverChangedOnDevice => '此裝置從未變更';
+
+  @override
+  String backupLastChanged(String time) {
+    return '上次變更於 $time';
+  }
+
+  @override
+  String backupCloudNewerBody(String cloudTime, String localState) {
+    return 'Google 雲端硬碟中的備份更新於 $cloudTime，比此裝置上的資料（$localState）更新。\n\n現在備份會覆蓋較新的備份——很可能是從其他裝置建立的。若您想在此裝置取得較新的資料，請取消並改用「還原」。\n\n仍要覆蓋較新的備份嗎？';
+  }
+
+  @override
+  String get backupOverwrite => '覆蓋';
+
+  @override
+  String get backupRestoreConfirmTitle => '還原備份？';
+
+  @override
+  String get backupRestoreConfirmBody => '這會覆蓋您目前的聯絡人與設定。請確認您有近期的備份。要繼續嗎？';
+
+  @override
+  String get backupRestoreAction => '還原';
+
+  @override
+  String get backupRestoringStatus => '從雲端硬碟還原中…';
+
+  @override
+  String backupRestoreFailed(String error) {
+    return '還原失敗：$error';
+  }
+
+  @override
+  String get backupRestoreCompletedStatus => '還原完成！';
+
+  @override
+  String get backupRestoreSuccessBody => '資料還原成功。必要時請重新啟動應用程式。';
+
+  @override
+  String get backupDriveTitle => 'Google 雲端硬碟備份';
+
+  @override
+  String get backupDriveDesc => '將您的聯絡人與設定以加密檔案安全備份到 Google 雲端硬碟。';
+
+  @override
+  String get backupProcessing => '處理中…';
+
+  @override
+  String get backupLastBackupLabel => '上次備份';
+
+  @override
+  String get backupNever => '從未';
+
+  @override
+  String get backupNowButton => '立即備份';
+
+  @override
+  String get backupChecking => '檢查中…';
+
+  @override
+  String get backupRestoreFromBackup => '從備份還原';
+
+  @override
+  String get backupNoBackupFound => '找不到備份';
 }
