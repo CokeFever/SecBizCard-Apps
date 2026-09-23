@@ -1059,4 +1059,92 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get backupNoBackupFound => '백업을 찾을 수 없음';
+
+  @override
+  String vcardErrorReadingFile(String error) {
+    return '파일 읽기 오류: $error';
+  }
+
+  @override
+  String vcardInvalidPackage(String error) {
+    return '유효하지 않은 패키지: $error';
+  }
+
+  @override
+  String get vcardNoContactsInPackage => '패키지에서 연락처를 찾을 수 없습니다';
+
+  @override
+  String get vcardPasteFirst => '먼저 vCard 내용을 붙여넣으세요';
+
+  @override
+  String get vcardNoContactsInContent => 'vCard 내용에서 연락처를 찾을 수 없습니다';
+
+  @override
+  String vcardImportedCount(int count, String skippedNote) {
+    return '연락처 $count개를 가져왔습니다$skippedNote';
+  }
+
+  @override
+  String vcardSkippedNote(int count) {
+    return ' ($count개 건너뜀)';
+  }
+
+  @override
+  String get vcardViewAction => '보기';
+
+  @override
+  String vcardImportFailed(String error) {
+    return '가져오기 실패: $error';
+  }
+
+  @override
+  String vcardPreviewTitle(int count) {
+    return '연락처 $count개를 가져올까요?';
+  }
+
+  @override
+  String get vcardNoContactInfo => '연락처 정보 없음';
+
+  @override
+  String get vcardImportAction => '가져오기';
+
+  @override
+  String get vcardHowItWorks => '사용 방법';
+
+  @override
+  String get vcardHowItWorksDesc =>
+      '즐겨 사용하는 AI 앱(ChatGPT, Gemini, Grok 등)으로 명함 사진을 스캔하고 결과를 vCard 2.1 형식으로 만들어 달라고 요청하세요.';
+
+  @override
+  String get vcardCopyPrompt => 'AI 프롬프트 복사';
+
+  @override
+  String get vcardPromptCopied => 'AI 프롬프트를 클립보드에 복사했습니다!';
+
+  @override
+  String get vcardThen => '그런 다음:';
+
+  @override
+  String get vcardStep1 => '내보낸 .vcf 파일을 업로드하거나';
+
+  @override
+  String get vcardStep2 => '아래에 vCard 텍스트를 직접 붙여넣기';
+
+  @override
+  String get vcardOption1 => '옵션 1: 파일 업로드';
+
+  @override
+  String get vcardChooseFile => '파일 선택 (.vcf)';
+
+  @override
+  String get vcardOr => '또는';
+
+  @override
+  String get vcardOption2 => '옵션 2: vCard 텍스트 붙여넣기';
+
+  @override
+  String get vcardImporting => '가져오는 중…';
+
+  @override
+  String get vcardImportFromText => '텍스트에서 가져오기';
 }

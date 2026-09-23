@@ -1045,6 +1045,94 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get backupNoBackupFound => '未找到备份';
+
+  @override
+  String vcardErrorReadingFile(String error) {
+    return '读取文件时出错：$error';
+  }
+
+  @override
+  String vcardInvalidPackage(String error) {
+    return '包无效：$error';
+  }
+
+  @override
+  String get vcardNoContactsInPackage => '包中未找到联系人';
+
+  @override
+  String get vcardPasteFirst => '请先粘贴 vCard 内容';
+
+  @override
+  String get vcardNoContactsInContent => 'vCard 内容中未找到联系人';
+
+  @override
+  String vcardImportedCount(int count, String skippedNote) {
+    return '已导入 $count 位联系人$skippedNote';
+  }
+
+  @override
+  String vcardSkippedNote(int count) {
+    return '（跳过 $count 位）';
+  }
+
+  @override
+  String get vcardViewAction => '查看';
+
+  @override
+  String vcardImportFailed(String error) {
+    return '导入失败：$error';
+  }
+
+  @override
+  String vcardPreviewTitle(int count) {
+    return '要导入 $count 位联系人吗？';
+  }
+
+  @override
+  String get vcardNoContactInfo => '无联系信息';
+
+  @override
+  String get vcardImportAction => '导入';
+
+  @override
+  String get vcardHowItWorks => '工作原理';
+
+  @override
+  String get vcardHowItWorksDesc =>
+      '使用您喜爱的 AI 应用（ChatGPT、Gemini、Grok 等）扫描名片照片，并让它将结果格式化为 vCard 2.1。';
+
+  @override
+  String get vcardCopyPrompt => '复制 AI 提示';
+
+  @override
+  String get vcardPromptCopied => '已复制 AI 提示到剪贴板！';
+
+  @override
+  String get vcardThen => '然后：';
+
+  @override
+  String get vcardStep1 => '上传导出的 .vcf 文件，或';
+
+  @override
+  String get vcardStep2 => '直接在下方粘贴 vCard 文本';
+
+  @override
+  String get vcardOption1 => '选项 1：上传文件';
+
+  @override
+  String get vcardChooseFile => '选择文件（.vcf）';
+
+  @override
+  String get vcardOr => '或';
+
+  @override
+  String get vcardOption2 => '选项 2：粘贴 vCard 文本';
+
+  @override
+  String get vcardImporting => '导入中…';
+
+  @override
+  String get vcardImportFromText => '从文本导入';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -2088,4 +2176,92 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get backupNoBackupFound => '找不到備份';
+
+  @override
+  String vcardErrorReadingFile(String error) {
+    return '讀取檔案時發生錯誤：$error';
+  }
+
+  @override
+  String vcardInvalidPackage(String error) {
+    return '套件無效：$error';
+  }
+
+  @override
+  String get vcardNoContactsInPackage => '套件中找不到聯絡人';
+
+  @override
+  String get vcardPasteFirst => '請先貼上 vCard 內容';
+
+  @override
+  String get vcardNoContactsInContent => 'vCard 內容中找不到聯絡人';
+
+  @override
+  String vcardImportedCount(int count, String skippedNote) {
+    return '已匯入 $count 位聯絡人$skippedNote';
+  }
+
+  @override
+  String vcardSkippedNote(int count) {
+    return '（略過 $count 位）';
+  }
+
+  @override
+  String get vcardViewAction => '檢視';
+
+  @override
+  String vcardImportFailed(String error) {
+    return '匯入失敗：$error';
+  }
+
+  @override
+  String vcardPreviewTitle(int count) {
+    return '要匯入 $count 位聯絡人嗎？';
+  }
+
+  @override
+  String get vcardNoContactInfo => '無聯絡資訊';
+
+  @override
+  String get vcardImportAction => '匯入';
+
+  @override
+  String get vcardHowItWorks => '運作方式';
+
+  @override
+  String get vcardHowItWorksDesc =>
+      '使用您喜愛的 AI 應用程式（ChatGPT、Gemini、Grok 等）掃描名片照片，並請它將結果格式化為 vCard 2.1。';
+
+  @override
+  String get vcardCopyPrompt => '複製 AI 提示';
+
+  @override
+  String get vcardPromptCopied => '已複製 AI 提示到剪貼簿！';
+
+  @override
+  String get vcardThen => '接著：';
+
+  @override
+  String get vcardStep1 => '上傳匯出的 .vcf 檔案，或';
+
+  @override
+  String get vcardStep2 => '直接在下方貼上 vCard 文字';
+
+  @override
+  String get vcardOption1 => '選項 1：上傳檔案';
+
+  @override
+  String get vcardChooseFile => '選擇檔案（.vcf）';
+
+  @override
+  String get vcardOr => '或';
+
+  @override
+  String get vcardOption2 => '選項 2：貼上 vCard 文字';
+
+  @override
+  String get vcardImporting => '匯入中…';
+
+  @override
+  String get vcardImportFromText => '從文字匯入';
 }
