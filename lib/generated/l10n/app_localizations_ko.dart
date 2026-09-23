@@ -235,6 +235,75 @@ class AppLocalizationsKo extends AppLocalizations {
   String get navNotifications => 'Notifications';
 
   @override
+  String get unsavedChangesTitle => '저장되지 않은 변경사항';
+
+  @override
+  String get unsavedChangesBody => '저장되지 않은 변경사항이 있습니다. 취소하고 나가시겠습니까?';
+
+  @override
+  String get unsavedChangesStay => '머무르기';
+
+  @override
+  String get unsavedChangesDiscard => '취소';
+
+  @override
+  String get drawerNotLoggedIn => '로그인되지 않음';
+
+  @override
+  String get drawerDefaultUser => '사용자';
+
+  @override
+  String get drawerMyProfile => '내 프로필';
+
+  @override
+  String get drawerManageContexts => '컨텍스트 관리';
+
+  @override
+  String get drawerErrorLoadingProfile => '프로필을 불러오는 중 오류가 발생했습니다';
+
+  @override
+  String get drawerBackupRestore => '백업 및 복원';
+
+  @override
+  String get drawerAiRecognition => 'AI 인식';
+
+  @override
+  String get drawerImportVcard => 'vCard 가져오기';
+
+  @override
+  String get drawerAppearance => '테마';
+
+  @override
+  String get drawerThemeAuto => '자동';
+
+  @override
+  String get drawerThemeLight => '라이트';
+
+  @override
+  String get drawerThemeDark => '다크';
+
+  @override
+  String get drawerLogout => '로그아웃';
+
+  @override
+  String get drawerConfirmLogoutTitle => '로그아웃 확인';
+
+  @override
+  String get drawerConfirmLogoutBody => '로그아웃하시겠습니까?';
+
+  @override
+  String get commonCancel => '취소';
+
+  @override
+  String get drawerLinkPrivacy => '개인정보';
+
+  @override
+  String get drawerLinkTerms => '약관';
+
+  @override
+  String get drawerLinkGuide => '가이드';
+
+  @override
   String get qrGenerating => '보안 QRCode 생성 중…';
 
   @override

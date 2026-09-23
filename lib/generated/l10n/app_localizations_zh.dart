@@ -234,6 +234,75 @@ class AppLocalizationsZh extends AppLocalizations {
   String get navNotifications => 'Notifications';
 
   @override
+  String get unsavedChangesTitle => '尚未保存的更改';
+
+  @override
+  String get unsavedChangesBody => '你有尚未保存的更改。确定要放弃并离开吗?';
+
+  @override
+  String get unsavedChangesStay => '留下';
+
+  @override
+  String get unsavedChangesDiscard => '放弃';
+
+  @override
+  String get drawerNotLoggedIn => '尚未登录';
+
+  @override
+  String get drawerDefaultUser => '用户';
+
+  @override
+  String get drawerMyProfile => '我的个人资料';
+
+  @override
+  String get drawerManageContexts => '管理情境';
+
+  @override
+  String get drawerErrorLoadingProfile => '加载个人资料时出错';
+
+  @override
+  String get drawerBackupRestore => '备份与恢复';
+
+  @override
+  String get drawerAiRecognition => 'AI 识别';
+
+  @override
+  String get drawerImportVcard => '导入 vCard';
+
+  @override
+  String get drawerAppearance => '外观';
+
+  @override
+  String get drawerThemeAuto => '自动';
+
+  @override
+  String get drawerThemeLight => '浅色';
+
+  @override
+  String get drawerThemeDark => '深色';
+
+  @override
+  String get drawerLogout => '登出';
+
+  @override
+  String get drawerConfirmLogoutTitle => '确认登出';
+
+  @override
+  String get drawerConfirmLogoutBody => '确定要登出吗?';
+
+  @override
+  String get commonCancel => '取消';
+
+  @override
+  String get drawerLinkPrivacy => '隐私权';
+
+  @override
+  String get drawerLinkTerms => '条款';
+
+  @override
+  String get drawerLinkGuide => '指南';
+
+  @override
   String get qrGenerating => '生成安全的 QRCode 中…';
 
   @override
@@ -633,6 +702,75 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get navNotifications => 'Notifications';
+
+  @override
+  String get unsavedChangesTitle => '尚未儲存的變更';
+
+  @override
+  String get unsavedChangesBody => '你有尚未儲存的變更。確定要捨棄並離開嗎?';
+
+  @override
+  String get unsavedChangesStay => '留下';
+
+  @override
+  String get unsavedChangesDiscard => '捨棄';
+
+  @override
+  String get drawerNotLoggedIn => '尚未登入';
+
+  @override
+  String get drawerDefaultUser => '使用者';
+
+  @override
+  String get drawerMyProfile => '我的個人資料';
+
+  @override
+  String get drawerManageContexts => '管理情境';
+
+  @override
+  String get drawerErrorLoadingProfile => '載入個人資料時發生錯誤';
+
+  @override
+  String get drawerBackupRestore => '備份與還原';
+
+  @override
+  String get drawerAiRecognition => 'AI 辨識';
+
+  @override
+  String get drawerImportVcard => '匯入 vCard';
+
+  @override
+  String get drawerAppearance => '外觀';
+
+  @override
+  String get drawerThemeAuto => '自動';
+
+  @override
+  String get drawerThemeLight => '淺色';
+
+  @override
+  String get drawerThemeDark => '深色';
+
+  @override
+  String get drawerLogout => '登出';
+
+  @override
+  String get drawerConfirmLogoutTitle => '確認登出';
+
+  @override
+  String get drawerConfirmLogoutBody => '確定要登出嗎?';
+
+  @override
+  String get commonCancel => '取消';
+
+  @override
+  String get drawerLinkPrivacy => '隱私權';
+
+  @override
+  String get drawerLinkTerms => '條款';
+
+  @override
+  String get drawerLinkGuide => '指南';
 
   @override
   String get qrGenerating => '產生安全的 QRCode 中…';

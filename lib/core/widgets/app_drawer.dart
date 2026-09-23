@@ -10,6 +10,7 @@ import 'package:secbizcard/core/widgets/profile_avatar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 part 'app_drawer.g.dart';
 
@@ -29,6 +30,7 @@ class AppDrawer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final authRepo = ref.watch(authRepositoryProvider);
     final user = authRepo.getCurrentUser();
     final profileRepo = ref.watch(profileRepositoryProvider);
@@ -49,7 +51,9 @@ class AppDrawer extends ConsumerWidget {
                 final profile = snapshot.data?.getRight().toNullable();
                 return UserAccountsDrawerHeader(
                   accountName: Text(
-                    profile?.displayName ?? user.displayName ?? 'User',
+                    profile?.displayName ??
+                        user.displayName ??
+                        l10n.drawerDefaultUser,
                   ),
                   accountEmail: Text(user.email ?? ''),
                   currentAccountPicture: ProfileAvatar(
@@ -64,14 +68,14 @@ class AppDrawer extends ConsumerWidget {
               },
             )
           else
-            const DrawerHeader(child: Center(child: Text('Not Logged In'))),
+            DrawerHeader(child: Center(child: Text(l10n.drawerNotLoggedIn))),
           Expanded(
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
           ListTile(
             leading: const Icon(Icons.person_outline),
-            title: const Text('My Profile'),
+            title: Text(l10n.drawerMyProfile),
             onTap: () {
               _dismiss(context);
               context.push('/profile');
@@ -79,7 +83,7 @@ class AppDrawer extends ConsumerWidget {
           ),
           ListTile(
             leading: const Icon(Icons.tune),
-            title: const Text('Manage Contexts'),
+            title: Text(l10n.drawerManageContexts),
             onTap: () async {
               if (user != null) {
                 // Use userProfileProvider which has auto-create logic
@@ -90,7 +94,7 @@ class AppDrawer extends ConsumerWidget {
                   context.push('/context-settings', extra: profile);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Error loading profile')),
+                    SnackBar(content: Text(l10n.drawerErrorLoadingProfile)),
                   );
                 }
               }
@@ -98,7 +102,7 @@ class AppDrawer extends ConsumerWidget {
           ),
           ListTile(
             leading: const Icon(Icons.cloud_sync),
-            title: const Text('Backup & Restore'),
+            title: Text(l10n.drawerBackupRestore),
             onTap: () {
               _dismiss(context);
               context.push('/backup');
@@ -106,7 +110,7 @@ class AppDrawer extends ConsumerWidget {
           ),
           ListTile(
             leading: const Icon(Icons.auto_awesome_outlined),
-            title: const Text('AI Recognition'),
+            title: Text(l10n.drawerAiRecognition),
             onTap: () {
               _dismiss(context);
               context.push('/ocr-settings');
@@ -114,7 +118,7 @@ class AppDrawer extends ConsumerWidget {
           ),
           ListTile(
             leading: const Icon(Icons.file_download),
-            title: const Text('Import vCard'),
+            title: Text(l10n.drawerImportVcard),
             onTap: () {
               _dismiss(context);
               context.push('/import-vcard');
@@ -124,7 +128,7 @@ class AppDrawer extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              'Appearance',
+              l10n.drawerAppearance,
               style: GoogleFonts.inter(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -140,21 +144,24 @@ class AppDrawer extends ConsumerWidget {
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: SegmentedButton<ThemeMode>(
-                  segments: const [
+                  segments: [
                     ButtonSegment(
                       value: ThemeMode.system,
-                      label: Text('Auto', style: TextStyle(fontSize: 12)),
-                      icon: Icon(Icons.brightness_auto, size: 16),
+                      label: Text(l10n.drawerThemeAuto,
+                          style: const TextStyle(fontSize: 12)),
+                      icon: const Icon(Icons.brightness_auto, size: 16),
                     ),
                     ButtonSegment(
                       value: ThemeMode.light,
-                      label: Text('Light', style: TextStyle(fontSize: 12)),
-                      icon: Icon(Icons.light_mode, size: 16),
+                      label: Text(l10n.drawerThemeLight,
+                          style: const TextStyle(fontSize: 12)),
+                      icon: const Icon(Icons.light_mode, size: 16),
                     ),
                     ButtonSegment(
                       value: ThemeMode.dark,
-                      label: Text('Dark', style: TextStyle(fontSize: 12)),
-                      icon: Icon(Icons.dark_mode, size: 16),
+                      label: Text(l10n.drawerThemeDark,
+                          style: const TextStyle(fontSize: 12)),
+                      icon: const Icon(Icons.dark_mode, size: 16),
                     ),
                   ],
                   selected: {mode},
@@ -172,22 +179,23 @@ class AppDrawer extends ConsumerWidget {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('Logout', style: TextStyle(color: Colors.red)),
+            title: Text(l10n.drawerLogout,
+                style: const TextStyle(color: Colors.red)),
             onTap: () async {
               final shouldLogout = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: const Text('Confirm Logout'),
-                  content: const Text('Are you sure you want to log out?'),
+                  title: Text(l10n.drawerConfirmLogoutTitle),
+                  content: Text(l10n.drawerConfirmLogoutBody),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Cancel'),
+                      child: Text(l10n.commonCancel),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context, true),
                       style: TextButton.styleFrom(foregroundColor: Colors.red),
-                      child: const Text('Logout'),
+                      child: Text(l10n.drawerLogout),
                     ),
                   ],
                 ),
@@ -212,7 +220,7 @@ class AppDrawer extends ConsumerWidget {
                     launchUrl(Uri.parse('https://ixo.app/privacy'), mode: LaunchMode.externalApplication);
                   },
                   child: Text(
-                    'Privacy',
+                    l10n.drawerLinkPrivacy,
                     style: GoogleFonts.inter(color: Colors.grey, fontSize: 11, decoration: TextDecoration.underline),
                   ),
                 ),
@@ -226,7 +234,7 @@ class AppDrawer extends ConsumerWidget {
                     launchUrl(Uri.parse('https://ixo.app/eula'), mode: LaunchMode.externalApplication);
                   },
                   child: Text(
-                    'Terms',
+                    l10n.drawerLinkTerms,
                     style: GoogleFonts.inter(color: Colors.grey, fontSize: 11, decoration: TextDecoration.underline),
                   ),
                 ),
@@ -252,7 +260,7 @@ class AppDrawer extends ConsumerWidget {
                     );
                   },
                   child: Text(
-                    'Guide',
+                    l10n.drawerLinkGuide,
                     style: GoogleFonts.inter(color: Colors.grey, fontSize: 11, decoration: TextDecoration.underline),
                   ),
                 ),

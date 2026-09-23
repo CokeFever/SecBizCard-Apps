@@ -517,6 +517,144 @@ abstract class AppLocalizations {
   /// **'Notifications'**
   String get navNotifications;
 
+  /// No description provided for @unsavedChangesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved Changes'**
+  String get unsavedChangesTitle;
+
+  /// No description provided for @unsavedChangesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You have unsaved changes. Are you sure you want to discard them and leave?'**
+  String get unsavedChangesBody;
+
+  /// No description provided for @unsavedChangesStay.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay'**
+  String get unsavedChangesStay;
+
+  /// No description provided for @unsavedChangesDiscard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get unsavedChangesDiscard;
+
+  /// No description provided for @drawerNotLoggedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Logged In'**
+  String get drawerNotLoggedIn;
+
+  /// No description provided for @drawerDefaultUser.
+  ///
+  /// In en, this message translates to:
+  /// **'User'**
+  String get drawerDefaultUser;
+
+  /// No description provided for @drawerMyProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'My Profile'**
+  String get drawerMyProfile;
+
+  /// No description provided for @drawerManageContexts.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Contexts'**
+  String get drawerManageContexts;
+
+  /// No description provided for @drawerErrorLoadingProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading profile'**
+  String get drawerErrorLoadingProfile;
+
+  /// No description provided for @drawerBackupRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup & Restore'**
+  String get drawerBackupRestore;
+
+  /// Drawer item for the AI Recognition (OCR) settings screen; 'AI' kept in English
+  ///
+  /// In en, this message translates to:
+  /// **'AI Recognition'**
+  String get drawerAiRecognition;
+
+  /// 'vCard' kept in English (format name)
+  ///
+  /// In en, this message translates to:
+  /// **'Import vCard'**
+  String get drawerImportVcard;
+
+  /// No description provided for @drawerAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get drawerAppearance;
+
+  /// No description provided for @drawerThemeAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get drawerThemeAuto;
+
+  /// No description provided for @drawerThemeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get drawerThemeLight;
+
+  /// No description provided for @drawerThemeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get drawerThemeDark;
+
+  /// No description provided for @drawerLogout.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get drawerLogout;
+
+  /// No description provided for @drawerConfirmLogoutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Logout'**
+  String get drawerConfirmLogoutTitle;
+
+  /// No description provided for @drawerConfirmLogoutBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to log out?'**
+  String get drawerConfirmLogoutBody;
+
+  /// No description provided for @commonCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get commonCancel;
+
+  /// No description provided for @drawerLinkPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy'**
+  String get drawerLinkPrivacy;
+
+  /// No description provided for @drawerLinkTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms'**
+  String get drawerLinkTerms;
+
+  /// No description provided for @drawerLinkGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Guide'**
+  String get drawerLinkGuide;
+
   /// Shown inside the QR placeholder frame while the session is being created
   ///
   /// In en, this message translates to:
