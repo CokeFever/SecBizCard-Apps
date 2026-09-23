@@ -1180,4 +1180,97 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get historyStatusExpired => '만료됨';
+
+  @override
+  String get verifyEmailTitle => '이메일 인증';
+
+  @override
+  String emailVerifyCustomSent(String email) {
+    return '$email(으)로 인증 메일을 보냈습니다! 링크를 클릭하여 로그인 이메일을 업데이트하세요.';
+  }
+
+  @override
+  String get emailVerifySent => '인증 메일을 보냈습니다! 받은편지함을 확인하세요.';
+
+  @override
+  String get emailNotVerifiedYet =>
+      '이메일이 아직 인증되지 않았습니다. 받은편지함을 확인하고 인증 링크를 클릭하세요.';
+
+  @override
+  String get emailCheckYourEmail => '이메일을 확인하세요';
+
+  @override
+  String get emailVerifyYourEmail => '이메일 인증';
+
+  @override
+  String get emailSentBody => '인증 링크를 이메일로 보냈습니다. 링크를 클릭하여 이메일 주소를 인증하세요.';
+
+  @override
+  String get emailWillSendBody => '이메일 주소를 확인할 수 있는 인증 링크를 보내드립니다.';
+
+  @override
+  String get emailSendButton => '인증 메일 보내기';
+
+  @override
+  String get emailIveVerified => '인증했습니다';
+
+  @override
+  String get emailResend => '메일 다시 보내기';
+
+  @override
+  String get emailTips => '팁';
+
+  @override
+  String get emailTipsBody =>
+      '• 메일이 보이지 않으면 스팸함을 확인하세요\n• 인증 링크는 1시간 후 만료됩니다\n• 필요하면 메일을 다시 보낼 수 있습니다';
+
+  @override
+  String get verifyPhoneTitle => '전화번호 인증';
+
+  @override
+  String get phoneSmsTimeout =>
+      'SMS 요청이 시간 초과되었습니다. 번호가 이미 사용 중이거나 유효하지 않거나 서버에서 차단되었을 수 있습니다.';
+
+  @override
+  String get phoneEnter6Digit => '6자리 코드를 입력하세요';
+
+  @override
+  String get phoneVerifiedAuto => '전화번호가 자동으로 인증되었습니다!';
+
+  @override
+  String get phoneEnterNumber => '전화번호를 입력하세요';
+
+  @override
+  String get phoneWillSendSms => 'SMS로 인증 코드를 보내드립니다';
+
+  @override
+  String get phoneNumberLabel => '전화번호';
+
+  @override
+  String get phoneSendCode => '코드 보내기';
+
+  @override
+  String get phoneEnterCode => '인증 코드 입력';
+
+  @override
+  String phoneSentCodeTo(String phone) {
+    return '$phone(으)로 6자리 코드를 보냈습니다';
+  }
+
+  @override
+  String get phoneVerify => '인증';
+
+  @override
+  String get phoneDidntReceive => '코드를 받지 못하셨나요? ';
+
+  @override
+  String phoneResendIn(int seconds) {
+    return '$seconds초 후 다시 보내기';
+  }
+
+  @override
+  String get phoneResendCode => '코드 다시 보내기';
+
+  @override
+  String get phoneChangeNumber => '전화번호 변경';
 }

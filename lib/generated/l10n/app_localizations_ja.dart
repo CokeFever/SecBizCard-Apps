@@ -1179,4 +1179,97 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get historyStatusExpired => '期限切れ';
+
+  @override
+  String get verifyEmailTitle => 'メールを確認';
+
+  @override
+  String emailVerifyCustomSent(String email) {
+    return '$email に確認メールを送信しました！リンクをクリックしてログイン用メールを更新してください。';
+  }
+
+  @override
+  String get emailVerifySent => '確認メールを送信しました！受信トレイをご確認ください。';
+
+  @override
+  String get emailNotVerifiedYet =>
+      'メールはまだ確認されていません。受信トレイを確認し、確認リンクをクリックしてください。';
+
+  @override
+  String get emailCheckYourEmail => 'メールを確認してください';
+
+  @override
+  String get emailVerifyYourEmail => 'メールを確認';
+
+  @override
+  String get emailSentBody => '確認リンクをメールに送信しました。リンクをクリックしてメールアドレスを確認してください。';
+
+  @override
+  String get emailWillSendBody => 'メールアドレスを確認するための確認リンクを送信します。';
+
+  @override
+  String get emailSendButton => '確認メールを送信';
+
+  @override
+  String get emailIveVerified => '確認しました';
+
+  @override
+  String get emailResend => 'メールを再送信';
+
+  @override
+  String get emailTips => 'ヒント';
+
+  @override
+  String get emailTipsBody =>
+      '• メールが見当たらない場合は迷惑メールフォルダをご確認ください\n• 確認リンクは 1 時間後に失効します\n• 必要に応じてメールを再送信できます';
+
+  @override
+  String get verifyPhoneTitle => '電話番号を確認';
+
+  @override
+  String get phoneSmsTimeout =>
+      'SMS リクエストがタイムアウトしました。番号がすでに使用済み、無効、またはサーバーによってブロックされている可能性があります。';
+
+  @override
+  String get phoneEnter6Digit => '6 桁のコードを入力してください';
+
+  @override
+  String get phoneVerifiedAuto => '電話番号が自動的に確認されました！';
+
+  @override
+  String get phoneEnterNumber => '電話番号を入力';
+
+  @override
+  String get phoneWillSendSms => 'SMS で確認コードを送信します';
+
+  @override
+  String get phoneNumberLabel => '電話番号';
+
+  @override
+  String get phoneSendCode => 'コードを送信';
+
+  @override
+  String get phoneEnterCode => '確認コードを入力';
+
+  @override
+  String phoneSentCodeTo(String phone) {
+    return '$phone に 6 桁のコードを送信しました';
+  }
+
+  @override
+  String get phoneVerify => '確認';
+
+  @override
+  String get phoneDidntReceive => 'コードが届きませんか？ ';
+
+  @override
+  String phoneResendIn(int seconds) {
+    return '$seconds 秒後に再送信';
+  }
+
+  @override
+  String get phoneResendCode => 'コードを再送信';
+
+  @override
+  String get phoneChangeNumber => '電話番号を変更';
 }

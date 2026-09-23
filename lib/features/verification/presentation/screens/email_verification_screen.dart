@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/profile/data/profile_repository.dart';
 import 'package:secbizcard/features/verification/data/email_verification_repository.dart';
+import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 class EmailVerificationScreen extends ConsumerStatefulWidget {
   /// Optional custom email to verify (e.g., Work Email)
@@ -26,6 +27,7 @@ class _EmailVerificationScreenState
   String? _successMessage;
 
   Future<void> _sendVerificationEmail() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -54,8 +56,8 @@ class _EmailVerificationScreenState
         setState(() {
           _emailSent = true;
           _successMessage = isCustomEmail
-              ? 'Verification email sent to ${widget.customEmail}! Click the link to update your login email.'
-              : 'Verification email sent! Please check your inbox.';
+              ? l10n.emailVerifyCustomSent(widget.customEmail!)
+              : l10n.emailVerifySent;
           _isLoading = false;
         });
       },
@@ -63,6 +65,7 @@ class _EmailVerificationScreenState
   }
 
   Future<void> _checkVerificationStatus() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -117,8 +120,7 @@ class _EmailVerificationScreenState
           }
         } else {
           setState(() {
-            _errorMessage =
-                'Email not verified yet. Please check your inbox and click the verification link.';
+            _errorMessage = l10n.emailNotVerifiedYet;
             _isLoading = false;
           });
         }
@@ -132,10 +134,12 @@ class _EmailVerificationScreenState
     // Use custom email if provided, otherwise use Firebase Auth email
     final userEmail = widget.customEmail ?? repository.getUserEmail();
 
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Verify Email',
+          l10n.verifyEmailTitle,
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
         ),
       ),
@@ -151,7 +155,7 @@ class _EmailVerificationScreenState
             ),
             const SizedBox(height: 24),
             Text(
-              _emailSent ? 'Check your email' : 'Verify your email',
+              _emailSent ? l10n.emailCheckYourEmail : l10n.emailVerifyYourEmail,
               style: GoogleFonts.outfit(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -171,9 +175,7 @@ class _EmailVerificationScreenState
               ),
             const SizedBox(height: 16),
             Text(
-              _emailSent
-                  ? 'We sent a verification link to your email. Click the link to verify your email address.'
-                  : 'We\'ll send you a verification link to confirm your email address.',
+              _emailSent ? l10n.emailSentBody : l10n.emailWillSendBody,
               style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
@@ -236,7 +238,7 @@ class _EmailVerificationScreenState
                       )
                     : const Icon(Icons.send),
                 label: Text(
-                  'Send Verification Email',
+                  l10n.emailSendButton,
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -260,7 +262,7 @@ class _EmailVerificationScreenState
                       )
                     : const Icon(Icons.check),
                 label: Text(
-                  'I\'ve Verified',
+                  l10n.emailIveVerified,
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -278,7 +280,7 @@ class _EmailVerificationScreenState
                 onPressed: _isLoading ? null : _sendVerificationEmail,
                 icon: const Icon(Icons.refresh),
                 label: Text(
-                  'Resend Email',
+                  l10n.emailResend,
                   style: GoogleFonts.inter(fontSize: 14),
                 ),
                 style: OutlinedButton.styleFrom(
@@ -305,7 +307,7 @@ class _EmailVerificationScreenState
                       Icon(Icons.info_outline, color: Colors.blue.shade700),
                       const SizedBox(width: 8),
                       Text(
-                        'Tips',
+                        l10n.emailTips,
                         style: GoogleFonts.inter(
                           fontWeight: FontWeight.w600,
                           color: Colors.blue.shade700,
@@ -315,9 +317,7 @@ class _EmailVerificationScreenState
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '• Check your spam folder if you don\'t see the email\n'
-                    '• The verification link expires after 1 hour\n'
-                    '• You can resend the email if needed',
+                    l10n.emailTipsBody,
                     style: GoogleFonts.inter(
                       fontSize: 13,
                       color: Colors.blue.shade900,

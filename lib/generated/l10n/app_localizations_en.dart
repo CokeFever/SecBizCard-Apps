@@ -1205,4 +1205,100 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get historyStatusExpired => 'Expired';
+
+  @override
+  String get verifyEmailTitle => 'Verify Email';
+
+  @override
+  String emailVerifyCustomSent(String email) {
+    return 'Verification email sent to $email! Click the link to update your login email.';
+  }
+
+  @override
+  String get emailVerifySent =>
+      'Verification email sent! Please check your inbox.';
+
+  @override
+  String get emailNotVerifiedYet =>
+      'Email not verified yet. Please check your inbox and click the verification link.';
+
+  @override
+  String get emailCheckYourEmail => 'Check your email';
+
+  @override
+  String get emailVerifyYourEmail => 'Verify your email';
+
+  @override
+  String get emailSentBody =>
+      'We sent a verification link to your email. Click the link to verify your email address.';
+
+  @override
+  String get emailWillSendBody =>
+      'We\'ll send you a verification link to confirm your email address.';
+
+  @override
+  String get emailSendButton => 'Send Verification Email';
+
+  @override
+  String get emailIveVerified => 'I\'ve Verified';
+
+  @override
+  String get emailResend => 'Resend Email';
+
+  @override
+  String get emailTips => 'Tips';
+
+  @override
+  String get emailTipsBody =>
+      '• Check your spam folder if you don\'t see the email\n• The verification link expires after 1 hour\n• You can resend the email if needed';
+
+  @override
+  String get verifyPhoneTitle => 'Verify Phone Number';
+
+  @override
+  String get phoneSmsTimeout =>
+      'SMS request timed out. The number might be already used, invalid, or blocked by the server.';
+
+  @override
+  String get phoneEnter6Digit => 'Please enter 6-digit code';
+
+  @override
+  String get phoneVerifiedAuto => 'Phone verified automatically!';
+
+  @override
+  String get phoneEnterNumber => 'Enter your phone number';
+
+  @override
+  String get phoneWillSendSms => 'We\'ll send you a verification code via SMS';
+
+  @override
+  String get phoneNumberLabel => 'Phone Number';
+
+  @override
+  String get phoneSendCode => 'Send Code';
+
+  @override
+  String get phoneEnterCode => 'Enter verification code';
+
+  @override
+  String phoneSentCodeTo(String phone) {
+    return 'We sent a 6-digit code to $phone';
+  }
+
+  @override
+  String get phoneVerify => 'Verify';
+
+  @override
+  String get phoneDidntReceive => 'Didn\'t receive the code? ';
+
+  @override
+  String phoneResendIn(int seconds) {
+    return 'Resend in ${seconds}s';
+  }
+
+  @override
+  String get phoneResendCode => 'Resend Code';
+
+  @override
+  String get phoneChangeNumber => 'Change phone number';
 }
