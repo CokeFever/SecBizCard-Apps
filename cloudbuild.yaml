@@ -44,8 +44,12 @@ steps:
 
         # 限制 Gradle 記憶體使用，避免在 8GB 機器上 OOM (GCP Quota 限制無法用 32GB 機器)
         # 設定更大的堆疊限制並嘗試關閉 daemon
-        export GRADLE_OPTS="-Xmx3g -XX:MaxMetaspaceSize=512m -Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Dorg.gradle.workers.max=1"
-        export JAVA_OPTS="-Xmx3g"
+        # Keep the Gradle client JVM small; the build/daemon JVM heap is set in
+        # android/gradle.properties (-Xmx2560m). Both must fit the 8GB machine
+        # alongside the Kotlin compiler. Do NOT raise these without also bumping
+        # machineType — adding purchases_flutter already OOM-killed the daemon.
+        export GRADLE_OPTS="-Xmx1536m -Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Dorg.gradle.workers.max=1"
+        export JAVA_OPTS="-Xmx1536m"
         
         # 預先安裝必要的 SDK 組件，避免在 Gradle 執行中途觸發下載導致 OOM
         echo "Updating Android SDK components..."
