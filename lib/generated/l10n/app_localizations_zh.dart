@@ -605,6 +605,84 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ocrFeedbackFailed => '反馈发送失败，请稍后再试。';
+
+  @override
+  String get editProfileTitle => '编辑个人资料';
+
+  @override
+  String get editProfilePhoneResetWarn => '⚠️ 已修改已验证的电话，保存后验证将被重置。';
+
+  @override
+  String get editProfileReverifyHint => '⚠️ 修改此项后需要重新验证';
+
+  @override
+  String get editProfileEditPhoto => '编辑照片';
+
+  @override
+  String get editProfileChooseImageSource => '选择图片来源';
+
+  @override
+  String get editProfileGallery => '相册';
+
+  @override
+  String get editProfileCamera => '相机';
+
+  @override
+  String get editProfileVerificationResetTitle => '验证将被重置';
+
+  @override
+  String get editProfileVerificationResetBody =>
+      '您正在更改已验证的电话号码，这会重置验证状态，您需要重新验证新的号码。';
+
+  @override
+  String get editProfileContinue => '继续';
+
+  @override
+  String get editProfileFullName => '姓名';
+
+  @override
+  String get editProfileNameRequired => '姓名为必填';
+
+  @override
+  String get editProfileJobTitle => '职务';
+
+  @override
+  String get editProfileCompany => '公司';
+
+  @override
+  String get editProfilePhone => '电话';
+
+  @override
+  String get editProfileAdditionalInfo => '其他信息';
+
+  @override
+  String get editProfileAddField => '添加字段';
+
+  @override
+  String get editProfileTapToChangePhoto => '点击以更换照片';
+
+  @override
+  String get editProfileBusinessCards => '名片';
+
+  @override
+  String get editProfileFrontSide => '正面';
+
+  @override
+  String get editProfileBackSide => '背面';
+
+  @override
+  String editProfileUpload(String label) {
+    return '上传$label';
+  }
+
+  @override
+  String get editProfileFieldTypeLabel => '类型';
+
+  @override
+  String get editProfileFieldLabelLabel => '标签';
+
+  @override
+  String get editProfileAdd => '添加';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -1208,4 +1286,82 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ocrFeedbackFailed => '回饋送出失敗，請稍後再試。';
+
+  @override
+  String get editProfileTitle => '編輯個人資料';
+
+  @override
+  String get editProfilePhoneResetWarn => '⚠️ 已修改已驗證的電話，儲存後驗證將被重設。';
+
+  @override
+  String get editProfileReverifyHint => '⚠️ 修改此項後需要重新驗證';
+
+  @override
+  String get editProfileEditPhoto => '編輯相片';
+
+  @override
+  String get editProfileChooseImageSource => '選擇圖片來源';
+
+  @override
+  String get editProfileGallery => '相簿';
+
+  @override
+  String get editProfileCamera => '相機';
+
+  @override
+  String get editProfileVerificationResetTitle => '驗證將被重設';
+
+  @override
+  String get editProfileVerificationResetBody =>
+      '您正在變更已驗證的電話號碼，這會重設驗證狀態，您需要重新驗證新的號碼。';
+
+  @override
+  String get editProfileContinue => '繼續';
+
+  @override
+  String get editProfileFullName => '姓名';
+
+  @override
+  String get editProfileNameRequired => '姓名為必填';
+
+  @override
+  String get editProfileJobTitle => '職稱';
+
+  @override
+  String get editProfileCompany => '公司';
+
+  @override
+  String get editProfilePhone => '電話';
+
+  @override
+  String get editProfileAdditionalInfo => '其他資訊';
+
+  @override
+  String get editProfileAddField => '新增欄位';
+
+  @override
+  String get editProfileTapToChangePhoto => '點擊以更換相片';
+
+  @override
+  String get editProfileBusinessCards => '名片';
+
+  @override
+  String get editProfileFrontSide => '正面';
+
+  @override
+  String get editProfileBackSide => '背面';
+
+  @override
+  String editProfileUpload(String label) {
+    return '上傳$label';
+  }
+
+  @override
+  String get editProfileFieldTypeLabel => '類型';
+
+  @override
+  String get editProfileFieldLabelLabel => '標籤';
+
+  @override
+  String get editProfileAdd => '新增';
 }

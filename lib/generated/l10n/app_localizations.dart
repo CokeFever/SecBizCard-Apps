@@ -1218,6 +1218,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t send feedback. Please try again later.'**
   String get ocrFeedbackFailed;
+
+  /// App bar title on the edit profile screen
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Profile'**
+  String get editProfileTitle;
+
+  /// Snackbar when a verified phone number is edited
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ Verified phone modified. Verification will be reset on save.'**
+  String get editProfilePhoneResetWarn;
+
+  /// Inline hint under a verified field when focused
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ Modifying this will require re-verification'**
+  String get editProfileReverifyHint;
+
+  /// Image cropper toolbar title
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Photo'**
+  String get editProfileEditPhoto;
+
+  /// Dialog title for picking image source
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Image Source'**
+  String get editProfileChooseImageSource;
+
+  /// Image source option: pick from gallery
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get editProfileGallery;
+
+  /// Image source option: take a photo
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get editProfileCamera;
+
+  /// Dialog title when saving a changed verified phone
+  ///
+  /// In en, this message translates to:
+  /// **'Verification Will Be Reset'**
+  String get editProfileVerificationResetTitle;
+
+  /// Dialog body when saving a changed verified phone
+  ///
+  /// In en, this message translates to:
+  /// **'You are changing a verified phone number. This will reset the verification status and you will need to verify the new number.'**
+  String get editProfileVerificationResetBody;
+
+  /// Confirm button to proceed with resetting verification
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get editProfileContinue;
+
+  /// Label for the full name field
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get editProfileFullName;
+
+  /// Validation error when name is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Name is required'**
+  String get editProfileNameRequired;
+
+  /// Label for the job title field
+  ///
+  /// In en, this message translates to:
+  /// **'Job Title'**
+  String get editProfileJobTitle;
+
+  /// Label for the company field
+  ///
+  /// In en, this message translates to:
+  /// **'Company'**
+  String get editProfileCompany;
+
+  /// Label for the phone field
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get editProfilePhone;
+
+  /// Section header for custom fields
+  ///
+  /// In en, this message translates to:
+  /// **'Additional Info'**
+  String get editProfileAdditionalInfo;
+
+  /// Button and dialog title to add a custom field
+  ///
+  /// In en, this message translates to:
+  /// **'Add Field'**
+  String get editProfileAddField;
+
+  /// Hint below the avatar
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to change photo'**
+  String get editProfileTapToChangePhoto;
+
+  /// Section header for card images
+  ///
+  /// In en, this message translates to:
+  /// **'Business Cards'**
+  String get editProfileBusinessCards;
+
+  /// Label for the front card image picker
+  ///
+  /// In en, this message translates to:
+  /// **'Front Side'**
+  String get editProfileFrontSide;
+
+  /// Label for the back card image picker
+  ///
+  /// In en, this message translates to:
+  /// **'Back Side'**
+  String get editProfileBackSide;
+
+  /// Placeholder text inside an empty card image picker
+  ///
+  /// In en, this message translates to:
+  /// **'Upload {label}'**
+  String editProfileUpload(String label);
+
+  /// Label for the field-category dropdown in Add Field dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get editProfileFieldTypeLabel;
+
+  /// Label for the field-label dropdown in Add Field dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get editProfileFieldLabelLabel;
+
+  /// Confirm button in the Add Field dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get editProfileAdd;
 }
 
 class _AppLocalizationsDelegate

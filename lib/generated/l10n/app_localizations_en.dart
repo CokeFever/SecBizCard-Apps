@@ -631,4 +631,84 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get ocrFeedbackFailed =>
       'Couldn\'t send feedback. Please try again later.';
+
+  @override
+  String get editProfileTitle => 'Edit Profile';
+
+  @override
+  String get editProfilePhoneResetWarn =>
+      '⚠️ Verified phone modified. Verification will be reset on save.';
+
+  @override
+  String get editProfileReverifyHint =>
+      '⚠️ Modifying this will require re-verification';
+
+  @override
+  String get editProfileEditPhoto => 'Edit Photo';
+
+  @override
+  String get editProfileChooseImageSource => 'Choose Image Source';
+
+  @override
+  String get editProfileGallery => 'Gallery';
+
+  @override
+  String get editProfileCamera => 'Camera';
+
+  @override
+  String get editProfileVerificationResetTitle => 'Verification Will Be Reset';
+
+  @override
+  String get editProfileVerificationResetBody =>
+      'You are changing a verified phone number. This will reset the verification status and you will need to verify the new number.';
+
+  @override
+  String get editProfileContinue => 'Continue';
+
+  @override
+  String get editProfileFullName => 'Full Name';
+
+  @override
+  String get editProfileNameRequired => 'Name is required';
+
+  @override
+  String get editProfileJobTitle => 'Job Title';
+
+  @override
+  String get editProfileCompany => 'Company';
+
+  @override
+  String get editProfilePhone => 'Phone';
+
+  @override
+  String get editProfileAdditionalInfo => 'Additional Info';
+
+  @override
+  String get editProfileAddField => 'Add Field';
+
+  @override
+  String get editProfileTapToChangePhoto => 'Tap to change photo';
+
+  @override
+  String get editProfileBusinessCards => 'Business Cards';
+
+  @override
+  String get editProfileFrontSide => 'Front Side';
+
+  @override
+  String get editProfileBackSide => 'Back Side';
+
+  @override
+  String editProfileUpload(String label) {
+    return 'Upload $label';
+  }
+
+  @override
+  String get editProfileFieldTypeLabel => 'Type';
+
+  @override
+  String get editProfileFieldLabelLabel => 'Label';
+
+  @override
+  String get editProfileAdd => 'Add';
 }

@@ -613,4 +613,83 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get ocrFeedbackFailed => '피드백을 보내지 못했습니다. 나중에 다시 시도해 주세요.';
+
+  @override
+  String get editProfileTitle => '프로필 편집';
+
+  @override
+  String get editProfilePhoneResetWarn =>
+      '⚠️ 인증된 전화번호가 변경되었습니다. 저장하면 인증이 초기화됩니다.';
+
+  @override
+  String get editProfileReverifyHint => '⚠️ 이 항목을 변경하면 재인증이 필요합니다';
+
+  @override
+  String get editProfileEditPhoto => '사진 편집';
+
+  @override
+  String get editProfileChooseImageSource => '이미지 소스 선택';
+
+  @override
+  String get editProfileGallery => '갤러리';
+
+  @override
+  String get editProfileCamera => '카메라';
+
+  @override
+  String get editProfileVerificationResetTitle => '인증이 초기화됩니다';
+
+  @override
+  String get editProfileVerificationResetBody =>
+      '인증된 전화번호를 변경하려고 합니다. 인증 상태가 초기화되며 새 번호를 다시 인증해야 합니다.';
+
+  @override
+  String get editProfileContinue => '계속';
+
+  @override
+  String get editProfileFullName => '이름';
+
+  @override
+  String get editProfileNameRequired => '이름은 필수입니다';
+
+  @override
+  String get editProfileJobTitle => '직책';
+
+  @override
+  String get editProfileCompany => '회사';
+
+  @override
+  String get editProfilePhone => '전화';
+
+  @override
+  String get editProfileAdditionalInfo => '추가 정보';
+
+  @override
+  String get editProfileAddField => '필드 추가';
+
+  @override
+  String get editProfileTapToChangePhoto => '탭하여 사진 변경';
+
+  @override
+  String get editProfileBusinessCards => '명함';
+
+  @override
+  String get editProfileFrontSide => '앞면';
+
+  @override
+  String get editProfileBackSide => '뒷면';
+
+  @override
+  String editProfileUpload(String label) {
+    return '$label 업로드';
+  }
+
+  @override
+  String get editProfileFieldTypeLabel => '유형';
+
+  @override
+  String get editProfileFieldLabelLabel => '라벨';
+
+  @override
+  String get editProfileAdd => '추가';
 }

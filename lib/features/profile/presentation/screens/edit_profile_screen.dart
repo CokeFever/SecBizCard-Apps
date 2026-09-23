@@ -19,6 +19,7 @@ import 'package:secbizcard/features/profile/presentation/controllers/edit_profil
 import 'package:intl/intl.dart';
 import 'package:secbizcard/core/utils/field_formatter.dart';
 import 'package:secbizcard/core/utils/dialog_utils.dart';
+import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 import 'package:secbizcard/features/storage/data/drive_repository.dart';
 import 'package:secbizcard/core/presentation/widgets/full_screen_image_viewer.dart';
@@ -138,8 +139,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         if (isModified && widget.user.phoneVerified) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text(
-                '⚠️ Verified phone modified. Verification will be reset on save.',
+              content: Text(
+                AppLocalizations.of(context)!.editProfilePhoneResetWarn,
               ),
               backgroundColor: Colors.orange.shade800,
               duration: const Duration(seconds: 3),
@@ -213,7 +214,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 Padding(
                   padding: const EdgeInsets.only(left: 16, top: 4),
                   child: Text(
-                    '⚠️ Modifying this will require re-verification',
+                    AppLocalizations.of(context)!.editProfileReverifyHint,
                     style: TextStyle(
                       fontSize: 11,
                       color: Colors.orange[700],
@@ -254,13 +255,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       // aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1), // Optional: force square
       uiSettings: [
         AndroidUiSettings(
-          toolbarTitle: 'Edit Photo',
+          toolbarTitle: AppLocalizations.of(context)!.editProfileEditPhoto,
           toolbarColor: Theme.of(context).primaryColor,
           toolbarWidgetColor: Colors.white,
           initAspectRatio: CropAspectRatioPreset.square,
           lockAspectRatio: false,
         ),
-        IOSUiSettings(title: 'Edit Photo'),
+        IOSUiSettings(title: AppLocalizations.of(context)!.editProfileEditPhoto),
       ],
     );
 
@@ -273,16 +274,17 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   void _showImageSourceDialog() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Choose Image Source'),
+        title: Text(l10n.editProfileChooseImageSource),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Gallery'),
+              title: Text(l10n.editProfileGallery),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(ImageSource.gallery);
@@ -290,7 +292,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('Camera'),
+              title: Text(l10n.editProfileCamera),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(ImageSource.camera);
@@ -377,23 +379,21 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
       // If phone was verified and is now changed, ask for confirmation
       if (phoneChanged && wasPhoneVerified) {
+        final l10n = AppLocalizations.of(context)!;
         final shouldContinue = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Verification Will Be Reset'),
-            content: const Text(
-              'You are changing a verified phone number. '
-              'This will reset the verification status and you will need to verify the new number.',
-            ),
+            title: Text(l10n.editProfileVerificationResetTitle),
+            content: Text(l10n.editProfileVerificationResetBody),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
+                child: Text(l10n.commonCancel),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
                 style: TextButton.styleFrom(foregroundColor: Colors.orange),
-                child: const Text('Continue'),
+                child: Text(l10n.editProfileContinue),
               ),
             ],
           ),
@@ -475,7 +475,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
           title: Text(
-            'Edit Profile',
+            AppLocalizations.of(context)!.editProfileTitle,
             style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
           ),
           actions: [
@@ -507,28 +507,29 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
               _buildTextField(
                 controller: _nameController,
-                label: 'Full Name',
+                label: AppLocalizations.of(context)!.editProfileFullName,
                 icon: Icons.person,
-                validator: (v) =>
-                    v == null || v.isEmpty ? 'Name is required' : null,
+                validator: (v) => v == null || v.isEmpty
+                    ? AppLocalizations.of(context)!.editProfileNameRequired
+                    : null,
               ),
               const SizedBox(height: 16),
               _buildTextField(
                 controller: _titleController,
-                label: 'Job Title',
+                label: AppLocalizations.of(context)!.editProfileJobTitle,
                 icon: Icons.work,
               ),
               const SizedBox(height: 16),
               _buildTextField(
                 controller: _companyController,
-                label: 'Company',
+                label: AppLocalizations.of(context)!.editProfileCompany,
                 icon: Icons.business,
               ),
               const SizedBox(height: 16),
               // Phone field with verification indicator
               _buildVerifiableField(
                 controller: _phoneController,
-                label: 'Phone',
+                label: AppLocalizations.of(context)!.editProfilePhone,
                 icon: Icons.phone,
                 keyboardType: TextInputType.phone,
                 isVerified: widget.user.phoneVerified,
@@ -540,7 +541,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Additional Info',
+                    AppLocalizations.of(context)!.editProfileAdditionalInfo,
                     style: GoogleFonts.inter(
                       fontWeight: FontWeight.w600,
                       color: theme.hintColor,
@@ -583,7 +584,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               OutlinedButton.icon(
                 onPressed: _addCustomField,
                 icon: const Icon(Icons.add),
-                label: const Text('Add Field'),
+                label: Text(AppLocalizations.of(context)!.editProfileAddField),
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 48),
                   side: BorderSide(color: theme.dividerColor),
@@ -684,7 +685,7 @@ Widget _buildAvatarSection() {
         ),
         const SizedBox(height: 12),
         Text(
-          'Tap to change photo',
+          AppLocalizations.of(context)!.editProfileTapToChangePhoto,
           style: TextStyle(color: theme.hintColor, fontSize: 14),
         ),
       ],
@@ -748,7 +749,7 @@ Widget _buildAvatarSection() {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Business Cards',
+          AppLocalizations.of(context)!.editProfileBusinessCards,
           style: GoogleFonts.inter(
             fontWeight: FontWeight.w600,
             color: theme.hintColor,
@@ -759,7 +760,7 @@ Widget _buildAvatarSection() {
           children: [
             Expanded(
               child: _buildCardPicker(
-                label: 'Front Side',
+                label: AppLocalizations.of(context)!.editProfileFrontSide,
                 imageFile: _cardFrontImage,
                 remotePath: widget.user.cardFrontPath,
                 driveFileId: widget.user.cardFrontDriveFileId,
@@ -774,7 +775,7 @@ Widget _buildAvatarSection() {
             const SizedBox(width: 16),
             Expanded(
               child: _buildCardPicker(
-                label: 'Back Side',
+                label: AppLocalizations.of(context)!.editProfileBackSide,
                 imageFile: _cardBackImage,
                 remotePath: widget.user.cardBackPath,
                 driveFileId: widget.user.cardBackDriveFileId,
@@ -876,7 +877,7 @@ Widget _buildAvatarSection() {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Upload $label',
+                          AppLocalizations.of(context)!.editProfileUpload(label),
                           style: TextStyle(
                             color: theme.colorScheme.primary.withValues(alpha: 0.6),
                             fontSize: 12,
@@ -976,14 +977,15 @@ class _AddFieldDialogState extends State<_AddFieldDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('Add Field'),
+      title: Text(l10n.editProfileAddField),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           DropdownButtonFormField<String>(
             initialValue: _selectedCategory,
-            decoration: const InputDecoration(labelText: 'Type'),
+            decoration: InputDecoration(labelText: l10n.editProfileFieldTypeLabel),
             items: widget.fieldTypes.keys.map((type) {
               return DropdownMenuItem(value: type, child: Text(type));
             }).toList(),
@@ -997,7 +999,7 @@ class _AddFieldDialogState extends State<_AddFieldDialog> {
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
             initialValue: _selectedLabel,
-            decoration: const InputDecoration(labelText: 'Label'),
+            decoration: InputDecoration(labelText: l10n.editProfileFieldLabelLabel),
             items: widget.fieldTypes[_selectedCategory]!.map((label) {
               return DropdownMenuItem(value: label, child: Text(label));
             }).toList(),
@@ -1012,7 +1014,7 @@ class _AddFieldDialogState extends State<_AddFieldDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n.commonCancel),
         ),
         FilledButton(
           onPressed: () {
@@ -1021,7 +1023,7 @@ class _AddFieldDialogState extends State<_AddFieldDialog> {
               'label': _selectedLabel!,
             });
           },
-          child: const Text('Add'),
+          child: Text(l10n.editProfileAdd),
         ),
       ],
     );

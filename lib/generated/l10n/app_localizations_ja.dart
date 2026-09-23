@@ -612,4 +612,83 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ocrFeedbackFailed => 'フィードバックを送信できませんでした。後でもう一度お試しください。';
+
+  @override
+  String get editProfileTitle => 'プロフィールを編集';
+
+  @override
+  String get editProfilePhoneResetWarn =>
+      '⚠️ 認証済みの電話番号が変更されました。保存すると認証がリセットされます。';
+
+  @override
+  String get editProfileReverifyHint => '⚠️ これを変更すると再認証が必要になります';
+
+  @override
+  String get editProfileEditPhoto => '写真を編集';
+
+  @override
+  String get editProfileChooseImageSource => '画像の取得元を選択';
+
+  @override
+  String get editProfileGallery => 'ギャラリー';
+
+  @override
+  String get editProfileCamera => 'カメラ';
+
+  @override
+  String get editProfileVerificationResetTitle => '認証がリセットされます';
+
+  @override
+  String get editProfileVerificationResetBody =>
+      '認証済みの電話番号を変更しようとしています。認証状態がリセットされ、新しい番号を再認証する必要があります。';
+
+  @override
+  String get editProfileContinue => '続行';
+
+  @override
+  String get editProfileFullName => '氏名';
+
+  @override
+  String get editProfileNameRequired => '氏名は必須です';
+
+  @override
+  String get editProfileJobTitle => '役職';
+
+  @override
+  String get editProfileCompany => '会社';
+
+  @override
+  String get editProfilePhone => '電話';
+
+  @override
+  String get editProfileAdditionalInfo => 'その他の情報';
+
+  @override
+  String get editProfileAddField => '項目を追加';
+
+  @override
+  String get editProfileTapToChangePhoto => 'タップして写真を変更';
+
+  @override
+  String get editProfileBusinessCards => '名刺';
+
+  @override
+  String get editProfileFrontSide => '表面';
+
+  @override
+  String get editProfileBackSide => '裏面';
+
+  @override
+  String editProfileUpload(String label) {
+    return '$labelをアップロード';
+  }
+
+  @override
+  String get editProfileFieldTypeLabel => '種類';
+
+  @override
+  String get editProfileFieldLabelLabel => 'ラベル';
+
+  @override
+  String get editProfileAdd => '追加';
 }
