@@ -290,6 +290,12 @@ void _warmUpCloudFunctions(Ref ref) {
     // screen. Eagerly initialize the otherwise-lazy sync provider.
     ref.read(subscriptionSyncProvider);
 
+    // Bind RevenueCat's app-user-id to the Firebase uid (init at startup ran
+    // before auth restored, so RevenueCat is anonymous until we log it in).
+    // Without this, purchases attach to an anonymous id and the backend never
+    // maps the subscription to the user → tier stays "basic".
+    ref.read(subscriptionIdentitySyncProvider);
+
     debugPrint('[Router] Cloud Functions + OCR usage warm-up triggered');
   } catch (e) {
     debugPrint('[Router] Warm-up error (non-fatal): $e');
