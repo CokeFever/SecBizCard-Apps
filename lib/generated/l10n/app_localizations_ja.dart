@@ -1272,4 +1272,51 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get phoneChangeNumber => '電話番号を変更';
+
+  @override
+  String get contextSettingsTitle => 'カードコンテキスト';
+
+  @override
+  String contextSettingsErrorSaving(String error) {
+    return '保存中にエラーが発生しました：$error';
+  }
+
+  @override
+  String get contextSettingsSaved => 'コンテキストを保存しました';
+
+  @override
+  String get contextSettingsIntro => 'コンテキストごとに共有する情報をカスタマイズ';
+
+  @override
+  String get contextSettingsBusinessDesc => 'すべての業務情報';
+
+  @override
+  String get contextSettingsSocialDesc => '仕事の詳細を含まない個人連絡先';
+
+  @override
+  String get contextSettingsLiteDesc => '最小限の情報のみ';
+
+  @override
+  String get contextSettingsToggleName => '氏名';
+
+  @override
+  String get contextSettingsToggleEmail => 'メール';
+
+  @override
+  String get contextSettingsTogglePhone => '電話';
+
+  @override
+  String get contextSettingsToggleJobTitle => '役職';
+
+  @override
+  String get contextSettingsToggleCompany => '会社';
+
+  @override
+  String get contextSettingsToggleAvatar => 'アバター';
+
+  @override
+  String get contextSettingsToggleCardFront => '名刺の表面';
+
+  @override
+  String get contextSettingsToggleCardBack => '名刺の裏面';
 }

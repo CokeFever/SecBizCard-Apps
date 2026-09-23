@@ -9,6 +9,7 @@ import 'package:secbizcard/core/utils/dialog_utils.dart';
 import 'package:secbizcard/features/profile/data/profile_repository.dart';
 import 'package:secbizcard/features/profile/domain/card_context.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
+import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 class ContextSettingsScreen extends ConsumerStatefulWidget {
   final UserProfile user;
@@ -110,6 +111,7 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
   }
 
   Future<void> _saveContexts() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _isSaving = true;
     });
@@ -131,12 +133,12 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
         result.fold(
           (failure) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error saving: ${failure.message}')),
+              SnackBar(content: Text(l10n.contextSettingsErrorSaving(failure.message))),
             );
           },
           (_) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Contexts saved successfully')),
+              SnackBar(content: Text(l10n.contextSettingsSaved)),
             );
             Navigator.pop(context);
           },
@@ -153,6 +155,7 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final hasChanges = _hasChanges;
 
     return PopScope(
@@ -168,7 +171,7 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
           title: Text(
-            'Card Contexts',
+            l10n.contextSettingsTitle,
             style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
           ),
           actions: [
@@ -190,7 +193,7 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           Text(
-            'Customize what information to share in different contexts',
+            l10n.contextSettingsIntro,
             style: GoogleFonts.inter(
               fontSize: 14,
               color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
@@ -212,6 +215,7 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
   Widget _buildContextCard(ContextType type) {
     final cardContext = _contexts[type]!;
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final String title;
     final String description;
     final IconData icon;
@@ -219,20 +223,20 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
 
     switch (type) {
       case ContextType.business:
-        title = 'Business';
-        description = 'Full professional information';
+        title = l10n.handshakeContextBusiness;
+        description = l10n.contextSettingsBusinessDesc;
         icon = Icons.business_center;
         color = Colors.blue;
         break;
       case ContextType.social:
-        title = 'Social';
-        description = 'Personal contact without work details';
+        title = l10n.handshakeContextSocial;
+        description = l10n.contextSettingsSocialDesc;
         icon = Icons.people;
         color = Colors.green;
         break;
       case ContextType.lite:
-        title = 'Lite';
-        description = 'Minimal information only';
+        title = l10n.handshakeContextLite;
+        description = l10n.contextSettingsLiteDesc;
         icon = Icons.person_outline;
         color = Colors.orange;
         break;
@@ -269,7 +273,7 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildToggle(
-                  'Name',
+                  l10n.contextSettingsToggleName,
                   cardContext.showName,
                   (value) => _updateContext(
                     type,
@@ -278,7 +282,7 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
                   icon: Icons.person_outline,
                 ),
                 _buildToggle(
-                  'Email',
+                  l10n.contextSettingsToggleEmail,
                   cardContext.showEmail,
                   (value) => _updateContext(
                     type,
@@ -287,7 +291,7 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
                   icon: Icons.email_outlined,
                 ),
                 _buildToggle(
-                  'Phone',
+                  l10n.contextSettingsTogglePhone,
                   cardContext.showPhone,
                   (value) => _updateContext(
                     type,
@@ -296,7 +300,7 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
                   icon: Icons.phone_outlined,
                 ),
                 _buildToggle(
-                  'Job Title',
+                  l10n.contextSettingsToggleJobTitle,
                   cardContext.showTitle,
                   (value) => _updateContext(
                     type,
@@ -305,7 +309,7 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
                   icon: Icons.work_outline,
                 ),
                 _buildToggle(
-                  'Company',
+                  l10n.contextSettingsToggleCompany,
                   cardContext.showCompany,
                   (value) => _updateContext(
                     type,
@@ -314,7 +318,7 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
                   icon: Icons.business_outlined,
                 ),
                 _buildToggle(
-                  'Avatar',
+                  l10n.contextSettingsToggleAvatar,
                   cardContext.showAvatar,
                   (value) => _updateContext(
                     type,
@@ -324,7 +328,7 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
                 ),
                 if (widget.user.cardFrontPath != null || widget.user.cardFrontDriveFileId != null)
                   _buildToggle(
-                    'Business Card Front',
+                    l10n.contextSettingsToggleCardFront,
                     cardContext.showCardFront,
                     (value) => _updateContext(
                       type,
@@ -334,7 +338,7 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
                   ),
                 if (widget.user.cardBackPath != null || widget.user.cardBackDriveFileId != null)
                   _buildToggle(
-                    'Business Card Back',
+                    l10n.contextSettingsToggleCardBack,
                     cardContext.showCardBack,
                     (value) => _updateContext(
                       type,
@@ -347,7 +351,7 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
                 if (widget.user.customFields.isNotEmpty) ...[
                   const Divider(height: 32),
                   Text(
-                    'Additional Info',
+                    l10n.editProfileAdditionalInfo,
                     style: GoogleFonts.inter(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,

@@ -2424,6 +2424,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Change phone number'**
   String get phoneChangeNumber;
+
+  /// No description provided for @contextSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Card Contexts'**
+  String get contextSettingsTitle;
+
+  /// No description provided for @contextSettingsErrorSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Error saving: {error}'**
+  String contextSettingsErrorSaving(String error);
+
+  /// No description provided for @contextSettingsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Contexts saved successfully'**
+  String get contextSettingsSaved;
+
+  /// No description provided for @contextSettingsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize what information to share in different contexts'**
+  String get contextSettingsIntro;
+
+  /// No description provided for @contextSettingsBusinessDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Full professional information'**
+  String get contextSettingsBusinessDesc;
+
+  /// No description provided for @contextSettingsSocialDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal contact without work details'**
+  String get contextSettingsSocialDesc;
+
+  /// No description provided for @contextSettingsLiteDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimal information only'**
+  String get contextSettingsLiteDesc;
+
+  /// No description provided for @contextSettingsToggleName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get contextSettingsToggleName;
+
+  /// No description provided for @contextSettingsToggleEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get contextSettingsToggleEmail;
+
+  /// No description provided for @contextSettingsTogglePhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get contextSettingsTogglePhone;
+
+  /// No description provided for @contextSettingsToggleJobTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Job Title'**
+  String get contextSettingsToggleJobTitle;
+
+  /// No description provided for @contextSettingsToggleCompany.
+  ///
+  /// In en, this message translates to:
+  /// **'Company'**
+  String get contextSettingsToggleCompany;
+
+  /// No description provided for @contextSettingsToggleAvatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Avatar'**
+  String get contextSettingsToggleAvatar;
+
+  /// No description provided for @contextSettingsToggleCardFront.
+  ///
+  /// In en, this message translates to:
+  /// **'Business Card Front'**
+  String get contextSettingsToggleCardFront;
+
+  /// No description provided for @contextSettingsToggleCardBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Business Card Back'**
+  String get contextSettingsToggleCardBack;
 }
 
 class _AppLocalizationsDelegate

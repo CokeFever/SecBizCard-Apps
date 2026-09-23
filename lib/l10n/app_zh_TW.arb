@@ -386,5 +386,20 @@
   "phoneDidntReceive": "沒有收到驗證碼？ ",
   "phoneResendIn": "{seconds} 秒後可重新寄送",
   "phoneResendCode": "重新寄送驗證碼",
-  "phoneChangeNumber": "更改電話號碼"
+  "phoneChangeNumber": "更改電話號碼",
+  "contextSettingsTitle": "名片情境",
+  "contextSettingsErrorSaving": "儲存時發生錯誤：{error}",
+  "contextSettingsSaved": "情境已成功儲存",
+  "contextSettingsIntro": "自訂在不同情境下要分享的資訊",
+  "contextSettingsBusinessDesc": "完整的專業資訊",
+  "contextSettingsSocialDesc": "不含工作細節的個人聯絡方式",
+  "contextSettingsLiteDesc": "僅最少量的資訊",
+  "contextSettingsToggleName": "姓名",
+  "contextSettingsToggleEmail": "電子郵件",
+  "contextSettingsTogglePhone": "電話",
+  "contextSettingsToggleJobTitle": "職稱",
+  "contextSettingsToggleCompany": "公司",
+  "contextSettingsToggleAvatar": "頭像",
+  "contextSettingsToggleCardFront": "名片正面",
+  "contextSettingsToggleCardBack": "名片背面"
 }

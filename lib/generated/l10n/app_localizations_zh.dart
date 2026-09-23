@@ -1257,6 +1257,53 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get phoneChangeNumber => '更改电话号码';
+
+  @override
+  String get contextSettingsTitle => '名片情境';
+
+  @override
+  String contextSettingsErrorSaving(String error) {
+    return '保存时出错：$error';
+  }
+
+  @override
+  String get contextSettingsSaved => '情境已成功保存';
+
+  @override
+  String get contextSettingsIntro => '自定义在不同情境下要分享的信息';
+
+  @override
+  String get contextSettingsBusinessDesc => '完整的专业信息';
+
+  @override
+  String get contextSettingsSocialDesc => '不含工作细节的个人联系方式';
+
+  @override
+  String get contextSettingsLiteDesc => '仅最少量的信息';
+
+  @override
+  String get contextSettingsToggleName => '姓名';
+
+  @override
+  String get contextSettingsToggleEmail => '电子邮件';
+
+  @override
+  String get contextSettingsTogglePhone => '电话';
+
+  @override
+  String get contextSettingsToggleJobTitle => '职务';
+
+  @override
+  String get contextSettingsToggleCompany => '公司';
+
+  @override
+  String get contextSettingsToggleAvatar => '头像';
+
+  @override
+  String get contextSettingsToggleCardFront => '名片正面';
+
+  @override
+  String get contextSettingsToggleCardBack => '名片背面';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -2512,4 +2559,51 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get phoneChangeNumber => '更改電話號碼';
+
+  @override
+  String get contextSettingsTitle => '名片情境';
+
+  @override
+  String contextSettingsErrorSaving(String error) {
+    return '儲存時發生錯誤：$error';
+  }
+
+  @override
+  String get contextSettingsSaved => '情境已成功儲存';
+
+  @override
+  String get contextSettingsIntro => '自訂在不同情境下要分享的資訊';
+
+  @override
+  String get contextSettingsBusinessDesc => '完整的專業資訊';
+
+  @override
+  String get contextSettingsSocialDesc => '不含工作細節的個人聯絡方式';
+
+  @override
+  String get contextSettingsLiteDesc => '僅最少量的資訊';
+
+  @override
+  String get contextSettingsToggleName => '姓名';
+
+  @override
+  String get contextSettingsToggleEmail => '電子郵件';
+
+  @override
+  String get contextSettingsTogglePhone => '電話';
+
+  @override
+  String get contextSettingsToggleJobTitle => '職稱';
+
+  @override
+  String get contextSettingsToggleCompany => '公司';
+
+  @override
+  String get contextSettingsToggleAvatar => '頭像';
+
+  @override
+  String get contextSettingsToggleCardFront => '名片正面';
+
+  @override
+  String get contextSettingsToggleCardBack => '名片背面';
 }
