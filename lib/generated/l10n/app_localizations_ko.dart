@@ -767,4 +767,56 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get handshakeShare => '공유';
+
+  @override
+  String get incomingExpired => '만료됨';
+
+  @override
+  String get incomingUnknownUser => '알 수 없는 사용자';
+
+  @override
+  String get incomingTitle => '받은 요청';
+
+  @override
+  String incomingWantsToExchange(String name) {
+    return '$name님이 연락처 정보를 교환하려고 합니다.';
+  }
+
+  @override
+  String get incomingAddToContacts => '내 연락처에 추가';
+
+  @override
+  String get incomingChooseInfo => '공유할 정보 선택:';
+
+  @override
+  String get incomingDecline => '거절';
+
+  @override
+  String get incomingApprove => '승인';
+
+  @override
+  String get scannerInvalidQr => '유효하지 않은 QR 코드';
+
+  @override
+  String get scannerInvalidQrFormat =>
+      'QR 코드 형식이 유효하지 않습니다. 예상 형식: https://ixo.app/<id>';
+
+  @override
+  String get scannerTitle => 'QR 코드 스캔';
+
+  @override
+  String get scannerPlaceInFrame => 'QR 코드를 프레임 안에 맞추세요';
+
+  @override
+  String get scannerPermissionTitle => '카메라 권한 필요';
+
+  @override
+  String get scannerPermissionBody =>
+      '이 기능은 안전한 교환을 위해 QR 코드를 스캔하는 카메라 접근 권한이 필요합니다.';
+
+  @override
+  String get scannerOpenSettings => '설정 열기';
+
+  @override
+  String get scannerGrantPermission => '권한 허용';
 }

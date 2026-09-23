@@ -1506,6 +1506,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Share'**
   String get handshakeShare;
+
+  /// Timer badge when the request has expired
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get incomingExpired;
+
+  /// Fallback name when the requester profile has no name
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown User'**
+  String get incomingUnknownUser;
+
+  /// No description provided for @incomingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Incoming Request'**
+  String get incomingTitle;
+
+  /// No description provided for @incomingWantsToExchange.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} wants to exchange contact info.'**
+  String incomingWantsToExchange(String name);
+
+  /// No description provided for @incomingAddToContacts.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to my contacts'**
+  String get incomingAddToContacts;
+
+  /// No description provided for @incomingChooseInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose info to share:'**
+  String get incomingChooseInfo;
+
+  /// No description provided for @incomingDecline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get incomingDecline;
+
+  /// No description provided for @incomingApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get incomingApprove;
+
+  /// No description provided for @scannerInvalidQr.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid QR code'**
+  String get scannerInvalidQr;
+
+  /// Error when the scanned QR does not match the expected link format; the URL is a literal example, kept in English
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid QR code format. Expected: https://ixo.app/<id>'**
+  String get scannerInvalidQrFormat;
+
+  /// No description provided for @scannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan QR Code'**
+  String get scannerTitle;
+
+  /// No description provided for @scannerPlaceInFrame.
+  ///
+  /// In en, this message translates to:
+  /// **'Place QR code in frame'**
+  String get scannerPlaceInFrame;
+
+  /// No description provided for @scannerPermissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera Permission Required'**
+  String get scannerPermissionTitle;
+
+  /// No description provided for @scannerPermissionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This feature requires camera access to scan QR codes for secure exchange.'**
+  String get scannerPermissionBody;
+
+  /// No description provided for @scannerOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get scannerOpenSettings;
+
+  /// No description provided for @scannerGrantPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant Permission'**
+  String get scannerGrantPermission;
 }
 
 class _AppLocalizationsDelegate

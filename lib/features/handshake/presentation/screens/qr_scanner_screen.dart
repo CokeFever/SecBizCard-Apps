@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 class QrScannerScreen extends StatefulWidget {
   const QrScannerScreen({super.key});
@@ -104,14 +105,14 @@ class _QrScannerScreenState extends State<QrScannerScreen>
 
     final uri = Uri.tryParse(code);
     if (uri == null) {
-      _showError('Invalid QR code');
+      _showError(AppLocalizations.of(context)!.scannerInvalidQr);
       return;
     }
 
     final pathSegments = uri.pathSegments;
 
     if (pathSegments.length != 1) {
-      _showError('Invalid QR code format. Expected: https://ixo.app/{id}');
+      _showError(AppLocalizations.of(context)!.scannerInvalidQrFormat);
       return;
     }
 
@@ -153,7 +154,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
     // Scanner view
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Scan QR Code'),
+        title: Text(AppLocalizations.of(context)!.scannerTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.flash_on),
@@ -198,9 +199,9 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                   color: Colors.black54,
                   borderRadius: BorderRadius.circular(24),
                 ),
-                child: const Text(
-                  'Place QR code in frame',
-                  style: TextStyle(color: Colors.white, fontSize: 16),
+                child: Text(
+                  AppLocalizations.of(context)!.scannerPlaceInFrame,
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
             ),
@@ -233,9 +234,9 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                 color: Colors.white.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 24),
-              const Text(
-                'Camera Permission Required',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context)!.scannerPermissionTitle,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -243,9 +244,9 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-              const Text(
-                'This feature requires camera access to scan QR codes for secure exchange.',
-                style: TextStyle(color: Colors.white70, fontSize: 16),
+              Text(
+                AppLocalizations.of(context)!.scannerPermissionBody,
+                style: const TextStyle(color: Colors.white70, fontSize: 16),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -253,7 +254,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                 ElevatedButton.icon(
                   onPressed: () => openAppSettings(),
                   icon: const Icon(Icons.settings),
-                  label: const Text('Open Settings'),
+                  label: Text(AppLocalizations.of(context)!.scannerOpenSettings),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
@@ -265,7 +266,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                 ElevatedButton.icon(
                   onPressed: _checkAndRequestPermission,
                   icon: const Icon(Icons.security),
-                  label: const Text('Grant Permission'),
+                  label: Text(AppLocalizations.of(context)!.scannerGrantPermission),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
