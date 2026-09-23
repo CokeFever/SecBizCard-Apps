@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_functions/cloud_functions.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,6 +9,7 @@ import 'package:secbizcard/core/responsive/adaptive_container.dart';
 import 'package:secbizcard/core/responsive/breakpoints.dart';
 import 'package:secbizcard/features/settings/data/ocr_settings_service.dart';
 import 'package:secbizcard/features/contacts/data/services/ocr_tier.dart';
+import 'package:secbizcard/features/contacts/data/ocr_usage_provider.dart';
 import 'package:secbizcard/features/contacts/data/card_detection_config.dart';
 import 'package:secbizcard/features/contacts/presentation/ocr_tier_display.dart';
 import 'package:secbizcard/features/subscription/data/subscription_providers.dart';
@@ -53,21 +52,14 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
     }
   }
 
-  /// Backend usage snapshot (tier/tierUsed/tierCap + admin stats). Null while
-  /// loading or when offline/unavailable.
-  OcrUsage? _usage;
-  bool _loadingUsage = true;
-
-  late final FirebaseFunctions _functions =
-      FirebaseFunctions.instanceFor(app: Firebase.app(), region: 'us-central1');
-
   /// The tier to DISPLAY: Flex overlays the backend tier whenever a BYOK key is
   /// present (OCR then goes straight to Google with the user's key, so the
-  /// backend tier is irrelevant). Otherwise use the backend tier, defaulting to
-  /// Basic while usage is still loading.
-  OcrTier get _effectiveTier {
+  /// backend tier is irrelevant). Otherwise use the backend tier ([usage],
+  /// from the app-level cache-first provider), defaulting to Basic while it's
+  /// still unknown.
+  OcrTier _effectiveTierFor(OcrUsage? usage) {
     if (_hasKey) return OcrTier.flex;
-    return _usage?.tier ?? OcrTier.basic;
+    return usage?.tier ?? OcrTier.basic;
   }
 
   @override
@@ -82,33 +74,12 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
     super.dispose();
   }
 
+  /// Loads only the local BYOK key flag. The backend tier/usage now comes from
+  /// the app-level [ocrUsageNotifierProvider] (cache-first + revalidate), which
+  /// is watched in [build] — no per-entry getOcrUsage call here anymore.
   Future<void> _load() async {
     final has = await ref.read(ocrSettingsServiceProvider).hasApiKey();
     if (mounted) setState(() => _hasKey = has);
-    await _loadUsage();
-  }
-
-  /// Fetch the backend usage/tier. Never throws — offline just leaves numbers
-  /// unknown. BYOK users still fetch it so removing the key reveals their real
-  /// backend tier (e.g. a paid subscriber who also set a key).
-  Future<void> _loadUsage() async {
-    if (mounted) setState(() => _loadingUsage = true);
-    OcrUsage? usage;
-    try {
-      final res = await _functions
-          .httpsCallable('getOcrUsage')
-          .call()
-          .timeout(const Duration(seconds: 8));
-      usage = OcrUsage.fromMap(Map<String, dynamic>.from(res.data as Map));
-    } catch (_) {
-      usage = null; // offline / error → unknown
-    }
-    if (mounted) {
-      setState(() {
-        _usage = usage;
-        _loadingUsage = false;
-      });
-    }
   }
 
   Future<void> _save() async {
@@ -191,6 +162,14 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
+    // App-level cache-first tier/usage. `loading` is true only before the first
+    // (cache or network) value arrives; after that the card shows numbers while
+    // a background revalidate may still be in flight.
+    final usageAsync = ref.watch(ocrUsageNotifierProvider);
+    final usage = usageAsync.valueOrNull;
+    final loadingUsage = usageAsync.isLoading && !usageAsync.hasValue;
+    final effectiveTier = _effectiveTierFor(usage);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -206,12 +185,12 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // ① Tier + usage card.
-              _buildTierCard(theme, l10n),
+              _buildTierCard(theme, l10n, usage, loadingUsage),
 
               // ② Free-tier (Basic) 800 shared-pool rule — only for Basic users
               // without a BYOK key. Paid/VIP/Flex bypass the pool, so it would
               // only confuse them.
-              if (_effectiveTier == OcrTier.basic) ...[
+              if (effectiveTier == OcrTier.basic) ...[
                 const SizedBox(height: 12),
                 _buildSharedPoolRule(theme, l10n),
               ],
@@ -351,11 +330,12 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
   /// ① Tier + usage card: the effective tier, this month's usage (x/cap, ∞ for
   /// VIP, BYOK for Flex), an upgrade entry for Basic/Plus, and — for Admins —
   /// the shared800/total observability counters.
-  Widget _buildTierCard(ThemeData theme, AppLocalizations l10n) {
-    final tier = _effectiveTier;
+  Widget _buildTierCard(ThemeData theme, AppLocalizations l10n, OcrUsage? usage,
+      bool loadingUsage) {
+    final tier = _effectiveTierFor(usage);
     final tierName = OcrTierDisplay.tierName(l10n, tier);
-    final used = _usage?.tierUsed;
-    final cap = _usage?.tierCap;
+    final used = usage?.tierUsed;
+    final cap = usage?.tierCap;
 
     // Usage line on the right: ∞ icon for VIP, "BYOK" for Flex, x/cap otherwise.
     Widget usageWidget;
@@ -368,7 +348,7 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
         style: TextStyle(
             fontWeight: FontWeight.w600, color: theme.colorScheme.primary),
       );
-    } else if (_loadingUsage) {
+    } else if (loadingUsage) {
       usageWidget = const SizedBox(
         width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2));
     } else {
@@ -443,11 +423,11 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
           ],
 
           // Admin-only observability: shared800 + total counters.
-          if (_usage?.admin != null) ...[
+          if (usage?.admin != null) ...[
             const SizedBox(height: 12),
             const Divider(height: 1),
             const SizedBox(height: 12),
-            _buildAdminStats(theme, l10n, _usage!.admin!),
+            _buildAdminStats(theme, l10n, usage!.admin!),
           ],
         ],
       ),
@@ -637,7 +617,9 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.ocrSubscribeThanks)));
-      await _loadUsage(); // entitlement webhook updates the backend tier
+      // Entitlement webhook updates the backend tier → refresh the shared
+      // usage provider so the tier card re-syncs (also updates the cache).
+      await ref.read(ocrUsageNotifierProvider.notifier).refresh();
     } on PlatformException catch (e) {
       // User cancellation is not an error worth surfacing.
       final code = PurchasesErrorHelper.getErrorCode(e);
@@ -657,7 +639,7 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.ocrRestoreDone)));
-      await _loadUsage();
+      await ref.read(ocrUsageNotifierProvider.notifier).refresh();
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
