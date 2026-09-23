@@ -2514,6 +2514,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Business Card Back'**
   String get contextSettingsToggleCardBack;
+
+  /// No description provided for @homeYourBusinessCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Business Card'**
+  String get homeYourBusinessCard;
+
+  /// Tagline kept in English across all locales (brand slogan)
+  ///
+  /// In en, this message translates to:
+  /// **'Scan to exchange'**
+  String get homeScanToExchange;
+
+  /// No description provided for @homeShareMyInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Share My Info'**
+  String get homeShareMyInfo;
+
+  /// No description provided for @manualCropTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust Area'**
+  String get manualCropTitle;
+
+  /// No description provided for @manualCropReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to Default'**
+  String get manualCropReset;
+
+  /// No description provided for @manualCropFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Crop Failed'**
+  String get manualCropFailed;
+
+  /// No description provided for @reviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Contact'**
+  String get reviewTitle;
+
+  /// No description provided for @reviewSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact saved!'**
+  String get reviewSaved;
+
+  /// No description provided for @reviewFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get reviewFieldName;
+
+  /// No description provided for @reviewFieldEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get reviewFieldEmail;
+
+  /// No description provided for @reviewFieldCompany.
+  ///
+  /// In en, this message translates to:
+  /// **'Company'**
+  String get reviewFieldCompany;
+
+  /// No description provided for @reviewFieldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get reviewFieldTitle;
+
+  /// No description provided for @reviewFieldPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get reviewFieldPhone;
+
+  /// No description provided for @reviewFieldMobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile'**
+  String get reviewFieldMobile;
+
+  /// No description provided for @reviewFieldFax.
+  ///
+  /// In en, this message translates to:
+  /// **'Fax'**
+  String get reviewFieldFax;
+
+  /// No description provided for @reviewFieldWebsite.
+  ///
+  /// In en, this message translates to:
+  /// **'Website'**
+  String get reviewFieldWebsite;
+
+  /// No description provided for @reviewFieldAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get reviewFieldAddress;
+
+  /// No description provided for @reviewFieldTaxId.
+  ///
+  /// In en, this message translates to:
+  /// **'VAT / Tax ID'**
+  String get reviewFieldTaxId;
 }
 
 class _AppLocalizationsDelegate
