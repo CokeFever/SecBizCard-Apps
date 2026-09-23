@@ -2748,6 +2748,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'EULA'**
   String get landingEula;
+
+  /// No description provided for @mainCancelSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel selection'**
+  String get mainCancelSelection;
+
+  /// No description provided for @mainSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String mainSelectedCount(int count);
+
+  /// No description provided for @mainExportTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get mainExportTooltip;
+
+  /// No description provided for @mainBackupReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up your contacts?'**
+  String get mainBackupReminderTitle;
+
+  /// No description provided for @mainBackupReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your contacts and card images are stored only on this device. We recommend backing them up to your own Google Drive so you don\'t lose them.'**
+  String get mainBackupReminderBody;
+
+  /// No description provided for @mainBackupDontRemind.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t remind me this month'**
+  String get mainBackupDontRemind;
+
+  /// No description provided for @mainBackupLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get mainBackupLater;
+
+  /// No description provided for @mainBackupNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up now'**
+  String get mainBackupNow;
+
+  /// No description provided for @mainExportCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Export {count} contact(s)'**
+  String mainExportCount(int count);
+
+  /// No description provided for @mainExportVcardSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact fields, no card images'**
+  String get mainExportVcardSubtitle;
+
+  /// No description provided for @mainExportZipSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fields plus card photos, re-importable'**
+  String get mainExportZipSubtitle;
+
+  /// No description provided for @mainShareFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Share failed: {error}'**
+  String mainShareFailed(String error);
+
+  /// No description provided for @mainExporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Exporting {count} contact(s)…'**
+  String mainExporting(int count);
+
+  /// No description provided for @mainExportedToGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Exported {count} contact(s) to Google Contacts'**
+  String mainExportedToGoogle(int count);
+
+  /// No description provided for @mainExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed: {error}'**
+  String mainExportFailed(String error);
+
+  /// No description provided for @mainExportedPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Exported {succeeded} of {total}; {failed} failed'**
+  String mainExportedPartial(int succeeded, int total, int failed);
 }
 
 class _AppLocalizationsDelegate

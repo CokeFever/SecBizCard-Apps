@@ -440,5 +440,21 @@
   "landingDownloadHeadline": "體驗安全又快速的\n名片交換",
   "landingCopyright": "© {year} SecBizCard. 保留一切權利。",
   "landingPrivacyPolicy": "隱私權政策",
-  "landingEula": "EULA"
+  "landingEula": "EULA",
+  "mainCancelSelection": "取消選取",
+  "mainSelectedCount": "已選取 {count} 項",
+  "mainExportTooltip": "匯出",
+  "mainBackupReminderTitle": "要備份您的聯絡人嗎？",
+  "mainBackupReminderBody": "您的聯絡人與名片圖片僅儲存在此裝置上。我們建議備份到您自己的 Google 雲端硬碟，以免遺失。",
+  "mainBackupDontRemind": "本月不再提醒",
+  "mainBackupLater": "稍後",
+  "mainBackupNow": "立即備份",
+  "mainExportCount": "匯出 {count} 位聯絡人",
+  "mainExportVcardSubtitle": "聯絡欄位，不含名片圖片",
+  "mainExportZipSubtitle": "欄位加名片照片，可重新匯入",
+  "mainShareFailed": "分享失敗：{error}",
+  "mainExporting": "正在匯出 {count} 位聯絡人…",
+  "mainExportedToGoogle": "已將 {count} 位聯絡人匯出到 Google 通訊錄",
+  "mainExportFailed": "匯出失敗：{error}",
+  "mainExportedPartial": "已匯出 {total} 位中的 {succeeded} 位；{failed} 位失敗"
 }

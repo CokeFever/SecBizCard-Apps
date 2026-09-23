@@ -1440,4 +1440,67 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get landingEula => 'EULA';
+
+  @override
+  String get mainCancelSelection => '選択をキャンセル';
+
+  @override
+  String mainSelectedCount(int count) {
+    return '$count 件選択中';
+  }
+
+  @override
+  String get mainExportTooltip => 'エクスポート';
+
+  @override
+  String get mainBackupReminderTitle => '連絡先をバックアップしますか？';
+
+  @override
+  String get mainBackupReminderBody =>
+      '連絡先と名刺画像はこの端末にのみ保存されています。紛失しないよう、ご自身の Google ドライブへのバックアップをおすすめします。';
+
+  @override
+  String get mainBackupDontRemind => '今月は通知しない';
+
+  @override
+  String get mainBackupLater => '後で';
+
+  @override
+  String get mainBackupNow => '今すぐバックアップ';
+
+  @override
+  String mainExportCount(int count) {
+    return '$count 件の連絡先をエクスポート';
+  }
+
+  @override
+  String get mainExportVcardSubtitle => '連絡先項目のみ、名刺画像なし';
+
+  @override
+  String get mainExportZipSubtitle => '項目と名刺写真、再インポート可能';
+
+  @override
+  String mainShareFailed(String error) {
+    return '共有に失敗しました：$error';
+  }
+
+  @override
+  String mainExporting(int count) {
+    return '$count 件の連絡先をエクスポート中…';
+  }
+
+  @override
+  String mainExportedToGoogle(int count) {
+    return '$count 件の連絡先を Google 連絡先にエクスポートしました';
+  }
+
+  @override
+  String mainExportFailed(String error) {
+    return 'エクスポートに失敗しました：$error';
+  }
+
+  @override
+  String mainExportedPartial(int succeeded, int total, int failed) {
+    return '$total 件中 $succeeded 件をエクスポート、$failed 件失敗';
+  }
 }

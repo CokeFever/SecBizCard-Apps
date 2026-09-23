@@ -1476,4 +1476,67 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get landingEula => 'EULA';
+
+  @override
+  String get mainCancelSelection => 'Cancel selection';
+
+  @override
+  String mainSelectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get mainExportTooltip => 'Export';
+
+  @override
+  String get mainBackupReminderTitle => 'Back up your contacts?';
+
+  @override
+  String get mainBackupReminderBody =>
+      'Your contacts and card images are stored only on this device. We recommend backing them up to your own Google Drive so you don\'t lose them.';
+
+  @override
+  String get mainBackupDontRemind => 'Don\'t remind me this month';
+
+  @override
+  String get mainBackupLater => 'Later';
+
+  @override
+  String get mainBackupNow => 'Back up now';
+
+  @override
+  String mainExportCount(int count) {
+    return 'Export $count contact(s)';
+  }
+
+  @override
+  String get mainExportVcardSubtitle => 'Contact fields, no card images';
+
+  @override
+  String get mainExportZipSubtitle => 'Fields plus card photos, re-importable';
+
+  @override
+  String mainShareFailed(String error) {
+    return 'Share failed: $error';
+  }
+
+  @override
+  String mainExporting(int count) {
+    return 'Exporting $count contact(s)…';
+  }
+
+  @override
+  String mainExportedToGoogle(int count) {
+    return 'Exported $count contact(s) to Google Contacts';
+  }
+
+  @override
+  String mainExportFailed(String error) {
+    return 'Export failed: $error';
+  }
+
+  @override
+  String mainExportedPartial(int succeeded, int total, int failed) {
+    return 'Exported $succeeded of $total; $failed failed';
+  }
 }

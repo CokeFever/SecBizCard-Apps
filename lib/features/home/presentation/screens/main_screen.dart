@@ -80,39 +80,36 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   }
 
   Future<void> _showBackupReminderDialog(BackupReminderService reminder) async {
+    final l10n = AppLocalizations.of(context)!;
     var dontRemind = false;
     final action = await showDialog<String>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setLocal) => AlertDialog(
-          title: const Text('Back up your contacts?'),
+          title: Text(l10n.mainBackupReminderTitle),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Your contacts and card images are stored only on this device. '
-                'We recommend backing them up to your own Google Drive so you '
-                "don't lose them.",
-              ),
+              Text(l10n.mainBackupReminderBody),
               const SizedBox(height: 8),
               CheckboxListTile(
                 value: dontRemind,
                 onChanged: (v) => setLocal(() => dontRemind = v ?? false),
                 contentPadding: EdgeInsets.zero,
                 controlAffinity: ListTileControlAffinity.leading,
-                title: const Text("Don't remind me this month"),
+                title: Text(l10n.mainBackupDontRemind),
               ),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, 'later'),
-              child: const Text('Later'),
+              child: Text(l10n.mainBackupLater),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(ctx, 'backup'),
-              child: const Text('Back up now'),
+              child: Text(l10n.mainBackupNow),
             ),
           ],
         ),
@@ -220,17 +217,17 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       return AppBar(
         leading: IconButton(
           icon: const Icon(Icons.close),
-          tooltip: 'Cancel selection',
+          tooltip: AppLocalizations.of(context)!.mainCancelSelection,
           onPressed: _exitSelection,
         ),
         title: Text(
-          '$count selected',
+          AppLocalizations.of(context)!.mainSelectedCount(count),
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.ios_share),
-            tooltip: 'Export',
+            tooltip: AppLocalizations.of(context)!.mainExportTooltip,
             onPressed: count == 0 ? null : _showExportOptions,
           ),
         ],
@@ -270,6 +267,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   Future<void> _showExportOptions() async {
     final count = _selectedProfiles().length;
     if (count == 0) return;
+    final l10n = AppLocalizations.of(context)!;
     final choice = await showModalBottomSheet<String>(
       context: context,
       showDragHandle: true,
@@ -280,25 +278,25 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
               child: Text(
-                'Export $count contact(s)',
+                l10n.mainExportCount(count),
                 style: Theme.of(ctx).textTheme.titleMedium,
               ),
             ),
             ListTile(
               leading: const Icon(Icons.description_outlined),
-              title: const Text('Text only (vCard .vcf)'),
-              subtitle: const Text('Contact fields, no card images'),
+              title: Text(l10n.contactDetailShareVcard),
+              subtitle: Text(l10n.mainExportVcardSubtitle),
               onTap: () => Navigator.pop(ctx, 'vcf'),
             ),
             ListTile(
               leading: const Icon(Icons.folder_zip_outlined),
-              title: const Text('Text + images (.zip)'),
-              subtitle: const Text('Fields plus card photos, re-importable'),
+              title: Text(l10n.contactDetailShareZip),
+              subtitle: Text(l10n.mainExportZipSubtitle),
               onTap: () => Navigator.pop(ctx, 'zip'),
             ),
             ListTile(
               leading: const Icon(Icons.import_export),
-              title: const Text('Save to Google Contacts'),
+              title: Text(l10n.contactDetailSaveToGoogle),
               onTap: () => Navigator.pop(ctx, 'google'),
             ),
           ],
@@ -322,13 +320,14 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   Future<void> _batchShareVCard() async {
     final profiles = _selectedProfiles();
     if (profiles.isEmpty) return;
+    final l10n = AppLocalizations.of(context)!;
     final service = ref.read(contactExportServiceProvider);
     try {
       await service.shareAsVCard(profiles);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Share failed: $e')),
+          SnackBar(content: Text(l10n.mainShareFailed('$e'))),
         );
       }
     }
@@ -338,13 +337,14 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   Future<void> _batchShareZip() async {
     final profiles = _selectedProfiles();
     if (profiles.isEmpty) return;
+    final l10n = AppLocalizations.of(context)!;
     final service = ref.read(contactExportServiceProvider);
     try {
       await service.shareAsZip(profiles);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Share failed: $e')),
+          SnackBar(content: Text(l10n.mainShareFailed('$e'))),
         );
       }
     }
@@ -354,21 +354,21 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   Future<void> _batchExportToGoogle() async {
     final profiles = _selectedProfiles();
     if (profiles.isEmpty) return;
+    final l10n = AppLocalizations.of(context)!;
     final messenger = ScaffoldMessenger.of(context);
     messenger.showSnackBar(
-      SnackBar(content: Text('Exporting ${profiles.length} contact(s)…')),
+      SnackBar(content: Text(l10n.mainExporting(profiles.length))),
     );
     final service = ref.read(contactExportServiceProvider);
     final result = await service.exportToGoogle(profiles);
     if (!mounted) return;
     final String msg;
     if (result.allOk) {
-      msg = 'Exported ${result.succeeded} contact(s) to Google Contacts';
+      msg = l10n.mainExportedToGoogle(result.succeeded);
     } else if (result.succeeded == 0) {
-      msg = 'Export failed: ${result.firstError ?? 'unknown error'}';
+      msg = l10n.mainExportFailed(result.firstError ?? 'unknown error');
     } else {
-      msg = 'Exported ${result.succeeded} of ${result.total}; '
-          '${result.failed} failed';
+      msg = l10n.mainExportedPartial(result.succeeded, result.total, result.failed);
     }
     messenger.showSnackBar(SnackBar(content: Text(msg)));
     _exitSelection();
@@ -386,7 +386,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         autofocus: true,
         style: GoogleFonts.inter(fontSize: 15),
         decoration: InputDecoration(
-          hintText: 'Search contacts...',
+          hintText: AppLocalizations.of(context)!.contactsSearchHint,
           hintStyle: TextStyle(
             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
             fontSize: 14,
@@ -422,7 +422,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 child: IconButton(
                   icon: const Icon(Icons.notifications_none),
                   onPressed: () => context.push('/handshake-history'),
-                  tooltip: 'Notifications',
+                  tooltip: AppLocalizations.of(context)!.navNotifications,
                 ),
               ),
               loading: () => IconButton(

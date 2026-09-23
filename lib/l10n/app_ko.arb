@@ -449,5 +449,21 @@
   "landingDownloadHeadline": "안전하고 빠른\n명함 교환을 경험하세요",
   "landingCopyright": "© {year} SecBizCard. All rights reserved.",
   "landingPrivacyPolicy": "개인정보 처리방침",
-  "landingEula": "EULA"
+  "landingEula": "EULA",
+  "mainCancelSelection": "선택 취소",
+  "mainSelectedCount": "{count}개 선택됨",
+  "mainExportTooltip": "내보내기",
+  "mainBackupReminderTitle": "연락처를 백업할까요?",
+  "mainBackupReminderBody": "연락처와 명함 이미지는 이 기기에만 저장됩니다. 분실하지 않도록 본인의 Google 드라이브에 백업하는 것을 권장합니다.",
+  "mainBackupDontRemind": "이번 달에는 알리지 않기",
+  "mainBackupLater": "나중에",
+  "mainBackupNow": "지금 백업",
+  "mainExportCount": "연락처 {count}개 내보내기",
+  "mainExportVcardSubtitle": "연락처 필드, 명함 이미지 없음",
+  "mainExportZipSubtitle": "필드와 명함 사진, 다시 가져오기 가능",
+  "mainShareFailed": "공유 실패: {error}",
+  "mainExporting": "연락처 {count}개 내보내는 중…",
+  "mainExportedToGoogle": "연락처 {count}개를 Google 주소록으로 내보냈습니다",
+  "mainExportFailed": "내보내기 실패: {error}",
+  "mainExportedPartial": "{total}개 중 {succeeded}개 내보냄, {failed}개 실패"
 }
