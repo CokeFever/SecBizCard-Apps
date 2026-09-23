@@ -223,6 +223,97 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ocrPaywallPlanPro => 'SecBizCard Pro';
 
   @override
+  String get qrScanToExchange => 'Scan to Exchange';
+
+  @override
+  String get navShare => 'Share';
+
+  @override
+  String get navCard => 'Card';
+
+  @override
+  String get navNotifications => 'Notifications';
+
+  @override
+  String get qrGenerating => '安全な QRCode を生成中…';
+
+  @override
+  String get qrBatchApproval => '一括承認';
+
+  @override
+  String get qrBatchApprovalOn => 'すべてのリクエストを自動承認';
+
+  @override
+  String get qrBatchApprovalOff => 'リクエストを個別に手動承認';
+
+  @override
+  String qrResetsIn(String time) {
+    return '$time 後にリセット';
+  }
+
+  @override
+  String qrRefreshAvailableIn(int seconds) {
+    return '$seconds 秒後に利用可能';
+  }
+
+  @override
+  String get qrRefreshTooltip => 'QRCode を再生成';
+
+  @override
+  String get qrUrlCopied => 'URL をクリップボードにコピーしました';
+
+  @override
+  String get qrCopyUrl => 'URL をコピー';
+
+  @override
+  String get qrRetry => '再試行';
+
+  @override
+  String get qrErrorSignInRequired => '情報を共有するにはサインインが必要です。';
+
+  @override
+  String qrErrorPrefix(String message) {
+    return 'エラー:$message';
+  }
+
+  @override
+  String get qrErrorNotAuthenticated => '認証されていません';
+
+  @override
+  String get qrErrorCompleteProfile => '先にプロフィールを完成させてください';
+
+  @override
+  String get qrCannotShare => '共有できません';
+
+  @override
+  String get commonOk => 'OK';
+
+  @override
+  String get qrInfoSharedBack => '相手も情報を共有しました!';
+
+  @override
+  String qrAlsoSharedInfo(String name) {
+    return '$name も情報を共有しました。';
+  }
+
+  @override
+  String get qrSaveToContacts => '連絡先に保存';
+
+  @override
+  String get commonClose => '閉じる';
+
+  @override
+  String get qrContactSaved => '連絡先を保存しました!';
+
+  @override
+  String qrSavedToContacts(String name) {
+    return '$name を連絡先に保存しました';
+  }
+
+  @override
+  String get qrInfoSharedSuccess => '情報を共有しました!';
+
+  @override
   String get ocrKeyLockedNote => '自分のキーが有効です。変更するには、先に削除してから新しいキーを追加してください。';
 
   @override

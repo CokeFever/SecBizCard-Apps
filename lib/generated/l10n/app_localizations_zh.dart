@@ -222,6 +222,97 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ocrPaywallPlanPro => 'SecBizCard Pro';
 
   @override
+  String get qrScanToExchange => 'Scan to Exchange';
+
+  @override
+  String get navShare => 'Share';
+
+  @override
+  String get navCard => 'Card';
+
+  @override
+  String get navNotifications => 'Notifications';
+
+  @override
+  String get qrGenerating => '生成安全的 QRCode 中…';
+
+  @override
+  String get qrBatchApproval => '批量批准';
+
+  @override
+  String get qrBatchApprovalOn => '自动批准所有请求';
+
+  @override
+  String get qrBatchApprovalOff => '逐一手动批准请求';
+
+  @override
+  String qrResetsIn(String time) {
+    return '$time 后重置';
+  }
+
+  @override
+  String qrRefreshAvailableIn(int seconds) {
+    return '$seconds 秒后可用';
+  }
+
+  @override
+  String get qrRefreshTooltip => '重新生成 QRCode';
+
+  @override
+  String get qrUrlCopied => '已复制网址到剪贴板';
+
+  @override
+  String get qrCopyUrl => '复制网址';
+
+  @override
+  String get qrRetry => '重试';
+
+  @override
+  String get qrErrorSignInRequired => '你必须先登录才能分享信息。';
+
+  @override
+  String qrErrorPrefix(String message) {
+    return '错误:$message';
+  }
+
+  @override
+  String get qrErrorNotAuthenticated => '尚未验证身份';
+
+  @override
+  String get qrErrorCompleteProfile => '请先完成你的个人资料';
+
+  @override
+  String get qrCannotShare => '无法分享';
+
+  @override
+  String get commonOk => '确定';
+
+  @override
+  String get qrInfoSharedBack => '对方也分享了信息!';
+
+  @override
+  String qrAlsoSharedInfo(String name) {
+    return '$name 也分享了他们的信息。';
+  }
+
+  @override
+  String get qrSaveToContacts => '保存到联系人';
+
+  @override
+  String get commonClose => '关闭';
+
+  @override
+  String get qrContactSaved => '已保存联系人!';
+
+  @override
+  String qrSavedToContacts(String name) {
+    return '已将 $name 保存到联系人';
+  }
+
+  @override
+  String get qrInfoSharedSuccess => '信息分享成功!';
+
+  @override
   String get ocrKeyLockedNote => '已启用你自己的密钥。若要更换，请先移除再新增。';
 
   @override
@@ -530,6 +621,97 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ocrPaywallPlanPro => 'SecBizCard Pro';
+
+  @override
+  String get qrScanToExchange => 'Scan to Exchange';
+
+  @override
+  String get navShare => 'Share';
+
+  @override
+  String get navCard => 'Card';
+
+  @override
+  String get navNotifications => 'Notifications';
+
+  @override
+  String get qrGenerating => '產生安全的 QRCode 中…';
+
+  @override
+  String get qrBatchApproval => '批次核准';
+
+  @override
+  String get qrBatchApprovalOn => '自動核准所有請求';
+
+  @override
+  String get qrBatchApprovalOff => '逐一手動核准請求';
+
+  @override
+  String qrResetsIn(String time) {
+    return '$time 後重設';
+  }
+
+  @override
+  String qrRefreshAvailableIn(int seconds) {
+    return '$seconds 秒後可用';
+  }
+
+  @override
+  String get qrRefreshTooltip => '重新產生 QRCode';
+
+  @override
+  String get qrUrlCopied => '已複製網址到剪貼簿';
+
+  @override
+  String get qrCopyUrl => '複製網址';
+
+  @override
+  String get qrRetry => '重試';
+
+  @override
+  String get qrErrorSignInRequired => '你必須先登入才能分享資訊。';
+
+  @override
+  String qrErrorPrefix(String message) {
+    return '錯誤:$message';
+  }
+
+  @override
+  String get qrErrorNotAuthenticated => '尚未驗證身分';
+
+  @override
+  String get qrErrorCompleteProfile => '請先完成你的個人資料';
+
+  @override
+  String get qrCannotShare => '無法分享';
+
+  @override
+  String get commonOk => '確定';
+
+  @override
+  String get qrInfoSharedBack => '對方也分享了資訊!';
+
+  @override
+  String qrAlsoSharedInfo(String name) {
+    return '$name 也分享了他們的資訊。';
+  }
+
+  @override
+  String get qrSaveToContacts => '儲存到聯絡人';
+
+  @override
+  String get commonClose => '關閉';
+
+  @override
+  String get qrContactSaved => '已儲存聯絡人!';
+
+  @override
+  String qrSavedToContacts(String name) {
+    return '已將 $name 儲存到聯絡人';
+  }
+
+  @override
+  String get qrInfoSharedSuccess => '資訊分享成功!';
 
   @override
   String get ocrKeyLockedNote => '已啟用你自己的金鑰。若要更換，請先移除再新增。';

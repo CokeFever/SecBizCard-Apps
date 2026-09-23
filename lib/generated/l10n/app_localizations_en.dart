@@ -230,6 +230,98 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ocrPaywallPlanPro => 'SecBizCard Pro';
 
   @override
+  String get qrScanToExchange => 'Scan to Exchange';
+
+  @override
+  String get navShare => 'Share';
+
+  @override
+  String get navCard => 'Card';
+
+  @override
+  String get navNotifications => 'Notifications';
+
+  @override
+  String get qrGenerating => 'Generating secured QR code…';
+
+  @override
+  String get qrBatchApproval => 'Batch Approval';
+
+  @override
+  String get qrBatchApprovalOn => 'Approve first request for all';
+
+  @override
+  String get qrBatchApprovalOff => 'Approve each request manually';
+
+  @override
+  String qrResetsIn(String time) {
+    return 'Resets in $time';
+  }
+
+  @override
+  String qrRefreshAvailableIn(int seconds) {
+    return 'Available in ${seconds}s';
+  }
+
+  @override
+  String get qrRefreshTooltip => 'Refresh QR Code';
+
+  @override
+  String get qrUrlCopied => 'URL copied to clipboard';
+
+  @override
+  String get qrCopyUrl => 'Copy URL';
+
+  @override
+  String get qrRetry => 'Retry';
+
+  @override
+  String get qrErrorSignInRequired =>
+      'You must be signed in to share your info.';
+
+  @override
+  String qrErrorPrefix(String message) {
+    return 'Error: $message';
+  }
+
+  @override
+  String get qrErrorNotAuthenticated => 'Not authenticated';
+
+  @override
+  String get qrErrorCompleteProfile => 'Please complete your profile first';
+
+  @override
+  String get qrCannotShare => 'Cannot Share';
+
+  @override
+  String get commonOk => 'OK';
+
+  @override
+  String get qrInfoSharedBack => 'Info Shared Back!';
+
+  @override
+  String qrAlsoSharedInfo(String name) {
+    return '$name also shared their info.';
+  }
+
+  @override
+  String get qrSaveToContacts => 'Save to Contacts';
+
+  @override
+  String get commonClose => 'Close';
+
+  @override
+  String get qrContactSaved => 'Contact Saved!';
+
+  @override
+  String qrSavedToContacts(String name) {
+    return 'Saved $name to contacts';
+  }
+
+  @override
+  String get qrInfoSharedSuccess => 'Info Shared Successfully!';
+
+  @override
   String get ocrKeyLockedNote =>
       'Your own key is active. To change it, remove it first and add a new one.';
 
