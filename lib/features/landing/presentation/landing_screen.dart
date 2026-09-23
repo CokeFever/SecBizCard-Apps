@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 class LandingScreen extends StatelessWidget {
   final bool invitationMode;
@@ -11,6 +12,7 @@ class LandingScreen extends StatelessWidget {
   const LandingScreen({super.key, this.invitationMode = false});
 
   void _launchStoreUrl(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     const androidUrl =
         'https://play.google.com/store/apps/details?id=com.secbizcard.app';
     const iosUrl = 'https://apps.apple.com/app/id6470000000'; // Placeholder
@@ -26,7 +28,7 @@ class LandingScreen extends StatelessWidget {
     } else {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open store link')),
+          SnackBar(content: Text(l10n.landingStoreLinkFailed)),
         );
       }
     }
@@ -34,6 +36,7 @@ class LandingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (invitationMode) {
       return Scaffold(
         backgroundColor: const Color(0xFF0F172A),
@@ -70,7 +73,7 @@ class LandingScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'SecBizCard Invitation',
+                  l10n.landingInvitationTitle,
                   style: GoogleFonts.outfit(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -80,7 +83,7 @@ class LandingScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'You\'ve been invited to connect via SecBizCard. To view this secure profile and exchange details, please use our mobile app.',
+                  l10n.landingInvitationBody,
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     color: const Color(0xFF475569), // Slate 600
@@ -95,7 +98,7 @@ class LandingScreen extends StatelessWidget {
                       _launchStoreUrl(context);
                     },
                     icon: const Icon(Icons.download),
-                    label: const Text('Download App'),
+                    label: Text(l10n.landingDownloadApp),
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
@@ -174,7 +177,7 @@ class LandingScreen extends StatelessWidget {
                     context.go('/login');
                   },
                   child: Text(
-                    'Continue to App',
+                    AppLocalizations.of(context)!.landingContinueToApp,
                     style: GoogleFonts.inter(
                       color: const Color(0xFF38BDF8),
                       fontWeight: FontWeight.w600,
@@ -206,7 +209,7 @@ class LandingScreen extends StatelessWidget {
                   : CrossAxisAlignment.center,
               children: [
                 Text(
-                  'The New Standard for\nProfessional Identity.',
+                  AppLocalizations.of(context)!.landingHeroTitle,
                   textAlign: isDesktop ? TextAlign.start : TextAlign.center,
                   style: GoogleFonts.outfit(
                     fontSize: isDesktop ? 72 : 42,
@@ -217,7 +220,7 @@ class LandingScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Secure, instant, and verified contact exchange.\nPowered by the Cloud.',
+                  AppLocalizations.of(context)!.landingHeroSubtitle,
                   textAlign: isDesktop ? TextAlign.start : TextAlign.center,
                   style: GoogleFonts.inter(
                     fontSize: isDesktop ? 20 : 16,
@@ -295,7 +298,7 @@ class LandingScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 32),
                     Text(
-                      "Your Name",
+                      AppLocalizations.of(context)!.landingMockName,
                       style: GoogleFonts.outfit(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
@@ -303,7 +306,7 @@ class LandingScreen extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "Chief Technology Officer",
+                      AppLocalizations.of(context)!.landingMockTitle,
                       style: GoogleFonts.inter(
                         fontSize: 18,
                         color: Colors.white70,
@@ -401,6 +404,7 @@ class LandingScreen extends StatelessWidget {
         builder: (context, constraints) {
           // Responsive Grid manually
           double cardWidth = isDesktop ? 350 : constraints.maxWidth;
+          final l10n = AppLocalizations.of(context)!;
 
           return Wrap(
             spacing: 32,
@@ -409,30 +413,26 @@ class LandingScreen extends StatelessWidget {
             children: [
               _featureCard(
                 icon: FontAwesomeIcons.qrcode,
-                title: 'QR Exchange',
-                description:
-                    'Simply show your dynamic QR code to share your business card instantly.',
+                title: l10n.landingFeatureQrTitle,
+                description: l10n.landingFeatureQrDesc,
                 width: cardWidth,
               ),
               _featureCard(
                 icon: Icons.lock_outline,
-                title: 'Privacy First',
-                description:
-                    'Your data lives in your own Google Drive. No centralized data harvesting.',
+                title: l10n.landingFeaturePrivacyTitle,
+                description: l10n.landingFeaturePrivacyDesc,
                 width: cardWidth,
               ),
               _featureCard(
                 icon: Icons.offline_bolt_outlined,
-                title: 'Works Offline',
-                description:
-                    'Access and share your card even without an internet connection.',
+                title: l10n.landingFeatureOfflineTitle,
+                description: l10n.landingFeatureOfflineDesc,
                 width: cardWidth,
               ),
               _featureCard(
                 icon: Icons.verified,
-                title: 'Verified Identity',
-                description:
-                    'Build trust with email and phone verification signals on your profile.',
+                title: l10n.landingFeatureVerifiedTitle,
+                description: l10n.landingFeatureVerifiedDesc,
                 width: cardWidth,
               ),
             ],
@@ -497,7 +497,7 @@ class LandingScreen extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            "Experience Secure & Fast\nBusiness Card Exchange",
+            AppLocalizations.of(context)!.landingDownloadHeadline,
             textAlign: TextAlign.center,
             style: GoogleFonts.outfit(
               fontSize: isDesktop ? 48 : 32,
@@ -522,7 +522,7 @@ class LandingScreen extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            '© ${DateTime.now().year} SecBizCard. All rights reserved.',
+            AppLocalizations.of(context)!.landingCopyright(DateTime.now().year),
             style: GoogleFonts.inter(color: Colors.grey),
           ),
           const SizedBox(height: 16),
@@ -530,7 +530,7 @@ class LandingScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _FooterLink(
-                text: 'Privacy Policy',
+                text: AppLocalizations.of(context)!.landingPrivacyPolicy,
                 onTap: () =>
                     launchUrl(Uri.parse('https://ixo.app/privacy.html')),
               ),
@@ -539,7 +539,7 @@ class LandingScreen extends StatelessWidget {
                 style: GoogleFonts.inter(color: Colors.grey[700], fontSize: 12),
               ),
               _FooterLink(
-                text: 'EULA',
+                text: AppLocalizations.of(context)!.landingEula,
                 onTap: () => launchUrl(Uri.parse('https://ixo.app/eula.html')),
               ),
             ],

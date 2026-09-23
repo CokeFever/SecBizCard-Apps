@@ -2622,6 +2622,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'VAT / Tax ID'**
   String get reviewFieldTaxId;
+
+  /// No description provided for @landingStoreLinkFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open store link'**
+  String get landingStoreLinkFailed;
+
+  /// Brand name kept in English
+  ///
+  /// In en, this message translates to:
+  /// **'SecBizCard Invitation'**
+  String get landingInvitationTitle;
+
+  /// No description provided for @landingInvitationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve been invited to connect via SecBizCard. To view this secure profile and exchange details, please use our mobile app.'**
+  String get landingInvitationBody;
+
+  /// No description provided for @landingDownloadApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Download App'**
+  String get landingDownloadApp;
+
+  /// No description provided for @landingContinueToApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to App'**
+  String get landingContinueToApp;
+
+  /// No description provided for @landingHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The New Standard for\nProfessional Identity.'**
+  String get landingHeroTitle;
+
+  /// No description provided for @landingHeroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure, instant, and verified contact exchange.\nPowered by the Cloud.'**
+  String get landingHeroSubtitle;
+
+  /// No description provided for @landingMockName.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Name'**
+  String get landingMockName;
+
+  /// No description provided for @landingMockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chief Technology Officer'**
+  String get landingMockTitle;
+
+  /// 'QR' kept in English
+  ///
+  /// In en, this message translates to:
+  /// **'QR Exchange'**
+  String get landingFeatureQrTitle;
+
+  /// No description provided for @landingFeatureQrDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Simply show your dynamic QR code to share your business card instantly.'**
+  String get landingFeatureQrDesc;
+
+  /// No description provided for @landingFeaturePrivacyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy First'**
+  String get landingFeaturePrivacyTitle;
+
+  /// No description provided for @landingFeaturePrivacyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data lives in your own Google Drive. No centralized data harvesting.'**
+  String get landingFeaturePrivacyDesc;
+
+  /// No description provided for @landingFeatureOfflineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Works Offline'**
+  String get landingFeatureOfflineTitle;
+
+  /// No description provided for @landingFeatureOfflineDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Access and share your card even without an internet connection.'**
+  String get landingFeatureOfflineDesc;
+
+  /// No description provided for @landingFeatureVerifiedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified Identity'**
+  String get landingFeatureVerifiedTitle;
+
+  /// No description provided for @landingFeatureVerifiedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Build trust with email and phone verification signals on your profile.'**
+  String get landingFeatureVerifiedDesc;
+
+  /// No description provided for @landingDownloadHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Experience Secure & Fast\nBusiness Card Exchange'**
+  String get landingDownloadHeadline;
+
+  /// No description provided for @landingCopyright.
+  ///
+  /// In en, this message translates to:
+  /// **'© {year} SecBizCard. All rights reserved.'**
+  String landingCopyright(int year);
+
+  /// No description provided for @landingPrivacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get landingPrivacyPolicy;
+
+  /// Legal acronym kept in English
+  ///
+  /// In en, this message translates to:
+  /// **'EULA'**
+  String get landingEula;
 }
 
 class _AppLocalizationsDelegate
