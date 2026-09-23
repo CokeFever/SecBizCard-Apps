@@ -11,6 +11,7 @@ import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'package:secbizcard/features/handshake/data/handshake_history_repository.dart';
 import 'package:secbizcard/core/services/notification_service.dart';
 import 'package:secbizcard/core/services/backup_reminder_service.dart';
+import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   final int initialTab;
@@ -240,7 +241,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       title: (_currentIndex == 1 && isSearching && titleOverride == null)
           ? _buildSearchField(theme)
           : Text(
-              titleOverride ?? (_currentIndex == 0 ? 'Share' : 'Card'),
+              titleOverride ??
+                  (_currentIndex == 0
+                      ? AppLocalizations.of(context)!.navShare
+                      : AppLocalizations.of(context)!.navCard),
               style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
             ),
       actions: _buildAppBarActions(context),

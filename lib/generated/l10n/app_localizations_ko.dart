@@ -223,6 +223,97 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ocrPaywallPlanPro => 'SecBizCard Pro';
 
   @override
+  String get qrScanToExchange => 'Scan to Exchange';
+
+  @override
+  String get navShare => 'Share';
+
+  @override
+  String get navCard => 'Card';
+
+  @override
+  String get navNotifications => 'Notifications';
+
+  @override
+  String get qrGenerating => '보안 QRCode 생성 중…';
+
+  @override
+  String get qrBatchApproval => '일괄 승인';
+
+  @override
+  String get qrBatchApprovalOn => '모든 요청 자동 승인';
+
+  @override
+  String get qrBatchApprovalOff => '요청을 개별적으로 수동 승인';
+
+  @override
+  String qrResetsIn(String time) {
+    return '$time 후 재설정';
+  }
+
+  @override
+  String qrRefreshAvailableIn(int seconds) {
+    return '$seconds초 후 사용 가능';
+  }
+
+  @override
+  String get qrRefreshTooltip => 'QRCode 다시 생성';
+
+  @override
+  String get qrUrlCopied => 'URL을 클립보드에 복사했습니다';
+
+  @override
+  String get qrCopyUrl => 'URL 복사';
+
+  @override
+  String get qrRetry => '다시 시도';
+
+  @override
+  String get qrErrorSignInRequired => '정보를 공유하려면 로그인해야 합니다.';
+
+  @override
+  String qrErrorPrefix(String message) {
+    return '오류: $message';
+  }
+
+  @override
+  String get qrErrorNotAuthenticated => '인증되지 않았습니다';
+
+  @override
+  String get qrErrorCompleteProfile => '먼저 프로필을 완성해 주세요';
+
+  @override
+  String get qrCannotShare => '공유할 수 없습니다';
+
+  @override
+  String get commonOk => '확인';
+
+  @override
+  String get qrInfoSharedBack => '상대방도 정보를 공유했습니다!';
+
+  @override
+  String qrAlsoSharedInfo(String name) {
+    return '$name님도 정보를 공유했습니다.';
+  }
+
+  @override
+  String get qrSaveToContacts => '연락처에 저장';
+
+  @override
+  String get commonClose => '닫기';
+
+  @override
+  String get qrContactSaved => '연락처를 저장했습니다!';
+
+  @override
+  String qrSavedToContacts(String name) {
+    return '$name님을 연락처에 저장했습니다';
+  }
+
+  @override
+  String get qrInfoSharedSuccess => '정보를 공유했습니다!';
+
+  @override
   String get ocrKeyLockedNote =>
       '직접 등록한 키가 사용 중입니다. 변경하려면 먼저 삭제한 후 새 키를 추가하세요.';
 

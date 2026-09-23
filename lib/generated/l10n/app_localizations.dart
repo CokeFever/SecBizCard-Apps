@@ -493,6 +493,168 @@ abstract class AppLocalizations {
   /// **'SecBizCard Pro'**
   String get ocrPaywallPlanPro;
 
+  /// Title above the QR code on the share screen
+  ///
+  /// In en, this message translates to:
+  /// **'Scan to Exchange'**
+  String get qrScanToExchange;
+
+  /// Main screen title for the Share tab (kept in English across locales — brand/functional label)
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get navShare;
+
+  /// Main screen title for the Card tab (kept in English across locales)
+  ///
+  /// In en, this message translates to:
+  /// **'Card'**
+  String get navCard;
+
+  /// Notifications screen/section title (kept in English across locales)
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get navNotifications;
+
+  /// Shown inside the QR placeholder frame while the session is being created
+  ///
+  /// In en, this message translates to:
+  /// **'Generating secured QR code…'**
+  String get qrGenerating;
+
+  /// No description provided for @qrBatchApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch Approval'**
+  String get qrBatchApproval;
+
+  /// No description provided for @qrBatchApprovalOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve first request for all'**
+  String get qrBatchApprovalOn;
+
+  /// No description provided for @qrBatchApprovalOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve each request manually'**
+  String get qrBatchApprovalOff;
+
+  /// No description provided for @qrResetsIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Resets in {time}'**
+  String qrResetsIn(String time);
+
+  /// No description provided for @qrRefreshAvailableIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Available in {seconds}s'**
+  String qrRefreshAvailableIn(int seconds);
+
+  /// No description provided for @qrRefreshTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh QR Code'**
+  String get qrRefreshTooltip;
+
+  /// No description provided for @qrUrlCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'URL copied to clipboard'**
+  String get qrUrlCopied;
+
+  /// No description provided for @qrCopyUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy URL'**
+  String get qrCopyUrl;
+
+  /// No description provided for @qrRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get qrRetry;
+
+  /// No description provided for @qrErrorSignInRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'You must be signed in to share your info.'**
+  String get qrErrorSignInRequired;
+
+  /// No description provided for @qrErrorPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {message}'**
+  String qrErrorPrefix(String message);
+
+  /// No description provided for @qrErrorNotAuthenticated.
+  ///
+  /// In en, this message translates to:
+  /// **'Not authenticated'**
+  String get qrErrorNotAuthenticated;
+
+  /// No description provided for @qrErrorCompleteProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Please complete your profile first'**
+  String get qrErrorCompleteProfile;
+
+  /// No description provided for @qrCannotShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot Share'**
+  String get qrCannotShare;
+
+  /// No description provided for @commonOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get commonOk;
+
+  /// No description provided for @qrInfoSharedBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Info Shared Back!'**
+  String get qrInfoSharedBack;
+
+  /// No description provided for @qrAlsoSharedInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} also shared their info.'**
+  String qrAlsoSharedInfo(String name);
+
+  /// No description provided for @qrSaveToContacts.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to Contacts'**
+  String get qrSaveToContacts;
+
+  /// No description provided for @commonClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get commonClose;
+
+  /// No description provided for @qrContactSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Saved!'**
+  String get qrContactSaved;
+
+  /// No description provided for @qrSavedToContacts.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved {name} to contacts'**
+  String qrSavedToContacts(String name);
+
+  /// No description provided for @qrInfoSharedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Info Shared Successfully!'**
+  String get qrInfoSharedSuccess;
+
   /// Explains why the key field is locked when a BYOK key is set
   ///
   /// In en, this message translates to:

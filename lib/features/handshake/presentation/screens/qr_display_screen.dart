@@ -17,6 +17,7 @@ import 'package:secbizcard/features/profile/domain/user_profile_extensions.dart'
 import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
 import 'package:secbizcard/features/handshake/data/handshake_history_repository.dart';
 import 'package:secbizcard/features/handshake/presentation/widgets/incoming_request_sheet.dart';
+import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 class QrDisplayScreen extends ConsumerStatefulWidget {
   final bool showAppBar;
@@ -161,7 +162,7 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
     if (currentUser == null) {
       if (mounted) {
         setState(() {
-          _error = 'You must be signed in to share your info.';
+          _error = AppLocalizations.of(context)!.qrErrorSignInRequired;
           _isLoading = false;
         });
       }
@@ -336,14 +337,15 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
             const Icon(Icons.check_circle, size: 60, color: Colors.green),
             const SizedBox(height: 16),
             Text(
-              'Info Shared Back!',
+              AppLocalizations.of(context)!.qrInfoSharedBack,
               style: GoogleFonts.outfit(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
-            Text('${returnProfile!.displayName} also shared their info.'),
+            Text(AppLocalizations.of(context)!
+                .qrAlsoSharedInfo(returnProfile!.displayName)),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
@@ -357,7 +359,9 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
                   if (context.mounted) {
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Contact Saved!')),
+                      SnackBar(
+                          content: Text(
+                              AppLocalizations.of(context)!.qrContactSaved)),
                     );
                     _resetState(); // Reset for next handshake
                   }
@@ -367,7 +371,7 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: const Text('Save to Contacts'),
+                child: Text(AppLocalizations.of(context)!.qrSaveToContacts),
               ),
             ),
             const SizedBox(height: 12),
@@ -376,7 +380,7 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
                 Navigator.pop(context);
                 _resetState();
               },
-              child: const Text('Close'),
+              child: Text(AppLocalizations.of(context)!.commonClose),
             ),
             const SizedBox(height: 24),
           ],
@@ -424,7 +428,9 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
         .getCurrentUser(); // Basic auth user
     if (user == null) {
       // Reject handshake since we can't proceed
-      await _rejectWithError('Not authenticated');
+      if (!mounted) return;
+      await _rejectWithError(
+          AppLocalizations.of(context)!.qrErrorNotAuthenticated);
       return;
     }
 
@@ -433,7 +439,9 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
 
     if (fullProfile == null) {
       // Reject handshake and notify user
-      await _rejectWithError('Please complete your profile first');
+      if (!mounted) return;
+      await _rejectWithError(
+          AppLocalizations.of(context)!.qrErrorCompleteProfile);
       return;
     }
 
@@ -450,15 +458,17 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
     result.fold(
       (failure) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Error: ${failure.message}')));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(
+                  AppLocalizations.of(context)!.qrErrorPrefix(failure.message))));
         }
       },
       (_) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Info Shared Successfully!')),
+            SnackBar(
+                content:
+                    Text(AppLocalizations.of(context)!.qrInfoSharedSuccess)),
           );
         }
       },
@@ -475,12 +485,12 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Cannot Share'),
+          title: Text(AppLocalizations.of(context)!.qrCannotShare),
           content: Text(errorMessage),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
+              child: Text(AppLocalizations.of(context)!.commonOk),
             ),
           ],
         ),
@@ -555,27 +565,55 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
     return user.filterForContext(type);
   }
 
-  /// Lightweight loading state while the session is being created: the title
-  /// (to keep the layout stable) plus a simple centered spinner. Deliberately
-  /// NOT a QR-sized filled box — a grey block that mirrors the QR frame reads
-  /// as an "empty QR" and makes the wait feel worse than a plain spinner.
+  /// Loading state while the session is being created. Mirrors the loaded
+  /// layout (same title position + a QR-sized framed box) so nothing jumps when
+  /// the real QR arrives. The frame is a transparent/outlined placeholder with
+  /// a spinner + "generating…" caption inside — it reads as "the QR is forming
+  /// here" and keeps "Scan to Exchange" vertically stable.
   Widget _buildLoadingSkeleton(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            'Scan to Exchange',
+            l10n.qrScanToExchange,
             style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 48),
-          const SizedBox(
-            width: 40,
-            height: 40,
-            child: CircularProgressIndicator(strokeWidth: 3),
+          const SizedBox(height: 32),
+          // Same footprint as the real QR container (250 QR + 16 padding each
+          // side = 282), so the layout doesn't shift when the QR loads.
+          Container(
+            width: 282,
+            height: 282,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: theme.dividerColor),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(
+                  width: 36,
+                  height: 36,
+                  child: CircularProgressIndicator(strokeWidth: 3),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.qrGenerating,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 48),
         ],
       ),
     );
@@ -584,6 +622,7 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
+    final l10n = AppLocalizations.of(context)!;
     final content = Center(
       child: _isLoading
           ? _buildLoadingSkeleton(context)
@@ -593,11 +632,11 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
               children: [
                 const Icon(Icons.error_outline, size: 64, color: Colors.red),
                 const SizedBox(height: 16),
-                Text('Error: $_error', textAlign: TextAlign.center),
+                Text(l10n.qrErrorPrefix(_error!), textAlign: TextAlign.center),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: _generateQrCode,
-                  child: const Text('Retry'),
+                  child: Text(l10n.qrRetry),
                 ),
               ],
             )
@@ -607,7 +646,7 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Scan to Exchange',
+                    l10n.qrScanToExchange,
                     style: GoogleFonts.outfit(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -655,7 +694,7 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Batch Approval',
+                              l10n.qrBatchApproval,
                               style: GoogleFonts.inter(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
@@ -666,8 +705,8 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
                             ),
                             Text(
                               _batchApproval
-                                  ? 'Approve first request for all'
-                                  : 'Approve each request manually',
+                                  ? l10n.qrBatchApprovalOn
+                                  : l10n.qrBatchApprovalOff,
                               style: TextStyle(
                                 fontSize: 10,
                                 color: Theme.of(
@@ -707,7 +746,7 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Resets in $_formattedCountdown',
+                        l10n.qrResetsIn(_formattedCountdown),
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           color: _remainingSeconds <= 180
@@ -723,8 +762,8 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
                             : null,
                         icon: const Icon(Icons.refresh),
                         tooltip: _remainingSeconds > 420
-                            ? 'Available in ${_remainingSeconds - 420}s'
-                            : 'Refresh QR Code',
+                            ? l10n.qrRefreshAvailableIn(_remainingSeconds - 420)
+                            : l10n.qrRefreshTooltip,
                         color: Theme.of(context).primaryColor,
                       ),
                     ],
@@ -759,12 +798,12 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
                           onPressed: () {
                             Clipboard.setData(ClipboardData(text: _qrUrl!));
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('URL copied to clipboard'),
+                              SnackBar(
+                                content: Text(l10n.qrUrlCopied),
                               ),
                             );
                           },
-                          tooltip: 'Copy URL',
+                          tooltip: l10n.qrCopyUrl,
                           constraints: const BoxConstraints(),
                           padding: EdgeInsets.zero,
                         ),
@@ -781,7 +820,7 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Share',
+          l10n.navShare,
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
         ),
         actions: const [],
