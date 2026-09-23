@@ -2040,6 +2040,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No Backup Found'**
   String get backupNoBackupFound;
+
+  /// No description provided for @vcardErrorReadingFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Error reading file: {error}'**
+  String vcardErrorReadingFile(String error);
+
+  /// No description provided for @vcardInvalidPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid package: {error}'**
+  String vcardInvalidPackage(String error);
+
+  /// No description provided for @vcardNoContactsInPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'No contacts found in the package'**
+  String get vcardNoContactsInPackage;
+
+  /// 'vCard' kept in English (format name)
+  ///
+  /// In en, this message translates to:
+  /// **'Please paste vCard content first'**
+  String get vcardPasteFirst;
+
+  /// No description provided for @vcardNoContactsInContent.
+  ///
+  /// In en, this message translates to:
+  /// **'No contacts found in vCard content'**
+  String get vcardNoContactsInContent;
+
+  /// No description provided for @vcardImportedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported {count} contact(s){skippedNote}'**
+  String vcardImportedCount(int count, String skippedNote);
+
+  /// No description provided for @vcardSkippedNote.
+  ///
+  /// In en, this message translates to:
+  /// **' (skipped {count})'**
+  String vcardSkippedNote(int count);
+
+  /// No description provided for @vcardViewAction.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get vcardViewAction;
+
+  /// No description provided for @vcardImportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Import failed: {error}'**
+  String vcardImportFailed(String error);
+
+  /// No description provided for @vcardPreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import {count} Contact(s)?'**
+  String vcardPreviewTitle(int count);
+
+  /// No description provided for @vcardNoContactInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'No contact info'**
+  String get vcardNoContactInfo;
+
+  /// No description provided for @vcardImportAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get vcardImportAction;
+
+  /// No description provided for @vcardHowItWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'How it works'**
+  String get vcardHowItWorks;
+
+  /// AI app names and 'vCard 2.1' kept in English
+  ///
+  /// In en, this message translates to:
+  /// **'Use your favorite AI app (ChatGPT, Gemini, Grok, etc.) to scan a business card photo and ask it to format the result as vCard 2.1.'**
+  String get vcardHowItWorksDesc;
+
+  /// 'AI' kept in English
+  ///
+  /// In en, this message translates to:
+  /// **'Copy AI Prompt'**
+  String get vcardCopyPrompt;
+
+  /// No description provided for @vcardPromptCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'AI prompt copied to clipboard!'**
+  String get vcardPromptCopied;
+
+  /// No description provided for @vcardThen.
+  ///
+  /// In en, this message translates to:
+  /// **'Then:'**
+  String get vcardThen;
+
+  /// '.vcf' kept in English (file extension)
+  ///
+  /// In en, this message translates to:
+  /// **'Upload the exported .vcf file, or'**
+  String get vcardStep1;
+
+  /// No description provided for @vcardStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste the vCard text directly below'**
+  String get vcardStep2;
+
+  /// No description provided for @vcardOption1.
+  ///
+  /// In en, this message translates to:
+  /// **'Option 1: Upload File'**
+  String get vcardOption1;
+
+  /// '.vcf' kept in English (file extension)
+  ///
+  /// In en, this message translates to:
+  /// **'Choose File (.vcf)'**
+  String get vcardChooseFile;
+
+  /// No description provided for @vcardOr.
+  ///
+  /// In en, this message translates to:
+  /// **'OR'**
+  String get vcardOr;
+
+  /// No description provided for @vcardOption2.
+  ///
+  /// In en, this message translates to:
+  /// **'Option 2: Paste vCard Text'**
+  String get vcardOption2;
+
+  /// No description provided for @vcardImporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Importing...'**
+  String get vcardImporting;
+
+  /// No description provided for @vcardImportFromText.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from Text'**
+  String get vcardImportFromText;
 }
 
 class _AppLocalizationsDelegate

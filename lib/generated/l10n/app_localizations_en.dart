@@ -1084,4 +1084,92 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backupNoBackupFound => 'No Backup Found';
+
+  @override
+  String vcardErrorReadingFile(String error) {
+    return 'Error reading file: $error';
+  }
+
+  @override
+  String vcardInvalidPackage(String error) {
+    return 'Invalid package: $error';
+  }
+
+  @override
+  String get vcardNoContactsInPackage => 'No contacts found in the package';
+
+  @override
+  String get vcardPasteFirst => 'Please paste vCard content first';
+
+  @override
+  String get vcardNoContactsInContent => 'No contacts found in vCard content';
+
+  @override
+  String vcardImportedCount(int count, String skippedNote) {
+    return 'Imported $count contact(s)$skippedNote';
+  }
+
+  @override
+  String vcardSkippedNote(int count) {
+    return ' (skipped $count)';
+  }
+
+  @override
+  String get vcardViewAction => 'View';
+
+  @override
+  String vcardImportFailed(String error) {
+    return 'Import failed: $error';
+  }
+
+  @override
+  String vcardPreviewTitle(int count) {
+    return 'Import $count Contact(s)?';
+  }
+
+  @override
+  String get vcardNoContactInfo => 'No contact info';
+
+  @override
+  String get vcardImportAction => 'Import';
+
+  @override
+  String get vcardHowItWorks => 'How it works';
+
+  @override
+  String get vcardHowItWorksDesc =>
+      'Use your favorite AI app (ChatGPT, Gemini, Grok, etc.) to scan a business card photo and ask it to format the result as vCard 2.1.';
+
+  @override
+  String get vcardCopyPrompt => 'Copy AI Prompt';
+
+  @override
+  String get vcardPromptCopied => 'AI prompt copied to clipboard!';
+
+  @override
+  String get vcardThen => 'Then:';
+
+  @override
+  String get vcardStep1 => 'Upload the exported .vcf file, or';
+
+  @override
+  String get vcardStep2 => 'Paste the vCard text directly below';
+
+  @override
+  String get vcardOption1 => 'Option 1: Upload File';
+
+  @override
+  String get vcardChooseFile => 'Choose File (.vcf)';
+
+  @override
+  String get vcardOr => 'OR';
+
+  @override
+  String get vcardOption2 => 'Option 2: Paste vCard Text';
+
+  @override
+  String get vcardImporting => 'Importing...';
+
+  @override
+  String get vcardImportFromText => 'Import from Text';
 }

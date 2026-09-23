@@ -11,6 +11,7 @@ import 'package:secbizcard/features/contacts/data/services/vcard_service.dart';
 import 'package:secbizcard/features/contacts/data/services/zip_import_service.dart';
 import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
+import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 class VCardImportScreen extends ConsumerStatefulWidget {
   const VCardImportScreen({super.key});
@@ -53,7 +54,7 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error reading file: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.vcardErrorReadingFile('$e'))),
         );
       }
     }
@@ -69,7 +70,7 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
     } on FormatException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Invalid package: ${e.message}')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.vcardInvalidPackage(e.message))),
         );
       }
       return;
@@ -78,7 +79,7 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
     if (result.contacts.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No contacts found in the package')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.vcardNoContactsInPackage)),
         );
       }
       return;
@@ -98,7 +99,7 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
     final text = _textController.text.trim();
     if (text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please paste vCard content first')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.vcardPasteFirst)),
       );
       return;
     }
@@ -111,7 +112,7 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
     if (contacts.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No contacts found in vCard content')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.vcardNoContactsInContent)),
         );
       }
       return;
@@ -145,12 +146,13 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
       ref.invalidate(savedContactsProvider);
 
       if (mounted) {
-        final skippedNote = skipped > 0 ? ' (skipped $skipped)' : '';
+        final l10n = AppLocalizations.of(context)!;
+        final skippedNote = skipped > 0 ? l10n.vcardSkippedNote(skipped) : '';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Imported $savedCount contact(s)$skippedNote'),
+            content: Text(l10n.vcardImportedCount(savedCount, skippedNote)),
             action: SnackBarAction(
-              label: 'View',
+              label: l10n.vcardViewAction,
               onPressed: () => context.go('/home?tab=1'),
             ),
           ),
@@ -160,7 +162,7 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Import failed: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.vcardImportFailed('$e'))),
         );
       }
     } finally {
@@ -169,10 +171,11 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
   }
 
   Future<bool?> _showPreviewDialog(List<UserProfile> contacts) {
+    final l10n = AppLocalizations.of(context)!;
     return showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Import ${contacts.length} Contact(s)?'),
+        title: Text(l10n.vcardPreviewTitle(contacts.length)),
         content: SizedBox(
           width: double.maxFinite,
           height: 300,
@@ -195,7 +198,7 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
                       ? c.email!
                       : (c.phone?.isNotEmpty == true
                           ? c.phone!
-                          : 'No contact info'),
+                          : l10n.vcardNoContactInfo),
                 ),
               );
             },
@@ -204,11 +207,11 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Import'),
+            child: Text(l10n.vcardImportAction),
           ),
         ],
       ),
@@ -218,11 +221,12 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Import vCard',
+          l10n.drawerImportVcard,
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
         ),
       ),
@@ -255,7 +259,7 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        'How it works',
+                        l10n.vcardHowItWorks,
                         style: GoogleFonts.outfit(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -266,7 +270,7 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Use your favorite AI app (ChatGPT, Gemini, Grok, etc.) to scan a business card photo and ask it to format the result as vCard 2.1.',
+                    l10n.vcardHowItWorksDesc,
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       color: theme.colorScheme.onSurfaceVariant,
@@ -286,14 +290,14 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
                               'Please output the vCard text so I can copy it directly.',
                         ));
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('AI prompt copied to clipboard!'),
-                            duration: Duration(seconds: 2),
+                          SnackBar(
+                            content: Text(l10n.vcardPromptCopied),
+                            duration: const Duration(seconds: 2),
                           ),
                         );
                       },
                       icon: const Icon(Icons.copy, size: 18),
-                      label: const Text('Copy AI Prompt'),
+                      label: Text(l10n.vcardCopyPrompt),
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
@@ -304,7 +308,7 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Then:',
+                    l10n.vcardThen,
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -312,9 +316,9 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _buildStep(theme, '1', 'Upload the exported .vcf file, or'),
+                  _buildStep(theme, '1', l10n.vcardStep1),
                   const SizedBox(height: 8),
-                  _buildStep(theme, '2', 'Paste the vCard text directly below'),
+                  _buildStep(theme, '2', l10n.vcardStep2),
                 ],
               ),
             ),
@@ -323,7 +327,7 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
 
             // Option 1: File Upload
             Text(
-              'Option 1: Upload File',
+              l10n.vcardOption1,
               style: GoogleFonts.outfit(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -336,7 +340,7 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
               child: OutlinedButton.icon(
                 onPressed: _isImporting ? null : _pickFile,
                 icon: const Icon(Icons.file_download),
-                label: const Text('Choose File (.vcf)'),
+                label: Text(l10n.vcardChooseFile),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: theme.colorScheme.primary,
                   side: BorderSide(color: theme.colorScheme.outline),
@@ -357,7 +361,7 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
-                    'OR',
+                    l10n.vcardOr,
                     style: GoogleFonts.inter(
                       color: theme.colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w600,
@@ -373,7 +377,7 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
 
             // Option 2: Paste Text
             Text(
-              'Option 2: Paste vCard Text',
+              l10n.vcardOption2,
               style: GoogleFonts.outfit(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -426,7 +430,7 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
                         ),
                       )
                     : const Icon(Icons.download_done),
-                label: Text(_isImporting ? 'Importing...' : 'Import from Text'),
+                label: Text(_isImporting ? l10n.vcardImporting : l10n.vcardImportFromText),
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(

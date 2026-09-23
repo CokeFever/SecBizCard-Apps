@@ -1058,4 +1058,92 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get backupNoBackupFound => 'バックアップが見つかりません';
+
+  @override
+  String vcardErrorReadingFile(String error) {
+    return 'ファイルの読み込み中にエラーが発生しました：$error';
+  }
+
+  @override
+  String vcardInvalidPackage(String error) {
+    return '無効なパッケージ：$error';
+  }
+
+  @override
+  String get vcardNoContactsInPackage => 'パッケージ内に連絡先が見つかりません';
+
+  @override
+  String get vcardPasteFirst => '先に vCard の内容を貼り付けてください';
+
+  @override
+  String get vcardNoContactsInContent => 'vCard の内容に連絡先が見つかりません';
+
+  @override
+  String vcardImportedCount(int count, String skippedNote) {
+    return '$count 件の連絡先をインポートしました$skippedNote';
+  }
+
+  @override
+  String vcardSkippedNote(int count) {
+    return '（$count 件スキップ）';
+  }
+
+  @override
+  String get vcardViewAction => '表示';
+
+  @override
+  String vcardImportFailed(String error) {
+    return 'インポートに失敗しました：$error';
+  }
+
+  @override
+  String vcardPreviewTitle(int count) {
+    return '$count 件の連絡先をインポートしますか？';
+  }
+
+  @override
+  String get vcardNoContactInfo => '連絡先情報なし';
+
+  @override
+  String get vcardImportAction => 'インポート';
+
+  @override
+  String get vcardHowItWorks => '使い方';
+
+  @override
+  String get vcardHowItWorksDesc =>
+      'お好みの AI アプリ（ChatGPT、Gemini、Grok など）で名刺の写真をスキャンし、結果を vCard 2.1 形式にするよう依頼してください。';
+
+  @override
+  String get vcardCopyPrompt => 'AI プロンプトをコピー';
+
+  @override
+  String get vcardPromptCopied => 'AI プロンプトをクリップボードにコピーしました！';
+
+  @override
+  String get vcardThen => '次に：';
+
+  @override
+  String get vcardStep1 => 'エクスポートした .vcf ファイルをアップロード、または';
+
+  @override
+  String get vcardStep2 => '下に vCard テキストを直接貼り付け';
+
+  @override
+  String get vcardOption1 => 'オプション 1：ファイルをアップロード';
+
+  @override
+  String get vcardChooseFile => 'ファイルを選択（.vcf）';
+
+  @override
+  String get vcardOr => 'または';
+
+  @override
+  String get vcardOption2 => 'オプション 2：vCard テキストを貼り付け';
+
+  @override
+  String get vcardImporting => 'インポート中…';
+
+  @override
+  String get vcardImportFromText => 'テキストからインポート';
 }
