@@ -45,14 +45,42 @@ class SubscriptionService {
     }
   }
 
-  /// Associate the current RevenueCat user with a Firebase uid (call on sign-in
-  /// if init ran before auth was known). No-op when not configured.
+  /// Associate the current RevenueCat user with a Firebase uid so purchases and
+  /// webhook `app_user_id` map to our account.
+  ///
+  /// CRITICAL: [init] runs at app startup, often before Firebase auth has
+  /// restored the session, so `appUserID` is null there and RevenueCat falls
+  /// back to an anonymous id ($RCAnonymousID:...). If we never re-associate, a
+  /// purchase is attached to that anonymous id, the webhook writes
+  /// users/{anonId} (not users/{firebaseUid}), and resolveTier — which reads
+  /// users/{request.auth.uid} — never sees the subscription, so the tier stays
+  /// "basic" forever. Calling this on sign-in fixes the mapping. No-op when not
+  /// configured or when RevenueCat is already on this uid.
   Future<void> logIn(String firebaseUid) async {
     if (!_configured) return;
     try {
+      final current = await Purchases.appUserID;
+      if (current == firebaseUid) return; // already mapped
       await Purchases.logIn(firebaseUid);
+      if (kDebugMode) debugPrint('[RevenueCat] logIn → $firebaseUid');
     } catch (e) {
       if (kDebugMode) debugPrint('[RevenueCat] logIn failed: $e');
+    }
+  }
+
+  /// Reset RevenueCat back to an anonymous id on sign-out, so the next user who
+  /// signs in on this device doesn't inherit the previous user's entitlements.
+  /// No-op when not configured.
+  Future<void> logOut() async {
+    if (!_configured) return;
+    try {
+      // Already anonymous → logOut throws; guard by checking first.
+      final isAnon = await Purchases.isAnonymous;
+      if (isAnon) return;
+      await Purchases.logOut();
+      if (kDebugMode) debugPrint('[RevenueCat] logOut → anonymous');
+    } catch (e) {
+      if (kDebugMode) debugPrint('[RevenueCat] logOut failed: $e');
     }
   }
 
