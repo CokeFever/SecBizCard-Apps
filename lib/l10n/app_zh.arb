@@ -284,5 +284,17 @@
   "contactDetailLabelCompany": "公司",
   "contactDetailLabelDepartment": "部门",
   "contactDetailLabelAddress": "地址",
-  "contactDetailOcrResult": "OCR 结果"
+  "contactDetailOcrResult": "OCR 结果",
+  "scanCapturing": "拍摄中…",
+  "scanDetectingEdges": "检测名片边缘中…",
+  "scanRecognizeFailed": "无法识别名片上的文字",
+  "scanNoteOwnKeyNearLimit": "您的 Cloud Vision 密钥即将达到每月免费上限（80%）。",
+  "scanNoteSharedNearLimit": "本月共享识别额度即将用完。",
+  "scanNoteUsedOnDevice": "已使用设备端识别。在设置中添加 Cloud Vision 密钥可获得最佳效果。",
+  "scanToggleHorizontal": "横向",
+  "scanToggleVertical": "竖向",
+  "scanCameraUnavailableTitle": "相机不可用",
+  "scanCameraUnavailableBody": "无法访问相机。请确认其未被其他应用使用。",
+  "scanRetry": "重试",
+  "scanPermissionBody": "此功能需要相机访问权限，以扫描并识别名片。"
 }

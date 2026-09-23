@@ -933,4 +933,42 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get contactDetailOcrResult => 'OCR 結果';
+
+  @override
+  String get scanCapturing => '撮影中…';
+
+  @override
+  String get scanDetectingEdges => '名刺の端を検出中…';
+
+  @override
+  String get scanRecognizeFailed => '名刺の文字を認識できませんでした';
+
+  @override
+  String get scanNoteOwnKeyNearLimit => 'Cloud Vision キーが月間無料上限（80%）に近づいています。';
+
+  @override
+  String get scanNoteSharedNearLimit => '今月の共有認識クォータが残りわずかです。';
+
+  @override
+  String get scanNoteUsedOnDevice =>
+      'デバイス上の認識を使用しました。設定で Cloud Vision キーを追加すると最良の結果が得られます。';
+
+  @override
+  String get scanToggleHorizontal => '横向き';
+
+  @override
+  String get scanToggleVertical => '縦向き';
+
+  @override
+  String get scanCameraUnavailableTitle => 'カメラを使用できません';
+
+  @override
+  String get scanCameraUnavailableBody =>
+      'カメラにアクセスできませんでした。他のアプリで使用されていないか確認してください。';
+
+  @override
+  String get scanRetry => '再試行';
+
+  @override
+  String get scanPermissionBody => 'この機能では、名刺をスキャンして認識するためにカメラへのアクセスが必要です。';
 }

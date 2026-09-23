@@ -284,5 +284,17 @@
   "contactDetailLabelCompany": "公司",
   "contactDetailLabelDepartment": "部門",
   "contactDetailLabelAddress": "地址",
-  "contactDetailOcrResult": "OCR 結果"
+  "contactDetailOcrResult": "OCR 結果",
+  "scanCapturing": "拍攝中…",
+  "scanDetectingEdges": "偵測名片邊緣中…",
+  "scanRecognizeFailed": "無法辨識名片上的文字",
+  "scanNoteOwnKeyNearLimit": "您的 Cloud Vision 金鑰即將達到每月免費上限（80%）。",
+  "scanNoteSharedNearLimit": "本月共用辨識額度即將用完。",
+  "scanNoteUsedOnDevice": "已使用裝置端辨識。在設定中加入 Cloud Vision 金鑰可獲得最佳效果。",
+  "scanToggleHorizontal": "橫向",
+  "scanToggleVertical": "直向",
+  "scanCameraUnavailableTitle": "相機無法使用",
+  "scanCameraUnavailableBody": "無法存取相機。請確認其未被其他應用程式使用。",
+  "scanRetry": "重試",
+  "scanPermissionBody": "此功能需要相機存取權，以掃描並辨識名片。"
 }

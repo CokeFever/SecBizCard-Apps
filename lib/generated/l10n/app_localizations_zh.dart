@@ -923,6 +923,42 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get contactDetailOcrResult => 'OCR 结果';
+
+  @override
+  String get scanCapturing => '拍摄中…';
+
+  @override
+  String get scanDetectingEdges => '检测名片边缘中…';
+
+  @override
+  String get scanRecognizeFailed => '无法识别名片上的文字';
+
+  @override
+  String get scanNoteOwnKeyNearLimit => '您的 Cloud Vision 密钥即将达到每月免费上限（80%）。';
+
+  @override
+  String get scanNoteSharedNearLimit => '本月共享识别额度即将用完。';
+
+  @override
+  String get scanNoteUsedOnDevice => '已使用设备端识别。在设置中添加 Cloud Vision 密钥可获得最佳效果。';
+
+  @override
+  String get scanToggleHorizontal => '横向';
+
+  @override
+  String get scanToggleVertical => '竖向';
+
+  @override
+  String get scanCameraUnavailableTitle => '相机不可用';
+
+  @override
+  String get scanCameraUnavailableBody => '无法访问相机。请确认其未被其他应用使用。';
+
+  @override
+  String get scanRetry => '重试';
+
+  @override
+  String get scanPermissionBody => '此功能需要相机访问权限，以扫描并识别名片。';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -1844,4 +1880,40 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get contactDetailOcrResult => 'OCR 結果';
+
+  @override
+  String get scanCapturing => '拍攝中…';
+
+  @override
+  String get scanDetectingEdges => '偵測名片邊緣中…';
+
+  @override
+  String get scanRecognizeFailed => '無法辨識名片上的文字';
+
+  @override
+  String get scanNoteOwnKeyNearLimit => '您的 Cloud Vision 金鑰即將達到每月免費上限（80%）。';
+
+  @override
+  String get scanNoteSharedNearLimit => '本月共用辨識額度即將用完。';
+
+  @override
+  String get scanNoteUsedOnDevice => '已使用裝置端辨識。在設定中加入 Cloud Vision 金鑰可獲得最佳效果。';
+
+  @override
+  String get scanToggleHorizontal => '橫向';
+
+  @override
+  String get scanToggleVertical => '直向';
+
+  @override
+  String get scanCameraUnavailableTitle => '相機無法使用';
+
+  @override
+  String get scanCameraUnavailableBody => '無法存取相機。請確認其未被其他應用程式使用。';
+
+  @override
+  String get scanRetry => '重試';
+
+  @override
+  String get scanPermissionBody => '此功能需要相機存取權，以掃描並辨識名片。';
 }

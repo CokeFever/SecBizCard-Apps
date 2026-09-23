@@ -934,4 +934,42 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get contactDetailOcrResult => 'OCR 결과';
+
+  @override
+  String get scanCapturing => '촬영 중…';
+
+  @override
+  String get scanDetectingEdges => '명함 가장자리 감지 중…';
+
+  @override
+  String get scanRecognizeFailed => '명함의 텍스트를 인식하지 못했습니다';
+
+  @override
+  String get scanNoteOwnKeyNearLimit => 'Cloud Vision 키가 월 무료 한도(80%)에 근접했습니다.';
+
+  @override
+  String get scanNoteSharedNearLimit => '이번 달 공유 인식 할당량이 얼마 남지 않았습니다.';
+
+  @override
+  String get scanNoteUsedOnDevice =>
+      '기기 내 인식을 사용했습니다. 최상의 결과를 위해 설정에서 Cloud Vision 키를 추가하세요.';
+
+  @override
+  String get scanToggleHorizontal => '가로';
+
+  @override
+  String get scanToggleVertical => '세로';
+
+  @override
+  String get scanCameraUnavailableTitle => '카메라를 사용할 수 없음';
+
+  @override
+  String get scanCameraUnavailableBody =>
+      '카메라에 접근할 수 없습니다. 다른 앱에서 사용 중이지 않은지 확인하세요.';
+
+  @override
+  String get scanRetry => '다시 시도';
+
+  @override
+  String get scanPermissionBody => '이 기능은 명함을 스캔하고 인식하기 위해 카메라 접근 권한이 필요합니다.';
 }

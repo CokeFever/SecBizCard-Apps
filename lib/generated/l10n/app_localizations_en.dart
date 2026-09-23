@@ -954,4 +954,45 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get contactDetailOcrResult => 'OCR Result';
+
+  @override
+  String get scanCapturing => 'Capturing...';
+
+  @override
+  String get scanDetectingEdges => 'Detecting card edges...';
+
+  @override
+  String get scanRecognizeFailed => 'Failed to recognize text on card';
+
+  @override
+  String get scanNoteOwnKeyNearLimit =>
+      'Your Cloud Vision key is near its monthly free limit (80%).';
+
+  @override
+  String get scanNoteSharedNearLimit =>
+      'Shared recognition quota is running low this month.';
+
+  @override
+  String get scanNoteUsedOnDevice =>
+      'Used on-device recognition. Add a Cloud Vision key in Settings for best results.';
+
+  @override
+  String get scanToggleHorizontal => 'Horizontal';
+
+  @override
+  String get scanToggleVertical => 'Vertical';
+
+  @override
+  String get scanCameraUnavailableTitle => 'Camera Unavailable';
+
+  @override
+  String get scanCameraUnavailableBody =>
+      'Could not access the camera. Please ensure it is not being used by another app.';
+
+  @override
+  String get scanRetry => 'Retry';
+
+  @override
+  String get scanPermissionBody =>
+      'This feature requires camera access to scan and recognize business cards.';
 }
