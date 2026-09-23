@@ -56,8 +56,10 @@ steps:
         dart run build_runner build --delete-conflicting-outputs
         
         echo "Starting Flutter Build..."
-        flutter build aab --release
-    secretEnv: ['ANDROID_KEYSTORE_PASSWORD', 'ANDROID_KEY_ALIAS', 'ANDROID_KEY_PASSWORD', 'OCR_DEPLOY_KEY', 'GOOGLE_SERVICES_JSON', 'FIREBASE_OPTIONS_DART']
+        # RevenueCat public SDK key (safe in the client) injected at build time.
+        # Empty is fine — SDK init no-ops and no paywall shows.
+        flutter build aab --release --dart-define=REVENUECAT_ANDROID_KEY="$$REVENUECAT_ANDROID_KEY"
+    secretEnv: ['ANDROID_KEYSTORE_PASSWORD', 'ANDROID_KEY_ALIAS', 'ANDROID_KEY_PASSWORD', 'OCR_DEPLOY_KEY', 'GOOGLE_SERVICES_JSON', 'FIREBASE_OPTIONS_DART', 'REVENUECAT_ANDROID_KEY']
 
   # 3. 上傳至 Google Play (使用 fastlane)
   - name: 'ghcr.io/cirruslabs/flutter:3.38.9'
@@ -100,6 +102,8 @@ availableSecrets:
       env: 'ANDROID_KEY_PASSWORD'
     - versionName: projects/ixo-app-secbizcard/secrets/PLAY_STORE_SERVICE_ACCOUNT_JSON/versions/latest
       env: 'PLAY_STORE_SERVICE_ACCOUNT_JSON'
+    - versionName: projects/ixo-app-secbizcard/secrets/REVENUECAT_ANDROID_KEY/versions/latest
+      env: 'REVENUECAT_ANDROID_KEY'
     - versionName: projects/ixo-app-secbizcard/secrets/OCR_DEPLOY_KEY/versions/latest
       env: 'OCR_DEPLOY_KEY'
     - versionName: projects/ixo-app-secbizcard/secrets/GOOGLE_SERVICES_JSON/versions/latest
