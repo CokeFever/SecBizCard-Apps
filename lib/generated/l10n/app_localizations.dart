@@ -709,6 +709,150 @@ abstract class AppLocalizations {
   /// **'Error: {error}'**
   String commonErrorWithDetail(String error);
 
+  /// No description provided for @onboardingSetupProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup Profile'**
+  String get onboardingSetupProfile;
+
+  /// No description provided for @onboardingGetStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Started Quickly'**
+  String get onboardingGetStarted;
+
+  /// No description provided for @onboardingImportDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Import your profile from your Google Contact card to skip manual entry.'**
+  String get onboardingImportDesc;
+
+  /// No description provided for @onboardingImportFromGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from Google'**
+  String get onboardingImportFromGoogle;
+
+  /// No description provided for @onboardingEnterManually.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Manually'**
+  String get onboardingEnterManually;
+
+  /// No description provided for @onboardingReviewInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Your Info'**
+  String get onboardingReviewInfo;
+
+  /// No description provided for @onboardingMasterProfileDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'This info will be your \"Master Profile\". You can choose what to share later.'**
+  String get onboardingMasterProfileDesc;
+
+  /// No description provided for @onboardingRecoveryTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: Using your Personal Phone & Gmail is recommended for account recovery and verified trust.'**
+  String get onboardingRecoveryTip;
+
+  /// No description provided for @onboardingFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name (Required)'**
+  String get onboardingFieldName;
+
+  /// No description provided for @onboardingFieldPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone (Optional)'**
+  String get onboardingFieldPhone;
+
+  /// No description provided for @onboardingFieldEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email (Optional)'**
+  String get onboardingFieldEmail;
+
+  /// No description provided for @onboardingFieldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Job Title'**
+  String get onboardingFieldTitle;
+
+  /// No description provided for @onboardingFieldCompany.
+  ///
+  /// In en, this message translates to:
+  /// **'Company'**
+  String get onboardingFieldCompany;
+
+  /// No description provided for @onboardingNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Name is required'**
+  String get onboardingNameRequired;
+
+  /// No description provided for @onboardingContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get onboardingContinue;
+
+  /// No description provided for @onboardingSmartContexts.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart Contexts'**
+  String get onboardingSmartContexts;
+
+  /// No description provided for @onboardingContextsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'We have set up 3 default contexts for you. You can customize them anytime in Settings.'**
+  String get onboardingContextsDesc;
+
+  /// No description provided for @onboardingContextWorkShares.
+  ///
+  /// In en, this message translates to:
+  /// **'Shares: Name, Job Title, Company, Phone, Email'**
+  String get onboardingContextWorkShares;
+
+  /// No description provided for @onboardingContextPersonalShares.
+  ///
+  /// In en, this message translates to:
+  /// **'Shares: Name, Personal Email, Avatar'**
+  String get onboardingContextPersonalShares;
+
+  /// No description provided for @onboardingContextQuickShares.
+  ///
+  /// In en, this message translates to:
+  /// **'Shares: Name only'**
+  String get onboardingContextQuickShares;
+
+  /// No description provided for @onboardingLooksGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Looks Good'**
+  String get onboardingLooksGood;
+
+  /// No description provided for @onboardingAllSet.
+  ///
+  /// In en, this message translates to:
+  /// **'You are all set!'**
+  String get onboardingAllSet;
+
+  /// No description provided for @onboardingReadyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Your digital business card is ready to share.'**
+  String get onboardingReadyDesc;
+
+  /// Final onboarding button; brand name kept in English
+  ///
+  /// In en, this message translates to:
+  /// **'Start Using SecBizCard'**
+  String get onboardingStartUsing;
+
   /// Shown inside the QR placeholder frame while the session is being created
   ///
   /// In en, this message translates to:
