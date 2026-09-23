@@ -871,4 +871,87 @@ class AppLocalizationsEn extends AppLocalizations {
   String editContactFieldRequired(String label) {
     return '$label is required';
   }
+
+  @override
+  String get contactDetailTitle => 'Contact Details';
+
+  @override
+  String contactDetailCopied(String label) {
+    return '$label copied to clipboard';
+  }
+
+  @override
+  String get contactDetailChooseGallery => 'Choose from Gallery';
+
+  @override
+  String get contactDetailTakePhoto => 'Take Photo';
+
+  @override
+  String get contactDetailRemovePhoto => 'Remove Photo';
+
+  @override
+  String get contactDetailPhotoUpdated => 'Photo updated';
+
+  @override
+  String get contactDetailCurrentAccount => 'current account';
+
+  @override
+  String get contactDetailExportTitle => 'Export to Google Contacts';
+
+  @override
+  String get contactDetailUseThisAccount => 'Use this account';
+
+  @override
+  String get contactDetailUseAnotherAccount => 'Or use another account';
+
+  @override
+  String contactDetailExportFailed(String error) {
+    return 'Export Failed: $error';
+  }
+
+  @override
+  String get contactDetailExportSuccess => 'Exported successfully!';
+
+  @override
+  String contactDetailShareVcardFailed(String error) {
+    return 'Failed to share vCard: $error';
+  }
+
+  @override
+  String contactDetailShareZipFailed(String error) {
+    return 'Failed to share .zip: $error';
+  }
+
+  @override
+  String get contactDetailMoreActions => 'More actions';
+
+  @override
+  String get contactDetailShareVcard => 'Text only (vCard .vcf)';
+
+  @override
+  String get contactDetailShareZip => 'Text + images (.zip)';
+
+  @override
+  String get contactDetailSaveToGoogle => 'Save to Google Contacts';
+
+  @override
+  String get contactDetailLabelEmail => 'Email';
+
+  @override
+  String get contactDetailLabelPhone => 'Phone';
+
+  @override
+  String get contactDetailLabelJobTitle => 'Job Title';
+
+  @override
+  String get contactDetailLabelCompany => 'Company';
+
+  @override
+  String get contactDetailLabelDepartment => 'Department';
+
+  @override
+  String get contactDetailLabelAddress => 'Address';
+
+  @override
+  String get contactDetailOcrResult => 'OCR Result';
 }

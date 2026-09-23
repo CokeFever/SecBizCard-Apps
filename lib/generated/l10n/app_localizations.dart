@@ -1662,6 +1662,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{label} is required'**
   String editContactFieldRequired(String label);
+
+  /// No description provided for @contactDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Details'**
+  String get contactDetailTitle;
+
+  /// No description provided for @contactDetailCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} copied to clipboard'**
+  String contactDetailCopied(String label);
+
+  /// No description provided for @contactDetailChooseGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from Gallery'**
+  String get contactDetailChooseGallery;
+
+  /// No description provided for @contactDetailTakePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take Photo'**
+  String get contactDetailTakePhoto;
+
+  /// No description provided for @contactDetailRemovePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Photo'**
+  String get contactDetailRemovePhoto;
+
+  /// No description provided for @contactDetailPhotoUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo updated'**
+  String get contactDetailPhotoUpdated;
+
+  /// Fallback label when the signed-in email is unavailable
+  ///
+  /// In en, this message translates to:
+  /// **'current account'**
+  String get contactDetailCurrentAccount;
+
+  /// No description provided for @contactDetailExportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export to Google Contacts'**
+  String get contactDetailExportTitle;
+
+  /// No description provided for @contactDetailUseThisAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this account'**
+  String get contactDetailUseThisAccount;
+
+  /// No description provided for @contactDetailUseAnotherAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Or use another account'**
+  String get contactDetailUseAnotherAccount;
+
+  /// No description provided for @contactDetailExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Failed: {error}'**
+  String contactDetailExportFailed(String error);
+
+  /// No description provided for @contactDetailExportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Exported successfully!'**
+  String get contactDetailExportSuccess;
+
+  /// 'vCard' kept in English
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to share vCard: {error}'**
+  String contactDetailShareVcardFailed(String error);
+
+  /// No description provided for @contactDetailShareZipFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to share .zip: {error}'**
+  String contactDetailShareZipFailed(String error);
+
+  /// No description provided for @contactDetailMoreActions.
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get contactDetailMoreActions;
+
+  /// 'vCard .vcf' kept in English (format names)
+  ///
+  /// In en, this message translates to:
+  /// **'Text only (vCard .vcf)'**
+  String get contactDetailShareVcard;
+
+  /// '.zip' kept in English (format name)
+  ///
+  /// In en, this message translates to:
+  /// **'Text + images (.zip)'**
+  String get contactDetailShareZip;
+
+  /// No description provided for @contactDetailSaveToGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to Google Contacts'**
+  String get contactDetailSaveToGoogle;
+
+  /// No description provided for @contactDetailLabelEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get contactDetailLabelEmail;
+
+  /// No description provided for @contactDetailLabelPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get contactDetailLabelPhone;
+
+  /// No description provided for @contactDetailLabelJobTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Job Title'**
+  String get contactDetailLabelJobTitle;
+
+  /// No description provided for @contactDetailLabelCompany.
+  ///
+  /// In en, this message translates to:
+  /// **'Company'**
+  String get contactDetailLabelCompany;
+
+  /// No description provided for @contactDetailLabelDepartment.
+  ///
+  /// In en, this message translates to:
+  /// **'Department'**
+  String get contactDetailLabelDepartment;
+
+  /// No description provided for @contactDetailLabelAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get contactDetailLabelAddress;
+
+  /// Label for the flattened OCR image; 'OCR' kept in English
+  ///
+  /// In en, this message translates to:
+  /// **'OCR Result'**
+  String get contactDetailOcrResult;
 }
 
 class _AppLocalizationsDelegate

@@ -851,4 +851,87 @@ class AppLocalizationsKo extends AppLocalizations {
   String editContactFieldRequired(String label) {
     return '$label은(는) 필수입니다';
   }
+
+  @override
+  String get contactDetailTitle => '연락처 상세';
+
+  @override
+  String contactDetailCopied(String label) {
+    return '$label을(를) 클립보드에 복사했습니다';
+  }
+
+  @override
+  String get contactDetailChooseGallery => '갤러리에서 선택';
+
+  @override
+  String get contactDetailTakePhoto => '사진 촬영';
+
+  @override
+  String get contactDetailRemovePhoto => '사진 삭제';
+
+  @override
+  String get contactDetailPhotoUpdated => '사진이 업데이트되었습니다';
+
+  @override
+  String get contactDetailCurrentAccount => '현재 계정';
+
+  @override
+  String get contactDetailExportTitle => 'Google 주소록으로 내보내기';
+
+  @override
+  String get contactDetailUseThisAccount => '이 계정 사용';
+
+  @override
+  String get contactDetailUseAnotherAccount => '다른 계정 사용';
+
+  @override
+  String contactDetailExportFailed(String error) {
+    return '내보내기 실패: $error';
+  }
+
+  @override
+  String get contactDetailExportSuccess => '내보내기에 성공했습니다!';
+
+  @override
+  String contactDetailShareVcardFailed(String error) {
+    return 'vCard 공유 실패: $error';
+  }
+
+  @override
+  String contactDetailShareZipFailed(String error) {
+    return '.zip 공유 실패: $error';
+  }
+
+  @override
+  String get contactDetailMoreActions => '추가 작업';
+
+  @override
+  String get contactDetailShareVcard => '텍스트만 (vCard .vcf)';
+
+  @override
+  String get contactDetailShareZip => '텍스트＋이미지 (.zip)';
+
+  @override
+  String get contactDetailSaveToGoogle => 'Google 주소록에 저장';
+
+  @override
+  String get contactDetailLabelEmail => '이메일';
+
+  @override
+  String get contactDetailLabelPhone => '전화';
+
+  @override
+  String get contactDetailLabelJobTitle => '직책';
+
+  @override
+  String get contactDetailLabelCompany => '회사';
+
+  @override
+  String get contactDetailLabelDepartment => '부서';
+
+  @override
+  String get contactDetailLabelAddress => '주소';
+
+  @override
+  String get contactDetailOcrResult => 'OCR 결과';
 }
