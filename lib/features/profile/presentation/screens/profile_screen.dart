@@ -13,6 +13,7 @@ import 'package:secbizcard/features/verification/presentation/screens/email_veri
 import 'package:secbizcard/features/verification/presentation/screens/phone_verification_screen.dart';
 import 'package:secbizcard/core/utils/field_formatter.dart';
 import 'package:secbizcard/core/widgets/profile_avatar.dart';
+import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -25,16 +26,18 @@ class ProfileScreen extends ConsumerWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'My Profile',
+          AppLocalizations.of(context)!.drawerMyProfile,
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
         ),
       ),
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: $err')),
+        error: (err, stack) => Center(
+            child: Text(AppLocalizations.of(context)!.commonErrorWithDetail('$err'))),
         data: (profile) {
           if (profile == null) {
-            return const Center(child: Text('Profile not found'));
+            return Center(
+                child: Text(AppLocalizations.of(context)!.profileNotFound));
           }
           return SingleChildScrollView(
             padding: const EdgeInsets.all(24),
@@ -174,7 +177,7 @@ class ProfileScreen extends ConsumerWidget {
                     context.push('/edit-profile', extra: profile);
                   },
                   icon: const Icon(Icons.edit),
-                  label: const Text('Edit Profile'),
+                  label: Text(AppLocalizations.of(context)!.profileEdit),
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 50),
                   ),
@@ -330,7 +333,7 @@ class ProfileScreen extends ConsumerWidget {
           children: [
             Icon(Icons.warning_amber_rounded, color: Colors.red[700], size: 24),
             const SizedBox(width: 8),
-            const Text('Delete Account'),
+            Text(AppLocalizations.of(ctx)!.profileDeleteAccount),
           ],
         ),
         content: const Text(
@@ -341,12 +344,12 @@ class ProfileScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(ctx)!.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red[900]),
-            child: const Text('Continue to Delete'),
+            child: Text(AppLocalizations.of(ctx)!.profileContinueToDelete),
           ),
         ],
       ),
@@ -358,19 +361,17 @@ class ProfileScreen extends ConsumerWidget {
     final finalConfirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Are you sure?'),
-        content: const Text(
-          'This is your last chance. Your account, profile, and all contacts will be permanently deleted.',
-        ),
+        title: Text(AppLocalizations.of(ctx)!.profileAreYouSure),
+        content: Text(AppLocalizations.of(ctx)!.profileDeleteLastChance),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(ctx)!.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red[900]),
-            child: const Text('Delete Forever'),
+            child: Text(AppLocalizations.of(ctx)!.profileDeleteForever),
           ),
         ],
       ),
@@ -403,7 +404,7 @@ class ProfileScreen extends ConsumerWidget {
         (failure) {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Failed: ${failure.message}'), backgroundColor: Colors.red),
+              SnackBar(content: Text(AppLocalizations.of(context)!.commonFailedWithDetail(failure.message)), backgroundColor: Colors.red),
             );
           }
         },
@@ -418,7 +419,7 @@ class ProfileScreen extends ConsumerWidget {
       }
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(AppLocalizations.of(context)!.commonErrorWithDetail('$e')), backgroundColor: Colors.red),
         );
       }
     }

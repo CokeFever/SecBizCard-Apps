@@ -414,6 +414,33 @@ class AppLocalizationsJa extends AppLocalizations {
   String get onboardingStartUsing => 'SecBizCard を使い始める';
 
   @override
+  String get profileNotFound => 'プロフィールが見つかりません';
+
+  @override
+  String get profileEdit => 'プロフィールを編集';
+
+  @override
+  String get profileDeleteAccount => 'アカウントを削除';
+
+  @override
+  String get profileContinueToDelete => '削除に進む';
+
+  @override
+  String get profileAreYouSure => '本当によろしいですか?';
+
+  @override
+  String get profileDeleteLastChance =>
+      'これが最後の確認です。アカウント、プロフィール、すべての連絡先が完全に削除されます。';
+
+  @override
+  String get profileDeleteForever => '完全に削除';
+
+  @override
+  String commonFailedWithDetail(String error) {
+    return '失敗:$error';
+  }
+
+  @override
   String get qrGenerating => '安全な QRCode を生成中…';
 
   @override
