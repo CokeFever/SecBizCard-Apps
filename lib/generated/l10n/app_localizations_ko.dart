@@ -972,4 +972,91 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get scanPermissionBody => '이 기능은 명함을 스캔하고 인식하기 위해 카메라 접근 권한이 필요합니다.';
+
+  @override
+  String get backupCreating => '백업 생성 중…';
+
+  @override
+  String get backupCloudNewerStatus => '클라우드 백업이 이 기기보다 최신입니다';
+
+  @override
+  String backupFailed(String error) {
+    return '백업 실패: $error';
+  }
+
+  @override
+  String get backupSuccessStatus => '백업 성공!';
+
+  @override
+  String get backupSavedToDrive => '백업을 Google 드라이브에 저장했습니다';
+
+  @override
+  String get backupCloudNewerTitle => '클라우드 백업이 더 최신입니다';
+
+  @override
+  String get backupNeverChangedOnDevice => '이 기기에서 변경된 적 없음';
+
+  @override
+  String backupLastChanged(String time) {
+    return '$time에 마지막으로 변경됨';
+  }
+
+  @override
+  String backupCloudNewerBody(String cloudTime, String localState) {
+    return 'Google 드라이브의 백업은 $cloudTime에 업데이트되어 이 기기의 데이터($localState)보다 최신입니다.\n\n지금 백업하면 더 최신인 백업(다른 기기에서 만든 것으로 보이는)을 덮어씁니다. 이 기기에 최신 데이터를 원하면 취소하고 \'복원\'을 사용하세요.\n\n그래도 더 최신인 백업을 덮어쓸까요?';
+  }
+
+  @override
+  String get backupOverwrite => '덮어쓰기';
+
+  @override
+  String get backupRestoreConfirmTitle => '백업을 복원할까요?';
+
+  @override
+  String get backupRestoreConfirmBody =>
+      '현재 연락처와 설정을 덮어씁니다. 최근 백업이 있는지 확인하세요. 계속할까요?';
+
+  @override
+  String get backupRestoreAction => '복원';
+
+  @override
+  String get backupRestoringStatus => '드라이브에서 복원 중…';
+
+  @override
+  String backupRestoreFailed(String error) {
+    return '복원 실패: $error';
+  }
+
+  @override
+  String get backupRestoreCompletedStatus => '복원 완료!';
+
+  @override
+  String get backupRestoreSuccessBody => '데이터를 복원했습니다. 필요하면 앱을 다시 시작하세요.';
+
+  @override
+  String get backupDriveTitle => 'Google 드라이브 백업';
+
+  @override
+  String get backupDriveDesc => '연락처와 설정을 암호화된 파일로 Google 드라이브에 안전하게 백업합니다.';
+
+  @override
+  String get backupProcessing => '처리 중…';
+
+  @override
+  String get backupLastBackupLabel => '마지막 백업';
+
+  @override
+  String get backupNever => '없음';
+
+  @override
+  String get backupNowButton => '지금 백업';
+
+  @override
+  String get backupChecking => '확인 중…';
+
+  @override
+  String get backupRestoreFromBackup => '백업에서 복원';
+
+  @override
+  String get backupNoBackupFound => '백업을 찾을 수 없음';
 }

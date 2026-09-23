@@ -1884,6 +1884,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This feature requires camera access to scan and recognize business cards.'**
   String get scanPermissionBody;
+
+  /// No description provided for @backupCreating.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating backup...'**
+  String get backupCreating;
+
+  /// No description provided for @backupCloudNewerStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud backup is newer than this device'**
+  String get backupCloudNewerStatus;
+
+  /// No description provided for @backupFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup Failed: {error}'**
+  String backupFailed(String error);
+
+  /// No description provided for @backupSuccessStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup Successful!'**
+  String get backupSuccessStatus;
+
+  /// No description provided for @backupSavedToDrive.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup saved to Google Drive'**
+  String get backupSavedToDrive;
+
+  /// No description provided for @backupCloudNewerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud backup is newer'**
+  String get backupCloudNewerTitle;
+
+  /// No description provided for @backupNeverChangedOnDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'never changed on this device'**
+  String get backupNeverChangedOnDevice;
+
+  /// No description provided for @backupLastChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'last changed {time}'**
+  String backupLastChanged(String time);
+
+  /// No description provided for @backupCloudNewerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The backup in Google Drive was updated {cloudTime}, which is newer than the data on this device ({localState}).\n\nBacking up now would overwrite that newer backup — likely a backup made from another device. If you want the newer data on this device, cancel and use Restore instead.\n\nOverwrite the newer backup anyway?'**
+  String backupCloudNewerBody(String cloudTime, String localState);
+
+  /// No description provided for @backupOverwrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Overwrite'**
+  String get backupOverwrite;
+
+  /// No description provided for @backupRestoreConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Backup?'**
+  String get backupRestoreConfirmTitle;
+
+  /// No description provided for @backupRestoreConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This will overwrite your current contacts and settings. Make sure you have a recent backup. Continue?'**
+  String get backupRestoreConfirmBody;
+
+  /// No description provided for @backupRestoreAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get backupRestoreAction;
+
+  /// No description provided for @backupRestoringStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring from Drive...'**
+  String get backupRestoringStatus;
+
+  /// No description provided for @backupRestoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Failed: {error}'**
+  String backupRestoreFailed(String error);
+
+  /// No description provided for @backupRestoreCompletedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Completed!'**
+  String get backupRestoreCompletedStatus;
+
+  /// No description provided for @backupRestoreSuccessBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Data restored successfully. Please restart app if needed.'**
+  String get backupRestoreSuccessBody;
+
+  /// No description provided for @backupDriveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Drive Backup'**
+  String get backupDriveTitle;
+
+  /// No description provided for @backupDriveDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Securely backup your contacts and settings to your Google Drive as an encrypted file.'**
+  String get backupDriveDesc;
+
+  /// No description provided for @backupProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing...'**
+  String get backupProcessing;
+
+  /// No description provided for @backupLastBackupLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Backup'**
+  String get backupLastBackupLabel;
+
+  /// No description provided for @backupNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Never'**
+  String get backupNever;
+
+  /// No description provided for @backupNowButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Back Up Now'**
+  String get backupNowButton;
+
+  /// No description provided for @backupChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking...'**
+  String get backupChecking;
+
+  /// No description provided for @backupRestoreFromBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore from Backup'**
+  String get backupRestoreFromBackup;
+
+  /// No description provided for @backupNoBackupFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No Backup Found'**
+  String get backupNoBackupFound;
 }
 
 class _AppLocalizationsDelegate

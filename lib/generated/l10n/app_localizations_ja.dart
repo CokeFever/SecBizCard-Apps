@@ -971,4 +971,91 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get scanPermissionBody => 'この機能では、名刺をスキャンして認識するためにカメラへのアクセスが必要です。';
+
+  @override
+  String get backupCreating => 'バックアップを作成中…';
+
+  @override
+  String get backupCloudNewerStatus => 'クラウドのバックアップがこの端末より新しいです';
+
+  @override
+  String backupFailed(String error) {
+    return 'バックアップに失敗しました：$error';
+  }
+
+  @override
+  String get backupSuccessStatus => 'バックアップに成功しました！';
+
+  @override
+  String get backupSavedToDrive => 'バックアップを Google ドライブに保存しました';
+
+  @override
+  String get backupCloudNewerTitle => 'クラウドのバックアップが新しい';
+
+  @override
+  String get backupNeverChangedOnDevice => 'この端末では変更されていません';
+
+  @override
+  String backupLastChanged(String time) {
+    return '$time に最終変更';
+  }
+
+  @override
+  String backupCloudNewerBody(String cloudTime, String localState) {
+    return 'Google ドライブのバックアップは $cloudTime に更新されており、この端末のデータ（$localState）より新しいです。\n\n今バックアップすると、その新しいバックアップ（おそらく別の端末で作成されたもの）を上書きします。この端末に新しいデータが欲しい場合は、キャンセルして「復元」を使用してください。\n\nそれでも新しいバックアップを上書きしますか？';
+  }
+
+  @override
+  String get backupOverwrite => '上書き';
+
+  @override
+  String get backupRestoreConfirmTitle => 'バックアップを復元しますか？';
+
+  @override
+  String get backupRestoreConfirmBody =>
+      '現在の連絡先と設定を上書きします。最近のバックアップがあることを確認してください。続行しますか？';
+
+  @override
+  String get backupRestoreAction => '復元';
+
+  @override
+  String get backupRestoringStatus => 'ドライブから復元中…';
+
+  @override
+  String backupRestoreFailed(String error) {
+    return '復元に失敗しました：$error';
+  }
+
+  @override
+  String get backupRestoreCompletedStatus => '復元が完了しました！';
+
+  @override
+  String get backupRestoreSuccessBody => 'データを復元しました。必要に応じてアプリを再起動してください。';
+
+  @override
+  String get backupDriveTitle => 'Google ドライブ バックアップ';
+
+  @override
+  String get backupDriveDesc => '連絡先と設定を暗号化ファイルとして Google ドライブに安全にバックアップします。';
+
+  @override
+  String get backupProcessing => '処理中…';
+
+  @override
+  String get backupLastBackupLabel => '前回のバックアップ';
+
+  @override
+  String get backupNever => 'なし';
+
+  @override
+  String get backupNowButton => '今すぐバックアップ';
+
+  @override
+  String get backupChecking => '確認中…';
+
+  @override
+  String get backupRestoreFromBackup => 'バックアップから復元';
+
+  @override
+  String get backupNoBackupFound => 'バックアップが見つかりません';
 }

@@ -995,4 +995,93 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get scanPermissionBody =>
       'This feature requires camera access to scan and recognize business cards.';
+
+  @override
+  String get backupCreating => 'Creating backup...';
+
+  @override
+  String get backupCloudNewerStatus => 'Cloud backup is newer than this device';
+
+  @override
+  String backupFailed(String error) {
+    return 'Backup Failed: $error';
+  }
+
+  @override
+  String get backupSuccessStatus => 'Backup Successful!';
+
+  @override
+  String get backupSavedToDrive => 'Backup saved to Google Drive';
+
+  @override
+  String get backupCloudNewerTitle => 'Cloud backup is newer';
+
+  @override
+  String get backupNeverChangedOnDevice => 'never changed on this device';
+
+  @override
+  String backupLastChanged(String time) {
+    return 'last changed $time';
+  }
+
+  @override
+  String backupCloudNewerBody(String cloudTime, String localState) {
+    return 'The backup in Google Drive was updated $cloudTime, which is newer than the data on this device ($localState).\n\nBacking up now would overwrite that newer backup — likely a backup made from another device. If you want the newer data on this device, cancel and use Restore instead.\n\nOverwrite the newer backup anyway?';
+  }
+
+  @override
+  String get backupOverwrite => 'Overwrite';
+
+  @override
+  String get backupRestoreConfirmTitle => 'Restore Backup?';
+
+  @override
+  String get backupRestoreConfirmBody =>
+      'This will overwrite your current contacts and settings. Make sure you have a recent backup. Continue?';
+
+  @override
+  String get backupRestoreAction => 'Restore';
+
+  @override
+  String get backupRestoringStatus => 'Restoring from Drive...';
+
+  @override
+  String backupRestoreFailed(String error) {
+    return 'Restore Failed: $error';
+  }
+
+  @override
+  String get backupRestoreCompletedStatus => 'Restore Completed!';
+
+  @override
+  String get backupRestoreSuccessBody =>
+      'Data restored successfully. Please restart app if needed.';
+
+  @override
+  String get backupDriveTitle => 'Google Drive Backup';
+
+  @override
+  String get backupDriveDesc =>
+      'Securely backup your contacts and settings to your Google Drive as an encrypted file.';
+
+  @override
+  String get backupProcessing => 'Processing...';
+
+  @override
+  String get backupLastBackupLabel => 'Last Backup';
+
+  @override
+  String get backupNever => 'Never';
+
+  @override
+  String get backupNowButton => 'Back Up Now';
+
+  @override
+  String get backupChecking => 'Checking...';
+
+  @override
+  String get backupRestoreFromBackup => 'Restore from Backup';
+
+  @override
+  String get backupNoBackupFound => 'No Backup Found';
 }
