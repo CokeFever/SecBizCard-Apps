@@ -14,6 +14,7 @@ import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/profile/domain/card_context.dart';
 import 'package:secbizcard/features/profile/domain/user_profile_extensions.dart';
+import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 class HandshakeScreen extends ConsumerStatefulWidget {
   final String sessionId;
@@ -100,7 +101,7 @@ class _HandshakeScreenState extends ConsumerState<HandshakeScreen> {
 
     final user = ref.read(authStateProvider).valueOrNull;
     if (user == null) {
-      setState(() => _error = "Not authenticated");
+      setState(() => _error = AppLocalizations.of(context)!.qrErrorNotAuthenticated);
       return;
     }
 
@@ -154,16 +155,22 @@ class _HandshakeScreenState extends ConsumerState<HandshakeScreen> {
     result.fold(
       (failure) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save: ${failure.message}')),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.handshakeSaveFailed(failure.message),
+            ),
+          ),
         );
       },
       (_) async {
         // Invalidate cache manually since repo doesn't do it anymore
         ref.invalidate(savedContactsProvider);
 
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Contact Saved!')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.qrContactSaved),
+          ),
+        );
 
         // 2. Ask (Dialog) to Share Back
         final sharedBack = await _showShareBackDialog();
@@ -180,25 +187,26 @@ class _HandshakeScreenState extends ConsumerState<HandshakeScreen> {
   }
 
   Future<bool> _showShareBackDialog() async {
+    final l10n = AppLocalizations.of(context)!;
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Share Back?'),
-          content: const Text('Do you want to share your contact info back?'),
+          title: Text(l10n.handshakeShareBackTitle),
+          content: Text(l10n.handshakeShareBackBody),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context, false);
               },
-              child: const Text('No'),
+              child: Text(l10n.handshakeNo),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context, true);
               },
-              child: const Text('Yes'),
+              child: Text(l10n.handshakeYes),
             ),
           ],
         );
@@ -240,12 +248,14 @@ class _HandshakeScreenState extends ConsumerState<HandshakeScreen> {
     if (!mounted) return;
 
     result.fold(
-      (l) => ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to share: ${l.message}'))),
-      (r) => ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Info Shared Back!'))),
+      (l) => ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.handshakeShareFailed(l.message)),
+        ),
+      ),
+      (r) => ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.qrInfoSharedBack)),
+      ),
     );
   }
 
@@ -282,14 +292,18 @@ class _HandshakeScreenState extends ConsumerState<HandshakeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Exchange Info'),
+        title: Text(AppLocalizations.of(context)!.handshakeTitle),
         leading: IconButton(icon: const Icon(Icons.close), onPressed: _abort),
       ),
       body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
         stream: repo.listenToSession(widget.sessionId),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+              child: Text(
+                AppLocalizations.of(context)!.commonErrorWithDetail('${snapshot.error}'),
+              ),
+            );
           }
 
           if (!snapshot.hasData) {
@@ -298,7 +312,7 @@ class _HandshakeScreenState extends ConsumerState<HandshakeScreen> {
 
           final doc = snapshot.data!;
           if (!doc.exists) {
-            return const Center(child: Text('Invalid or Expired Link'));
+            return Center(child: Text(AppLocalizations.of(context)!.handshakeInvalidLink));
           }
 
           final data = doc.data()!;
@@ -325,7 +339,9 @@ class _HandshakeScreenState extends ConsumerState<HandshakeScreen> {
               try {
                 return _buildDataReceivedUI(payload);
               } catch (e) {
-                return Center(child: Text('Error parsing data: $e'));
+                return Center(
+                  child: Text(AppLocalizations.of(context)!.handshakeParseError('$e')),
+                );
               }
             }
           }
@@ -379,14 +395,14 @@ class _HandshakeScreenState extends ConsumerState<HandshakeScreen> {
           const Icon(Icons.qr_code_scanner, size: 80, color: Colors.blue),
           const SizedBox(height: 32),
           Text(
-            'Found Secure Link',
+            AppLocalizations.of(context)!.handshakeFoundLink,
             style: GoogleFonts.outfit(
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 16),
-          const Text('Request to exchange info?'),
+          Text(AppLocalizations.of(context)!.handshakeRequestPrompt),
           const SizedBox(height: 32),
           if (_error != null)
             Padding(
@@ -398,7 +414,10 @@ class _HandshakeScreenState extends ConsumerState<HandshakeScreen> {
             // Buttons
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              OutlinedButton(onPressed: _abort, child: const Text('Abort')),
+              OutlinedButton(
+                onPressed: _abort,
+                child: Text(AppLocalizations.of(context)!.handshakeAbort),
+              ),
               const SizedBox(width: 16),
               ElevatedButton(
                 onPressed: _isRequesting ? null : _sendRequest,
@@ -414,7 +433,7 @@ class _HandshakeScreenState extends ConsumerState<HandshakeScreen> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Send Request'),
+                    : Text(AppLocalizations.of(context)!.handshakeSendRequest),
               ),
             ],
           ),
@@ -433,16 +452,19 @@ class _HandshakeScreenState extends ConsumerState<HandshakeScreen> {
           const CircularProgressIndicator(),
           const SizedBox(height: 24),
           Text(
-            'Request Sent!',
+            AppLocalizations.of(context)!.handshakeRequestSent,
             style: GoogleFonts.outfit(
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 8),
-          const Text('Waiting for approval...'),
+          Text(AppLocalizations.of(context)!.handshakeWaitingApproval),
           const SizedBox(height: 32),
-          OutlinedButton(onPressed: _abort, child: const Text('Abort')),
+          OutlinedButton(
+            onPressed: _abort,
+            child: Text(AppLocalizations.of(context)!.handshakeAbort),
+          ),
         ],
       ),
     );
@@ -455,9 +477,12 @@ class _HandshakeScreenState extends ConsumerState<HandshakeScreen> {
         children: [
           const Icon(Icons.block, size: 60, color: Colors.red),
           const SizedBox(height: 16),
-          const Text('Request Declined'),
+          Text(AppLocalizations.of(context)!.handshakeRequestDeclined),
           const SizedBox(height: 24),
-          OutlinedButton(onPressed: _abort, child: const Text('Close')),
+          OutlinedButton(
+            onPressed: _abort,
+            child: Text(AppLocalizations.of(context)!.commonClose),
+          ),
         ],
       ),
     );
@@ -471,14 +496,17 @@ class _HandshakeScreenState extends ConsumerState<HandshakeScreen> {
           const Icon(Icons.timer_off, size: 60, color: Colors.grey),
           const SizedBox(height: 16),
           Text(
-            'Session Expired',
+            AppLocalizations.of(context)!.handshakeSessionExpired,
             style: GoogleFonts.outfit(
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 24),
-          OutlinedButton(onPressed: _abort, child: const Text('Close')),
+          OutlinedButton(
+            onPressed: _abort,
+            child: Text(AppLocalizations.of(context)!.commonClose),
+          ),
         ],
       ),
     );
@@ -498,7 +526,7 @@ class _HandshakeScreenState extends ConsumerState<HandshakeScreen> {
           const Icon(Icons.check_circle, size: 80, color: Colors.green),
           const SizedBox(height: 24),
           Text(
-            'Info Received!',
+            AppLocalizations.of(context)!.handshakeInfoReceived,
             style: GoogleFonts.outfit(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -556,7 +584,7 @@ class _HandshakeScreenState extends ConsumerState<HandshakeScreen> {
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  child: const Text('Abort'),
+                  child: Text(AppLocalizations.of(context)!.handshakeAbort),
                 ),
               ),
               const SizedBox(width: 16),
@@ -568,7 +596,7 @@ class _HandshakeScreenState extends ConsumerState<HandshakeScreen> {
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  child: const Text('Save Contact'),
+                  child: Text(AppLocalizations.of(context)!.qrSaveToContacts),
                 ),
               ),
             ],
@@ -596,13 +624,14 @@ class _ShareBackContextSheetState extends State<_ShareBackContextSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Select Context to Share',
+            l10n.handshakeSelectContext,
             style: GoogleFonts.outfit(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -610,21 +639,21 @@ class _ShareBackContextSheetState extends State<_ShareBackContextSheet> {
           ),
           const SizedBox(height: 16),
           SegmentedButton<ContextType>(
-            segments: const [
+            segments: [
               ButtonSegment(
                 value: ContextType.business,
-                label: Text('Business'),
-                icon: Icon(Icons.business),
+                label: Text(l10n.handshakeContextBusiness),
+                icon: const Icon(Icons.business),
               ),
               ButtonSegment(
                 value: ContextType.social,
-                label: Text('Social'),
-                icon: Icon(Icons.people),
+                label: Text(l10n.handshakeContextSocial),
+                icon: const Icon(Icons.people),
               ),
               ButtonSegment(
                 value: ContextType.lite,
-                label: Text('Lite'),
-                icon: Icon(Icons.person_outline),
+                label: Text(l10n.handshakeContextLite),
+                icon: const Icon(Icons.person_outline),
               ),
             ],
             selected: {_selectedContext},
@@ -642,7 +671,7 @@ class _ShareBackContextSheetState extends State<_ShareBackContextSheet> {
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              child: const Text('Share'),
+              child: Text(l10n.handshakeShare),
             ),
           ),
         ],

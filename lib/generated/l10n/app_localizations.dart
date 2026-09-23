@@ -1368,6 +1368,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add'**
   String get editProfileAdd;
+
+  /// App bar title on the handshake exchange screen
+  ///
+  /// In en, this message translates to:
+  /// **'Exchange Info'**
+  String get handshakeTitle;
+
+  /// No description provided for @handshakeSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save: {error}'**
+  String handshakeSaveFailed(String error);
+
+  /// Dialog title asking whether to share info back
+  ///
+  /// In en, this message translates to:
+  /// **'Share Back?'**
+  String get handshakeShareBackTitle;
+
+  /// No description provided for @handshakeShareBackBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want to share your contact info back?'**
+  String get handshakeShareBackBody;
+
+  /// No description provided for @handshakeNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get handshakeNo;
+
+  /// No description provided for @handshakeYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get handshakeYes;
+
+  /// No description provided for @handshakeShareFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to share: {error}'**
+  String handshakeShareFailed(String error);
+
+  /// No description provided for @handshakeInvalidLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid or Expired Link'**
+  String get handshakeInvalidLink;
+
+  /// No description provided for @handshakeParseError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error parsing data: {error}'**
+  String handshakeParseError(String error);
+
+  /// No description provided for @handshakeFoundLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Found Secure Link'**
+  String get handshakeFoundLink;
+
+  /// No description provided for @handshakeRequestPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Request to exchange info?'**
+  String get handshakeRequestPrompt;
+
+  /// No description provided for @handshakeAbort.
+  ///
+  /// In en, this message translates to:
+  /// **'Abort'**
+  String get handshakeAbort;
+
+  /// No description provided for @handshakeSendRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Request'**
+  String get handshakeSendRequest;
+
+  /// No description provided for @handshakeRequestSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Sent!'**
+  String get handshakeRequestSent;
+
+  /// No description provided for @handshakeWaitingApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for approval...'**
+  String get handshakeWaitingApproval;
+
+  /// No description provided for @handshakeRequestDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Declined'**
+  String get handshakeRequestDeclined;
+
+  /// No description provided for @handshakeSessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Session Expired'**
+  String get handshakeSessionExpired;
+
+  /// No description provided for @handshakeInfoReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Info Received!'**
+  String get handshakeInfoReceived;
+
+  /// No description provided for @handshakeSelectContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Context to Share'**
+  String get handshakeSelectContext;
+
+  /// No description provided for @handshakeContextBusiness.
+  ///
+  /// In en, this message translates to:
+  /// **'Business'**
+  String get handshakeContextBusiness;
+
+  /// No description provided for @handshakeContextSocial.
+  ///
+  /// In en, this message translates to:
+  /// **'Social'**
+  String get handshakeContextSocial;
+
+  /// No description provided for @handshakeContextLite.
+  ///
+  /// In en, this message translates to:
+  /// **'Lite'**
+  String get handshakeContextLite;
+
+  /// Button to share info back with the selected context
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get handshakeShare;
 }
 
 class _AppLocalizationsDelegate
