@@ -426,6 +426,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingStartUsing => 'Start Using SecBizCard';
 
   @override
+  String get profileNotFound => 'Profile not found';
+
+  @override
+  String get profileEdit => 'Edit Profile';
+
+  @override
+  String get profileDeleteAccount => 'Delete Account';
+
+  @override
+  String get profileContinueToDelete => 'Continue to Delete';
+
+  @override
+  String get profileAreYouSure => 'Are you sure?';
+
+  @override
+  String get profileDeleteLastChance =>
+      'This is your last chance. Your account, profile, and all contacts will be permanently deleted.';
+
+  @override
+  String get profileDeleteForever => 'Delete Forever';
+
+  @override
+  String commonFailedWithDetail(String error) {
+    return 'Failed: $error';
+  }
+
+  @override
   String get qrGenerating => 'Generating secured QR code…';
 
   @override

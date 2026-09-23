@@ -410,6 +410,32 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboardingStartUsing => '开始使用 SecBizCard';
 
   @override
+  String get profileNotFound => '找不到个人资料';
+
+  @override
+  String get profileEdit => '编辑个人资料';
+
+  @override
+  String get profileDeleteAccount => '删除账号';
+
+  @override
+  String get profileContinueToDelete => '继续删除';
+
+  @override
+  String get profileAreYouSure => '你确定吗?';
+
+  @override
+  String get profileDeleteLastChance => '这是你最后的机会。你的账号、个人资料与所有联系人将被永久删除。';
+
+  @override
+  String get profileDeleteForever => '永久删除';
+
+  @override
+  String commonFailedWithDetail(String error) {
+    return '失败:$error';
+  }
+
+  @override
   String get qrGenerating => '生成安全的 QRCode 中…';
 
   @override
@@ -985,6 +1011,32 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get onboardingStartUsing => '開始使用 SecBizCard';
+
+  @override
+  String get profileNotFound => '找不到個人資料';
+
+  @override
+  String get profileEdit => '編輯個人資料';
+
+  @override
+  String get profileDeleteAccount => '刪除帳號';
+
+  @override
+  String get profileContinueToDelete => '繼續刪除';
+
+  @override
+  String get profileAreYouSure => '你確定嗎?';
+
+  @override
+  String get profileDeleteLastChance => '這是你最後的機會。你的帳號、個人資料與所有聯絡人將被永久刪除。';
+
+  @override
+  String get profileDeleteForever => '永久刪除';
+
+  @override
+  String commonFailedWithDetail(String error) {
+    return '失敗:$error';
+  }
 
   @override
   String get qrGenerating => '產生安全的 QRCode 中…';

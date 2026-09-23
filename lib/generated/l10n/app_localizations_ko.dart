@@ -414,6 +414,33 @@ class AppLocalizationsKo extends AppLocalizations {
   String get onboardingStartUsing => 'SecBizCard 시작하기';
 
   @override
+  String get profileNotFound => '프로필을 찾을 수 없습니다';
+
+  @override
+  String get profileEdit => '프로필 편집';
+
+  @override
+  String get profileDeleteAccount => '계정 삭제';
+
+  @override
+  String get profileContinueToDelete => '삭제 계속';
+
+  @override
+  String get profileAreYouSure => '확실합니까?';
+
+  @override
+  String get profileDeleteLastChance =>
+      '마지막 기회입니다. 계정, 프로필, 모든 연락처가 영구적으로 삭제됩니다.';
+
+  @override
+  String get profileDeleteForever => '영구 삭제';
+
+  @override
+  String commonFailedWithDetail(String error) {
+    return '실패: $error';
+  }
+
+  @override
   String get qrGenerating => '보안 QRCode 생성 중…';
 
   @override

@@ -853,6 +853,54 @@ abstract class AppLocalizations {
   /// **'Start Using SecBizCard'**
   String get onboardingStartUsing;
 
+  /// No description provided for @profileNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile not found'**
+  String get profileNotFound;
+
+  /// No description provided for @profileEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Profile'**
+  String get profileEdit;
+
+  /// No description provided for @profileDeleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get profileDeleteAccount;
+
+  /// No description provided for @profileContinueToDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to Delete'**
+  String get profileContinueToDelete;
+
+  /// No description provided for @profileAreYouSure.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure?'**
+  String get profileAreYouSure;
+
+  /// No description provided for @profileDeleteLastChance.
+  ///
+  /// In en, this message translates to:
+  /// **'This is your last chance. Your account, profile, and all contacts will be permanently deleted.'**
+  String get profileDeleteLastChance;
+
+  /// No description provided for @profileDeleteForever.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Forever'**
+  String get profileDeleteForever;
+
+  /// No description provided for @commonFailedWithDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed: {error}'**
+  String commonFailedWithDetail(String error);
+
   /// Shown inside the QR placeholder frame while the session is being created
   ///
   /// In en, this message translates to:
