@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/profile/data/profile_repository.dart';
+import 'package:secbizcard/features/contacts/data/ocr_usage_provider.dart';
 import 'package:secbizcard/core/config/theme_controller.dart';
 import 'package:secbizcard/core/widgets/profile_avatar.dart';
 
@@ -202,6 +203,15 @@ class AppDrawer extends ConsumerWidget {
               );
 
               if (shouldLogout == true) {
+                // Clear this user's cached OCR tier BEFORE signing out, while we
+                // still know their uid, so a shared device never shows the
+                // previous user's tier on the next sign-in.
+                final outgoingUid = authRepo.getCurrentUser()?.uid;
+                if (outgoingUid != null) {
+                  await ref
+                      .read(ocrUsageNotifierProvider.notifier)
+                      .clearCacheFor(outgoingUid);
+                }
                 await authRepo.signOut();
                 if (context.mounted) {
                   context.go('/login');
