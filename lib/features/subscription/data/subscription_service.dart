@@ -86,6 +86,24 @@ class SubscriptionService {
     return _tierFromCustomerInfo(info);
   }
 
+  /// Register a listener fired whenever RevenueCat's [CustomerInfo] changes —
+  /// e.g. a purchase completes, a subscription renews/expires, or an
+  /// entitlement changes from another device/store. No-ops when not configured.
+  /// Returns the same [listener] so callers can remove it later.
+  CustomerInfoUpdateListener? addCustomerInfoListener(
+      CustomerInfoUpdateListener listener) {
+    if (!_configured) return null;
+    Purchases.addCustomerInfoUpdateListener(listener);
+    return listener;
+  }
+
+  /// Removes a previously-added [CustomerInfo] listener. No-ops when not
+  /// configured or when [listener] is null.
+  void removeCustomerInfoListener(CustomerInfoUpdateListener? listener) {
+    if (!_configured || listener == null) return;
+    Purchases.removeCustomerInfoUpdateListener(listener);
+  }
+
   /// Read the current active entitlement tier (for UI display).
   Future<SubscriptionTier> currentTier() async {
     if (!_configured) return SubscriptionTier.none;
