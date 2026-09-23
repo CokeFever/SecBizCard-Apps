@@ -683,6 +683,81 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get editProfileAdd => '添加';
+
+  @override
+  String get handshakeTitle => '交换信息';
+
+  @override
+  String handshakeSaveFailed(String error) {
+    return '保存失败：$error';
+  }
+
+  @override
+  String get handshakeShareBackTitle => '回传您的信息？';
+
+  @override
+  String get handshakeShareBackBody => '您要将自己的联系信息回传给对方吗？';
+
+  @override
+  String get handshakeNo => '否';
+
+  @override
+  String get handshakeYes => '是';
+
+  @override
+  String handshakeShareFailed(String error) {
+    return '分享失败：$error';
+  }
+
+  @override
+  String get handshakeInvalidLink => '链接无效或已过期';
+
+  @override
+  String handshakeParseError(String error) {
+    return '解析数据时出错：$error';
+  }
+
+  @override
+  String get handshakeFoundLink => '已找到安全链接';
+
+  @override
+  String get handshakeRequestPrompt => '要请求交换信息吗？';
+
+  @override
+  String get handshakeAbort => '中止';
+
+  @override
+  String get handshakeSendRequest => '发送请求';
+
+  @override
+  String get handshakeRequestSent => '请求已发送！';
+
+  @override
+  String get handshakeWaitingApproval => '等待对方批准…';
+
+  @override
+  String get handshakeRequestDeclined => '请求已被拒绝';
+
+  @override
+  String get handshakeSessionExpired => '会话已过期';
+
+  @override
+  String get handshakeInfoReceived => '已收到信息！';
+
+  @override
+  String get handshakeSelectContext => '选择要分享的情境';
+
+  @override
+  String get handshakeContextBusiness => '商务';
+
+  @override
+  String get handshakeContextSocial => '社交';
+
+  @override
+  String get handshakeContextLite => '精简';
+
+  @override
+  String get handshakeShare => '分享';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -1364,4 +1439,79 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get editProfileAdd => '新增';
+
+  @override
+  String get handshakeTitle => '交換資訊';
+
+  @override
+  String handshakeSaveFailed(String error) {
+    return '儲存失敗：$error';
+  }
+
+  @override
+  String get handshakeShareBackTitle => '回傳您的資訊？';
+
+  @override
+  String get handshakeShareBackBody => '您要將自己的聯絡資訊回傳給對方嗎？';
+
+  @override
+  String get handshakeNo => '否';
+
+  @override
+  String get handshakeYes => '是';
+
+  @override
+  String handshakeShareFailed(String error) {
+    return '分享失敗：$error';
+  }
+
+  @override
+  String get handshakeInvalidLink => '連結無效或已過期';
+
+  @override
+  String handshakeParseError(String error) {
+    return '解析資料時發生錯誤：$error';
+  }
+
+  @override
+  String get handshakeFoundLink => '已找到安全連結';
+
+  @override
+  String get handshakeRequestPrompt => '要請求交換資訊嗎？';
+
+  @override
+  String get handshakeAbort => '中止';
+
+  @override
+  String get handshakeSendRequest => '傳送請求';
+
+  @override
+  String get handshakeRequestSent => '請求已送出！';
+
+  @override
+  String get handshakeWaitingApproval => '等待對方核准…';
+
+  @override
+  String get handshakeRequestDeclined => '請求已被拒絕';
+
+  @override
+  String get handshakeSessionExpired => '工作階段已過期';
+
+  @override
+  String get handshakeInfoReceived => '已收到資訊！';
+
+  @override
+  String get handshakeSelectContext => '選擇要分享的情境';
+
+  @override
+  String get handshakeContextBusiness => '商務';
+
+  @override
+  String get handshakeContextSocial => '社交';
+
+  @override
+  String get handshakeContextLite => '精簡';
+
+  @override
+  String get handshakeShare => '分享';
 }

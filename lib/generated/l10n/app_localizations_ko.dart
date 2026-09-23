@@ -692,4 +692,79 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get editProfileAdd => '추가';
+
+  @override
+  String get handshakeTitle => '정보 교환';
+
+  @override
+  String handshakeSaveFailed(String error) {
+    return '저장 실패: $error';
+  }
+
+  @override
+  String get handshakeShareBackTitle => '정보를 회신할까요?';
+
+  @override
+  String get handshakeShareBackBody => '내 연락처 정보를 상대방에게 회신하시겠어요?';
+
+  @override
+  String get handshakeNo => '아니요';
+
+  @override
+  String get handshakeYes => '예';
+
+  @override
+  String handshakeShareFailed(String error) {
+    return '공유 실패: $error';
+  }
+
+  @override
+  String get handshakeInvalidLink => '유효하지 않거나 만료된 링크입니다';
+
+  @override
+  String handshakeParseError(String error) {
+    return '데이터 분석 중 오류가 발생했습니다: $error';
+  }
+
+  @override
+  String get handshakeFoundLink => '보안 링크를 찾았습니다';
+
+  @override
+  String get handshakeRequestPrompt => '정보 교환을 요청할까요?';
+
+  @override
+  String get handshakeAbort => '중단';
+
+  @override
+  String get handshakeSendRequest => '요청 보내기';
+
+  @override
+  String get handshakeRequestSent => '요청을 보냈습니다!';
+
+  @override
+  String get handshakeWaitingApproval => '승인을 기다리는 중…';
+
+  @override
+  String get handshakeRequestDeclined => '요청이 거절되었습니다';
+
+  @override
+  String get handshakeSessionExpired => '세션이 만료되었습니다';
+
+  @override
+  String get handshakeInfoReceived => '정보를 받았습니다!';
+
+  @override
+  String get handshakeSelectContext => '공유할 컨텍스트 선택';
+
+  @override
+  String get handshakeContextBusiness => '비즈니스';
+
+  @override
+  String get handshakeContextSocial => '소셜';
+
+  @override
+  String get handshakeContextLite => '라이트';
+
+  @override
+  String get handshakeShare => '공유';
 }

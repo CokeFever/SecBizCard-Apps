@@ -711,4 +711,80 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editProfileAdd => 'Add';
+
+  @override
+  String get handshakeTitle => 'Exchange Info';
+
+  @override
+  String handshakeSaveFailed(String error) {
+    return 'Failed to save: $error';
+  }
+
+  @override
+  String get handshakeShareBackTitle => 'Share Back?';
+
+  @override
+  String get handshakeShareBackBody =>
+      'Do you want to share your contact info back?';
+
+  @override
+  String get handshakeNo => 'No';
+
+  @override
+  String get handshakeYes => 'Yes';
+
+  @override
+  String handshakeShareFailed(String error) {
+    return 'Failed to share: $error';
+  }
+
+  @override
+  String get handshakeInvalidLink => 'Invalid or Expired Link';
+
+  @override
+  String handshakeParseError(String error) {
+    return 'Error parsing data: $error';
+  }
+
+  @override
+  String get handshakeFoundLink => 'Found Secure Link';
+
+  @override
+  String get handshakeRequestPrompt => 'Request to exchange info?';
+
+  @override
+  String get handshakeAbort => 'Abort';
+
+  @override
+  String get handshakeSendRequest => 'Send Request';
+
+  @override
+  String get handshakeRequestSent => 'Request Sent!';
+
+  @override
+  String get handshakeWaitingApproval => 'Waiting for approval...';
+
+  @override
+  String get handshakeRequestDeclined => 'Request Declined';
+
+  @override
+  String get handshakeSessionExpired => 'Session Expired';
+
+  @override
+  String get handshakeInfoReceived => 'Info Received!';
+
+  @override
+  String get handshakeSelectContext => 'Select Context to Share';
+
+  @override
+  String get handshakeContextBusiness => 'Business';
+
+  @override
+  String get handshakeContextSocial => 'Social';
+
+  @override
+  String get handshakeContextLite => 'Lite';
+
+  @override
+  String get handshakeShare => 'Share';
 }

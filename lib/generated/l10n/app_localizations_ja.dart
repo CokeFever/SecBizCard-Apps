@@ -691,4 +691,79 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get editProfileAdd => '追加';
+
+  @override
+  String get handshakeTitle => '情報を交換';
+
+  @override
+  String handshakeSaveFailed(String error) {
+    return '保存に失敗しました：$error';
+  }
+
+  @override
+  String get handshakeShareBackTitle => '情報を返信しますか？';
+
+  @override
+  String get handshakeShareBackBody => 'あなたの連絡先情報を相手に返信しますか？';
+
+  @override
+  String get handshakeNo => 'いいえ';
+
+  @override
+  String get handshakeYes => 'はい';
+
+  @override
+  String handshakeShareFailed(String error) {
+    return '共有に失敗しました：$error';
+  }
+
+  @override
+  String get handshakeInvalidLink => '無効または期限切れのリンクです';
+
+  @override
+  String handshakeParseError(String error) {
+    return 'データの解析中にエラーが発生しました：$error';
+  }
+
+  @override
+  String get handshakeFoundLink => '安全なリンクが見つかりました';
+
+  @override
+  String get handshakeRequestPrompt => '情報交換をリクエストしますか？';
+
+  @override
+  String get handshakeAbort => '中止';
+
+  @override
+  String get handshakeSendRequest => 'リクエストを送信';
+
+  @override
+  String get handshakeRequestSent => 'リクエストを送信しました！';
+
+  @override
+  String get handshakeWaitingApproval => '承認を待っています…';
+
+  @override
+  String get handshakeRequestDeclined => 'リクエストが拒否されました';
+
+  @override
+  String get handshakeSessionExpired => 'セッションの有効期限が切れました';
+
+  @override
+  String get handshakeInfoReceived => '情報を受け取りました！';
+
+  @override
+  String get handshakeSelectContext => '共有するコンテキストを選択';
+
+  @override
+  String get handshakeContextBusiness => 'ビジネス';
+
+  @override
+  String get handshakeContextSocial => 'ソーシャル';
+
+  @override
+  String get handshakeContextLite => 'ライト';
+
+  @override
+  String get handshakeShare => '共有';
 }
