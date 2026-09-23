@@ -131,38 +131,11 @@ class OCRService {
       FirebaseFunctions.instanceFor(app: Firebase.app(), region: 'us-central1');
   late final CloudVisionRecognizer _vision = CloudVisionRecognizer(_functions);
 
-  /// Pre-scan status for the camera preview: which engine will be used and,
-  /// for the shared key, how much monthly quota remains. Never throws — returns
-  /// a best-effort snapshot (offline → shared usage unknown).
-  Future<OcrPreScanStatus> preScanStatus() async {
-    final hasOwn = await _settings.hasApiKey();
-    if (hasOwn) {
-      // BYOK: recognition goes straight to Google with the user's key, so we
-      // don't track usage here. Client-side tier = Flex; the badge shows "BYOK"
-      // rather than a count.
-      return OcrPreScanStatus(
-        engine: OcrEngineUsed.ownKeyVision,
-        tier: OcrTier.flex,
-      );
-    }
-    // Shared: query the (non-billing) usage endpoint for tier + usage.
-    try {
-      final callable = _functions.httpsCallable('getOcrUsage');
-      final res = await callable
-          .call()
-          .timeout(const Duration(seconds: 8));
-      final usage = OcrUsage.fromMap(Map<String, dynamic>.from(res.data as Map));
-      return OcrPreScanStatus(
-        engine: OcrEngineUsed.sharedVision,
-        tier: usage.tier,
-        tierUsed: usage.tierUsed,
-        tierCap: usage.tierCap,
-      );
-    } catch (_) {
-      // Offline or error → we'll still attempt Vision, usage unknown.
-      return OcrPreScanStatus(engine: OcrEngineUsed.sharedVision);
-    }
-  }
+  // NOTE: The pre-scan tier/usage badge is now driven by the app-level
+  // `ocrUsageNotifierProvider` (cache-first + background revalidate) overlaid
+  // with the BYOK key flag — see scan_card_screen `_resolvePreScanStatus`. The
+  // old `preScanStatus()` here did an on-entry `getOcrUsage` call that caused a
+  // visible flicker; it was removed so there's a single source of tier/usage.
 
   /// Whether the orchestrator will attempt Cloud Vision (own key or shared)
   /// before falling back to on-device ML Kit. Used to show an accurate

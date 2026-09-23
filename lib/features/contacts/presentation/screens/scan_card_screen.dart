@@ -2,25 +2,28 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:secbizcard/features/contacts/data/services/ocr_service.dart';
 import 'package:secbizcard/features/contacts/data/services/ocr_tier.dart';
+import 'package:secbizcard/features/contacts/data/ocr_usage_provider.dart';
 import 'package:secbizcard/features/contacts/presentation/ocr_tier_display.dart';
 import 'package:secbizcard/features/contacts/data/card_detection_config.dart';
+import 'package:secbizcard/features/settings/data/ocr_settings_service.dart';
 import 'package:secbizcard/core/responsive/breakpoints.dart';
 import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
-class ScanCardScreen extends StatefulWidget {
+class ScanCardScreen extends ConsumerStatefulWidget {
   const ScanCardScreen({super.key});
 
   @override
-  State<ScanCardScreen> createState() => _ScanCardScreenState();
+  ConsumerState<ScanCardScreen> createState() => _ScanCardScreenState();
 }
 
-class _ScanCardScreenState extends State<ScanCardScreen>
+class _ScanCardScreenState extends ConsumerState<ScanCardScreen>
     with WidgetsBindingObserver {
   CameraController? _controller;
   bool _isProcessing = false;
@@ -28,7 +31,6 @@ class _ScanCardScreenState extends State<ScanCardScreen>
   bool _isVertical = false;
   String? _capturedImagePath;
   String _processingStatus = '';
-  OcrPreScanStatus? _preScanStatus; // engine + remaining shared quota
 
   // Detection confidence from the most recent processCard call, forwarded to
   // the review screen for the "report bad recognition" low-confidence check.
@@ -46,12 +48,6 @@ class _ScanCardScreenState extends State<ScanCardScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _checkAndRequestPermission();
-    _loadPreScanStatus();
-  }
-
-  Future<void> _loadPreScanStatus() async {
-    final status = await _ocrService.preScanStatus();
-    if (mounted) setState(() => _preScanStatus = status);
   }
 
   @override
@@ -319,6 +315,32 @@ class _ScanCardScreenState extends State<ScanCardScreen>
       'width': wFrac,
       'height': hFrac,
     };
+  }
+
+  /// Builds the pre-scan status from the app-level cached providers instead of
+  /// an on-entry network call. BYOK (own key present) → Flex/own-key engine;
+  /// otherwise the shared-key engine with the cached backend tier + usage.
+  /// Returns null until we have a definite answer (BYOK flag resolved, and —
+  /// for the shared path — a cached/fetched usage), so the badge doesn't flash.
+  OcrPreScanStatus? _resolvePreScanStatus(WidgetRef ref) {
+    final hasOwnKey = ref.watch(hasOwnVisionKeyProvider).valueOrNull;
+    if (hasOwnKey == null) return null; // key flag not resolved yet
+    if (hasOwnKey) {
+      // BYOK: recognition goes straight to Google with the user's key.
+      return OcrPreScanStatus(
+        engine: OcrEngineUsed.ownKeyVision,
+        tier: OcrTier.flex,
+      );
+    }
+    // Shared path: show the cached backend tier + usage. Null usage (cold, no
+    // cache yet) → still show the shared-key badge without a count.
+    final usage = ref.watch(ocrUsageNotifierProvider).valueOrNull;
+    return OcrPreScanStatus(
+      engine: OcrEngineUsed.sharedVision,
+      tier: usage?.tier,
+      tierUsed: usage?.tierUsed,
+      tierCap: usage?.tierCap,
+    );
   }
 
   /// Camera-preview badge showing the engine that will be used and, for the
@@ -712,12 +734,20 @@ class _ScanCardScreenState extends State<ScanCardScreen>
             ),
           ),
 
-          // Pre-scan engine + shared-quota indicator (top-right).
-          if (!_isProcessing && _preScanStatus != null)
+          // Pre-scan engine + shared-quota indicator (top-right). Derived from
+          // the app-level cache-first usage provider (+ the BYOK key flag) so
+          // it renders instantly from cache — no on-entry getOcrUsage call.
+          if (!_isProcessing)
             Positioned(
               top: padding.top + 16,
               right: 16,
-              child: _buildPreScanBadge(context, _preScanStatus!),
+              child: Consumer(
+                builder: (context, ref, _) {
+                  final status = _resolvePreScanStatus(ref);
+                  if (status == null) return const SizedBox.shrink();
+                  return _buildPreScanBadge(context, status);
+                },
+              ),
             ),
 
           // Capture Button (hidden during processing).
