@@ -120,3 +120,62 @@ above:
 
 Reminder: Flutter stays pinned **3.38.9** across all pipelines — do not use
 "stable".
+
+---
+
+## Part C — Subscription state-machine fixes (build 1.6.0+172)
+
+Context: on 1.6.0+171 the Android purchase flow showed multiple problems — buying
+Plus then Pro left BOTH active (each billing), ~20 sandbox order emails, tier
+updated only after leaving+returning, cancel reflected only after app restart.
+Root cause: the app never passed a Google **product-change** on upgrade (Play
+stacked a 2nd independent subscription), the UI waited on the backend webhook
+instead of RevenueCat's returned tier, there was no foreground refresh, the
+paywall showed the already-owned tier, and the backend webhook was
+last-event-wins (a late Plus renewal could overwrite an active Pro).
+
+Fixes shipped in **1.6.0+172** (app) + a backend deploy (already live):
+- App: `purchase()` passes `StoreProductChangeInfo(withTimeProration)` with the
+  current active product id → Play REPLACES instead of stacking.
+- App: optimistic tier update from RevenueCat's purchase/restore result, then
+  `refresh()` reconciles used/cap.
+- App: paywall hides the already-owned tier (Plus sees only Upgrade to Pro).
+- App: OCR tier refreshes on app resume (foreground).
+- Backend (DEPLOYED via firebase_deploy.yml): `shouldPersistDecision` — a
+  lower-tier event can't clobber an active higher tier; an expire/cancel only
+  clears the tier it actually refers to.
+
+### BEFORE re-testing — clean the leftover sandbox state
+The earlier test left TWO concurrently-active sandbox subscriptions (Plus + Pro)
+and purchases attached to a RevenueCat anonymous id. Start clean:
+1. Google Play (test account `cokeliebhaber@gmail.com`) → Subscriptions →
+   **cancel** any active SecBizCard Plus/Pro test subs (they also auto-expire on
+   the 5-min sandbox cycle).
+2. RevenueCat Dashboard → Customers → delete the anonymous customer
+   (`$RCAnonymousID:...`) and/or the test customer, so entitlements start fresh.
+3. Optionally wait for the sandbox subs to fully expire before retesting.
+
+### Re-test checklist (Android internal + iOS TestFlight)
+- [ ] Sign in with Google `cokeliebhaber@gmail.com` (non-VIP).
+- [ ] Subscribe to **Plus** → tier card shows **Plus almost immediately**
+      (optimistic), then settles to `Plus x/20`. No leaving+returning needed.
+- [ ] From Plus, tap **Upgrade to Pro** → the paywall shows **only Pro** (Plus
+      hidden). Purchase → Play should say it's a **plan change/replacement**,
+      not a new subscription.
+- [ ] After upgrade: Google Play → Subscriptions shows **only ONE active** sub
+      (Pro), NOT Plus+Pro. Tier card shows **Pro** (settles to `Pro x/100`).
+- [ ] Far fewer order emails than before (ideally one per real change; sandbox
+      5-min renewals still generate some — that's Play, not a bug).
+- [ ] Cancel the sub in Google Play → return to the app (foreground) → tier
+      reflects the change without needing an app restart (once the webhook +
+      resume-refresh land).
+- [ ] Tier never flips backwards on its own (backend reconciliation): once Pro,
+      a stray Plus renewal event must not drop it back to Plus.
+- [ ] Known limitation (do NOT file as a bug): a true DOWNGRADE Pro→Plus can
+      briefly show Basic for one cycle if events arrive out of order. Deferred.
+
+### If tier still doesn't update
+- Check RevenueCat Dashboard → that customer → `app_user_id` == Firebase uid
+  (not `$RCAnonymousID`) and the entitlement is active.
+- Check the webhook is hitting the (now redeployed) `handleRevenueCatEvent`
+  (RevenueCat → Integrations → Webhooks → recent deliveries = 200).
