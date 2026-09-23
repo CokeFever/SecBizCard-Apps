@@ -1374,4 +1374,71 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get reviewFieldTaxId => '사업자/세금 번호';
+
+  @override
+  String get landingStoreLinkFailed => '스토어 링크를 열 수 없습니다';
+
+  @override
+  String get landingInvitationTitle => 'SecBizCard 초대';
+
+  @override
+  String get landingInvitationBody =>
+      'SecBizCard를 통해 연결하도록 초대받았습니다. 이 보안 프로필을 보고 정보를 교환하려면 모바일 앱을 사용하세요.';
+
+  @override
+  String get landingDownloadApp => '앱 다운로드';
+
+  @override
+  String get landingContinueToApp => '앱으로 이동';
+
+  @override
+  String get landingHeroTitle => '전문가 정체성의\n새로운 표준.';
+
+  @override
+  String get landingHeroSubtitle => '안전하고 즉각적이며 검증된 연락처 교환.\n클라우드 기반.';
+
+  @override
+  String get landingMockName => '내 이름';
+
+  @override
+  String get landingMockTitle => '최고기술책임자';
+
+  @override
+  String get landingFeatureQrTitle => 'QR 교환';
+
+  @override
+  String get landingFeatureQrDesc => '동적 QR 코드를 보여주기만 하면 명함을 즉시 공유할 수 있습니다.';
+
+  @override
+  String get landingFeaturePrivacyTitle => '프라이버시 우선';
+
+  @override
+  String get landingFeaturePrivacyDesc =>
+      '데이터는 본인의 Google 드라이브에 저장됩니다. 중앙 집중식 데이터 수집이 없습니다.';
+
+  @override
+  String get landingFeatureOfflineTitle => '오프라인 작동';
+
+  @override
+  String get landingFeatureOfflineDesc => '인터넷 연결이 없어도 명함에 접근하고 공유할 수 있습니다.';
+
+  @override
+  String get landingFeatureVerifiedTitle => '검증된 신원';
+
+  @override
+  String get landingFeatureVerifiedDesc => '이메일과 전화 인증 신호로 프로필에 신뢰를 구축하세요.';
+
+  @override
+  String get landingDownloadHeadline => '안전하고 빠른\n명함 교환을 경험하세요';
+
+  @override
+  String landingCopyright(int year) {
+    return '© $year SecBizCard. All rights reserved.';
+  }
+
+  @override
+  String get landingPrivacyPolicy => '개인정보 처리방침';
+
+  @override
+  String get landingEula => 'EULA';
 }

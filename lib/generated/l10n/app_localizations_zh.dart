@@ -1358,6 +1358,72 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get reviewFieldTaxId => '统一编号／税号';
+
+  @override
+  String get landingStoreLinkFailed => '无法打开商店链接';
+
+  @override
+  String get landingInvitationTitle => 'SecBizCard 邀请';
+
+  @override
+  String get landingInvitationBody =>
+      '您受邀通过 SecBizCard 建立联系。若要查看此安全个人资料并交换信息，请使用我们的移动应用。';
+
+  @override
+  String get landingDownloadApp => '下载应用';
+
+  @override
+  String get landingContinueToApp => '前往应用';
+
+  @override
+  String get landingHeroTitle => '专业身份的\n全新标准。';
+
+  @override
+  String get landingHeroSubtitle => '安全、即时且经过验证的联系信息交换。\n由云端驱动。';
+
+  @override
+  String get landingMockName => '您的姓名';
+
+  @override
+  String get landingMockTitle => '首席技术官';
+
+  @override
+  String get landingFeatureQrTitle => 'QR 交换';
+
+  @override
+  String get landingFeatureQrDesc => '只需出示您的动态 QR code，即可立即分享名片。';
+
+  @override
+  String get landingFeaturePrivacyTitle => '隐私优先';
+
+  @override
+  String get landingFeaturePrivacyDesc => '您的数据保存在您自己的 Google 云端硬盘，没有集中式的数据收集。';
+
+  @override
+  String get landingFeatureOfflineTitle => '离线可用';
+
+  @override
+  String get landingFeatureOfflineDesc => '即使没有网络连接，也能访问并分享您的名片。';
+
+  @override
+  String get landingFeatureVerifiedTitle => '已验证身份';
+
+  @override
+  String get landingFeatureVerifiedDesc => '通过电子邮件与电话验证标记，在您的个人资料上建立信任。';
+
+  @override
+  String get landingDownloadHeadline => '体验安全又快速的\n名片交换';
+
+  @override
+  String landingCopyright(int year) {
+    return '© $year SecBizCard. 保留所有权利。';
+  }
+
+  @override
+  String get landingPrivacyPolicy => '隐私政策';
+
+  @override
+  String get landingEula => 'EULA';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -2714,4 +2780,70 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get reviewFieldTaxId => '統一編號／稅號';
+
+  @override
+  String get landingStoreLinkFailed => '無法開啟商店連結';
+
+  @override
+  String get landingInvitationTitle => 'SecBizCard 邀請';
+
+  @override
+  String get landingInvitationBody =>
+      '您受邀透過 SecBizCard 建立聯繫。若要檢視此安全個人資料並交換資訊，請使用我們的行動應用程式。';
+
+  @override
+  String get landingDownloadApp => '下載應用程式';
+
+  @override
+  String get landingContinueToApp => '前往應用程式';
+
+  @override
+  String get landingHeroTitle => '專業身分的\n全新標準。';
+
+  @override
+  String get landingHeroSubtitle => '安全、即時且經過驗證的聯絡資訊交換。\n由雲端驅動。';
+
+  @override
+  String get landingMockName => '您的姓名';
+
+  @override
+  String get landingMockTitle => '技術長';
+
+  @override
+  String get landingFeatureQrTitle => 'QR 交換';
+
+  @override
+  String get landingFeatureQrDesc => '只要出示您的動態 QR code，即可立即分享名片。';
+
+  @override
+  String get landingFeaturePrivacyTitle => '隱私優先';
+
+  @override
+  String get landingFeaturePrivacyDesc => '您的資料保存在您自己的 Google 雲端硬碟，沒有集中式的資料蒐集。';
+
+  @override
+  String get landingFeatureOfflineTitle => '離線可用';
+
+  @override
+  String get landingFeatureOfflineDesc => '即使沒有網路連線，也能存取並分享您的名片。';
+
+  @override
+  String get landingFeatureVerifiedTitle => '已驗證身分';
+
+  @override
+  String get landingFeatureVerifiedDesc => '透過電子郵件與電話驗證標記，在您的個人資料上建立信任。';
+
+  @override
+  String get landingDownloadHeadline => '體驗安全又快速的\n名片交換';
+
+  @override
+  String landingCopyright(int year) {
+    return '© $year SecBizCard. 保留一切權利。';
+  }
+
+  @override
+  String get landingPrivacyPolicy => '隱私權政策';
+
+  @override
+  String get landingEula => 'EULA';
 }

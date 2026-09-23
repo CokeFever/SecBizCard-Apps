@@ -1373,4 +1373,71 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get reviewFieldTaxId => '登録番号／税番号';
+
+  @override
+  String get landingStoreLinkFailed => 'ストアのリンクを開けませんでした';
+
+  @override
+  String get landingInvitationTitle => 'SecBizCard の招待';
+
+  @override
+  String get landingInvitationBody =>
+      'SecBizCard での接続に招待されました。この安全なプロフィールを表示して情報を交換するには、モバイルアプリをご利用ください。';
+
+  @override
+  String get landingDownloadApp => 'アプリをダウンロード';
+
+  @override
+  String get landingContinueToApp => 'アプリへ進む';
+
+  @override
+  String get landingHeroTitle => 'プロフェッショナルな\nアイデンティティの新基準。';
+
+  @override
+  String get landingHeroSubtitle => '安全で即時、そして検証済みの連絡先交換。\nクラウドによって実現。';
+
+  @override
+  String get landingMockName => 'あなたの名前';
+
+  @override
+  String get landingMockTitle => '最高技術責任者';
+
+  @override
+  String get landingFeatureQrTitle => 'QR 交換';
+
+  @override
+  String get landingFeatureQrDesc => '動的な QR コードを見せるだけで、名刺を即座に共有できます。';
+
+  @override
+  String get landingFeaturePrivacyTitle => 'プライバシー優先';
+
+  @override
+  String get landingFeaturePrivacyDesc =>
+      'データはあなた自身の Google ドライブに保存されます。中央集約的なデータ収集はありません。';
+
+  @override
+  String get landingFeatureOfflineTitle => 'オフラインでも動作';
+
+  @override
+  String get landingFeatureOfflineDesc => 'インターネット接続がなくても、名刺にアクセスして共有できます。';
+
+  @override
+  String get landingFeatureVerifiedTitle => '検証済みの身元';
+
+  @override
+  String get landingFeatureVerifiedDesc => 'メールと電話の検証シグナルで、プロフィールに信頼を築きます。';
+
+  @override
+  String get landingDownloadHeadline => '安全で高速な\n名刺交換を体験';
+
+  @override
+  String landingCopyright(int year) {
+    return '© $year SecBizCard. All rights reserved.';
+  }
+
+  @override
+  String get landingPrivacyPolicy => 'プライバシーポリシー';
+
+  @override
+  String get landingEula => 'EULA';
 }

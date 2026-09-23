@@ -1404,4 +1404,76 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reviewFieldTaxId => 'VAT / Tax ID';
+
+  @override
+  String get landingStoreLinkFailed => 'Could not open store link';
+
+  @override
+  String get landingInvitationTitle => 'SecBizCard Invitation';
+
+  @override
+  String get landingInvitationBody =>
+      'You\'ve been invited to connect via SecBizCard. To view this secure profile and exchange details, please use our mobile app.';
+
+  @override
+  String get landingDownloadApp => 'Download App';
+
+  @override
+  String get landingContinueToApp => 'Continue to App';
+
+  @override
+  String get landingHeroTitle => 'The New Standard for\nProfessional Identity.';
+
+  @override
+  String get landingHeroSubtitle =>
+      'Secure, instant, and verified contact exchange.\nPowered by the Cloud.';
+
+  @override
+  String get landingMockName => 'Your Name';
+
+  @override
+  String get landingMockTitle => 'Chief Technology Officer';
+
+  @override
+  String get landingFeatureQrTitle => 'QR Exchange';
+
+  @override
+  String get landingFeatureQrDesc =>
+      'Simply show your dynamic QR code to share your business card instantly.';
+
+  @override
+  String get landingFeaturePrivacyTitle => 'Privacy First';
+
+  @override
+  String get landingFeaturePrivacyDesc =>
+      'Your data lives in your own Google Drive. No centralized data harvesting.';
+
+  @override
+  String get landingFeatureOfflineTitle => 'Works Offline';
+
+  @override
+  String get landingFeatureOfflineDesc =>
+      'Access and share your card even without an internet connection.';
+
+  @override
+  String get landingFeatureVerifiedTitle => 'Verified Identity';
+
+  @override
+  String get landingFeatureVerifiedDesc =>
+      'Build trust with email and phone verification signals on your profile.';
+
+  @override
+  String get landingDownloadHeadline =>
+      'Experience Secure & Fast\nBusiness Card Exchange';
+
+  @override
+  String landingCopyright(int year) {
+    return '© $year SecBizCard. All rights reserved.';
+  }
+
+  @override
+  String get landingPrivacyPolicy => 'Privacy Policy';
+
+  @override
+  String get landingEula => 'EULA';
 }
