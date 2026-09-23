@@ -338,6 +338,78 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get onboardingSetupProfile => '设置个人资料';
+
+  @override
+  String get onboardingGetStarted => '快速开始';
+
+  @override
+  String get onboardingImportDesc => '从你的 Google 联系人名片导入个人资料,省去手动输入。';
+
+  @override
+  String get onboardingImportFromGoogle => '从 Google 导入';
+
+  @override
+  String get onboardingEnterManually => '手动输入';
+
+  @override
+  String get onboardingReviewInfo => '查看你的信息';
+
+  @override
+  String get onboardingMasterProfileDesc => '这些信息会成为你的「主要个人资料」。你可以稍后选择要分享哪些内容。';
+
+  @override
+  String get onboardingRecoveryTip => '提示:建议使用你的个人电话与 Gmail,以便账号恢复与可信验证。';
+
+  @override
+  String get onboardingFieldName => '全名(必填)';
+
+  @override
+  String get onboardingFieldPhone => '电话(选填)';
+
+  @override
+  String get onboardingFieldEmail => '电子邮件(选填)';
+
+  @override
+  String get onboardingFieldTitle => '职称';
+
+  @override
+  String get onboardingFieldCompany => '公司';
+
+  @override
+  String get onboardingNameRequired => '姓名为必填';
+
+  @override
+  String get onboardingContinue => '继续';
+
+  @override
+  String get onboardingSmartContexts => '智能情境';
+
+  @override
+  String get onboardingContextsDesc => '我们已为你设置 3 个默认情境。你可以随时在设置中自定义。';
+
+  @override
+  String get onboardingContextWorkShares => '分享:姓名、职称、公司、电话、电子邮件';
+
+  @override
+  String get onboardingContextPersonalShares => '分享:姓名、个人电子邮件、头像';
+
+  @override
+  String get onboardingContextQuickShares => '分享:仅姓名';
+
+  @override
+  String get onboardingLooksGood => '看起来不错';
+
+  @override
+  String get onboardingAllSet => '一切就绪!';
+
+  @override
+  String get onboardingReadyDesc => '你的数字名片已准备好可以分享。';
+
+  @override
+  String get onboardingStartUsing => '开始使用 SecBizCard';
+
+  @override
   String get qrGenerating => '生成安全的 QRCode 中…';
 
   @override
@@ -841,6 +913,78 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String commonErrorWithDetail(String error) {
     return '錯誤:$error';
   }
+
+  @override
+  String get onboardingSetupProfile => '設定個人資料';
+
+  @override
+  String get onboardingGetStarted => '快速開始';
+
+  @override
+  String get onboardingImportDesc => '從你的 Google 聯絡人名片匯入個人資料,省去手動輸入。';
+
+  @override
+  String get onboardingImportFromGoogle => '從 Google 匯入';
+
+  @override
+  String get onboardingEnterManually => '手動輸入';
+
+  @override
+  String get onboardingReviewInfo => '檢視你的資訊';
+
+  @override
+  String get onboardingMasterProfileDesc => '這些資訊會成為你的「主要個人資料」。你可以稍後選擇要分享哪些內容。';
+
+  @override
+  String get onboardingRecoveryTip => '提示:建議使用你的個人電話與 Gmail,以利帳號復原與可信驗證。';
+
+  @override
+  String get onboardingFieldName => '全名(必填)';
+
+  @override
+  String get onboardingFieldPhone => '電話(選填)';
+
+  @override
+  String get onboardingFieldEmail => '電子郵件(選填)';
+
+  @override
+  String get onboardingFieldTitle => '職稱';
+
+  @override
+  String get onboardingFieldCompany => '公司';
+
+  @override
+  String get onboardingNameRequired => '姓名為必填';
+
+  @override
+  String get onboardingContinue => '繼續';
+
+  @override
+  String get onboardingSmartContexts => '智慧情境';
+
+  @override
+  String get onboardingContextsDesc => '我們已為你設定 3 個預設情境。你可以隨時在設定中自訂。';
+
+  @override
+  String get onboardingContextWorkShares => '分享:姓名、職稱、公司、電話、電子郵件';
+
+  @override
+  String get onboardingContextPersonalShares => '分享:姓名、個人電子郵件、頭像';
+
+  @override
+  String get onboardingContextQuickShares => '分享:僅姓名';
+
+  @override
+  String get onboardingLooksGood => '看起來不錯';
+
+  @override
+  String get onboardingAllSet => '一切就緒!';
+
+  @override
+  String get onboardingReadyDesc => '你的數位名片已準備好可以分享。';
+
+  @override
+  String get onboardingStartUsing => '開始使用 SecBizCard';
 
   @override
   String get qrGenerating => '產生安全的 QRCode 中…';

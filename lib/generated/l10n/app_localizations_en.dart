@@ -347,6 +347,85 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get onboardingSetupProfile => 'Setup Profile';
+
+  @override
+  String get onboardingGetStarted => 'Get Started Quickly';
+
+  @override
+  String get onboardingImportDesc =>
+      'Import your profile from your Google Contact card to skip manual entry.';
+
+  @override
+  String get onboardingImportFromGoogle => 'Import from Google';
+
+  @override
+  String get onboardingEnterManually => 'Enter Manually';
+
+  @override
+  String get onboardingReviewInfo => 'Review Your Info';
+
+  @override
+  String get onboardingMasterProfileDesc =>
+      'This info will be your \"Master Profile\". You can choose what to share later.';
+
+  @override
+  String get onboardingRecoveryTip =>
+      'Tip: Using your Personal Phone & Gmail is recommended for account recovery and verified trust.';
+
+  @override
+  String get onboardingFieldName => 'Full Name (Required)';
+
+  @override
+  String get onboardingFieldPhone => 'Phone (Optional)';
+
+  @override
+  String get onboardingFieldEmail => 'Email (Optional)';
+
+  @override
+  String get onboardingFieldTitle => 'Job Title';
+
+  @override
+  String get onboardingFieldCompany => 'Company';
+
+  @override
+  String get onboardingNameRequired => 'Name is required';
+
+  @override
+  String get onboardingContinue => 'Continue';
+
+  @override
+  String get onboardingSmartContexts => 'Smart Contexts';
+
+  @override
+  String get onboardingContextsDesc =>
+      'We have set up 3 default contexts for you. You can customize them anytime in Settings.';
+
+  @override
+  String get onboardingContextWorkShares =>
+      'Shares: Name, Job Title, Company, Phone, Email';
+
+  @override
+  String get onboardingContextPersonalShares =>
+      'Shares: Name, Personal Email, Avatar';
+
+  @override
+  String get onboardingContextQuickShares => 'Shares: Name only';
+
+  @override
+  String get onboardingLooksGood => 'Looks Good';
+
+  @override
+  String get onboardingAllSet => 'You are all set!';
+
+  @override
+  String get onboardingReadyDesc =>
+      'Your digital business card is ready to share.';
+
+  @override
+  String get onboardingStartUsing => 'Start Using SecBizCard';
+
+  @override
   String get qrGenerating => 'Generating secured QR code…';
 
   @override

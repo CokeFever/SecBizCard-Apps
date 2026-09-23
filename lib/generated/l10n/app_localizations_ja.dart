@@ -339,6 +339,81 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get onboardingSetupProfile => 'プロフィール設定';
+
+  @override
+  String get onboardingGetStarted => 'すぐに始める';
+
+  @override
+  String get onboardingImportDesc => 'Google 連絡先の名刺からプロフィールをインポートして、手入力を省けます。';
+
+  @override
+  String get onboardingImportFromGoogle => 'Google からインポート';
+
+  @override
+  String get onboardingEnterManually => '手動で入力';
+
+  @override
+  String get onboardingReviewInfo => '情報を確認';
+
+  @override
+  String get onboardingMasterProfileDesc =>
+      'この情報があなたの「マスタープロフィール」になります。共有する内容は後で選べます。';
+
+  @override
+  String get onboardingRecoveryTip =>
+      'ヒント:アカウント復旧と信頼性確認のため、個人の電話番号と Gmail の使用をおすすめします。';
+
+  @override
+  String get onboardingFieldName => '氏名(必須)';
+
+  @override
+  String get onboardingFieldPhone => '電話(任意)';
+
+  @override
+  String get onboardingFieldEmail => 'メール(任意)';
+
+  @override
+  String get onboardingFieldTitle => '役職';
+
+  @override
+  String get onboardingFieldCompany => '会社';
+
+  @override
+  String get onboardingNameRequired => '氏名は必須です';
+
+  @override
+  String get onboardingContinue => '続ける';
+
+  @override
+  String get onboardingSmartContexts => 'スマートコンテキスト';
+
+  @override
+  String get onboardingContextsDesc =>
+      '3 つのデフォルトコンテキストを設定しました。設定でいつでもカスタマイズできます。';
+
+  @override
+  String get onboardingContextWorkShares => '共有:氏名、役職、会社、電話、メール';
+
+  @override
+  String get onboardingContextPersonalShares => '共有:氏名、個人メール、アバター';
+
+  @override
+  String get onboardingContextQuickShares => '共有:氏名のみ';
+
+  @override
+  String get onboardingLooksGood => '良さそう';
+
+  @override
+  String get onboardingAllSet => '準備完了!';
+
+  @override
+  String get onboardingReadyDesc => 'デジタル名刺の共有準備ができました。';
+
+  @override
+  String get onboardingStartUsing => 'SecBizCard を使い始める';
+
+  @override
   String get qrGenerating => '安全な QRCode を生成中…';
 
   @override

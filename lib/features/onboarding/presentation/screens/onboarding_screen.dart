@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/onboarding/presentation/controllers/onboarding_controller.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
+import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -114,7 +115,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'Setup Profile',
+          AppLocalizations.of(context)!.onboardingSetupProfile,
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -173,13 +174,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         ),
         const SizedBox(height: 32),
         Text(
-          'Get Started Quickly',
+          AppLocalizations.of(context)!.onboardingGetStarted,
           style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.bold),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 16),
         Text(
-          'Import your profile from your Google Contact card to skip manual entry.',
+          AppLocalizations.of(context)!.onboardingImportDesc,
           style: GoogleFonts.inter(fontSize: 16, color: Colors.grey[600]),
           textAlign: TextAlign.center,
         ),
@@ -193,7 +194,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             child: ElevatedButton.icon(
               onPressed: () => notifier.importFromGoogle(),
               icon: const Icon(Icons.cloud_download),
-              label: const Text('Import from Google'),
+              label: Text(AppLocalizations.of(context)!.onboardingImportFromGoogle),
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -205,7 +206,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           TextButton(
             onPressed: () => notifier.skipImport(),
             child: Text(
-              'Enter Manually',
+              AppLocalizations.of(context)!.onboardingEnterManually,
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -233,7 +234,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Review Your Info',
+            AppLocalizations.of(context)!.onboardingReviewInfo,
             style: GoogleFonts.outfit(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -241,7 +242,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'This info will be your "Master Profile". You can choose what to share later.',
+            AppLocalizations.of(context)!.onboardingMasterProfileDesc,
             style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[600]),
           ),
           const SizedBox(height: 8),
@@ -262,7 +263,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Tip: Using your Personal Phone & Gmail is recommended for account recovery and verified trust.',
+                    AppLocalizations.of(context)!.onboardingRecoveryTip,
                     style: GoogleFonts.inter(
                       fontSize: 13,
                       color: Colors.blue.shade900,
@@ -277,33 +278,33 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
           _buildTextField(
             controller: _nameController,
-            label: 'Full Name (Required)',
+            label: AppLocalizations.of(context)!.onboardingFieldName,
             icon: Icons.person,
           ),
           const SizedBox(height: 16),
           _buildTextField(
             controller: _phoneController,
-            label: 'Phone (Optional)',
+            label: AppLocalizations.of(context)!.onboardingFieldPhone,
             icon: Icons.phone,
             keyboardType: TextInputType.phone,
           ),
           const SizedBox(height: 16),
           _buildTextField(
             controller: _emailController,
-            label: 'Email (Optional)',
+            label: AppLocalizations.of(context)!.onboardingFieldEmail,
             icon: Icons.email,
             keyboardType: TextInputType.emailAddress,
           ),
           const SizedBox(height: 16),
           _buildTextField(
             controller: _titleController,
-            label: 'Job Title',
+            label: AppLocalizations.of(context)!.onboardingFieldTitle,
             icon: Icons.work,
           ),
           const SizedBox(height: 16),
           _buildTextField(
             controller: _companyController,
-            label: 'Company',
+            label: AppLocalizations.of(context)!.onboardingFieldCompany,
             icon: Icons.business,
           ),
 
@@ -317,7 +318,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 _updateDraft();
                 if (_nameController.text.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Name is required')),
+                    SnackBar(content: Text(AppLocalizations.of(context)!.onboardingNameRequired)),
                   );
                   return;
                 }
@@ -328,7 +329,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              child: const Text('Continue'),
+              child: Text(AppLocalizations.of(context)!.onboardingContinue),
             ),
           ),
         ],
@@ -344,12 +345,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Smart Contexts',
+          AppLocalizations.of(context)!.onboardingSmartContexts,
           style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         Text(
-          'We have set up 3 default contexts for you. You can customize them anytime in Settings.',
+          AppLocalizations.of(context)!.onboardingContextsDesc,
           style: GoogleFonts.inter(fontSize: 16, color: Colors.grey[600]),
         ),
         const SizedBox(height: 32),
@@ -358,21 +359,21 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           title: 'Business',
           icon: Icons.business_center,
           color: Colors.blue,
-          description: 'Shares: Name, Job Title, Company, Phone, Email',
+          description: AppLocalizations.of(context)!.onboardingContextWorkShares,
         ),
         const SizedBox(height: 16),
         _buildContextCard(
           title: 'Social',
           icon: Icons.person,
           color: Colors.purple,
-          description: 'Shares: Name, Personal Email, Avatar',
+          description: AppLocalizations.of(context)!.onboardingContextPersonalShares,
         ),
         const SizedBox(height: 16),
         _buildContextCard(
           title: 'Lite',
           icon: Icons.flash_on,
           color: Colors.orange,
-          description: 'Shares: Name only',
+          description: AppLocalizations.of(context)!.onboardingContextQuickShares,
         ),
 
         const Spacer(),
@@ -386,7 +387,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 borderRadius: BorderRadius.circular(16),
               ),
             ),
-            child: const Text('Looks Good'),
+            child: Text(AppLocalizations.of(context)!.onboardingLooksGood),
           ),
         ),
       ],
@@ -445,13 +446,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         const Icon(Icons.check_circle, size: 80, color: Colors.green),
         const SizedBox(height: 32),
         Text(
-          'You are all set!',
+          AppLocalizations.of(context)!.onboardingAllSet,
           style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.bold),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 16),
         Text(
-          'Your digital business card is ready to share.',
+          AppLocalizations.of(context)!.onboardingReadyDesc,
           style: GoogleFonts.inter(fontSize: 16, color: Colors.grey[600]),
           textAlign: TextAlign.center,
         ),
@@ -475,7 +476,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
                 backgroundColor: Colors.green,
               ),
-              child: const Text('Start Using IXO'),
+              child: Text(AppLocalizations.of(context)!.onboardingStartUsing),
             ),
           ),
         if (state.error != null)

@@ -339,6 +339,81 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get onboardingSetupProfile => '프로필 설정';
+
+  @override
+  String get onboardingGetStarted => '빠르게 시작하기';
+
+  @override
+  String get onboardingImportDesc => 'Google 연락처 명함에서 프로필을 가져와 수동 입력을 건너뛰세요.';
+
+  @override
+  String get onboardingImportFromGoogle => 'Google에서 가져오기';
+
+  @override
+  String get onboardingEnterManually => '직접 입력';
+
+  @override
+  String get onboardingReviewInfo => '정보 확인';
+
+  @override
+  String get onboardingMasterProfileDesc =>
+      '이 정보가 \"마스터 프로필\"이 됩니다. 공유할 내용은 나중에 선택할 수 있습니다.';
+
+  @override
+  String get onboardingRecoveryTip =>
+      '팁: 계정 복구와 신뢰 확인을 위해 개인 전화번호와 Gmail 사용을 권장합니다.';
+
+  @override
+  String get onboardingFieldName => '성명(필수)';
+
+  @override
+  String get onboardingFieldPhone => '전화(선택)';
+
+  @override
+  String get onboardingFieldEmail => '이메일(선택)';
+
+  @override
+  String get onboardingFieldTitle => '직함';
+
+  @override
+  String get onboardingFieldCompany => '회사';
+
+  @override
+  String get onboardingNameRequired => '이름은 필수입니다';
+
+  @override
+  String get onboardingContinue => '계속';
+
+  @override
+  String get onboardingSmartContexts => '스마트 컨텍스트';
+
+  @override
+  String get onboardingContextsDesc =>
+      '3개의 기본 컨텍스트를 설정했습니다. 설정에서 언제든지 맞춤 설정할 수 있습니다.';
+
+  @override
+  String get onboardingContextWorkShares => '공유: 이름, 직함, 회사, 전화, 이메일';
+
+  @override
+  String get onboardingContextPersonalShares => '공유: 이름, 개인 이메일, 아바타';
+
+  @override
+  String get onboardingContextQuickShares => '공유: 이름만';
+
+  @override
+  String get onboardingLooksGood => '좋아요';
+
+  @override
+  String get onboardingAllSet => '모두 완료!';
+
+  @override
+  String get onboardingReadyDesc => '디지털 명함을 공유할 준비가 되었습니다.';
+
+  @override
+  String get onboardingStartUsing => 'SecBizCard 시작하기';
+
+  @override
   String get qrGenerating => '보안 QRCode 생성 중…';
 
   @override
