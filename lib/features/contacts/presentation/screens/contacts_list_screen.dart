@@ -7,6 +7,7 @@ import 'package:secbizcard/core/presentation/widgets/user_profile_avatar.dart';
 import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
 
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
+import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 final contactsSearchQueryProvider = StateProvider<String>((ref) => '');
 final contactsSearchModeProvider = StateProvider<bool>((ref) => false);
@@ -101,7 +102,7 @@ class _ContactsListScreenState extends ConsumerState<ContactsListScreen>
           if (searchQuery.isNotEmpty) {
             return Center(
               child: Text(
-                'No contacts found for "$searchQuery"',
+                AppLocalizations.of(context)!.contactsNoneFoundFor(searchQuery),
                 style: GoogleFonts.inter(color: Colors.grey),
               ),
             );
@@ -117,12 +118,12 @@ class _ContactsListScreenState extends ConsumerState<ContactsListScreen>
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'No contacts yet',
+                  AppLocalizations.of(context)!.contactsNoneYet,
                   style: GoogleFonts.inter(color: Colors.grey),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Exchanged or scanned cards will appear here',
+                  AppLocalizations.of(context)!.contactsEmptyHint,
                   style: GoogleFonts.inter(color: Colors.grey, fontSize: 12),
                 ),
               ],
@@ -194,13 +195,16 @@ class _ContactsListScreenState extends ConsumerState<ContactsListScreen>
                       result.fold(
                         (l) => ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Delete failed: ${l.message}'),
+                            content: Text(AppLocalizations.of(context)!
+                                .contactsDeleteFailed(l.message)),
                           ),
                         ),
                         (r) {
                           ref.invalidate(savedContactsProvider);
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Contact deleted')),
+                            SnackBar(
+                                content: Text(AppLocalizations.of(context)!
+                                    .contactsDeleted)),
                           );
                         },
                       );
@@ -208,7 +212,7 @@ class _ContactsListScreenState extends ConsumerState<ContactsListScreen>
                     backgroundColor: Colors.red,
                     foregroundColor: Colors.white,
                     icon: Icons.delete,
-                    label: 'Delete',
+                    label: AppLocalizations.of(context)!.contactsDelete,
                   ),
                 ],
               ),
@@ -218,7 +222,8 @@ class _ContactsListScreenState extends ConsumerState<ContactsListScreen>
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, stack) => Center(child: Text('Error: $err')),
+      error: (err, stack) =>
+          Center(child: Text(AppLocalizations.of(context)!.commonErrorWithDetail('$err'))),
     );
 
     if (!widget.showAppBar) return content;
@@ -239,7 +244,7 @@ class _ContactsListScreenState extends ConsumerState<ContactsListScreen>
                   autofocus: true,
                   style: GoogleFonts.inter(fontSize: 15),
                   decoration: InputDecoration(
-                    hintText: 'Search contacts...',
+                    hintText: AppLocalizations.of(context)!.contactsSearchHint,
                     hintStyle: TextStyle(
                       color: theme.colorScheme.onSurfaceVariant.withValues(
                         alpha: 0.7,
@@ -260,7 +265,7 @@ class _ContactsListScreenState extends ConsumerState<ContactsListScreen>
                 ),
               )
             : Text(
-                'Card',
+                AppLocalizations.of(context)!.navCard,
                 style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
               ),
         actions: [

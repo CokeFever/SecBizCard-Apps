@@ -303,6 +303,41 @@ class AppLocalizationsZh extends AppLocalizations {
   String get drawerLinkGuide => '指南';
 
   @override
+  String loginSignInError(String error) {
+    return '登录错误:$error';
+  }
+
+  @override
+  String contactsNoneFoundFor(String query) {
+    return '找不到符合「$query」的联系人';
+  }
+
+  @override
+  String get contactsNoneYet => '尚无联系人';
+
+  @override
+  String get contactsEmptyHint => '交换或扫描的名片会显示在这里';
+
+  @override
+  String contactsDeleteFailed(String error) {
+    return '删除失败:$error';
+  }
+
+  @override
+  String get contactsDeleted => '已删除联系人';
+
+  @override
+  String get contactsDelete => '删除';
+
+  @override
+  String get contactsSearchHint => '搜索联系人…';
+
+  @override
+  String commonErrorWithDetail(String error) {
+    return '错误:$error';
+  }
+
+  @override
   String get qrGenerating => '生成安全的 QRCode 中…';
 
   @override
@@ -771,6 +806,41 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get drawerLinkGuide => '指南';
+
+  @override
+  String loginSignInError(String error) {
+    return '登入錯誤:$error';
+  }
+
+  @override
+  String contactsNoneFoundFor(String query) {
+    return '找不到符合「$query」的聯絡人';
+  }
+
+  @override
+  String get contactsNoneYet => '尚無聯絡人';
+
+  @override
+  String get contactsEmptyHint => '交換或掃描的名片會顯示在這裡';
+
+  @override
+  String contactsDeleteFailed(String error) {
+    return '刪除失敗:$error';
+  }
+
+  @override
+  String get contactsDeleted => '已刪除聯絡人';
+
+  @override
+  String get contactsDelete => '刪除';
+
+  @override
+  String get contactsSearchHint => '搜尋聯絡人…';
+
+  @override
+  String commonErrorWithDetail(String error) {
+    return '錯誤:$error';
+  }
 
   @override
   String get qrGenerating => '產生安全的 QRCode 中…';

@@ -304,6 +304,41 @@ class AppLocalizationsJa extends AppLocalizations {
   String get drawerLinkGuide => 'ガイド';
 
   @override
+  String loginSignInError(String error) {
+    return 'サインインエラー:$error';
+  }
+
+  @override
+  String contactsNoneFoundFor(String query) {
+    return '「$query」に一致する連絡先が見つかりません';
+  }
+
+  @override
+  String get contactsNoneYet => '連絡先がまだありません';
+
+  @override
+  String get contactsEmptyHint => '交換またはスキャンした名刺がここに表示されます';
+
+  @override
+  String contactsDeleteFailed(String error) {
+    return '削除に失敗しました:$error';
+  }
+
+  @override
+  String get contactsDeleted => '連絡先を削除しました';
+
+  @override
+  String get contactsDelete => '削除';
+
+  @override
+  String get contactsSearchHint => '連絡先を検索…';
+
+  @override
+  String commonErrorWithDetail(String error) {
+    return 'エラー:$error';
+  }
+
+  @override
   String get qrGenerating => '安全な QRCode を生成中…';
 
   @override
