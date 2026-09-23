@@ -1147,4 +1147,37 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get vcardImportFromText => '텍스트에서 가져오기';
+
+  @override
+  String get historyClearTitle => '기록을 지울까요?';
+
+  @override
+  String get historyClearBody => '모든 교환 기록이 삭제됩니다.';
+
+  @override
+  String get historyClearAction => '지우기';
+
+  @override
+  String get historyClearTooltip => '기록 지우기';
+
+  @override
+  String get historyNoActivity => '아직 활동이 없습니다';
+
+  @override
+  String get historyApproved => '승인했습니다!';
+
+  @override
+  String get historyStatusApproved => '승인됨';
+
+  @override
+  String get historyStatusRejected => '거절됨';
+
+  @override
+  String get historyStatusPending => '대기 중';
+
+  @override
+  String get historyStatusMissed => '놓침';
+
+  @override
+  String get historyStatusExpired => '만료됨';
 }

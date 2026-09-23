@@ -347,5 +347,16 @@
   "vcardOr": "或",
   "vcardOption2": "選項 2：貼上 vCard 文字",
   "vcardImporting": "匯入中…",
-  "vcardImportFromText": "從文字匯入"
+  "vcardImportFromText": "從文字匯入",
+  "historyClearTitle": "清除記錄？",
+  "historyClearBody": "這會刪除所有交換記錄。",
+  "historyClearAction": "清除",
+  "historyClearTooltip": "清除記錄",
+  "historyNoActivity": "尚無活動",
+  "historyApproved": "已核准！",
+  "historyStatusApproved": "已核准",
+  "historyStatusRejected": "已拒絕",
+  "historyStatusPending": "待處理",
+  "historyStatusMissed": "已錯過",
+  "historyStatusExpired": "已過期"
 }

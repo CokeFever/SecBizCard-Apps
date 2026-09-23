@@ -11,6 +11,7 @@ import 'package:secbizcard/features/profile/domain/user_profile_extensions.dart'
 import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
 import 'package:secbizcard/core/presentation/widgets/user_profile_avatar.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
+import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 class HandshakeHistoryScreen extends ConsumerWidget {
   const HandshakeHistoryScreen({super.key});
@@ -19,11 +20,12 @@ class HandshakeHistoryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final historyAsync = ref.watch(handshakeHistoryProvider);
     final repository = ref.read(handshakeHistoryRepositoryProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Notifications',
+          l10n.navNotifications,
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
         ),
         actions: [
@@ -36,18 +38,16 @@ class HandshakeHistoryScreen extends ConsumerWidget {
                       final confirm = await showDialog<bool>(
                         context: context,
                         builder: (context) => AlertDialog(
-                          title: const Text('Clear History?'),
-                          content: const Text(
-                            'This will delete all handshake records.',
-                          ),
+                          title: Text(l10n.historyClearTitle),
+                          content: Text(l10n.historyClearBody),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context, false),
-                              child: const Text('Cancel'),
+                              child: Text(l10n.commonCancel),
                             ),
                             TextButton(
                               onPressed: () => Navigator.pop(context, true),
-                              child: const Text('Clear'),
+                              child: Text(l10n.historyClearAction),
                             ),
                           ],
                         ),
@@ -58,7 +58,7 @@ class HandshakeHistoryScreen extends ConsumerWidget {
                         ref.invalidate(handshakeHistoryProvider);
                       }
                     },
-              tooltip: 'Clear History',
+              tooltip: l10n.historyClearTooltip,
             ),
             loading: () => const SizedBox.shrink(),
             error: (_, __) => const SizedBox.shrink(),
@@ -75,7 +75,7 @@ class HandshakeHistoryScreen extends ConsumerWidget {
                   Icon(Icons.history, size: 64, color: Colors.grey[300]),
                   const SizedBox(height: 16),
                   Text(
-                    'No activity yet',
+                    l10n.historyNoActivity,
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                 ],
@@ -99,7 +99,7 @@ class HandshakeHistoryScreen extends ConsumerWidget {
                     radius: 20,
                   ),
                   title: Text(
-                    report.senderName ?? 'Unknown User',
+                    report.senderName ?? l10n.incomingUnknownUser,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(
@@ -122,7 +122,7 @@ class HandshakeHistoryScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          status.name.toUpperCase(),
+                          _statusLabel(l10n, status).toUpperCase(),
                           style: TextStyle(
                             color: _getStatusColor(status),
                             fontSize: 10,
@@ -156,7 +156,7 @@ class HandshakeHistoryScreen extends ConsumerWidget {
                           if (fullProfile == null) {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Please complete your profile first')),
+                                SnackBar(content: Text(l10n.qrErrorCompleteProfile)),
                               );
                             }
                             return;
@@ -175,7 +175,7 @@ class HandshakeHistoryScreen extends ConsumerWidget {
                             (failure) {
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Error: ${failure.message}')),
+                                  SnackBar(content: Text(l10n.commonErrorWithDetail(failure.message))),
                                 );
                               }
                             },
@@ -204,7 +204,7 @@ class HandshakeHistoryScreen extends ConsumerWidget {
                               
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Approved!')),
+                                  SnackBar(content: Text(l10n.historyApproved)),
                                 );
                               }
                             },
@@ -233,9 +233,24 @@ class HandshakeHistoryScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: $err')),
+        error: (err, stack) => Center(child: Text(l10n.commonErrorWithDetail('$err'))),
       ),
     );
+  }
+
+  String _statusLabel(AppLocalizations l10n, HandshakeRequestStatus status) {
+    switch (status) {
+      case HandshakeRequestStatus.approved:
+        return l10n.historyStatusApproved;
+      case HandshakeRequestStatus.rejected:
+        return l10n.historyStatusRejected;
+      case HandshakeRequestStatus.pending:
+        return l10n.historyStatusPending;
+      case HandshakeRequestStatus.missed:
+        return l10n.historyStatusMissed;
+      case HandshakeRequestStatus.expired:
+        return l10n.historyStatusExpired;
+    }
   }
 
   Color _getStatusColor(HandshakeRequestStatus status) {

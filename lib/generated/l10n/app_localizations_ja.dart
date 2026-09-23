@@ -1146,4 +1146,37 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get vcardImportFromText => 'テキストからインポート';
+
+  @override
+  String get historyClearTitle => '履歴を消去しますか？';
+
+  @override
+  String get historyClearBody => 'すべての交換記録が削除されます。';
+
+  @override
+  String get historyClearAction => '消去';
+
+  @override
+  String get historyClearTooltip => '履歴を消去';
+
+  @override
+  String get historyNoActivity => 'アクティビティはまだありません';
+
+  @override
+  String get historyApproved => '承認しました！';
+
+  @override
+  String get historyStatusApproved => '承認済み';
+
+  @override
+  String get historyStatusRejected => '拒否済み';
+
+  @override
+  String get historyStatusPending => '保留中';
+
+  @override
+  String get historyStatusMissed => '見逃し';
+
+  @override
+  String get historyStatusExpired => '期限切れ';
 }
