@@ -216,6 +216,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ocrKeyFormatHint => 'Google Cloud API 密钥以「AIza」开头,长度为 39 个字符。';
 
   @override
+  String get ocrPaywallPlanPlus => 'SecBizCard Plus';
+
+  @override
+  String get ocrPaywallPlanPro => 'SecBizCard Pro';
+
+  @override
   String get ocrKeyLockedNote => '已启用你自己的密钥。若要更换，请先移除再新增。';
 
   @override
@@ -518,6 +524,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ocrKeyFormatHint => 'Google Cloud API 金鑰以「AIza」開頭,長度為 39 個字元。';
+
+  @override
+  String get ocrPaywallPlanPlus => 'SecBizCard Plus';
+
+  @override
+  String get ocrPaywallPlanPro => 'SecBizCard Pro';
 
   @override
   String get ocrKeyLockedNote => '已啟用你自己的金鑰。若要更換，請先移除再新增。';

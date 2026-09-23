@@ -556,13 +556,17 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
                 const SizedBox(height: 16),
 
                 if (hasLivePackages) ...[
-                  // Live RevenueCat packages: real localized price + purchase.
+                  // Live RevenueCat packages: our own clean name/description
+                  // (keyed on the package identifier) + the REAL store price.
+                  // We deliberately avoid storeProduct.title/description, which
+                  // on Android append the app name, e.g. "SecBizCard Plus
+                  // (SecBizCard - Card Manager)".
                   for (final pkg in packages) ...[
                     _planTile(
                       theme,
-                      pkg.storeProduct.title,
+                      _packageName(l10n, pkg),
                       pkg.storeProduct.priceString,
-                      pkg.storeProduct.description,
+                      _packageDesc(l10n, pkg),
                       onTap: () => _purchase(ctx, pkg),
                     ),
                     const SizedBox(height: 10),
@@ -602,6 +606,24 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
         );
       },
     );
+  }
+
+  /// Clean display name for a package, keyed on its identifier (plus/pro), so
+  /// we don't show the store's app-suffixed title. Falls back to the store
+  /// title if the identifier is unrecognized.
+  String _packageName(AppLocalizations l10n, Package pkg) {
+    final id = pkg.identifier.toLowerCase();
+    if (id.contains('pro')) return l10n.ocrPaywallPlanPro;
+    if (id.contains('plus')) return l10n.ocrPaywallPlanPlus;
+    return pkg.storeProduct.title;
+  }
+
+  /// Clean description for a package (e.g. "20 cloud scans per month").
+  String _packageDesc(AppLocalizations l10n, Package pkg) {
+    final id = pkg.identifier.toLowerCase();
+    if (id.contains('pro')) return l10n.ocrPlanProDesc;
+    if (id.contains('plus')) return l10n.ocrPlanPlusDesc;
+    return pkg.storeProduct.description;
   }
 
   /// Run a purchase for [pkg]. Closes the sheet, then refreshes usage so the

@@ -217,6 +217,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ocrKeyFormatHint => 'Google Cloud API 키는 \"AIza\"로 시작하며 39자입니다.';
 
   @override
+  String get ocrPaywallPlanPlus => 'SecBizCard Plus';
+
+  @override
+  String get ocrPaywallPlanPro => 'SecBizCard Pro';
+
+  @override
   String get ocrKeyLockedNote =>
       '직접 등록한 키가 사용 중입니다. 변경하려면 먼저 삭제한 후 새 키를 추가하세요.';
 
