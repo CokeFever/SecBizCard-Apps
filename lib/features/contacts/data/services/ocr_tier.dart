@@ -47,6 +47,24 @@ enum OcrTier {
 
   /// True for the paid subscription tiers.
   bool get isPaid => this == OcrTier.plus || this == OcrTier.pro;
+
+  /// The backend string for this tier (inverse of [fromBackend]). Used when
+  /// serializing a cached [OcrUsage] so it round-trips through [fromBackend].
+  /// Flex is client-only and never persisted as a backend tier; it maps to
+  /// "basic" defensively (a cached snapshot never carries flex — see OcrUsage).
+  String toBackend() {
+    switch (this) {
+      case OcrTier.plus:
+        return 'plus';
+      case OcrTier.pro:
+        return 'pro';
+      case OcrTier.vip:
+        return 'vip';
+      case OcrTier.basic:
+      case OcrTier.flex:
+        return 'basic';
+    }
+  }
 }
 
 /// Admin-only observability counters (returned by getOcrUsage only for accounts
@@ -81,6 +99,13 @@ class OcrAdminStats {
       totalUsed: (total['used'] as num?)?.toInt() ?? 0,
     );
   }
+
+  /// Serializes back to the same `{shared800:{used,cap}, total:{used}}` shape
+  /// `fromMap` reads, so a cached snapshot round-trips.
+  Map<String, dynamic> toMap() => {
+        'shared800': {'used': shared800Used, 'cap': shared800Cap},
+        'total': {'used': totalUsed},
+      };
 }
 
 /// The caller's current OCR usage snapshot from getOcrUsage / recognizeCard,
@@ -124,4 +149,16 @@ class OcrUsage {
       ),
     );
   }
+
+  /// Serializes to the same shape [fromMap] reads, so a snapshot can be cached
+  /// on disk and restored losslessly. `tierUsed`/`tierCap` are only written when
+  /// non-null, preserving the "null cap = unlimited (VIP) vs unknown" semantics:
+  /// on restore, [fromMap] re-derives unlimited-vs-unknown from the tier exactly
+  /// as it does for a fresh backend response. Admin stats are observability-only
+  /// and intentionally NOT cached (recomputed live for admins).
+  Map<String, dynamic> toMap() => {
+        'tier': tier.toBackend(),
+        if (tierUsed != null) 'tierUsed': tierUsed,
+        if (tierCap != null) 'tierCap': tierCap,
+      };
 }
