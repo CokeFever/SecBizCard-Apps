@@ -90,6 +90,8 @@
   "ocrAdminShared800": "無料枠（Basic）",
   "ocrAdminTotal": "CV 呼び出し総数",
   "ocrKeyFormatHint": "Google Cloud API キーは「AIza」で始まり、39 文字です。",
+  "ocrPaywallPlanPlus": "SecBizCard Plus",
+  "ocrPaywallPlanPro": "SecBizCard Pro",
   "ocrKeyLockedNote": "自分のキーが有効です。変更するには、先に削除してから新しいキーを追加してください。",
   "ocrRemoveKeyAction": "キーを削除",
   "ocrPaywallTitle": "クラウド認識をアップグレード",

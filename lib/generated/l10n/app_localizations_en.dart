@@ -224,6 +224,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'A Google Cloud API key starts with \"AIza\" and is 39 characters long.';
 
   @override
+  String get ocrPaywallPlanPlus => 'SecBizCard Plus';
+
+  @override
+  String get ocrPaywallPlanPro => 'SecBizCard Pro';
+
+  @override
   String get ocrKeyLockedNote =>
       'Your own key is active. To change it, remove it first and add a new one.';
 

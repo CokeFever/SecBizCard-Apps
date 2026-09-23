@@ -481,6 +481,18 @@ abstract class AppLocalizations {
   /// **'A Google Cloud API key starts with \"AIza\" and is 39 characters long.'**
   String get ocrKeyFormatHint;
 
+  /// Paywall plan name for the Plus tier (brand name, kept in English)
+  ///
+  /// In en, this message translates to:
+  /// **'SecBizCard Plus'**
+  String get ocrPaywallPlanPlus;
+
+  /// Paywall plan name for the Pro tier (brand name, kept in English)
+  ///
+  /// In en, this message translates to:
+  /// **'SecBizCard Pro'**
+  String get ocrPaywallPlanPro;
+
   /// Explains why the key field is locked when a BYOK key is set
   ///
   /// In en, this message translates to:

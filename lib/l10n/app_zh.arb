@@ -81,6 +81,8 @@
   "ocrAdminShared800": "免费额度池（Basic）",
   "ocrAdminTotal": "CV 总调用次数",
   "ocrKeyFormatHint": "Google Cloud API 密钥以「AIza」开头,长度为 39 个字符。",
+  "ocrPaywallPlanPlus": "SecBizCard Plus",
+  "ocrPaywallPlanPro": "SecBizCard Pro",
   "ocrKeyLockedNote": "已启用你自己的密钥。若要更换，请先移除再新增。",
   "ocrRemoveKeyAction": "移除密钥",
   "ocrPaywallTitle": "升级云端识别",
