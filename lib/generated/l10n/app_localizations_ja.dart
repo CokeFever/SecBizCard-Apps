@@ -211,7 +211,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ocrAdminShared800 => '無料枠（Basic）';
 
   @override
-  String get ocrAdminTotal => 'Vision 呼び出し総数';
+  String get ocrAdminTotal => 'CV 呼び出し総数';
+
+  @override
+  String get ocrKeyFormatHint => 'Google Cloud API キーは「AIza」で始まり、39 文字です。';
 
   @override
   String get ocrKeyLockedNote => '自分のキーが有効です。変更するには、先に削除してから新しいキーを追加してください。';

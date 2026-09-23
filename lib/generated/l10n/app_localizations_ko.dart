@@ -211,7 +211,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ocrAdminShared800 => '무료 풀(Basic)';
 
   @override
-  String get ocrAdminTotal => 'Vision 총 호출 수';
+  String get ocrAdminTotal => 'CV 총 호출 수';
+
+  @override
+  String get ocrKeyFormatHint => 'Google Cloud API 키는 \"AIza\"로 시작하며 39자입니다.';
 
   @override
   String get ocrKeyLockedNote =>

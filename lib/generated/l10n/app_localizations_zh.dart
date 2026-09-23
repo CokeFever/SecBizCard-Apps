@@ -210,7 +210,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ocrAdminShared800 => '免费额度池（Basic）';
 
   @override
-  String get ocrAdminTotal => 'Vision 总调用次数';
+  String get ocrAdminTotal => 'CV 总调用次数';
+
+  @override
+  String get ocrKeyFormatHint => 'Google Cloud API 密钥以「AIza」开头,长度为 39 个字符。';
 
   @override
   String get ocrKeyLockedNote => '已启用你自己的密钥。若要更换，请先移除再新增。';
@@ -511,7 +514,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get ocrAdminShared800 => '免費額度池（Basic）';
 
   @override
-  String get ocrAdminTotal => 'Vision 總呼叫次數';
+  String get ocrAdminTotal => 'CV 總呼叫次數';
+
+  @override
+  String get ocrKeyFormatHint => 'Google Cloud API 金鑰以「AIza」開頭,長度為 39 個字元。';
 
   @override
   String get ocrKeyLockedNote => '已啟用你自己的金鑰。若要更換，請先移除再新增。';

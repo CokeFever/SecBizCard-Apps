@@ -11,6 +11,7 @@ import 'package:secbizcard/core/responsive/adaptive_container.dart';
 import 'package:secbizcard/core/responsive/breakpoints.dart';
 import 'package:secbizcard/features/settings/data/ocr_settings_service.dart';
 import 'package:secbizcard/features/contacts/data/services/ocr_tier.dart';
+import 'package:secbizcard/features/contacts/data/card_detection_config.dart';
 import 'package:secbizcard/features/contacts/presentation/ocr_tier_display.dart';
 import 'package:secbizcard/features/subscription/data/subscription_providers.dart';
 import 'package:secbizcard/generated/l10n/app_localizations.dart';
@@ -32,6 +33,25 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
   bool _obscure = true;
   bool _saving = false;
   bool _hasKey = false;
+
+  /// Whether the text currently in the key field looks like a valid Google
+  /// Cloud API key. Drives the Save button's enabled state so we don't store an
+  /// obviously-malformed key. The pattern is remote-tunable (see
+  /// CardDetectionConfig 'byokKeyRegex') so a Google format change can be fixed
+  /// from the console without a release.
+  bool _keyLooksValid = false;
+
+  /// The BYOK key-format regex, from Remote Config (falls back to the built-in
+  /// Google API key format when unset/invalid).
+  RegExp get _googleApiKeyPattern {
+    final pattern = CardDetectionConfig.current.string('byokKeyRegex');
+    try {
+      return RegExp(pattern);
+    } catch (_) {
+      // Defensive: string() already validates, but never throw from the getter.
+      return RegExp(r'^AIza[A-Za-z0-9_-]{35}$');
+    }
+  }
 
   /// Backend usage snapshot (tier/tierUsed/tierCap + admin stats). Null while
   /// loading or when offline/unavailable.
@@ -252,6 +272,13 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
                   obscureText: _obscure,
                   autocorrect: false,
                   enableSuggestions: false,
+                  onChanged: (value) {
+                    final valid =
+                        _googleApiKeyPattern.hasMatch(value.trim());
+                    if (valid != _keyLooksValid) {
+                      setState(() => _keyLooksValid = valid);
+                    }
+                  },
                   decoration: InputDecoration(
                     hintText: l10n.ocrKeyHint,
                     border: OutlineInputBorder(
@@ -264,11 +291,22 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 6),
+                Text(
+                  l10n.ocrKeyFormatHint,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
                 const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton.icon(
-                    onPressed: _saving ? null : _save,
+                    // Disabled until the key matches the Google API key format,
+                    // so we never store an obviously-invalid key.
+                    onPressed:
+                        (_saving || !_keyLooksValid) ? null : _save,
                     icon: const Icon(Icons.save),
                     label: Text(l10n.save),
                   ),
@@ -296,7 +334,6 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
               _expandable(
                 theme,
                 title: l10n.ocrSafetyTitle,
-                initiallyExpanded: true,
                 children: [
                   _StepText(l10n.ocrSafety1),
                   _StepText(l10n.ocrSafety2),

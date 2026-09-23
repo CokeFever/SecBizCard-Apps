@@ -217,7 +217,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ocrAdminShared800 => 'Free pool (Basic)';
 
   @override
-  String get ocrAdminTotal => 'Total Vision calls';
+  String get ocrAdminTotal => 'Total CV calls';
+
+  @override
+  String get ocrKeyFormatHint =>
+      'A Google Cloud API key starts with \"AIza\" and is 39 characters long.';
 
   @override
   String get ocrKeyLockedNote =>
