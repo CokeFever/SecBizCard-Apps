@@ -242,6 +242,76 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navNotifications => 'Notifications';
 
   @override
+  String get unsavedChangesTitle => 'Unsaved Changes';
+
+  @override
+  String get unsavedChangesBody =>
+      'You have unsaved changes. Are you sure you want to discard them and leave?';
+
+  @override
+  String get unsavedChangesStay => 'Stay';
+
+  @override
+  String get unsavedChangesDiscard => 'Discard';
+
+  @override
+  String get drawerNotLoggedIn => 'Not Logged In';
+
+  @override
+  String get drawerDefaultUser => 'User';
+
+  @override
+  String get drawerMyProfile => 'My Profile';
+
+  @override
+  String get drawerManageContexts => 'Manage Contexts';
+
+  @override
+  String get drawerErrorLoadingProfile => 'Error loading profile';
+
+  @override
+  String get drawerBackupRestore => 'Backup & Restore';
+
+  @override
+  String get drawerAiRecognition => 'AI Recognition';
+
+  @override
+  String get drawerImportVcard => 'Import vCard';
+
+  @override
+  String get drawerAppearance => 'Appearance';
+
+  @override
+  String get drawerThemeAuto => 'Auto';
+
+  @override
+  String get drawerThemeLight => 'Light';
+
+  @override
+  String get drawerThemeDark => 'Dark';
+
+  @override
+  String get drawerLogout => 'Logout';
+
+  @override
+  String get drawerConfirmLogoutTitle => 'Confirm Logout';
+
+  @override
+  String get drawerConfirmLogoutBody => 'Are you sure you want to log out?';
+
+  @override
+  String get commonCancel => 'Cancel';
+
+  @override
+  String get drawerLinkPrivacy => 'Privacy';
+
+  @override
+  String get drawerLinkTerms => 'Terms';
+
+  @override
+  String get drawerLinkGuide => 'Guide';
+
+  @override
   String get qrGenerating => 'Generating secured QR code…';
 
   @override

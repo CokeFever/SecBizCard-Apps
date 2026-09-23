@@ -235,6 +235,75 @@ class AppLocalizationsJa extends AppLocalizations {
   String get navNotifications => 'Notifications';
 
   @override
+  String get unsavedChangesTitle => '未保存の変更';
+
+  @override
+  String get unsavedChangesBody => '保存されていない変更があります。破棄して移動してもよろしいですか?';
+
+  @override
+  String get unsavedChangesStay => 'とどまる';
+
+  @override
+  String get unsavedChangesDiscard => '破棄';
+
+  @override
+  String get drawerNotLoggedIn => '未ログイン';
+
+  @override
+  String get drawerDefaultUser => 'ユーザー';
+
+  @override
+  String get drawerMyProfile => 'マイプロフィール';
+
+  @override
+  String get drawerManageContexts => 'コンテキスト管理';
+
+  @override
+  String get drawerErrorLoadingProfile => 'プロフィールの読み込み中にエラーが発生しました';
+
+  @override
+  String get drawerBackupRestore => 'バックアップと復元';
+
+  @override
+  String get drawerAiRecognition => 'AI 認識';
+
+  @override
+  String get drawerImportVcard => 'vCard をインポート';
+
+  @override
+  String get drawerAppearance => '外観';
+
+  @override
+  String get drawerThemeAuto => '自動';
+
+  @override
+  String get drawerThemeLight => 'ライト';
+
+  @override
+  String get drawerThemeDark => 'ダーク';
+
+  @override
+  String get drawerLogout => 'ログアウト';
+
+  @override
+  String get drawerConfirmLogoutTitle => 'ログアウトの確認';
+
+  @override
+  String get drawerConfirmLogoutBody => 'ログアウトしてもよろしいですか?';
+
+  @override
+  String get commonCancel => 'キャンセル';
+
+  @override
+  String get drawerLinkPrivacy => 'プライバシー';
+
+  @override
+  String get drawerLinkTerms => '規約';
+
+  @override
+  String get drawerLinkGuide => 'ガイド';
+
+  @override
   String get qrGenerating => '安全な QRCode を生成中…';
 
   @override
