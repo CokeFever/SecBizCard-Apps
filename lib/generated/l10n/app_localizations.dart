@@ -655,6 +655,60 @@ abstract class AppLocalizations {
   /// **'Guide'**
   String get drawerLinkGuide;
 
+  /// No description provided for @loginSignInError.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in error: {error}'**
+  String loginSignInError(String error);
+
+  /// No description provided for @contactsNoneFoundFor.
+  ///
+  /// In en, this message translates to:
+  /// **'No contacts found for \"{query}\"'**
+  String contactsNoneFoundFor(String query);
+
+  /// No description provided for @contactsNoneYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No contacts yet'**
+  String get contactsNoneYet;
+
+  /// No description provided for @contactsEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Exchanged or scanned cards will appear here'**
+  String get contactsEmptyHint;
+
+  /// No description provided for @contactsDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete failed: {error}'**
+  String contactsDeleteFailed(String error);
+
+  /// No description provided for @contactsDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact deleted'**
+  String get contactsDeleted;
+
+  /// No description provided for @contactsDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get contactsDelete;
+
+  /// No description provided for @contactsSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search contacts…'**
+  String get contactsSearchHint;
+
+  /// No description provided for @commonErrorWithDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {error}'**
+  String commonErrorWithDetail(String error);
+
   /// Shown inside the QR placeholder frame while the session is being created
   ///
   /// In en, this message translates to:

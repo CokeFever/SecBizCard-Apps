@@ -312,6 +312,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get drawerLinkGuide => 'Guide';
 
   @override
+  String loginSignInError(String error) {
+    return 'Sign-in error: $error';
+  }
+
+  @override
+  String contactsNoneFoundFor(String query) {
+    return 'No contacts found for \"$query\"';
+  }
+
+  @override
+  String get contactsNoneYet => 'No contacts yet';
+
+  @override
+  String get contactsEmptyHint => 'Exchanged or scanned cards will appear here';
+
+  @override
+  String contactsDeleteFailed(String error) {
+    return 'Delete failed: $error';
+  }
+
+  @override
+  String get contactsDeleted => 'Contact deleted';
+
+  @override
+  String get contactsDelete => 'Delete';
+
+  @override
+  String get contactsSearchHint => 'Search contacts…';
+
+  @override
+  String commonErrorWithDetail(String error) {
+    return 'Error: $error';
+  }
+
+  @override
   String get qrGenerating => 'Generating secured QR code…';
 
   @override

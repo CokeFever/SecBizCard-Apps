@@ -304,6 +304,41 @@ class AppLocalizationsKo extends AppLocalizations {
   String get drawerLinkGuide => '가이드';
 
   @override
+  String loginSignInError(String error) {
+    return '로그인 오류: $error';
+  }
+
+  @override
+  String contactsNoneFoundFor(String query) {
+    return '\"$query\"에 일치하는 연락처가 없습니다';
+  }
+
+  @override
+  String get contactsNoneYet => '아직 연락처가 없습니다';
+
+  @override
+  String get contactsEmptyHint => '교환하거나 스캔한 명함이 여기에 표시됩니다';
+
+  @override
+  String contactsDeleteFailed(String error) {
+    return '삭제 실패: $error';
+  }
+
+  @override
+  String get contactsDeleted => '연락처를 삭제했습니다';
+
+  @override
+  String get contactsDelete => '삭제';
+
+  @override
+  String get contactsSearchHint => '연락처 검색…';
+
+  @override
+  String commonErrorWithDetail(String error) {
+    return '오류: $error';
+  }
+
+  @override
   String get qrGenerating => '보안 QRCode 생성 중…';
 
   @override
