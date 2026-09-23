@@ -10,6 +10,8 @@ import 'package:secbizcard/features/handshake/presentation/screens/handshake_scr
 import 'package:secbizcard/features/handshake/presentation/screens/qr_display_screen.dart';
 import 'package:secbizcard/features/handshake/presentation/screens/qr_scanner_screen.dart';
 import 'package:secbizcard/features/handshake/data/handshake_repository.dart';
+import 'package:secbizcard/features/contacts/data/ocr_usage_provider.dart';
+import 'package:secbizcard/features/subscription/data/subscription_providers.dart';
 import 'package:secbizcard/features/handshake/presentation/screens/handshake_history_screen.dart';
 import 'package:secbizcard/features/home/presentation/screens/main_screen.dart';
 import 'package:secbizcard/features/contacts/presentation/screens/edit_contact_screen.dart';
@@ -275,8 +277,21 @@ void _warmUpCloudFunctions(Ref ref) {
     // Reading the repository instantiates the FirebaseFunctions client and
     // establishes the HTTP connection pool early.
     ref.read(handshakeRepositoryProvider);
-    debugPrint('[Router] Cloud Functions connection warm-up triggered');
+
+    // Prefetch the OCR tier/usage now (login → home), so the AI Recognition
+    // and scan screens render their tier/badge instantly from the seeded
+    // provider instead of each doing an on-entry getOcrUsage round-trip.
+    // Reading is enough: build() seeds from the per-uid cache and kicks off a
+    // background revalidate. keepAlive means this is a no-op if already warm.
+    ref.read(ocrUsageNotifierProvider);
+
+    // Register the RevenueCat entitlement listener for the session, so a
+    // purchase/renewal/expiry re-syncs the cached tier without visiting a
+    // screen. Eagerly initialize the otherwise-lazy sync provider.
+    ref.read(subscriptionSyncProvider);
+
+    debugPrint('[Router] Cloud Functions + OCR usage warm-up triggered');
   } catch (e) {
-    debugPrint('[Router] Cloud Functions warm-up error (non-fatal): $e');
+    debugPrint('[Router] Warm-up error (non-fatal): $e');
   }
 }
