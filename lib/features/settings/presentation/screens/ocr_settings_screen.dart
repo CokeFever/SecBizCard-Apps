@@ -170,6 +170,11 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
     final usage = usageAsync.valueOrNull;
     final loadingUsage = usageAsync.isLoading && !usageAsync.hasValue;
     final effectiveTier = _effectiveTierFor(usage);
+    // True while a purchase/restore is still syncing with the backend. All
+    // subscription actions are disabled until it completes, so the user can't
+    // fire a second store action (upgrade/manage/restore) that would race the
+    // pending webhook and risk a duplicate subscription.
+    final syncing = ref.watch(ocrUsageSyncingProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -186,7 +191,7 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // ① Tier + usage card.
-              _buildTierCard(theme, l10n, usage, loadingUsage),
+              _buildTierCard(theme, l10n, usage, loadingUsage, syncing),
 
               // ② Free-tier (Basic) 800 shared-pool rule — only for Basic users
               // without a BYOK key. Paid/VIP/Flex bypass the pool, so it would
@@ -332,7 +337,7 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
   /// VIP, BYOK for Flex), an upgrade entry for Basic/Plus, and — for Admins —
   /// the shared800/total observability counters.
   Widget _buildTierCard(ThemeData theme, AppLocalizations l10n, OcrUsage? usage,
-      bool loadingUsage) {
+      bool loadingUsage, bool syncing) {
     final tier = _effectiveTierFor(usage);
     final tierName = OcrTierDisplay.tierName(l10n, tier);
     final used = usage?.tierUsed;
@@ -411,36 +416,51 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
           // Upgrade entry: Basic → subscribe; Plus → upgrade to Pro.
           // (Pro is the top tier — no upgrade entry; it can only be cancelled
           // via "Manage subscription" below. There is no in-app downgrade.)
+          // While syncing a just-completed purchase, the button is disabled and
+          // shows a "syncing" state so a second store action can't race the
+          // pending webhook.
           if (tier == OcrTier.basic || tier == OcrTier.plus) ...[
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                onPressed: () => _showSubscribeSheet(tier),
-                icon: const Icon(Icons.arrow_upward, size: 18),
-                label: Text(tier == OcrTier.plus
-                    ? l10n.ocrUpgradeToPro
-                    : l10n.ocrSubscribe),
+                onPressed: syncing ? null : () => _showSubscribeSheet(tier),
+                icon: syncing
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.arrow_upward, size: 18),
+                label: Text(syncing
+                    ? l10n.ocrSyncing
+                    : (tier == OcrTier.plus
+                        ? l10n.ocrUpgradeToPro
+                        : l10n.ocrSubscribe)),
               ),
             ),
           ],
 
-          // Paid users (Plus/Pro): Manage subscription (opens the store's
-          // subscription page — the only cancel path, by design) + Restore
-          // (Apple 3.1.1: a restorable-IAP app must offer restore, and this is
-          // the only restore entry a Pro user can reach since they never open
-          // the paywall sheet).
-          if (tier == OcrTier.plus || tier == OcrTier.pro) ...[
+          // Pro ONLY: Manage subscription + Restore. Pro is the top tier, so it
+          // has NO button into the paywall sheet — which is where Basic/Plus
+          // users reach Manage/Restore. Without these links a Pro user would
+          // have no in-app way to cancel (via the store's page) or restore, so
+          // we surface them here. Basic/Plus intentionally DON'T show these:
+          // their Subscribe/Upgrade button opens the paywall, which carries
+          // Restore (and Manage), so duplicating them on the card is redundant.
+          // Apple 3.1.1 restore is satisfied for every tier (Pro here;
+          // Basic/Plus in the paywall). Disabled while syncing.
+          if (tier == OcrTier.pro) ...[
             const SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextButton(
-                  onPressed: _openManageSubscription,
-                  child: Text(l10n.ocrManageSubscription),
+                  onPressed: syncing ? null : _openManageSubscription,
+                  child: Text(
+                      syncing ? l10n.ocrSyncing : l10n.ocrManageSubscription),
                 ),
                 TextButton(
-                  onPressed: _restoreFromCard,
+                  onPressed: syncing ? null : _runRestore,
                   child: Text(l10n.ocrRestorePurchases),
                 ),
               ],
@@ -588,16 +608,49 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
                     const SizedBox(height: 10),
                   ],
                   const SizedBox(height: 10),
-                  TextButton(
-                    onPressed: () => _restore(ctx),
-                    child: Text(l10n.ocrRestorePurchases),
-                  ),
+                  // Restore for everyone; Manage subscription only when the user
+                  // already has a paid plan (a Plus user here to upgrade can
+                  // instead cancel via the store). Basic has nothing to manage.
+                  if (currentTier.isPaid)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(ctx);
+                            _openManageSubscription();
+                          },
+                          child: Text(l10n.ocrManageSubscription),
+                        ),
+                        TextButton(
+                          onPressed: () => _restore(ctx),
+                          child: Text(l10n.ocrRestorePurchases),
+                        ),
+                      ],
+                    )
+                  else
+                    TextButton(
+                      onPressed: () => _restore(ctx),
+                      child: Text(l10n.ocrRestorePurchases),
+                    ),
                 ] else if (offeringLiveButAllOwned) ...[
                   // Offering is live but the user already owns the top plan —
-                  // still offer Restore, no misleading static tiles.
-                  TextButton(
-                    onPressed: () => _restore(ctx),
-                    child: Text(l10n.ocrRestorePurchases),
+                  // offer Manage + Restore, no misleading static tiles.
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          _openManageSubscription();
+                        },
+                        child: Text(l10n.ocrManageSubscription),
+                      ),
+                      TextButton(
+                        onPressed: () => _restore(ctx),
+                        child: Text(l10n.ocrRestorePurchases),
+                      ),
+                    ],
                   ),
                 ] else ...[
                   // Fallback: static plan info until the offering goes live.
@@ -697,10 +750,20 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.ocrSubscribeThanks)));
       // Optimistically reflect the new tier immediately (RevenueCat already
-      // confirmed it), then refresh for the authoritative used/cap numbers once
-      // the entitlement webhook has updated the backend.
+      // confirmed it) so the card shows Plus/Pro at once, then POLL the backend
+      // until the entitlement webhook has written Firestore and getOcrUsage
+      // returns the real used/cap (e.g. Plus 0/20). This avoids the old "shows
+      // Plus, flickers back to Basic, only correct after leaving+returning":
+      // the poll keeps the optimistic tier until the authoritative numbers land
+      // (a couple of seconds with RTDN), then caches them for every screen.
       _applyOptimisticTier(tier);
-      await ref.read(ocrUsageNotifierProvider.notifier).refresh();
+      final target = _optimisticOcrTierFor(tier);
+      final notifier = ref.read(ocrUsageNotifierProvider.notifier);
+      if (target != null) {
+        await notifier.refreshUntilTierReached(target);
+      } else {
+        await notifier.refresh();
+      }
     } on PlatformException catch (e) {
       // User cancellation is not an error worth surfacing.
       final code = PurchasesErrorHelper.getErrorCode(e);
@@ -716,19 +779,33 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
     await _runRestore();
   }
 
-  /// Restore invoked from the tier card (no sheet to close). Same behavior.
-  Future<void> _restoreFromCard() => _runRestore();
-
   Future<void> _runRestore() async {
     final l10n = AppLocalizations.of(context)!;
     final service = ref.read(subscriptionServiceProvider);
     try {
       final tier = await service.restore();
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(l10n.ocrRestoreDone)));
+      // Reflect the real outcome: only say "restored" when an active paid
+      // entitlement actually came back. A restore that finds nothing (e.g. the
+      // user already cancelled, or never purchased on this account) must not
+      // claim success — that was the misleading "Purchases restored" after a
+      // cancel. `none` → "no purchases to restore".
+      final restored = tier != SubscriptionTier.none;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(restored ? l10n.ocrRestoreDone : l10n.ocrRestoreNone),
+      ));
+      // _applyOptimisticTier no-ops on `none`, so a failed restore never
+      // re-raises the displayed tier. When something WAS restored, poll until
+      // the backend confirms the tier + real usage (same as purchase); when
+      // nothing was, a single refresh reconciles the truth.
       _applyOptimisticTier(tier);
-      await ref.read(ocrUsageNotifierProvider.notifier).refresh();
+      final target = _optimisticOcrTierFor(tier);
+      final notifier = ref.read(ocrUsageNotifierProvider.notifier);
+      if (target != null) {
+        await notifier.refreshUntilTierReached(target);
+      } else {
+        await notifier.refresh();
+      }
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
@@ -758,6 +835,15 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
     }
   }
 
+  /// The [OcrTier] a RevenueCat [SubscriptionTier] result maps to, or null when
+  /// it carries no paid entitlement (`none`) — used both to set the optimistic
+  /// tier and as the poll target.
+  OcrTier? _optimisticOcrTierFor(SubscriptionTier tier) => switch (tier) {
+        SubscriptionTier.plus => OcrTier.plus,
+        SubscriptionTier.pro => OcrTier.pro,
+        SubscriptionTier.none => null,
+      };
+
   /// Map a RevenueCat [SubscriptionTier] result to our [OcrTier] and push it to
   /// the shared usage provider for an instant UI update. Skipped when a BYOK
   /// key is set (Flex overrides the backend tier) or when RevenueCat reports no
@@ -765,11 +851,7 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
   /// display optimistically).
   void _applyOptimisticTier(SubscriptionTier tier) {
     if (_hasKey) return;
-    final OcrTier? mapped = switch (tier) {
-      SubscriptionTier.plus => OcrTier.plus,
-      SubscriptionTier.pro => OcrTier.pro,
-      SubscriptionTier.none => null,
-    };
+    final mapped = _optimisticOcrTierFor(tier);
     if (mapped == null) return;
     ref.read(ocrUsageNotifierProvider.notifier).setTierOptimistic(mapped);
   }

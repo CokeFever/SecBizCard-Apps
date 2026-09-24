@@ -571,6 +571,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ocrRestoreDone => 'Purchases restored.';
 
   @override
+  String get ocrRestoreNone => 'No purchases to restore.';
+
+  @override
+  String get ocrSyncing => 'Syncing…';
+
+  @override
   String get ocrSubscribeFailed => 'Something went wrong. Please try again.';
 
   @override

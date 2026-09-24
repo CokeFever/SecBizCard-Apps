@@ -556,6 +556,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ocrRestoreDone => '購入を復元しました。';
 
   @override
+  String get ocrRestoreNone => '復元できる購入はありません。';
+
+  @override
+  String get ocrSyncing => '同期中…';
+
+  @override
   String get ocrSubscribeFailed => 'エラーが発生しました。もう一度お試しください。';
 
   @override

@@ -186,6 +186,8 @@
   "ocrManageSubscription": "管理订阅",
   "ocrSubscribeThanks": "感谢订阅！",
   "ocrRestoreDone": "购买已恢复。",
+  "ocrRestoreNone": "没有可恢复的购买。",
+  "ocrSyncing": "同步中…",
   "ocrSubscribeFailed": "发生错误，请再试一次。",
   "editProfileTitle": "编辑个人资料",
   "editProfilePhoneResetWarn": "⚠️ 已修改已验证的电话，保存后验证将被重置。",

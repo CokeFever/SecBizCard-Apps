@@ -1105,11 +1105,23 @@ abstract class AppLocalizations {
   /// **'Thanks for subscribing!'**
   String get ocrSubscribeThanks;
 
-  /// Snackbar after restoring purchases
+  /// Snackbar after restoring purchases that found an active subscription
   ///
   /// In en, this message translates to:
   /// **'Purchases restored.'**
   String get ocrRestoreDone;
+
+  /// Snackbar after a restore that found no active subscription
+  ///
+  /// In en, this message translates to:
+  /// **'No purchases to restore.'**
+  String get ocrRestoreNone;
+
+  /// Label on subscription buttons while a just-completed purchase/restore is still syncing with the backend; actions are disabled until done
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get ocrSyncing;
 
   /// Snackbar when a purchase or restore fails
   ///

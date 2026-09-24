@@ -27,8 +27,14 @@ class OcrPreScanStatus {
     this.tier,
     this.tierUsed,
     this.tierCap,
+    this.syncing = false,
   });
   final OcrEngineUsed engine;
+
+  /// True while a just-purchased tier is shown optimistically and the backend
+  /// hasn't confirmed the authoritative used/cap yet. The badge shows a neutral
+  /// "syncing" state rather than presenting the optimistic tier as ready.
+  final bool syncing;
 
   /// Effective tier (null when unknown, e.g. offline before a scan).
   final OcrTier? tier;
