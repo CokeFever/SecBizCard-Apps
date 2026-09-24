@@ -39,7 +39,7 @@ class QrDisplayScreen extends ConsumerStatefulWidget {
 }
 
 class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   String? _qrUrl;
   String? _sessionId;
   bool _isLoading = true;
@@ -70,12 +70,32 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     final incoming = widget.incomingSessionId;
     if (incoming != null && incoming.isNotEmpty) {
       // Deep-linked from a handshake notification: attach to the existing
       // session and drive the approval flow, instead of creating a new QR.
       _attachToIncomingSession(incoming);
     } else {
+      _generateQrCode();
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    // Auto-recover on return to foreground. While backgrounded the Functions
+    // gRPC channel goes idle and the countdown timer is paused; on resume the
+    // screen could otherwise be frozen on a stale "unavailable" error, or the
+    // session may have expired. Regenerate silently so the user sees a fresh
+    // QR instead of an error they have to manually Retry. Skipped for the
+    // deep-linked incoming-session mode (it attaches to an existing session).
+    if (widget.incomingSessionId != null &&
+        widget.incomingSessionId!.isNotEmpty) {
+      return;
+    }
+    final expired = _expiresAt != null && !DateTime.now().isBefore(_expiresAt!);
+    if (_error != null || expired) {
       _generateQrCode();
     }
   }
@@ -94,6 +114,7 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _countdownTimer?.cancel();
     _sessionSubscription?.cancel();
     super.dispose();

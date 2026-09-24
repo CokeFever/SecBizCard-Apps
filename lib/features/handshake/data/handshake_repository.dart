@@ -29,30 +29,54 @@ class HandshakeRepository {
   Future<Either<Failure, HandshakeSession>> createHandshakeSession({
     bool batchApproval = true,
   }) async {
-    try {
-      final callable = _functions.httpsCallable('createHandshakeSession');
-      // No context needed initially.
-      final result = await callable.call({'batchApproval': batchApproval});
+    // Retry transient connectivity failures. When the app returns from the
+    // background the Functions gRPC channel is often still cold/reconnecting,
+    // so the first call fails with `unavailable` (the "Error: unavailable:
+    // UNAVAILABLE" the user saw on resume). A couple of short backoff retries
+    // let the channel reconnect, so the QR regenerates itself instead of
+    // freezing on an error that a manual "Retry" would have fixed anyway.
+    const transientCodes = {'unavailable', 'internal', 'deadline-exceeded'};
+    const maxAttempts = 3;
+    FirebaseFunctionsException? lastError;
 
-      final url = result.data['url'] as String?;
-      if (url == null) {
-        return left(const ServerFailure('Failed to generate URL'));
+    for (var attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        final callable = _functions.httpsCallable('createHandshakeSession');
+        // No context needed initially.
+        final result = await callable.call({'batchApproval': batchApproval});
+
+        final url = result.data['url'] as String?;
+        if (url == null) {
+          return left(const ServerFailure('Failed to generate URL'));
+        }
+
+        // Prefer the server-provided sessionId; fall back to parsing the URL.
+        final segments = Uri.parse(url).pathSegments;
+        final sessionId = (result.data['sessionId'] as String?) ??
+            (segments.isNotEmpty ? segments.last : null);
+        if (sessionId == null || sessionId.isEmpty) {
+          return left(const ServerFailure('Failed to resolve session id'));
+        }
+
+        return right(HandshakeSession(url: url, sessionId: sessionId));
+      } on FirebaseFunctionsException catch (e) {
+        lastError = e;
+        // Only retry transient/connectivity errors; fail fast on real errors
+        // (auth, invalid-argument, etc.) so we don't hide a genuine problem.
+        final isTransient = transientCodes.contains(e.code);
+        if (!isTransient || attempt == maxAttempts - 1) {
+          return left(
+              ServerFailure('${e.code}: ${e.message ?? 'Unknown error'}'));
+        }
+        // Backoff before retrying so the channel can reconnect: 400ms, 900ms.
+        await Future<void>.delayed(Duration(milliseconds: 400 + attempt * 500));
+      } catch (e) {
+        return left(ServerFailure(e.toString()));
       }
-
-      // Prefer the server-provided sessionId; fall back to parsing the URL.
-      final segments = Uri.parse(url).pathSegments;
-      final sessionId = (result.data['sessionId'] as String?) ??
-          (segments.isNotEmpty ? segments.last : null);
-      if (sessionId == null || sessionId.isEmpty) {
-        return left(const ServerFailure('Failed to resolve session id'));
-      }
-
-      return right(HandshakeSession(url: url, sessionId: sessionId));
-    } on FirebaseFunctionsException catch (e) {
-      return left(ServerFailure('${e.code}: ${e.message ?? 'Unknown error'}'));
-    } catch (e) {
-      return left(ServerFailure(e.toString()));
     }
+    // Unreachable in practice (loop returns), but satisfies the analyzer.
+    return left(ServerFailure(
+        '${lastError?.code ?? 'unknown'}: ${lastError?.message ?? 'Unknown error'}'));
   }
 
   /// Receiver sends a request to the Sender
