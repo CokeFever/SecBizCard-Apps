@@ -423,6 +423,22 @@ class AppLocalizationsKo extends AppLocalizations {
   String get profileDeleteAccount => '계정 삭제';
 
   @override
+  String get profileVerifyInfoTitle => '정보 확인';
+
+  @override
+  String get profileVerifyEmail => '이메일 확인';
+
+  @override
+  String get profileVerifyPhone => '전화 확인';
+
+  @override
+  String get profileVerifyHint => '확인';
+
+  @override
+  String get profileDeleteAccountWarning =>
+      '계정과 모든 데이터가 영구적으로 삭제되며 되돌릴 수 없습니다.\n\n⚠️ 계정을 삭제하기 전에 \'설정\'의 백업 기능으로 연락처를 내보내는 것을 강력히 권장합니다.\n\n확인을 위해 재인증이 필요합니다.';
+
+  @override
   String get profileContinueToDelete => '삭제 계속';
 
   @override
@@ -568,6 +584,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get ocrTerms => '이용약관';
+
+  @override
+  String ocrSubCancelledExpires(String date) {
+    return '해지됨 · $date까지 이용 가능';
+  }
 
   @override
   String get ocrSubscribeFailed => '오류가 발생했습니다. 다시 시도해 주세요.';

@@ -10,6 +10,34 @@ import 'revenuecat_config.dart';
 /// field written by the webhook).
 enum SubscriptionTier { none, plus, pro }
 
+/// A snapshot of the caller's subscription state for UI, from RevenueCat's
+/// [CustomerInfo]. Distinguishes "active and will renew" from "cancelled but
+/// still valid until [expiresAt]" — cancelling only turns off auto-renewal; the
+/// user keeps access until the paid period ends, so the UI shows "Pro · cancels
+/// on <date>" rather than dropping to Basic immediately.
+class SubscriptionStatus {
+  const SubscriptionStatus({
+    required this.tier,
+    required this.willRenew,
+    this.expiresAt,
+  });
+
+  final SubscriptionTier tier;
+
+  /// Whether the subscription will auto-renew. False after the user cancels
+  /// (auto-renew off) even though [tier] is still active until [expiresAt].
+  final bool willRenew;
+
+  /// The paid period end (when access drops to Basic if not renewed). Null when
+  /// unknown or no active subscription.
+  final DateTime? expiresAt;
+
+  /// True when the user has cancelled auto-renew but the paid tier is still
+  /// active (period not yet ended) — the "cancelled, expires on <date>" state.
+  bool get isCancelledButActive =>
+      tier != SubscriptionTier.none && !willRenew && expiresAt != null;
+}
+
 /// Thin wrapper over the RevenueCat SDK. Handles init (keyed on the Firebase
 /// uid so entitlements map to our accounts), fetching the current offering for
 /// the paywall, purchasing, restoring, and reading the active entitlement.
@@ -206,6 +234,40 @@ class SubscriptionService {
     } catch (e) {
       if (kDebugMode) debugPrint('[RevenueCat] getCustomerInfo failed: $e');
       return SubscriptionTier.none;
+    }
+  }
+
+  /// Read the current subscription status (tier + willRenew + expiry) for UI,
+  /// so the tier card can show "cancelled, expires on <date>". Returns a `none`
+  /// status when not configured or on error.
+  Future<SubscriptionStatus> currentStatus() async {
+    const none = SubscriptionStatus(
+        tier: SubscriptionTier.none, willRenew: false, expiresAt: null);
+    if (!_configured) return none;
+    try {
+      final info = await Purchases.getCustomerInfo();
+      final tier = _tierFromCustomerInfo(info);
+      if (tier == SubscriptionTier.none) return none;
+      // The active entitlement backing this tier (Pro preferred over Plus).
+      final active = info.entitlements.active;
+      final ent = active[RevenueCatConfig.entitlementPro] ??
+          active[RevenueCatConfig.entitlementPlus];
+      if (ent == null) {
+        return SubscriptionStatus(tier: tier, willRenew: true);
+      }
+      final exp = ent.expirationDate; // ISO-8601 string or null
+      DateTime? expiresAt;
+      if (exp != null && exp.isNotEmpty) {
+        expiresAt = DateTime.tryParse(exp)?.toLocal();
+      }
+      return SubscriptionStatus(
+        tier: tier,
+        willRenew: ent.willRenew,
+        expiresAt: expiresAt,
+      );
+    } catch (e) {
+      if (kDebugMode) debugPrint('[RevenueCat] currentStatus failed: $e');
+      return none;
     }
   }
 

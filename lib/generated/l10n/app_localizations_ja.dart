@@ -423,6 +423,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String get profileDeleteAccount => 'アカウントを削除';
 
   @override
+  String get profileVerifyInfoTitle => '情報を確認';
+
+  @override
+  String get profileVerifyEmail => 'メールを確認';
+
+  @override
+  String get profileVerifyPhone => '電話を確認';
+
+  @override
+  String get profileVerifyHint => '確認';
+
+  @override
+  String get profileDeleteAccountWarning =>
+      'アカウントとすべてのデータが完全に削除されます。この操作は取り消せません。\n\n⚠️ アカウントを削除する前に、「設定」のバックアップ機能で連絡先をエクスポートすることを強くおすすめします。\n\n確認のため再認証が必要です。';
+
+  @override
   String get profileContinueToDelete => '削除に進む';
 
   @override
@@ -567,6 +583,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ocrTerms => '利用規約';
+
+  @override
+  String ocrSubCancelledExpires(String date) {
+    return '解約済み · $date まで利用可能';
+  }
 
   @override
   String get ocrSubscribeFailed => 'エラーが発生しました。もう一度お試しください。';

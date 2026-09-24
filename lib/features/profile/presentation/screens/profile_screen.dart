@@ -126,7 +126,8 @@ class ProfileScreen extends ConsumerWidget {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'Verify your information',
+                              AppLocalizations.of(context)!
+                                  .profileVerifyInfoTitle,
                               style: GoogleFonts.inter(
                                 fontWeight: FontWeight.w600,
                                 color: Colors.orange.shade900,
@@ -139,7 +140,7 @@ class ProfileScreen extends ConsumerWidget {
                             !_isVerifiedAuthAccount(profile))
                           _buildVerificationButton(
                             context,
-                            'Verify Email',
+                            AppLocalizations.of(context)!.profileVerifyEmail,
                             Icons.email,
                             () async {
                               await Navigator.push<bool>(
@@ -154,7 +155,7 @@ class ProfileScreen extends ConsumerWidget {
                         if (!profile.phoneVerified)
                           _buildVerificationButton(
                             context,
-                            'Verify Phone',
+                            AppLocalizations.of(context)!.profileVerifyPhone,
                             Icons.phone,
                             () async {
                               await Navigator.push<bool>(
@@ -186,7 +187,7 @@ class ProfileScreen extends ConsumerWidget {
                 GestureDetector(
                   onTap: () => _showDeleteAccountDialog(context, ref),
                   child: Text(
-                    'Delete Account',
+                    AppLocalizations.of(context)!.profileDeleteAccount,
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       color: Colors.grey,
@@ -253,12 +254,14 @@ class ProfileScreen extends ConsumerWidget {
                       color: Colors.orange.shade700,
                     ),
                     const SizedBox(width: 4),
-                    Text(
-                      'Verify',
-                      style: GoogleFonts.inter(
-                        fontSize: 10,
-                        color: Colors.orange.shade700,
-                        fontWeight: FontWeight.w500,
+                    Builder(
+                      builder: (context) => Text(
+                        AppLocalizations.of(context)!.profileVerifyHint,
+                        style: GoogleFonts.inter(
+                          fontSize: 10,
+                          color: Colors.orange.shade700,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ],
@@ -336,10 +339,8 @@ class ProfileScreen extends ConsumerWidget {
             Text(AppLocalizations.of(ctx)!.profileDeleteAccount),
           ],
         ),
-        content: const Text(
-          'This will permanently delete your account and all data. This action cannot be undone.\n\n'
-          '⚠️ We strongly recommend using the Backup feature (in Settings) to export your contacts before deleting your account.\n\n'
-          'You will need to re-authenticate to confirm.',
+        content: Text(
+          AppLocalizations.of(ctx)!.profileDeleteAccountWarning,
         ),
         actions: [
           TextButton(
