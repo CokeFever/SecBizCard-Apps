@@ -551,6 +551,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ocrRestoreDone => '购买已恢复。';
 
   @override
+  String get ocrRestoreNone => '没有可恢复的购买。';
+
+  @override
+  String get ocrSyncing => '同步中…';
+
+  @override
   String get ocrSubscribeFailed => '发生错误，请再试一次。';
 
   @override
@@ -2037,6 +2043,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ocrRestoreDone => '購買已還原。';
+
+  @override
+  String get ocrRestoreNone => '沒有可還原的購買。';
+
+  @override
+  String get ocrSyncing => '同步中…';
 
   @override
   String get ocrSubscribeFailed => '發生錯誤，請再試一次。';

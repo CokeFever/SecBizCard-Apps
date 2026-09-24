@@ -195,6 +195,8 @@
   "ocrManageSubscription": "サブスクリプションを管理",
   "ocrSubscribeThanks": "ご登録ありがとうございます！",
   "ocrRestoreDone": "購入を復元しました。",
+  "ocrRestoreNone": "復元できる購入はありません。",
+  "ocrSyncing": "同期中…",
   "ocrSubscribeFailed": "エラーが発生しました。もう一度お試しください。",
   "editProfileTitle": "プロフィールを編集",
   "editProfilePhoneResetWarn": "⚠️ 認証済みの電話番号が変更されました。保存すると認証がリセットされます。",

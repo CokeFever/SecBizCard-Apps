@@ -557,6 +557,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ocrRestoreDone => '구매를 복원했습니다.';
 
   @override
+  String get ocrRestoreNone => '복원할 구매가 없습니다.';
+
+  @override
+  String get ocrSyncing => '동기화 중…';
+
+  @override
   String get ocrSubscribeFailed => '오류가 발생했습니다. 다시 시도해 주세요.';
 
   @override

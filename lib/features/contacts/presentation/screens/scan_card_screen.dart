@@ -335,11 +335,19 @@ class _ScanCardScreenState extends ConsumerState<ScanCardScreen>
     // Shared path: show the cached backend tier + usage. Null usage (cold, no
     // cache yet) → still show the shared-key badge without a count.
     final usage = ref.watch(ocrUsageNotifierProvider).valueOrNull;
+    // Syncing = a just-purchased tier is shown optimistically but the backend
+    // hasn't confirmed the real used/cap yet. The badge must NOT present that
+    // optimistic tier as a ready "Pro · 0/100" (misleading); it shows a neutral
+    // "syncing" state instead. This is display-only — recognition itself is
+    // always gated by the backend (resolveTier), so a not-yet-synced tier can
+    // never grant cloud quota; it just falls back to ML Kit.
+    final syncing = ref.watch(ocrUsageSyncingProvider);
     return OcrPreScanStatus(
       engine: OcrEngineUsed.sharedVision,
       tier: usage?.tier,
       tierUsed: usage?.tierUsed,
       tierCap: usage?.tierCap,
+      syncing: syncing,
     );
   }
 
@@ -354,7 +362,10 @@ class _ScanCardScreenState extends ConsumerState<ScanCardScreen>
         label = OcrTierDisplay.badgeLabel(l10n, status.tier ?? OcrTier.flex);
         break;
       case OcrEngineUsed.sharedVision:
-        if (status.tier != null) {
+        if (status.syncing) {
+          // A just-purchased tier is still syncing — don't present it as ready.
+          label = l10n.ocrSyncing;
+        } else if (status.tier != null) {
           // "<Tier> · x/cap this month", "VIP · ∞", etc.
           label = OcrTierDisplay.badgeLabel(
             l10n,
@@ -379,7 +390,15 @@ class _ScanCardScreenState extends ConsumerState<ScanCardScreen>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.cloud_outlined, size: 14, color: Colors.white),
+          if (status.syncing)
+            const SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(
+                  strokeWidth: 2, color: Colors.white),
+            )
+          else
+            const Icon(Icons.cloud_outlined, size: 14, color: Colors.white),
           const SizedBox(width: 6),
           Text(label, style: const TextStyle(color: Colors.white, fontSize: 12)),
         ],

@@ -195,6 +195,8 @@
   "ocrManageSubscription": "구독 관리",
   "ocrSubscribeThanks": "구독해 주셔서 감사합니다!",
   "ocrRestoreDone": "구매를 복원했습니다.",
+  "ocrRestoreNone": "복원할 구매가 없습니다.",
+  "ocrSyncing": "동기화 중…",
   "ocrSubscribeFailed": "오류가 발생했습니다. 다시 시도해 주세요.",
   "editProfileTitle": "프로필 편집",
   "editProfilePhoneResetWarn": "⚠️ 인증된 전화번호가 변경되었습니다. 저장하면 인증이 초기화됩니다.",
