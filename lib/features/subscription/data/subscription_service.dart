@@ -179,6 +179,24 @@ class SubscriptionService {
     Purchases.removeCustomerInfoUpdateListener(listener);
   }
 
+  /// The platform's "manage subscription" deep link for the current customer
+  /// (Play subscription page on Android, Apple subscription settings on iOS),
+  /// as provided by RevenueCat. Null when not configured or when the customer
+  /// has no store-managed subscription. Opening it is where the user cancels —
+  /// there is no in-app downgrade path by design (cancel → expire → Basic).
+  Future<String?> managementUrl() async {
+    if (!_configured) return null;
+    try {
+      final info = await Purchases.getCustomerInfo();
+      final url = info.managementURL;
+      if (url == null || url.isEmpty) return null;
+      return url;
+    } catch (e) {
+      if (kDebugMode) debugPrint('[RevenueCat] managementUrl failed: $e');
+      return null;
+    }
+  }
+
   /// Read the current active entitlement tier (for UI display).
   Future<SubscriptionTier> currentTier() async {
     if (!_configured) return SubscriptionTier.none;

@@ -192,6 +192,7 @@
   "ocrPlanProPrice": "US$4.99/月",
   "ocrPlanProDesc": "毎月 100 回のクラウドスキャン",
   "ocrRestorePurchases": "購入を復元",
+  "ocrManageSubscription": "サブスクリプションを管理",
   "ocrSubscribeThanks": "ご登録ありがとうございます！",
   "ocrRestoreDone": "購入を復元しました。",
   "ocrSubscribeFailed": "エラーが発生しました。もう一度お試しください。",

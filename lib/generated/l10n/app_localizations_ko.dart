@@ -548,6 +548,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ocrRestorePurchases => '구매 복원';
 
   @override
+  String get ocrManageSubscription => '구독 관리';
+
+  @override
   String get ocrSubscribeThanks => '구독해 주셔서 감사합니다!';
 
   @override
