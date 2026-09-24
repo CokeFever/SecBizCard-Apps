@@ -1078,7 +1078,7 @@ abstract class AppLocalizations {
   /// Pro plan price (placeholder until store pricing is live)
   ///
   /// In en, this message translates to:
-  /// **'US\$4.99/mo'**
+  /// **'US\$2.99/mo'**
   String get ocrPlanProPrice;
 
   /// Pro plan description

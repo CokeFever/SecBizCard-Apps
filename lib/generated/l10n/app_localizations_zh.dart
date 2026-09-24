@@ -533,7 +533,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ocrPlanPlusDesc => '每月 20 次云端识别';
 
   @override
-  String get ocrPlanProPrice => 'US\$4.99/月';
+  String get ocrPlanProPrice => 'US\$2.99/月';
 
   @override
   String get ocrPlanProDesc => '每月 100 次云端识别';
@@ -2027,7 +2027,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get ocrPlanPlusDesc => '每月 20 次雲端辨識';
 
   @override
-  String get ocrPlanProPrice => 'US\$4.99/月';
+  String get ocrPlanProPrice => 'US\$2.99/月';
 
   @override
   String get ocrPlanProDesc => '每月 100 次雲端辨識';

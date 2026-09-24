@@ -553,7 +553,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ocrPlanPlusDesc => '20 cloud scans per month';
 
   @override
-  String get ocrPlanProPrice => 'US\$4.99/mo';
+  String get ocrPlanProPrice => 'US\$2.99/mo';
 
   @override
   String get ocrPlanProDesc => '100 cloud scans per month';

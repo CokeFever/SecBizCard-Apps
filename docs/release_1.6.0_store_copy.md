@@ -9,7 +9,7 @@ on-device recognition stays free/unlimited, and the existing shared cloud quota
 ja/ko are machine-translated (owner skips native review; en/zh-TW authoritative),
 consistent with prior releases.
 
-> **Tiers sold:** Plus US$0.99/mo (20 cloud scans), Pro US$4.99/mo (100 cloud
+> **Tiers sold:** Plus US$0.99/mo (20 cloud scans), Pro US$2.99/mo (100 cloud
 > scans). Auto-renewable monthly. Product IDs `secbizcard_plus_monthly` /
 > `secbizcard_pro_monthly` (both stores). VIP is internal (backend email
 > allow-list), NOT a store product.
@@ -73,7 +73,7 @@ any subscription.
 WHAT'S NEW
 - Two auto-renewable subscriptions (same subscription group "SecBizCard Cloud
   Scans"): Plus (secbizcard_plus_monthly, US$0.99/mo, 20 cloud scans) and Pro
-  (secbizcard_pro_monthly, US$4.99/mo, 100 cloud scans).
+  (secbizcard_pro_monthly, US$2.99/mo, 100 cloud scans).
 - Purchases are managed through RevenueCat + StoreKit. Restore Purchases is
   provided.
 
