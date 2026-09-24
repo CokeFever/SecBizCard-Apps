@@ -134,11 +134,13 @@ class OcrUsageNotifier extends _$OcrUsageNotifier {
     if (uid == null || _rank(target) == 0) return;
 
     _setSyncing(true);
+    OcrUsage? lastFresh; // most recent authoritative backend value seen
     try {
       for (var attempt = 0; attempt < maxAttempts; attempt++) {
         final fresh = await _fetch();
         // User switched mid-poll → abandon.
         if (ref.read(authStateProvider).valueOrNull?.uid != uid) return;
+        if (fresh != null) lastFresh = fresh;
 
         if (fresh != null && _rank(fresh.tier) >= _rank(target)) {
           // Webhook landed: authoritative tier + used/cap. Apply, cache, done.
@@ -154,7 +156,19 @@ class OcrUsageNotifier extends _$OcrUsageNotifier {
           await Future<void>.delayed(interval);
         }
       }
-      // Timed out: leave the optimistic tier in place; build()/resume fixes up.
+
+      // Timed out: the backend never reached [target]. Rather than leave the
+      // screen stuck on the optimistic tier with "usage unavailable" (the
+      // freeze seen when RevenueCat reports a tier the backend doesn't — e.g. a
+      // restore that finds an active store subscription while the backend is
+      // out of sync), converge to the backend truth NOW: drop the optimistic
+      // tier and show the last authoritative value. Worst case the user briefly
+      // saw the optimistic tier, then it settles to reality instead of hanging.
+      _clearOptimistic();
+      if (lastFresh != null) {
+        state = AsyncData(lastFresh);
+        await _writeCache(uid, lastFresh);
+      }
     } finally {
       _setSyncing(false);
     }

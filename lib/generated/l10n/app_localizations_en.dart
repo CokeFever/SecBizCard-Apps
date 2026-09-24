@@ -435,6 +435,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileDeleteAccount => 'Delete Account';
 
   @override
+  String get profileVerifyInfoTitle => 'Verify your information';
+
+  @override
+  String get profileVerifyEmail => 'Verify Email';
+
+  @override
+  String get profileVerifyPhone => 'Verify Phone';
+
+  @override
+  String get profileVerifyHint => 'Verify';
+
+  @override
+  String get profileDeleteAccountWarning =>
+      'This will permanently delete your account and all data. This action cannot be undone.\n\n⚠️ We strongly recommend using the Backup feature (in Settings) to export your contacts before deleting your account.\n\nYou will need to re-authenticate to confirm.';
+
+  @override
   String get profileContinueToDelete => 'Continue to Delete';
 
   @override
@@ -582,6 +598,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ocrTerms => 'Terms of Use';
+
+  @override
+  String ocrSubCancelledExpires(String date) {
+    return 'Cancelled · access until $date';
+  }
 
   @override
   String get ocrSubscribeFailed => 'Something went wrong. Please try again.';

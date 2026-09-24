@@ -14,6 +14,15 @@ SubscriptionService subscriptionService(Ref ref) {
   return SubscriptionService();
 }
 
+/// The caller's subscription status (tier + willRenew + expiry) from RevenueCat,
+/// for the tier card's "cancelled, expires on <date>" line. autoDispose so it
+/// re-fetches each time the settings screen mounts; the screen also invalidates
+/// it on resume / after a purchase so a just-made cancel reflects promptly.
+@riverpod
+Future<SubscriptionStatus> subscriptionStatus(Ref ref) {
+  return ref.watch(subscriptionServiceProvider).currentStatus();
+}
+
 /// Keeps RevenueCat's app-user-id in sync with the Firebase uid.
 ///
 /// This is the fix for "purchase succeeds but tier never updates": [init] runs

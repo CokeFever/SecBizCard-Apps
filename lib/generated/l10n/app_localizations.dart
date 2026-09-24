@@ -871,6 +871,36 @@ abstract class AppLocalizations {
   /// **'Delete Account'**
   String get profileDeleteAccount;
 
+  /// Heading of the verification card on the profile screen
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your information'**
+  String get profileVerifyInfoTitle;
+
+  /// Button to start email verification on the profile screen
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Email'**
+  String get profileVerifyEmail;
+
+  /// Button to start phone verification on the profile screen
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Phone'**
+  String get profileVerifyPhone;
+
+  /// Small inline hint label prompting the user to verify a field
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get profileVerifyHint;
+
+  /// Body text of the first delete-account confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'This will permanently delete your account and all data. This action cannot be undone.\n\n⚠️ We strongly recommend using the Backup feature (in Settings) to export your contacts before deleting your account.\n\nYou will need to re-authenticate to confirm.'**
+  String get profileDeleteAccountWarning;
+
   /// No description provided for @profileContinueToDelete.
   ///
   /// In en, this message translates to:
@@ -1134,6 +1164,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Terms of Use'**
   String get ocrTerms;
+
+  /// Tier card note when the user has cancelled auto-renew but the paid tier is still active until the given date
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled · access until {date}'**
+  String ocrSubCancelledExpires(String date);
 
   /// Snackbar when a purchase or restore fails
   ///

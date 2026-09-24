@@ -419,6 +419,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileDeleteAccount => '删除账号';
 
   @override
+  String get profileVerifyInfoTitle => '验证你的信息';
+
+  @override
+  String get profileVerifyEmail => '验证电子邮件';
+
+  @override
+  String get profileVerifyPhone => '验证电话';
+
+  @override
+  String get profileVerifyHint => '验证';
+
+  @override
+  String get profileDeleteAccountWarning =>
+      '这将永久删除你的账号与所有数据，此操作无法撤销。\n\n⚠️ 强烈建议先使用「设置」中的备份功能导出联系人，再删除账号。\n\n你需要重新验证身份以确认。';
+
+  @override
   String get profileContinueToDelete => '继续删除';
 
   @override
@@ -562,6 +578,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ocrTerms => '使用条款';
+
+  @override
+  String ocrSubCancelledExpires(String date) {
+    return '已取消 · 可使用至 $date';
+  }
 
   @override
   String get ocrSubscribeFailed => '发生错误，请再试一次。';
@@ -1920,6 +1941,22 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get profileDeleteAccount => '刪除帳號';
 
   @override
+  String get profileVerifyInfoTitle => '驗證你的資訊';
+
+  @override
+  String get profileVerifyEmail => '驗證電子郵件';
+
+  @override
+  String get profileVerifyPhone => '驗證電話';
+
+  @override
+  String get profileVerifyHint => '驗證';
+
+  @override
+  String get profileDeleteAccountWarning =>
+      '這將永久刪除你的帳號與所有資料，此操作無法復原。\n\n⚠️ 強烈建議先使用「設定」中的備份功能匯出聯絡人，再刪除帳號。\n\n你需要重新驗證身分以確認。';
+
+  @override
   String get profileContinueToDelete => '繼續刪除';
 
   @override
@@ -2063,6 +2100,11 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ocrTerms => '使用條款';
+
+  @override
+  String ocrSubCancelledExpires(String date) {
+    return '已取消 · 可使用至 $date';
+  }
 
   @override
   String get ocrSubscribeFailed => '發生錯誤，請再試一次。';

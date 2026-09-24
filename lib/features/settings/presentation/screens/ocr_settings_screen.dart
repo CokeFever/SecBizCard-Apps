@@ -76,7 +76,7 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen>
     // opens this screen, not just from the possibly-stale cache. Deferred so it
     // doesn't fight the first cache-first paint.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) ref.read(ocrUsageNotifierProvider.notifier).refresh();
+      if (mounted) _refreshSubscriptionState();
     });
   }
 
@@ -88,8 +88,16 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen>
     // would keep showing the old paid tier until manually left and reopened —
     // the "cancel shows no change while sitting on the screen" report.
     if (state == AppLifecycleState.resumed && mounted) {
-      ref.read(ocrUsageNotifierProvider.notifier).refresh();
+      _refreshSubscriptionState();
     }
+  }
+
+  /// Re-pull both the backend tier/usage AND the RevenueCat status (willRenew /
+  /// expiry), so returning to this screen reflects a store-side cancel both as
+  /// the tier and as the "cancelled · access until <date>" note.
+  void _refreshSubscriptionState() {
+    ref.read(ocrUsageNotifierProvider.notifier).refresh();
+    ref.invalidate(subscriptionStatusProvider);
   }
 
   @override
@@ -437,6 +445,13 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen>
             ),
           ],
 
+          // "Cancelled · access until <date>" — for a paid tier whose auto-renew
+          // has been turned off but is still valid until the period ends. Makes
+          // a cancellation visible (the user keeps Pro/Plus until expiry, so the
+          // tier alone looks unchanged after they cancel).
+          if (tier == OcrTier.plus || tier == OcrTier.pro)
+            _buildCancelledNote(theme, l10n),
+
           // Upgrade entry: Basic → subscribe; Plus → upgrade to Pro.
           // (Pro is the top tier — no upgrade entry; it can only be cancelled
           // via "Manage subscription" below. There is no in-app downgrade.)
@@ -490,6 +505,38 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen>
             const SizedBox(height: 12),
             _buildAdminStats(theme, l10n, usage!.admin!),
           ],
+        ],
+      ),
+    );
+  }
+
+  /// "Cancelled · access until <date>" note. Watches the RevenueCat status; only
+  /// renders when auto-renew is off but the paid tier is still active. Empty
+  /// otherwise (renewing normally, or status not yet loaded).
+  Widget _buildCancelledNote(ThemeData theme, AppLocalizations l10n) {
+    final statusAsync = ref.watch(subscriptionStatusProvider);
+    final status = statusAsync.valueOrNull;
+    if (status == null || !status.isCancelledButActive) {
+      return const SizedBox.shrink();
+    }
+    final date = MaterialLocalizations.of(context)
+        .formatMediumDate(status.expiresAt!);
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Row(
+        children: [
+          Icon(Icons.info_outline,
+              size: 14, color: theme.colorScheme.onSurfaceVariant),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              l10n.ocrSubCancelledExpires(date),
+              style: TextStyle(
+                fontSize: 12,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
         ],
       ),
     );
