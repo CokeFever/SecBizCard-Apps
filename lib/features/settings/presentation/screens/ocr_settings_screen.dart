@@ -409,6 +409,8 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
           ],
 
           // Upgrade entry: Basic → subscribe; Plus → upgrade to Pro.
+          // (Pro is the top tier — no upgrade entry; it can only be cancelled
+          // via "Manage subscription" below. There is no in-app downgrade.)
           if (tier == OcrTier.basic || tier == OcrTier.plus) ...[
             const SizedBox(height: 12),
             SizedBox(
@@ -420,6 +422,28 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
                     ? l10n.ocrUpgradeToPro
                     : l10n.ocrSubscribe),
               ),
+            ),
+          ],
+
+          // Paid users (Plus/Pro): Manage subscription (opens the store's
+          // subscription page — the only cancel path, by design) + Restore
+          // (Apple 3.1.1: a restorable-IAP app must offer restore, and this is
+          // the only restore entry a Pro user can reach since they never open
+          // the paywall sheet).
+          if (tier == OcrTier.plus || tier == OcrTier.pro) ...[
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  onPressed: _openManageSubscription,
+                  child: Text(l10n.ocrManageSubscription),
+                ),
+                TextButton(
+                  onPressed: _restoreFromCard,
+                  child: Text(l10n.ocrRestorePurchases),
+                ),
+              ],
             ),
           ],
 
@@ -688,9 +712,16 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
   }
 
   Future<void> _restore(BuildContext sheetCtx) async {
+    Navigator.pop(sheetCtx);
+    await _runRestore();
+  }
+
+  /// Restore invoked from the tier card (no sheet to close). Same behavior.
+  Future<void> _restoreFromCard() => _runRestore();
+
+  Future<void> _runRestore() async {
     final l10n = AppLocalizations.of(context)!;
     final service = ref.read(subscriptionServiceProvider);
-    Navigator.pop(sheetCtx);
     try {
       final tier = await service.restore();
       if (!mounted) return;
@@ -699,6 +730,28 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
       _applyOptimisticTier(tier);
       await ref.read(ocrUsageNotifierProvider.notifier).refresh();
     } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.ocrSubscribeFailed)));
+    }
+  }
+
+  /// Opens the platform's subscription management page (Play/Apple) via the
+  /// RevenueCat-provided managementURL. This is the (by-design) only place to
+  /// cancel — there is no in-app downgrade. Falls back to a snackbar if no URL.
+  Future<void> _openManageSubscription() async {
+    final l10n = AppLocalizations.of(context)!;
+    final url = await ref.read(subscriptionServiceProvider).managementUrl();
+    if (!mounted) return;
+    if (url == null) {
+      // No management URL (e.g. sandbox edge / not configured) — nothing to open.
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.ocrSubscribeFailed)));
+      return;
+    }
+    final uri = Uri.tryParse(url);
+    if (uri == null ||
+        !await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.ocrSubscribeFailed)));

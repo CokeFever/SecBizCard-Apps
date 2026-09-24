@@ -542,6 +542,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ocrRestorePurchases => '恢复购买';
 
   @override
+  String get ocrManageSubscription => '管理订阅';
+
+  @override
   String get ocrSubscribeThanks => '感谢订阅！';
 
   @override
@@ -2025,6 +2028,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ocrRestorePurchases => '還原購買';
+
+  @override
+  String get ocrManageSubscription => '管理訂閱';
 
   @override
   String get ocrSubscribeThanks => '感謝訂閱！';

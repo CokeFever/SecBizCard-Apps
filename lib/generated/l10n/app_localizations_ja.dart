@@ -547,6 +547,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ocrRestorePurchases => '購入を復元';
 
   @override
+  String get ocrManageSubscription => 'サブスクリプションを管理';
+
+  @override
   String get ocrSubscribeThanks => 'ご登録ありがとうございます！';
 
   @override

@@ -1093,6 +1093,12 @@ abstract class AppLocalizations {
   /// **'Restore purchases'**
   String get ocrRestorePurchases;
 
+  /// Link on the tier card (paid users) that opens the store's subscription management page — where the user cancels
+  ///
+  /// In en, this message translates to:
+  /// **'Manage subscription'**
+  String get ocrManageSubscription;
+
   /// Snackbar after a successful subscription purchase
   ///
   /// In en, this message translates to:
