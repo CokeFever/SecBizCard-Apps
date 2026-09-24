@@ -101,7 +101,20 @@ flutter gen-l10n
 echo "Running build_runner..."
 dart run build_runner build --delete-conflicting-outputs
 
-# Build iOS release (also runs pod install internally)
+# Pod install with a spec-repo refresh BEFORE the archive build.
+# Xcode Cloud's baked-in CocoaPods spec repo snapshot can lag behind pub.dev and
+# lack pod versions our committed ios/Podfile.lock pins (e.g. RevenueCat pods:
+# purchases_flutter -> PurchasesHybridCommon -> RevenueCat), surfacing as
+# "CocoaPods's specs repository is too out-of-date". `flutter build ios` runs
+# pod install internally but WITHOUT --repo-update, so do an explicit
+# repo-updating install here first. pod install needs Generated.xcconfig, which
+# a config-only build produces (fast: no AOT/archive).
+echo "Preparing iOS pods (with spec-repo update)..."
+flutter build ios --config-only --release --no-codesign \
+    --dart-define=REVENUECAT_IOS_KEY="$REVENUECAT_IOS_KEY"
+(cd ios && pod install --repo-update)
+
+# Build iOS release (pod install will now be satisfied by the refreshed repo).
 # RevenueCat public SDK key (safe in the client) is injected via --dart-define.
 # Set REVENUECAT_IOS_KEY as an environment variable in the Xcode Cloud workflow
 # (App Store Connect). Empty is fine — SDK init no-ops and no paywall shows.
