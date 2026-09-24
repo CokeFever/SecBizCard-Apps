@@ -385,7 +385,7 @@
   "@ocrPlanPlusPrice": { "description": "Plus plan price (placeholder until store pricing is live)" },
   "ocrPlanPlusDesc": "20 cloud scans per month",
   "@ocrPlanPlusDesc": { "description": "Plus plan description" },
-  "ocrPlanProPrice": "US$4.99/mo",
+  "ocrPlanProPrice": "US$2.99/mo",
   "@ocrPlanProPrice": { "description": "Pro plan price (placeholder until store pricing is live)" },
   "ocrPlanProDesc": "100 cloud scans per month",
   "@ocrPlanProDesc": { "description": "Pro plan description" },

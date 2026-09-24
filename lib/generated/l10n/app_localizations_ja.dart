@@ -538,7 +538,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ocrPlanPlusDesc => '毎月 20 回のクラウドスキャン';
 
   @override
-  String get ocrPlanProPrice => 'US\$4.99/月';
+  String get ocrPlanProPrice => 'US\$2.99/月';
 
   @override
   String get ocrPlanProDesc => '毎月 100 回のクラウドスキャン';

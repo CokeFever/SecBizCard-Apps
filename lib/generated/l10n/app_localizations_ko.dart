@@ -539,7 +539,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ocrPlanPlusDesc => '매월 20회 클라우드 스캔';
 
   @override
-  String get ocrPlanProPrice => 'US\$4.99/월';
+  String get ocrPlanProPrice => 'US\$2.99/월';
 
   @override
   String get ocrPlanProDesc => '매월 100회 클라우드 스캔';
