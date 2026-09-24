@@ -179,3 +179,22 @@ and purchases attached to a RevenueCat anonymous id. Start clean:
   (not `$RCAnonymousID`) and the entitlement is active.
 - Check the webhook is hitting the (now redeployed) `handleRevenueCatEvent`
   (RevenueCat → Integrations → Webhooks → recent deliveries = 200).
+
+### Manage subscription + Restore links (build 1.6.0+173)
+Product rule: no in-app downgrade. Plans only go up (Basic→Plus→Pro) or are
+cancelled (→ expire → Basic). Cancel happens on the store, reached via the
+in-app "Manage subscription" link. Verify:
+- [ ] **Basic**: tier card shows the Subscribe button only; no Manage/Restore
+      row (those live in the paywall sheet).
+- [ ] **Plus**: tier card shows "Upgrade to Pro" + a row with "Manage
+      subscription" and "Restore purchases".
+- [ ] **Pro**: tier card shows **no upgrade/downgrade button** — only "Manage
+      subscription" + "Restore purchases".
+- [ ] Tap **Manage subscription** → opens the Google Play (or Apple) manage-
+      subscription page for this app externally. Cancelling there → back in app
+      (foreground) → tier returns to Basic after expiry.
+- [ ] Tap **Restore purchases** while already Pro → stays Pro, shows the restore
+      snackbar (no error).
+- [ ] Fresh reinstall + sign in with the same Google account → tier is detected
+      automatically WITHOUT tapping Restore (logIn + webbook sync); Restore is
+      only the fallback / Apple 3.1.1 requirement.
