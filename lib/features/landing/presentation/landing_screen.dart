@@ -4,6 +4,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import 'package:secbizcard/core/app_links.dart';
 import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 class LandingScreen extends StatelessWidget {
@@ -532,7 +534,7 @@ class LandingScreen extends StatelessWidget {
               _FooterLink(
                 text: AppLocalizations.of(context)!.landingPrivacyPolicy,
                 onTap: () =>
-                    launchUrl(Uri.parse('https://ixo.app/privacy.html')),
+                    launchUrl(Uri.parse(AppLinks.privacyPolicy)),
               ),
               Text(
                 ' • ',
@@ -540,7 +542,7 @@ class LandingScreen extends StatelessWidget {
               ),
               _FooterLink(
                 text: AppLocalizations.of(context)!.landingEula,
-                onTap: () => launchUrl(Uri.parse('https://ixo.app/eula.html')),
+                onTap: () => launchUrl(Uri.parse(AppLinks.eula)),
               ),
             ],
           ),

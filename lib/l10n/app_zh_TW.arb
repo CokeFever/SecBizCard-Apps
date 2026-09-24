@@ -188,6 +188,8 @@
   "ocrRestoreDone": "購買已還原。",
   "ocrRestoreNone": "沒有可還原的購買。",
   "ocrSyncing": "同步中…",
+  "ocrPaywallLegal": "自動續訂訂閱。方案每月自動續訂，直到你取消為止；可隨時在商店管理或取消。費用將向你的商店帳號收取。",
+  "ocrTerms": "使用條款",
   "ocrSubscribeFailed": "發生錯誤，請再試一次。",
   "editProfileTitle": "編輯個人資料",
   "editProfilePhoneResetWarn": "⚠️ 已修改已驗證的電話，儲存後驗證將被重設。",

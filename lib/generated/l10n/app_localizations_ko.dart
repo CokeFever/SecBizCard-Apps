@@ -563,6 +563,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ocrSyncing => '동기화 중…';
 
   @override
+  String get ocrPaywallLegal =>
+      '자동 갱신 구독입니다. 요금제는 취소할 때까지 매월 자동 갱신되며, 스토어에서 언제든지 관리하거나 취소할 수 있습니다. 요금은 스토어 계정으로 청구됩니다.';
+
+  @override
+  String get ocrTerms => '이용약관';
+
+  @override
   String get ocrSubscribeFailed => '오류가 발생했습니다. 다시 시도해 주세요.';
 
   @override

@@ -197,6 +197,8 @@
   "ocrRestoreDone": "購入を復元しました。",
   "ocrRestoreNone": "復元できる購入はありません。",
   "ocrSyncing": "同期中…",
+  "ocrPaywallLegal": "自動更新サブスクリプションです。プランはキャンセルするまで毎月自動更新され、ストアでいつでも管理・解約できます。料金はストアアカウントに請求されます。",
+  "ocrTerms": "利用規約",
   "ocrSubscribeFailed": "エラーが発生しました。もう一度お試しください。",
   "editProfileTitle": "プロフィールを編集",
   "editProfilePhoneResetWarn": "⚠️ 認証済みの電話番号が変更されました。保存すると認証がリセットされます。",

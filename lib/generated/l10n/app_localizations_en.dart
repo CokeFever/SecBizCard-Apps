@@ -577,6 +577,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ocrSyncing => 'Syncing…';
 
   @override
+  String get ocrPaywallLegal =>
+      'Auto-renewable subscription. Your plan renews monthly until cancelled; manage or cancel anytime in the store. Payment is charged to your store account.';
+
+  @override
+  String get ocrTerms => 'Terms of Use';
+
+  @override
   String get ocrSubscribeFailed => 'Something went wrong. Please try again.';
 
   @override

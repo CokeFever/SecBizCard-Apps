@@ -1123,6 +1123,18 @@ abstract class AppLocalizations {
   /// **'Syncing…'**
   String get ocrSyncing;
 
+  /// Auto-renewal disclosure shown on the subscription paywall (Apple 3.1.2 requirement)
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-renewable subscription. Your plan renews monthly until cancelled; manage or cancel anytime in the store. Payment is charged to your store account.'**
+  String get ocrPaywallLegal;
+
+  /// Label for the Terms of Use (EULA) link on the paywall
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Use'**
+  String get ocrTerms;
+
   /// Snackbar when a purchase or restore fails
   ///
   /// In en, this message translates to:

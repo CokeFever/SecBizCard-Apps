@@ -1,5 +1,6 @@
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
+import 'package:secbizcard/core/app_links.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
@@ -227,7 +228,7 @@ class AppDrawer extends ConsumerWidget {
                 GestureDetector(
                   onTap: () {
                     _dismiss(context);
-                    launchUrl(Uri.parse('https://ixo.app/privacy'), mode: LaunchMode.externalApplication);
+                    launchUrl(Uri.parse(AppLinks.privacyPolicy), mode: LaunchMode.externalApplication);
                   },
                   child: Text(
                     l10n.drawerLinkPrivacy,
@@ -241,7 +242,7 @@ class AppDrawer extends ConsumerWidget {
                 GestureDetector(
                   onTap: () {
                     _dismiss(context);
-                    launchUrl(Uri.parse('https://ixo.app/eula'), mode: LaunchMode.externalApplication);
+                    launchUrl(Uri.parse(AppLinks.eula), mode: LaunchMode.externalApplication);
                   },
                   child: Text(
                     l10n.drawerLinkTerms,
