@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:secbizcard/core/app_links.dart';
 import 'package:secbizcard/core/responsive/adaptive_container.dart';
+import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/core/responsive/breakpoints.dart';
 import 'package:secbizcard/features/settings/data/ocr_settings_service.dart';
 import 'package:secbizcard/features/contacts/data/services/ocr_tier.dart';
@@ -29,7 +30,8 @@ class OcrSettingsScreen extends ConsumerStatefulWidget {
   ConsumerState<OcrSettingsScreen> createState() => _OcrSettingsScreenState();
 }
 
-class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
+class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen>
+    with WidgetsBindingObserver {
   final _keyController = TextEditingController();
   bool _obscure = true;
   bool _saving = false;
@@ -67,11 +69,32 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _load();
+    // Refresh on entry so a tier change made outside the app (cancel/expire via
+    // the store, handled by the webhook → backend) is reflected when the user
+    // opens this screen, not just from the possibly-stale cache. Deferred so it
+    // doesn't fight the first cache-first paint.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.read(ocrUsageNotifierProvider.notifier).refresh();
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // On return to foreground while this screen is open, re-fetch the tier.
+    // A cancel/expiry done in the store only reaches us via the webhook →
+    // backend; without this the screen (which otherwise only fetches on build)
+    // would keep showing the old paid tier until manually left and reopened —
+    // the "cancel shows no change while sitting on the screen" report.
+    if (state == AppLifecycleState.resumed && mounted) {
+      ref.read(ocrUsageNotifierProvider.notifier).refresh();
+    }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _keyController.dispose();
     super.dispose();
   }
@@ -441,30 +464,22 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
             ),
           ],
 
-          // Pro ONLY: Manage subscription + Restore. Pro is the top tier, so it
-          // has NO button into the paywall sheet — which is where Basic/Plus
-          // users reach Manage/Restore. Without these links a Pro user would
-          // have no in-app way to cancel (via the store's page) or restore, so
-          // we surface them here. Basic/Plus intentionally DON'T show these:
-          // their Subscribe/Upgrade button opens the paywall, which carries
-          // Restore (and Manage), so duplicating them on the card is redundant.
-          // Apple 3.1.1 restore is satisfied for every tier (Pro here;
-          // Basic/Plus in the paywall). Disabled while syncing.
+          // Pro ONLY: Manage subscription. Pro is the top tier, so it has NO
+          // button into the paywall sheet — without this a Pro user would have
+          // no in-app way to cancel (via the store's page). NO Restore here:
+          // an active subscriber has nothing to restore, and showing it caused
+          // the misleading "Purchases restored" during the cancel grace period.
+          // Restore lives only on the Basic paywall (reinstall / other-device
+          // recovery), which satisfies Apple 3.1.1. Disabled while syncing.
           if (tier == OcrTier.pro) ...[
             const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TextButton(
-                  onPressed: syncing ? null : _openManageSubscription,
-                  child: Text(
-                      syncing ? l10n.ocrSyncing : l10n.ocrManageSubscription),
-                ),
-                TextButton(
-                  onPressed: syncing ? null : _runRestore,
-                  child: Text(l10n.ocrRestorePurchases),
-                ),
-              ],
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: syncing ? null : _openManageSubscription,
+                child: Text(
+                    syncing ? l10n.ocrSyncing : l10n.ocrManageSubscription),
+              ),
             ),
           ],
 
@@ -609,25 +624,23 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
                     const SizedBox(height: 10),
                   ],
                   const SizedBox(height: 10),
-                  // Restore for everyone; Manage subscription only when the user
-                  // already has a paid plan (a Plus user here to upgrade can
-                  // instead cancel via the store). Basic has nothing to manage.
+                  // Restore is ONLY for users with no active subscription
+                  // (Basic) — they might have bought on another device / after
+                  // a reinstall and need to recover it. A user who already has
+                  // an active paid plan (Plus here to upgrade) has nothing to
+                  // restore; showing it only caused the misleading "Purchases
+                  // restored" during the cancel grace period. For a paid user
+                  // we instead offer Manage subscription (the cancel path).
                   if (currentTier.isPaid)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(ctx);
-                            _openManageSubscription();
-                          },
-                          child: Text(l10n.ocrManageSubscription),
-                        ),
-                        TextButton(
-                          onPressed: () => _restore(ctx),
-                          child: Text(l10n.ocrRestorePurchases),
-                        ),
-                      ],
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          _openManageSubscription();
+                        },
+                        child: Text(l10n.ocrManageSubscription),
+                      ),
                     )
                   else
                     TextButton(
@@ -636,22 +649,16 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
                     ),
                 ] else if (offeringLiveButAllOwned) ...[
                   // Offering is live but the user already owns the top plan —
-                  // offer Manage + Restore, no misleading static tiles.
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(ctx);
-                          _openManageSubscription();
-                        },
-                        child: Text(l10n.ocrManageSubscription),
-                      ),
-                      TextButton(
-                        onPressed: () => _restore(ctx),
-                        child: Text(l10n.ocrRestorePurchases),
-                      ),
-                    ],
+                  // Manage only (a paid user has nothing to restore).
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        _openManageSubscription();
+                      },
+                      child: Text(l10n.ocrManageSubscription),
+                    ),
                   ),
                 ] else ...[
                   // Fallback: static plan info until the offering goes live.
@@ -783,6 +790,15 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
     final service = ref.read(subscriptionServiceProvider);
     Navigator.pop(sheetCtx);
     try {
+      // Defensive identity binding: ensure RevenueCat is on the Firebase uid
+      // BEFORE purchasing, so the purchase (and its webhook app_user_id) can
+      // never attach to an anonymous id ($RCAnonymousID:…) — the bug that left
+      // subscriptions unmapped to the account. subscriptionIdentitySync already
+      // logs in at startup; this guards the edge where a purchase happens before
+      // that ran. logIn is a no-op when already on this uid.
+      final uid = ref.read(authStateProvider).valueOrNull?.uid;
+      if (uid != null) await service.logIn(uid);
+
       // If the user already has a paid subscription and is switching plans
       // (e.g. Plus → Pro), pass its product id so Google Play REPLACES the old
       // subscription instead of opening a second one (which caused both to stay
@@ -795,21 +811,25 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
           ? oldProductId
           : null;
 
-      final tier = await service.purchase(pkg, oldProductIdentifier: upgradeFrom);
+      await service.purchase(pkg, oldProductIdentifier: upgradeFrom);
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.ocrSubscribeThanks)));
-      // Optimistically reflect the new tier immediately (RevenueCat already
-      // confirmed it) so the card shows Plus/Pro at once, then POLL the backend
-      // until the entitlement webhook has written Firestore and getOcrUsage
-      // returns the real used/cap (e.g. Plus 0/20). This avoids the old "shows
-      // Plus, flickers back to Basic, only correct after leaving+returning":
-      // the poll keeps the optimistic tier until the authoritative numbers land
-      // (a couple of seconds with RTDN), then caches them for every screen.
-      _applyOptimisticTier(tier);
-      final target = _optimisticOcrTierFor(tier);
+      // The tier the user just BOUGHT — derived from the tapped package, NOT
+      // from service.purchase's returned CustomerInfo. On a Google Play upgrade
+      // (Plus → Pro with product replacement) the returned CustomerInfo can
+      // momentarily still report the OLD tier (Plus); using that made the poll
+      // target = Plus, so it exited on the first fetch (backend already Plus)
+      // and the lock/sync flow never showed. The tapped package is the reliable
+      // intent, so upgrades get the same optimistic → lock → sync flow as a
+      // fresh Basic → Plus purchase.
+      final target = _packageTier(pkg);
       final notifier = ref.read(ocrUsageNotifierProvider.notifier);
       if (target != null) {
+        // Optimistically reflect the purchased tier at once (card shows Pro),
+        // then POLL the backend until the webhook has written the real used/cap
+        // (e.g. Pro 0/100), keeping actions locked meanwhile.
+        ref.read(ocrUsageNotifierProvider.notifier).setTierOptimistic(target);
         await notifier.refreshUntilTierReached(target);
       } else {
         await notifier.refresh();
