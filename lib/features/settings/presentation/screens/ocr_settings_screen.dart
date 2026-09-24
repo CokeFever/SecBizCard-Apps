@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:secbizcard/core/app_links.dart';
 import 'package:secbizcard/core/responsive/adaptive_container.dart';
 import 'package:secbizcard/core/responsive/breakpoints.dart';
 import 'package:secbizcard/features/settings/data/ocr_settings_service.dart';
@@ -676,11 +677,60 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen> {
                   onPressed: () => Navigator.pop(ctx),
                   child: Text(l10n.cancel),
                 ),
+
+                // Apple 3.1.2 / Google Play policy: the paywall must disclose
+                // auto-renewal terms and link to the Privacy Policy + Terms of
+                // Use (EULA) before purchase. Shown in every branch.
+                const SizedBox(height: 12),
+                _paywallLegalFooter(theme, l10n),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  /// Auto-renewal disclosure + Privacy Policy / Terms of Use links, required on
+  /// the subscription paywall by both stores. URLs are the canonical ixo.app
+  /// pages (no ".html" — those 404).
+  Widget _paywallLegalFooter(ThemeData theme, AppLocalizations l10n) {
+    final linkStyle = TextStyle(
+      fontSize: 12,
+      color: theme.colorScheme.primary,
+      decoration: TextDecoration.underline,
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l10n.ocrPaywallLegal,
+          style: TextStyle(
+            fontSize: 11,
+            color: theme.colorScheme.onSurfaceVariant,
+            height: 1.4,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GestureDetector(
+              onTap: () => launchUrl(Uri.parse(AppLinks.privacyPolicy),
+                  mode: LaunchMode.externalApplication),
+              child: Text(l10n.landingPrivacyPolicy, style: linkStyle),
+            ),
+            Text('   ·   ',
+                style: TextStyle(
+                    fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
+            GestureDetector(
+              onTap: () => launchUrl(Uri.parse(AppLinks.eula),
+                  mode: LaunchMode.externalApplication),
+              child: Text(l10n.ocrTerms, style: linkStyle),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

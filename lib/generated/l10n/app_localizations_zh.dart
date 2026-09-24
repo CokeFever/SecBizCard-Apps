@@ -557,6 +557,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ocrSyncing => '同步中…';
 
   @override
+  String get ocrPaywallLegal =>
+      '自动续订订阅。方案每月自动续订，直到你取消为止；可随时在商店管理或取消。费用将向你的商店账号收取。';
+
+  @override
+  String get ocrTerms => '使用条款';
+
+  @override
   String get ocrSubscribeFailed => '发生错误，请再试一次。';
 
   @override
@@ -2049,6 +2056,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ocrSyncing => '同步中…';
+
+  @override
+  String get ocrPaywallLegal =>
+      '自動續訂訂閱。方案每月自動續訂，直到你取消為止；可隨時在商店管理或取消。費用將向你的商店帳號收取。';
+
+  @override
+  String get ocrTerms => '使用條款';
 
   @override
   String get ocrSubscribeFailed => '發生錯誤，請再試一次。';

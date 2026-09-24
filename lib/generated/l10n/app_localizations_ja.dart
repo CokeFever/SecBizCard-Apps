@@ -562,6 +562,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ocrSyncing => '同期中…';
 
   @override
+  String get ocrPaywallLegal =>
+      '自動更新サブスクリプションです。プランはキャンセルするまで毎月自動更新され、ストアでいつでも管理・解約できます。料金はストアアカウントに請求されます。';
+
+  @override
+  String get ocrTerms => '利用規約';
+
+  @override
   String get ocrSubscribeFailed => 'エラーが発生しました。もう一度お試しください。';
 
   @override
