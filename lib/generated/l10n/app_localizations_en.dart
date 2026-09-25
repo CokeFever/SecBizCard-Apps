@@ -300,6 +300,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get drawerConfirmLogoutBody => 'Are you sure you want to log out?';
 
   @override
+  String get drawerLogoutWipeNote =>
+      'Signing out removes your contacts and profile from this device. Make sure you\'ve backed up first — you can restore them from Google Drive after signing back in.';
+
+  @override
+  String get drawerLogoutUnbackedWarning =>
+      '⚠️ You have changes that aren\'t backed up yet. Signing out will remove your contacts and profile from this device and those changes will be lost. Back up to Google Drive first?';
+
+  @override
   String get commonCancel => 'Cancel';
 
   @override

@@ -291,6 +291,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get drawerConfirmLogoutBody => '确定要登出吗?';
 
   @override
+  String get drawerLogoutWipeNote =>
+      '登出会将你的联系人与个人资料从这台设备移除。请先确认已备份 —— 重新登录后可从 Google Drive 恢复。';
+
+  @override
+  String get drawerLogoutUnbackedWarning =>
+      '⚠️ 你有尚未备份的更改。登出会将联系人与个人资料从这台设备移除,这些更改将会丢失。要先备份到 Google Drive 吗?';
+
+  @override
   String get commonCancel => '取消';
 
   @override
@@ -1811,6 +1819,14 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get drawerConfirmLogoutBody => '確定要登出嗎?';
+
+  @override
+  String get drawerLogoutWipeNote =>
+      '登出會將你的聯絡人與個人資料從這台裝置移除。請先確認已備份 —— 重新登入後可從 Google Drive 還原。';
+
+  @override
+  String get drawerLogoutUnbackedWarning =>
+      '⚠️ 你有尚未備份的變更。登出會將聯絡人與個人資料從這台裝置移除,這些變更將會遺失。要先備份到 Google Drive 嗎?';
 
   @override
   String get commonCancel => '取消';

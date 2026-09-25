@@ -11,6 +11,7 @@ import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'package:secbizcard/features/handshake/data/handshake_history_repository.dart';
 import 'package:secbizcard/core/services/notification_service.dart';
 import 'package:secbizcard/core/services/backup_reminder_service.dart';
+import 'package:secbizcard/core/services/deep_link_service.dart';
 import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
@@ -55,7 +56,33 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(notificationServiceProvider).initialize();
       _maybeShowBackupReminder();
+      _resumePendingHandshake();
     });
+  }
+
+  /// Deferred deep link: if the user arrived here after scanning an exchange QR
+  /// while the app wasn't installed (or opened via a deep link), continue that
+  /// exchange automatically instead of making them re-scan.
+  ///
+  /// The pending session id is populated by [DeepLinkService] from: an initial
+  /// deep link (app opened via Universal Link / App Link / custom scheme), the
+  /// Android Play Install Referrer (installed from the web landing page's Play
+  /// Store link), or the iOS clipboard hand-off. We just read it here — once —
+  /// and route into the handshake flow.
+  Future<void> _resumePendingHandshake() async {
+    // Touch the service so its build() runs the initial-link / install-referrer
+    // / clipboard checks that populate the pending session (fire-and-forget).
+    ref.read(deepLinkServiceProvider);
+    // Briefly poll for a pending session. app↔app (live deep link) resolves on
+    // the first poll → zero added latency; the web→install path may need a
+    // moment for the async referrer/clipboard checks to land, so we wait up to
+    // 3s, returning the instant it appears. Nothing pending → returns null fast
+    // once (interval-bounded) and we simply carry on.
+    final sessionId = await ref
+        .read(pendingHandshakeSessionProvider.notifier)
+        .awaitPendingSession();
+    if (sessionId == null || !mounted) return;
+    context.push('/handshake/$sessionId');
   }
 
   /// Once per app launch, if the user has data with unbacked-up changes and

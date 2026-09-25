@@ -292,6 +292,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get drawerConfirmLogoutBody => '로그아웃하시겠습니까?';
 
   @override
+  String get drawerLogoutWipeNote =>
+      '로그아웃하면 연락처와 프로필이 이 기기에서 삭제됩니다. 먼저 백업하세요 — 다시 로그인한 후 Google 드라이브에서 복원할 수 있습니다.';
+
+  @override
+  String get drawerLogoutUnbackedWarning =>
+      '⚠️ 아직 백업되지 않은 변경사항이 있습니다. 로그아웃하면 연락처와 프로필이 이 기기에서 삭제되고 해당 변경사항이 사라집니다. 먼저 Google 드라이브에 백업하시겠습니까?';
+
+  @override
   String get commonCancel => '취소';
 
   @override

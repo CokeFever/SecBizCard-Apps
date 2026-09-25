@@ -631,6 +631,18 @@ abstract class AppLocalizations {
   /// **'Are you sure you want to log out?'**
   String get drawerConfirmLogoutBody;
 
+  /// Logout dialog note: local data is wiped on sign-out
+  ///
+  /// In en, this message translates to:
+  /// **'Signing out removes your contacts and profile from this device. Make sure you\'ve backed up first — you can restore them from Google Drive after signing back in.'**
+  String get drawerLogoutWipeNote;
+
+  /// Stronger logout warning when there are unbacked-up local changes
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ You have changes that aren\'t backed up yet. Signing out will remove your contacts and profile from this device and those changes will be lost. Back up to Google Drive first?'**
+  String get drawerLogoutUnbackedWarning;
+
   /// No description provided for @commonCancel.
   ///
   /// In en, this message translates to:

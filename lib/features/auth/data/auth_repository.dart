@@ -11,6 +11,7 @@ import 'package:google_sign_in/google_sign_in.dart' as google_sign_in;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
+import 'package:secbizcard/core/database/database_helper.dart';
 import 'package:secbizcard/core/errors/failure.dart';
 import 'package:secbizcard/features/profile/data/profile_repository.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
@@ -309,6 +310,18 @@ class AuthRepository {
       // Apple Sign-In does not require explicit sign-out
     } catch (e) {
       // Just log or ignore for now
+    }
+    // PRIVACY: wipe all local personal data on sign-out. Contacts/profile are
+    // stored locally in one device-wide sqflite DB with no per-account scoping,
+    // so without this the next account to sign in on this device would see the
+    // previous user's contacts (cross-account leak). Contacts live on-device and
+    // are recoverable from the user's Google Drive backup, so clearing here is
+    // safe by design. Runs regardless of provider and even if sign-out threw,
+    // so we never leave the previous user's data behind.
+    try {
+      await DatabaseHelper.instance.deleteAllData();
+    } catch (e) {
+      if (kDebugMode) debugPrint('[Auth] local data wipe on sign-out failed: $e');
     }
   }
 

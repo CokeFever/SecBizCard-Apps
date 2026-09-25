@@ -42,6 +42,56 @@ class PendingHandshakeSession extends _$PendingHandshakeSession {
     await prefs.remove(_pendingSessionKey);
     state = const AsyncData(null);
   }
+
+  /// Wait (briefly) for a pending session to appear, then consume it once.
+  ///
+  /// This bridges a timing race on FIRST launch after installing from the web
+  /// landing page: the pending session is written by an ASYNC check (Android
+  /// Play Install Referrer / iOS clipboard) that may not have completed by the
+  /// time the home screen reads it. We poll SharedPreferences up to [timeout],
+  /// returning as soon as a value appears (and clearing it — one-time use).
+  ///
+  /// IMPORTANT: this only matters for the deferred (web → install) path. The
+  /// app↔app path (already installed, opened via a live deep link) resolves on
+  /// the FIRST poll with zero added latency, so normal card exchange stays fast.
+  /// Returns null if nothing arrives within [timeout].
+  Future<String?> awaitPendingSession({
+    Duration timeout = const Duration(seconds: 3),
+    Duration interval = const Duration(milliseconds: 300),
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Immediate check first — an already-written pending session (app↔app live
+    // deep link, or a value persisted from a previous launch) returns instantly
+    // with zero wait.
+    final immediate = prefs.getString(_pendingSessionKey);
+    if (immediate != null) {
+      await prefs.remove(_pendingSessionKey);
+      state = const AsyncData(null);
+      return immediate;
+    }
+
+    // Nothing yet. Only WAIT if the one-time deferred-install checks might still
+    // be in flight — i.e. this is the first launch where the Android install
+    // referrer / iOS clipboard is being read. On every subsequent launch those
+    // flags are already set, so we don't poll (no needless 3s on normal opens).
+    final referrerPending = !(prefs.getBool('has_checked_install_referrer') ?? false);
+    final clipboardPending = !(prefs.getBool('has_checked_clipboard_referrer') ?? false);
+    if (!referrerPending && !clipboardPending) return null;
+
+    final deadline = DateTime.now().add(timeout);
+    while (DateTime.now().isBefore(deadline)) {
+      await Future<void>.delayed(interval);
+      await prefs.reload(); // pick up writes made by the async deep-link checks
+      final pending = prefs.getString(_pendingSessionKey);
+      if (pending != null) {
+        await prefs.remove(_pendingSessionKey); // one-time use
+        state = const AsyncData(null);
+        return pending;
+      }
+    }
+    return null;
+  }
 }
 
 /// Service to handle deep links and install referrer

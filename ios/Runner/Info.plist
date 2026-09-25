@@ -40,6 +40,16 @@
 				<string>com.googleusercontent.apps.769422548283-f5c7cid1b0es0999i4mfg3mp2jqocd18</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>app.ixo.secbizcard.handshake</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>secbizcard</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>

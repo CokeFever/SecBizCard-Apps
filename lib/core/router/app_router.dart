@@ -12,6 +12,7 @@ import 'package:secbizcard/features/handshake/presentation/screens/qr_scanner_sc
 import 'package:secbizcard/features/handshake/data/handshake_repository.dart';
 import 'package:secbizcard/features/contacts/data/ocr_usage_provider.dart';
 import 'package:secbizcard/features/subscription/data/subscription_providers.dart';
+import 'package:secbizcard/core/services/deep_link_service.dart';
 import 'package:secbizcard/features/handshake/presentation/screens/handshake_history_screen.dart';
 import 'package:secbizcard/features/home/presentation/screens/main_screen.dart';
 import 'package:secbizcard/features/contacts/presentation/screens/edit_contact_screen.dart';
@@ -295,6 +296,13 @@ void _warmUpCloudFunctions(Ref ref) {
     // Without this, purchases attach to an anonymous id and the backend never
     // maps the subscription to the user → tier stays "basic".
     ref.read(subscriptionIdentitySyncProvider);
+
+    // Kick off deep-link detection early (login → home), so the async initial-
+    // link / Android install-referrer / iOS clipboard checks have a head start
+    // to write the pending handshake session before MainScreen reads it. This
+    // powers "scan exchange QR → install app → continue the exchange" without a
+    // re-scan (see MainScreen._resumePendingHandshake).
+    ref.read(deepLinkServiceProvider);
 
     debugPrint('[Router] Cloud Functions + OCR usage warm-up triggered');
   } catch (e) {
