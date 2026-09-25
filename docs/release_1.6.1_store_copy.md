@@ -1,10 +1,11 @@
-# Release 1.6.0 — 送審文案(What's New + App Review 說明)
+# Release 1.6.1 — 送審文案(What's New + App Review 說明)
 
-> 送審前只留這一份 1.6.0 文件。排版檢視:Kiro/VS Code 開此檔按 `Cmd+Shift+V`。
+> 送審前只留這一份文件。排版檢視:Kiro/VS Code 開此檔按 `Cmd+Shift+V`。
 
-1.6.0 對使用者**唯一有感**的變化:新增選用的 **Plus / Pro 訂閱**,解鎖每月更多
-雲端 AI 名片辨識。免費的裝置端辨識照舊。其餘(訂閱狀態同步、名片交換 deeplink、
-登出隱私、後端修正等)都是「本來就該正常運作」的內部改進,**不寫進 What's New**。
+1.6.1 是這條「新增訂閱」路線的送審版(接續 1.6.0 開發)。對使用者**唯一有感**
+的變化:新增選用的 **Plus / Pro 訂閱**,解鎖每月更多雲端 AI 名片辨識。免費的裝置端
+辨識照舊。其餘(訂閱狀態同步、名片交換 deeplink、登出隱私、備份提醒時機、後端修正等)
+都是「本來就該正常運作」的內部改進,**不寫進 What's New**。
 
 - Plus:US$0.99/月,每月 20 次雲端辨識 · `secbizcard_plus_monthly`
 - Pro:US$2.99/月,每月 100 次雲端辨識 · `secbizcard_pro_monthly`
@@ -57,7 +58,7 @@ Plus와 Pro 출시 —— 매월 클라우드 AI 명함 스캔을 더 많이 사
 貼進 App Review Information → Notes for Reviewer。
 
 ```
-1.6.0 introduces OPTIONAL auto-renewable subscriptions. Core functionality
+1.6.1 introduces OPTIONAL auto-renewable subscriptions. Core functionality
 (scan, store, exchange business cards) remains fully usable for free.
 
 WHAT'S NEW
@@ -118,7 +119,7 @@ Plus와 Pro 출시 —— 매월 클라우드 AI 명함 스캔을 더 많이 사
 
 ## 送審 gotcha(兩平台)
 - **Apple**:group 內第一個訂閱必須**與 app 版本一起送審**。在 App Store Connect
-  把兩個訂閱附到 1.6.0 版本一起提交。
+  把兩個訂閱附到 1.6.1 版本一起提交。
 - **Play**:訂閱已 Active,app release rollout 到 track 即可;正式版在內測通過後 promote。
 
 ## 送審前檢查(細項見 submission_checklist.md)
