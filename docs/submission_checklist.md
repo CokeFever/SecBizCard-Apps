@@ -1,4 +1,4 @@
-# 送審前檢查清單(1.6.0 訂閱版)
+# 送審檢查清單(1.6.1 訂閱版 — 已送審,等候審核結果)
 
 雙平台(App Store + Google Play)送審前的完整待辦。`[x]` 已完成、`[ ]` 待辦、
 `[~]` 進行中/部分完成。相關細節見同目錄其他 docs。
@@ -53,12 +53,14 @@
       (後端降級邏輯與 Android 共用、已驗證;仍建議想辦法在 iOS 實測一次)
 - [ ] **用最新 build 在「乾淨 sandbox 帳號」完整跑一輪**(避免幽靈訂閱干擾)
 
-## F. 送審動作
+## F. 送審動作(1.6.1 已送審,等候結果)
 
-- [ ] 確定最終送審 build 版號(目前累積到 1.6.0+177,之後的修正要再 bump)
-- [ ] iOS:App Store Connect 選 build + 訂閱一起加入送審提交
-- [ ] Android:Play Console 上傳 AAB + 訂閱一起送審
-- [ ] 送審備註:提供測試帳號/說明(審核員如何測訂閱)
+- [x] 最終送審版本:**1.6.1+180**(版本名 1.6.1;iOS build 顯示 1.6.1(101))
+- [x] iOS:App Store Connect 選 build + 訂閱一起送審
+      (Draft Submission 含 iOS App 1.6.1 + SecBizCard Cloud Scans group + Pro + Plus)
+- [x] Android:Play Console 建立 production release + AAB + 訂閱一起送審
+- [x] 送審備註:App Review Notes 已備妥(訂閱測試、電話驗證、Google 登入、QR、
+      OCR feedback、隱私)→ 見 release_1.6.1_store_copy.md
 
 ---
 
@@ -70,3 +72,22 @@
 
 隱私標籤(iOS + Android,含 Purchases + Device ID)已勾選完成。
 法務/文案/素材/程式功能大致就緒;剩下主要是**測試驗證**。
+
+---
+
+## G. 下一版再處理(不擋 1.6.1 送審)
+
+Play Console「Create production release」頁看到的增強項,這版先不動,下個版本評估:
+
+- [ ] **開啟 automatic app text translation**(Play 的 3 項 enhancement 只開了 2 項:
+      Google Play 簽章 + Automatic protection 已開;自動翻譯還是 Get started)。
+      注意:我們的商店文案已人工備妥 5 語(見 release notes / metadata),自動翻譯
+      可能與既有人工翻譯衝突或覆蓋,開之前先確認它作用範圍,別把人工文案洗掉。
+- [ ] enhancement 變更要**重新上傳 AAB 才生效**(頁面提示
+      "Upload your app bundle again to apply enhancement changes")。所以若真的要開,
+      排在下個版本 build 時一起做。
+- [ ] (順帶留意)Play 顯示 **Quantum-ready signing key available** —— 目前 Google Play
+      簽章已啟用,量子安全金鑰是可選升級,列為日後觀察項,非必要。
+
+### Play release notes 品牌一致性(已於 1.6.1 文案修正,存查)
+- release notes 五語結尾統一帶 "SecBizCard"(ja/ko 原本漏了,已補)。下版沿用即可。
