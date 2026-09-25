@@ -1,0 +1,72 @@
+# 送審前檢查清單(1.6.0 訂閱版)
+
+雙平台(App Store + Google Play)送審前的完整待辦。`[x]` 已完成、`[ ]` 待辦、
+`[~]` 進行中/部分完成。相關細節見同目錄其他 docs。
+
+> 排版檢視:在 Kiro/VS Code 開此檔按 `Cmd+Shift+V` 開渲染預覽。
+
+---
+
+## A. 程式功能(App 行為)
+
+- [x] 訂閱狀態機:樂觀顯示 → 鎖定動作(syncing)→ 輪詢同步真實用量
+- [x] Basic→Plus、Plus→Pro 升級(升級用「所買方案」當目標,避免卡住)
+- [x] 「已取消 · 可使用至 X」狀態顯示(取消後仍有效到期末)
+- [x] 輪詢超時 fallback:收斂到後端真實值,不卡「無法取得用量」
+- [x] Restore 只在 Basic paywall(有訂閱者不顯示,避免誤導)
+- [x] 購買前 `logIn(uid)`,杜絕掛到匿名 RevenueCat id
+- [x] 相機徽章誠實顯示(同步中顯示 Syncing,不用樂觀值誤導)
+- [x] QR 分享畫面 `unavailable` 回前景自癒
+- [x] 個人資料頁多語補齊(Verify/Delete Account 等 5 語)
+- [x] Paywall 法律揭露(自動續訂說明 + 隱私政策 + 使用條款連結)
+
+## B. 後端
+
+- [x] `resolveTier` 防禦性過期(renewsAt 過期即降級)+ 測試
+- [x] RevenueCat webhook reconciliation(避免低階事件蓋掉高階)+ 測試
+- [x] webhook 結構化 log(方便診斷)
+- [x] 已部署(functions)
+- [x] RTDN(Android)已設定
+- [x] App Store Server Notifications(iOS)已設定 + IAP `.p8` 已上傳
+
+## C. 商店設定
+
+- [x] 訂閱產品建立:secbizcard_plus_monthly / secbizcard_pro_monthly(兩平台)
+- [x] 價格:Plus US$0.99、Pro US$2.99(≈ NT$30 / NT$90)
+- [x] Subscription Group「SecBizCard Cloud Scans」(Plus/Pro 同組,順序正確)
+- [x] IAP Display Name + Description(5 語)→ 見 subscription_store_metadata.md
+- [x] IAP 審核截圖(1640×2360)→ ~/Desktop/iap_review_out/
+- [x] App 上架素材(截圖/描述/標題)兩平台
+- [x] **App Store Connect 填 App Privacy 標籤**(新增 Purchases + Device ID)→ 記得 Publish
+- [x] **Play Console 填 Data Safety**(新增 Purchase history + Device or other IDs)→ 記得 Submit
+
+## D. 法務文件(已上線)
+
+- [x] 隱私政策 ixo.app/privacy 加訂閱段落 + 修正(已部署、線上驗證)
+- [x] EULA ixo.app/eula 加訂閱條款(Apple 3.1.2)(已部署、線上驗證)
+
+## E. 測試驗證(送審前必過)
+
+- [x] Android:Basic→Plus→Pro、取消、退款降級 —— 已多次驗證
+- [x] iOS:Basic→Plus、Plus→Pro —— 已驗證
+- [~] **iOS:取消→到期→降回 Basic** —— sandbox 難模擬,尚未在乾淨環境跑通
+      (後端降級邏輯與 Android 共用、已驗證;仍建議想辦法在 iOS 實測一次)
+- [ ] **用最新 build 在「乾淨 sandbox 帳號」完整跑一輪**(避免幽靈訂閱干擾)
+
+## F. 送審動作
+
+- [ ] 確定最終送審 build 版號(目前累積到 1.6.0+177,之後的修正要再 bump)
+- [ ] iOS:App Store Connect 選 build + 訂閱一起加入送審提交
+- [ ] Android:Play Console 上傳 AAB + 訂閱一起送審
+- [ ] 送審備註:提供測試帳號/說明(審核員如何測訂閱)
+
+---
+
+## 目前最關鍵的未完成項(依重要性)
+
+1. **iOS 取消→到期降級的乾淨驗證**(E) —— 最大風險,金流相關。
+2. **乾淨 sandbox 完整跑一輪最新 build**(E)—— 之前一直被幽靈訂閱干擾。
+3. **確認隱私標籤已 Publish/Submit**(iOS App Privacy 要 Publish、Play Data safety 要 Submit 才生效)。
+
+隱私標籤(iOS + Android,含 Purchases + Device ID)已勾選完成。
+法務/文案/素材/程式功能大致就緒;剩下主要是**測試驗證**。
