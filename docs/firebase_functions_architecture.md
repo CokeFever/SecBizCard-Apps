@@ -1,8 +1,15 @@
 # Firebase Cloud Functions Architecture
 
-This document outlines the purpose and necessity of the 6 core Firebase Cloud Functions used in the SecBizCard application. These functions handle the entire lifecycle of a business card exchange (handshake) between two users, including edge cases for users who do not yet have the App installed.
+This document outlines the purpose and necessity of the 4 core Firebase Cloud Functions used in the SecBizCard application. These functions handle the entire lifecycle of a business card exchange (handshake) between two users.
 
-All 6 functions play a critical and distinct role in the system.
+> **Update (2026-09-25).** The two device-fingerprint functions
+> (`savePendingSession` / `getPendingSession`) were **removed**. Fingerprint-based
+> deferred deep linking proved unreliable and privacy-questionable; the
+> web-to-app handoff now relies on Universal Links / App Links, the Android
+> Play install referrer, and iOS clipboard hand-off instead — no server-side
+> fingerprint records. See `deep_linking_DECISIONS.md` for the current design.
+
+All 4 functions below play a critical and distinct role in the system.
 
 ---
 
@@ -23,16 +30,16 @@ These functions handle the standard flow when both users have the SecBizCard App
 
 ---
 
-## 2. Web-to-App Handoff Flow (2 Functions)
-These functions handle the fallback flow when someone without the App scans the QR code using a standard camera, opening the Web interface (`ixo.app`).
+## 2. Web-to-App Handoff Flow (no dedicated functions)
+When someone without the App scans the QR code using a standard camera, the
+landing page (`ixo.app/{id}`) handles the handoff **without any Cloud Function**:
 
-### `savePendingSession` (onRequest / HTTP)
-*   **Purpose:** When the Web interface is opened, it generates a device fingerprint and calls this API. This function saves the intended `sessionId` and the fingerprint in a temporary `pending_sessions` Firestore collection.
-*   **Necessity:** **Strictly Necessary**. Allows users to register their "intent to scan" before they are redirected to download and install the App.
-
-### `getPendingSession` (onCall)
-*   **Purpose:** When the user subsequently installs and opens the Flutter App, the App generates the same device fingerprint and calls this API. The backend retrieves the previously stored `sessionId` from `pending_sessions` and deletes the temporary record.
-*   **Necessity:** **Strictly Necessary**. Bridges the gap between the Web browser context and the native App context, enabling a seamless deep-linking experience post-installation.
+- **Universal Links (iOS) / App Links (Android):** if the App is installed, the
+  OS opens it directly on the handshake URL — no round-trip needed.
+- **Not installed:** the landing page routes to the App Store / Play Store. On
+  Android the Play **install referrer** carries the session id; on iOS the
+  landing page writes the session id to the **clipboard** and the App reads it
+  on first launch. The old server-side fingerprint records were removed.
 
 ---
 
