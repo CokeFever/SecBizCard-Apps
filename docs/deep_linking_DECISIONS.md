@@ -1,8 +1,30 @@
 # Deep Linking Architecture Decision Record
 
 **Date**: 2026-02-01  
-**Status**: Approved  
+**Status**: Partially superseded (see update below)  
 **Author**: Google Antigravity Team
+
+> **Update (2026-09-25) — iOS fingerprinting removed.** The "Server-side
+> Fingerprinting (Firestore `pending_sessions`)" path for iOS deferred deep
+> linking was **dropped** and never shipped. In practice it was unreliable
+> (fingerprint collisions / mismatches) and privacy-questionable. The
+> `savePendingSession` / `getPendingSession` Cloud Functions and the
+> `pending_sessions` collection were removed.
+>
+> **Current design (as shipped):**
+> - **Both platforms:** Universal Links (iOS) / App Links (Android) open the
+>   App directly when installed. `assetlinks.json` on `ixo.app` root carries the
+>   3 live signing fingerprints.
+> - **Android, not installed:** Play **install referrer** carries the session id.
+> - **iOS, not installed:** landing page writes the session id to the
+>   **clipboard**; the App reads it on first launch.
+> - **Continuation:** on first launch the App short-polls the backend
+>   (`awaitPendingSession`, ≤3s) so an app↔app scan resumes instantly and only a
+>   genuine install-first-launch waits briefly.
+>
+> The sections below are kept for historical rationale (esp. the Android design,
+> which is unchanged, and the alternatives considered). Treat the iOS
+> fingerprinting parts as **not current**.
 
 ## Context
 
