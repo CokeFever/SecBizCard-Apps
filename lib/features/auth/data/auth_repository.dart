@@ -13,6 +13,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import 'package:secbizcard/core/database/database_helper.dart';
 import 'package:secbizcard/core/errors/failure.dart';
+import 'package:secbizcard/core/services/backup_reminder_service.dart';
 import 'package:secbizcard/features/profile/data/profile_repository.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
 
@@ -322,6 +323,15 @@ class AuthRepository {
       await DatabaseHelper.instance.deleteAllData();
     } catch (e) {
       if (kDebugMode) debugPrint('[Auth] local data wipe on sign-out failed: $e');
+    }
+    // Also clear the backup-reminder bookkeeping so the next account signing in
+    // on this device does not inherit the previous account's "unbacked-up
+    // changes" / snooze state (those timestamps live in SharedPreferences,
+    // which the DB wipe above does not touch).
+    try {
+      await BackupReminderService().clear();
+    } catch (e) {
+      if (kDebugMode) debugPrint('[Auth] backup-reminder clear on sign-out failed: $e');
     }
   }
 
