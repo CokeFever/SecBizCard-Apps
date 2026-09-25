@@ -90,6 +90,9 @@
        Ready for Review,會跟著一起重審,不用動。
   - 已線上驗證 EULA + Privacy 連結皆可通、內容含訂閱條款。
   - ⚠️ **常設規則**:提供訂閱的 app,**Description 必須含 EULA 連結**。以後每次送審沿用。
+  - **狀態:已修並 resubmit**(2026-09-25) — 5 語 Description 皆加
+    `Terms of Use (EULA): https://ixo.app/eula` + `Privacy Policy: https://ixo.app/privacy`,
+    已 Resubmit to App Review,等候結果。無需新 build。
 
 ## G. 下一版再處理(不擋 1.6.1 送審)
 
