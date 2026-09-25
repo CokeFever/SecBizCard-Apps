@@ -69,14 +69,27 @@ class BackupReminderService {
     await prefs.setInt(keySnoozedMonth, _monthKey);
   }
 
+  /// Clear all reminder bookkeeping. Called on sign-out so a different account
+  /// signing in on this device does not inherit the previous account's
+  /// "unbacked-up changes" / snooze state. (The contacts DB itself is wiped
+  /// separately by the auth layer.)
+  Future<void> clear() async {
+    final prefs = await _prefs;
+    await prefs.remove(keyLastModified);
+    await prefs.remove(keyLastBackup);
+    await prefs.remove(keySnoozedMonth);
+  }
+
   /// Whether to show the backup reminder now.
   ///
   /// [hasData] must be true only when the user actually has contacts/profile
   /// worth backing up — an empty install is never nagged.
   ///
-  /// Returns true when: there is data, AND it has never been backed up OR has
-  /// changed since the last backup, AND the reminder has not been snoozed for
-  /// the current calendar month.
+  /// Returns true when: there is data, the reminder has not been snoozed for
+  /// the current calendar month, AND there are unbacked-up changes whose last
+  /// change was on an earlier calendar day than today. The day-boundary rule
+  /// means a contact added/edited *today* is only surfaced from the NEXT day's
+  /// cold start onward — we never nag about a change the user just made.
   Future<bool> shouldRemind({required bool hasData}) async {
     if (!hasData) return false;
 
@@ -86,15 +99,21 @@ class BackupReminderService {
     final snoozedMonth = prefs.getInt(keySnoozedMonth);
     if (snoozedMonth != null && snoozedMonth == _monthKey) return false;
 
-    final lastBackup = prefs.getInt(keyLastBackup);
-    // Never backed up but has data -> remind.
-    if (lastBackup == null) return true;
-
     final lastModified = prefs.getInt(keyLastModified);
-    // Backed up and nothing recorded as changed since -> no need.
+    // Nothing was ever recorded as changed on this device -> nothing to nag
+    // about. (A fresh account, or one whose changes are all already backed up.)
     if (lastModified == null) return false;
 
-    // Unbacked-up changes exist.
-    return lastModified > lastBackup;
+    final lastBackup = prefs.getInt(keyLastBackup);
+    final hasUnbackedChanges = lastBackup == null || lastModified > lastBackup;
+    if (!hasUnbackedChanges) return false;
+
+    // Next-day rule: only remind once the change is at least one calendar day
+    // old. A change made today waits until tomorrow.
+    final modified = DateTime.fromMillisecondsSinceEpoch(lastModified);
+    final now = _now();
+    final modifiedDay = DateTime(modified.year, modified.month, modified.day);
+    final today = DateTime(now.year, now.month, now.day);
+    return today.isAfter(modifiedDay);
   }
 }
