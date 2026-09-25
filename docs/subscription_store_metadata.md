@@ -16,6 +16,28 @@ Plus). VIP is internal (backend email allow-list), NOT a store product.
 
 ## Apple App Store Connect
 
+### Subscription GROUP localization (required — blocks "Add for Review")
+
+Separate from the per-subscription display names below. Set under Subscriptions →
+group **SecBizCard Cloud Scans** → Display Name and Description → Add Localization.
+This is the group name users see in iOS Settings → Subscriptions. Add all 5.
+
+- **App Name Display Options:** keep the default **Use App Name — SecBizCard**
+  (the app name already carries the brand, so the group name below stays clean).
+- **Subscription Group Display Name** (≤ 35 chars):
+
+| Localization | Group Display Name |
+|--------------|--------------------|
+| English (U.S.) | Cloud Card Scans |
+| Chinese (Traditional) | 雲端名片辨識 |
+| Chinese (Simplified) | 云端名片识别 |
+| Japanese | クラウド名刺スキャン |
+| Korean | 클라우드 명함 스캔 |
+
+---
+
+### Per-subscription localizations
+
 Per language, each subscription needs a **Display Name** (≤ 30 chars) and a
 **Description** (≤ 45 chars). Set under Subscriptions → <product> → Localizations.
 
