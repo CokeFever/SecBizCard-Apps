@@ -15,7 +15,6 @@ import 'package:secbizcard/features/contacts/data/ocr_usage_provider.dart';
 import 'package:secbizcard/features/contacts/data/card_detection_config.dart';
 import 'package:secbizcard/features/contacts/presentation/ocr_tier_display.dart';
 import 'package:secbizcard/features/subscription/data/subscription_providers.dart';
-import 'package:secbizcard/features/subscription/data/subscription_service.dart';
 import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 /// Unified, compact settings for AI-based business-card recognition (OCR).
@@ -900,29 +899,26 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen>
     final l10n = AppLocalizations.of(context)!;
     final service = ref.read(subscriptionServiceProvider);
     try {
-      final tier = await service.restore();
+      // Restore = ask RevenueCat/the store to re-sync this account's receipts.
+      // We deliberately do NOT trust its returned tier for the display: the
+      // BACKEND is the single source of truth (it gates paid features and stays
+      // consistent across platforms). Restoring re-syncs RevenueCat → fires the
+      // entitlement webhook → updates the backend; we then show whatever the
+      // backend reports. This avoids the "restore shows Pro from the store, then
+      // drops to Basic" flicker when the store and backend momentarily disagree
+      // (e.g. a lingering sandbox receipt, or a not-yet-synced cross-platform
+      // purchase).
+      await service.restore();
+      await ref.read(ocrUsageNotifierProvider.notifier).refresh();
       if (!mounted) return;
-      // Reflect the real outcome: only say "restored" when an active paid
-      // entitlement actually came back. A restore that finds nothing (e.g. the
-      // user already cancelled, or never purchased on this account) must not
-      // claim success — that was the misleading "Purchases restored" after a
-      // cancel. `none` → "no purchases to restore".
-      final restored = tier != SubscriptionTier.none;
+      // Message reflects the BACKEND result, not the store's.
+      final backendTier =
+          ref.read(ocrUsageNotifierProvider).valueOrNull?.tier;
+      final restored =
+          backendTier == OcrTier.plus || backendTier == OcrTier.pro;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(restored ? l10n.ocrRestoreDone : l10n.ocrRestoreNone),
       ));
-      // _applyOptimisticTier no-ops on `none`, so a failed restore never
-      // re-raises the displayed tier. When something WAS restored, poll until
-      // the backend confirms the tier + real usage (same as purchase); when
-      // nothing was, a single refresh reconciles the truth.
-      _applyOptimisticTier(tier);
-      final target = _optimisticOcrTierFor(tier);
-      final notifier = ref.read(ocrUsageNotifierProvider.notifier);
-      if (target != null) {
-        await notifier.refreshUntilTierReached(target);
-      } else {
-        await notifier.refresh();
-      }
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
@@ -950,27 +946,6 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen>
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.ocrSubscribeFailed)));
     }
-  }
-
-  /// The [OcrTier] a RevenueCat [SubscriptionTier] result maps to, or null when
-  /// it carries no paid entitlement (`none`) — used both to set the optimistic
-  /// tier and as the poll target.
-  OcrTier? _optimisticOcrTierFor(SubscriptionTier tier) => switch (tier) {
-        SubscriptionTier.plus => OcrTier.plus,
-        SubscriptionTier.pro => OcrTier.pro,
-        SubscriptionTier.none => null,
-      };
-
-  /// Map a RevenueCat [SubscriptionTier] result to our [OcrTier] and push it to
-  /// the shared usage provider for an instant UI update. Skipped when a BYOK
-  /// key is set (Flex overrides the backend tier) or when RevenueCat reports no
-  /// active entitlement (let the backend refresh decide, don't downgrade the
-  /// display optimistically).
-  void _applyOptimisticTier(SubscriptionTier tier) {
-    if (_hasKey) return;
-    final mapped = _optimisticOcrTierFor(tier);
-    if (mapped == null) return;
-    ref.read(ocrUsageNotifierProvider.notifier).setTierOptimistic(mapped);
   }
 
   Widget _planTile(
