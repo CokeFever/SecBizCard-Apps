@@ -106,6 +106,8 @@
   "drawerLogout": "登出",
   "drawerConfirmLogoutTitle": "確認登出",
   "drawerConfirmLogoutBody": "確定要登出嗎?",
+  "drawerLogoutWipeNote": "登出會將你的聯絡人與個人資料從這台裝置移除。請先確認已備份 —— 重新登入後可從 Google Drive 還原。",
+  "drawerLogoutUnbackedWarning": "⚠️ 你有尚未備份的變更。登出會將聯絡人與個人資料從這台裝置移除,這些變更將會遺失。要先備份到 Google Drive 嗎?",
   "commonCancel": "取消",
   "drawerLinkPrivacy": "隱私權",
   "drawerLinkTerms": "條款",

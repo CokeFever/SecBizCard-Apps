@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/profile/data/profile_repository.dart';
 import 'package:secbizcard/features/contacts/data/ocr_usage_provider.dart';
+import 'package:secbizcard/core/services/backup_reminder_service.dart';
 import 'package:secbizcard/core/config/theme_controller.dart';
 import 'package:secbizcard/core/widgets/profile_avatar.dart';
 
@@ -184,11 +185,21 @@ class AppDrawer extends ConsumerWidget {
             title: Text(l10n.drawerLogout,
                 style: const TextStyle(color: Colors.red)),
             onTap: () async {
+              // Sign-out wipes local data (privacy: no per-account scoping on
+              // the device DB). Warn accordingly, and more strongly when there
+              // are unbacked-up changes that would be lost.
+              final hasUnbacked = await ref
+                  .read(backupReminderServiceProvider)
+                  .shouldRemind(hasData: true);
+              if (!context.mounted) return;
+              final body = hasUnbacked
+                  ? l10n.drawerLogoutUnbackedWarning
+                  : '${l10n.drawerConfirmLogoutBody}\n\n${l10n.drawerLogoutWipeNote}';
               final shouldLogout = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
                   title: Text(l10n.drawerConfirmLogoutTitle),
-                  content: Text(l10n.drawerConfirmLogoutBody),
+                  content: Text(body),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),

@@ -292,6 +292,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get drawerConfirmLogoutBody => 'ログアウトしてもよろしいですか?';
 
   @override
+  String get drawerLogoutWipeNote =>
+      'ログアウトすると、連絡先とプロフィールがこの端末から削除されます。先にバックアップしてください —— 再ログイン後に Google ドライブから復元できます。';
+
+  @override
+  String get drawerLogoutUnbackedWarning =>
+      '⚠️ バックアップされていない変更があります。ログアウトすると連絡先とプロフィールがこの端末から削除され、その変更は失われます。先に Google ドライブへバックアップしますか?';
+
+  @override
   String get commonCancel => 'キャンセル';
 
   @override
