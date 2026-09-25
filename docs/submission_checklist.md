@@ -75,6 +75,22 @@
 
 ---
 
+## F-1. 送審後被打回的修正紀錄
+
+- **2026-09-25 Apple Guideline 3.1.2(訂閱)** — App Version Rejected(自動檢查):
+  「offers auto-renewable subscriptions... but does not include a functional link
+  to the Terms of Use (EULA) in the app metadata that appears on the App Store
+  product page.」
+  - **修法(不需新 build,只改 metadata):**
+    1. 在 **App Store 版本頁 → Description** 結尾,每個上架語言都加兩行:
+       `Terms of Use (EULA): https://ixo.app/eula`
+       `Privacy Policy: https://ixo.app/privacy`
+    2. (雙保險)App Information → License Agreement (EULA) 填 `https://ixo.app/eula`。
+    3. 存檔後按 **Resubmit to App Review**。訂閱三項(group/Pro/Plus)是
+       Ready for Review,會跟著一起重審,不用動。
+  - 已線上驗證 EULA + Privacy 連結皆可通、內容含訂閱條款。
+  - ⚠️ **常設規則**:提供訂閱的 app,**Description 必須含 EULA 連結**。以後每次送審沿用。
+
 ## G. 下一版再處理(不擋 1.6.1 送審)
 
 Play Console「Create production release」頁看到的增強項,這版先不動,下個版本評估:
