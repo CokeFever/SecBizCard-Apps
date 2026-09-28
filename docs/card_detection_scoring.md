@@ -246,3 +246,47 @@ sensitivity tweaks of that rule DON'T need another release. That's how
   its weight as Layer 1 while you're there.
 - Never chase a Play Console optimization score by loosening a rule; correctness
   and the regression suite come first.
+
+
+---
+
+## 未來評估:名片簿 / 多卡同框(multi-card in one frame)
+
+**狀態:已知問題,暫緩處理。目前只用掃描畫面的引導提示緩解(`scanCardSingleTip`
+「一次辨識一張名片」)。** OCR 設計上就是「一次一張」,以下為日後若要真正處理時的
+背景與方向。
+
+### 觀察到的實例(2026-09-27,OCR feedback)
+使用者對著**名片簿透明頁**拍照,一次框到三張名片(飛瑞 / 工研院 / acer),彼此
+排列整齊又隔著反光膜。結果:
+
+- OpenCV / Vision 的單卡邊緣偵測**找不到清楚的單張卡邊界 → 判定 fallback →
+  改用整張影像送 OCR**。
+- 三張卡的文字全進 parser,`parseLines` 是「文字袋」模型(僅用 box 高度做名字
+  prominence、用 top 排序電話,不做空間區域過濾),於是拼出**跨卡的錯誤結果**:
+  name 取自第 2 張、title/company 取自第 3 張、email 取自第 1 張。
+- `detectionScore` 0.90、`detectionFallback:false` → 信心分數還很高,使用者不會
+  被警告。這是「高信心但錯」的危險情況。
+
+### 為什麼「用瞄準框過濾框外文字」現在做不到(調查結論)
+1. **座標系對不上**:瞄準框(`_normalizedGuideRect`)是螢幕/預覽座標;OCR 的 box
+   是「OCR 輸入影像」像素座標,而該影像是相機全解析度照片經 OpenCV 透視校正裁切
+   +可能旋轉後的產物。中間**沒有保存 預覽→影像 的轉換**,校正後瞄準框在輸出影像
+   裡失去意義。
+2. **shared-key 路徑的 box x/y 實際是 0**:後端 `recognizeCard` 未回傳位置,
+   client `?? 0` 補零(見 `cloud_vision_recognizer.dart` `recognizeWithSharedKey`)。
+   多數使用者走 shared-key,位置資訊根本不存在。own-key Vision 與 ML Kit 內部
+   有真實 x/y,但 ML Kit 的 rawOcrLines 在離開 `ocr_service.dart` 前被丟棄。
+
+### 日後若要處理的候選方向(依成本)
+- **A(推薦・需碰 native):偵測失敗時,退回「裁切到瞄準框」而非「整張影像」。**
+  在原始影像上用 guideRect 硬裁一刀再送 OCR,幾何上強制只留框內那張,繞開座標系/
+  後端/ML Kit 三個坑。要改 Android `OpenCVProcessor.kt` 的 fallback 分支,iOS 端
+  (`AppDelegate.swift` Vision)對應補上。
+- **B(純 Dart・輕):多卡防呆提示。** OCR 後若出現多卡訊號(≥2 個 email、≥2 個
+  統一編號、≥2 個公司名),不硬給結果,改提示「偵測到多張名片,請對準單張重拍」。
+  治標,但擋掉「高信心卻錯」。
+- **C(重):真多卡切割** —— 偵測 N 張卡 → 各自 crop → 產出 N 筆聯絡人。體驗最好、
+  工程最重。目前明確不做。
+
+負責線:sbc-card-ocr(偵測/裁切)+ sbc-flutter-mobile(native)。
