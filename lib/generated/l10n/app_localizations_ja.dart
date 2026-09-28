@@ -607,6 +607,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get scanCardBackgroundTip => '無地で模様のない背景をご使用ください';
 
   @override
+  String get scanCardSingleTip => '一度に 1 枚ずつスキャンしてください';
+
+  @override
   String get ocrFeedbackPromptTitle => '認識結果はうまくいきませんでしたか？';
 
   @override

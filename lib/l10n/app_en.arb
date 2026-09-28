@@ -434,6 +434,10 @@
   "@scanCardBackgroundTip": {
     "description": "Secondary tip: a plain background improves card edge detection"
   },
+  "scanCardSingleTip": "Scan one card at a time",
+  "@scanCardSingleTip": {
+    "description": "Secondary tip: the OCR recognizes a single business card per capture; avoid photographing multiple cards (e.g. a card binder page) in one frame"
+  },
   "ocrFeedbackPromptTitle": "Was the recognition off?",
   "@ocrFeedbackPromptTitle": {
     "description": "Title of the dialog shown on Back when a result looks poor"

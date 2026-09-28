@@ -602,6 +602,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get scanCardBackgroundTip => '请放在单色、无花纹的背景上';
 
   @override
+  String get scanCardSingleTip => '一次识别一张名片';
+
+  @override
   String get ocrFeedbackPromptTitle => '识别结果不理想吗？';
 
   @override
@@ -2130,6 +2133,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get scanCardBackgroundTip => '請放在單色、無花紋的背景上';
+
+  @override
+  String get scanCardSingleTip => '一次辨識一張名片';
 
   @override
   String get ocrFeedbackPromptTitle => '辨識結果不理想嗎？';

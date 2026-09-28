@@ -1201,6 +1201,12 @@ abstract class AppLocalizations {
   /// **'Use a plain, non-patterned background'**
   String get scanCardBackgroundTip;
 
+  /// Secondary tip: the OCR recognizes a single business card per capture; avoid photographing multiple cards (e.g. a card binder page) in one frame
+  ///
+  /// In en, this message translates to:
+  /// **'Scan one card at a time'**
+  String get scanCardSingleTip;
+
   /// Title of the dialog shown on Back when a result looks poor
   ///
   /// In en, this message translates to:
