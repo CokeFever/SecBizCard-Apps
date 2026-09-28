@@ -48,6 +48,7 @@
   "ocrSharedKeyUsage": "Cloud Vision · 共享密钥本月 {used}/{cap}",
   "scanCardHint": "将名片放入框内",
   "scanCardBackgroundTip": "请放在单色、无花纹的背景上",
+  "scanCardSingleTip": "一次识别一张名片",
   "ocrFeedbackPromptTitle": "识别结果不理想吗？",
   "ocrFeedbackPromptBody": "如果这张名片识别得不好，你可以协助我们改善。我们会退还你本月的一次扫描次数。",
   "ocrFeedbackReport": "协助改善",

@@ -622,6 +622,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scanCardBackgroundTip => 'Use a plain, non-patterned background';
 
   @override
+  String get scanCardSingleTip => 'Scan one card at a time';
+
+  @override
   String get ocrFeedbackPromptTitle => 'Was the recognition off?';
 
   @override

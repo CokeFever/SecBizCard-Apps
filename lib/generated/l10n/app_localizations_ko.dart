@@ -608,6 +608,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get scanCardBackgroundTip => '무늬 없는 단색 배경을 사용하세요';
 
   @override
+  String get scanCardSingleTip => '한 번에 명함 한 장씩 스캔하세요';
+
+  @override
   String get ocrFeedbackPromptTitle => '인식 결과가 좋지 않았나요?';
 
   @override

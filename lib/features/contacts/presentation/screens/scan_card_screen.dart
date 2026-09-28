@@ -724,13 +724,34 @@ class _ScanCardScreenState extends ConsumerState<ScanCardScreen>
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          const Icon(Icons.credit_card,
+                              size: 13, color: Colors.white70),
+                          const SizedBox(width: 5),
+                          Flexible(
+                            child: Text(
+                              AppLocalizations.of(context)!.scanCardSingleTip,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  color: Colors.white70, fontSize: 12),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
                           const Icon(Icons.wallpaper_outlined,
                               size: 13, color: Colors.white70),
                           const SizedBox(width: 5),
-                          Text(
-                            AppLocalizations.of(context)!.scanCardBackgroundTip,
-                            style: const TextStyle(
-                                color: Colors.white70, fontSize: 12),
+                          Flexible(
+                            child: Text(
+                              AppLocalizations.of(context)!
+                                  .scanCardBackgroundTip,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  color: Colors.white70, fontSize: 12),
+                            ),
                           ),
                         ],
                       ),

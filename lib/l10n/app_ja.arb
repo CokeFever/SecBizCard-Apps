@@ -48,6 +48,7 @@
   "ocrSharedKeyUsage": "Cloud Vision · 共有キー 今月 {used}/{cap}",
   "scanCardHint": "名刺を枠内に収めてください",
   "scanCardBackgroundTip": "無地で模様のない背景をご使用ください",
+  "scanCardSingleTip": "一度に 1 枚ずつスキャンしてください",
   "ocrFeedbackPromptTitle": "認識結果はうまくいきませんでしたか？",
   "ocrFeedbackPromptBody": "この名刺がうまく認識されなかった場合、改善にご協力いただけます。今月のスキャン回数を 1 回分お返しします。",
   "ocrFeedbackReport": "改善に協力",
