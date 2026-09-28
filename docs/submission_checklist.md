@@ -1,4 +1,4 @@
-# 送審檢查清單(1.6.1 訂閱版 — 已送審,等候審核結果)
+# 送審檢查清單(1.6.1 訂閱版 — ✅ 雙平台已過審上架 2026-09-25)
 
 雙平台(App Store + Google Play)送審前的完整待辦。`[x]` 已完成、`[ ]` 待辦、
 `[~]` 進行中/部分完成。相關細節見同目錄其他 docs。
@@ -64,14 +64,19 @@
 
 ---
 
-## 目前最關鍵的未完成項(依重要性)
+## ✅ 結果:1.6.1 雙平台已過審上架(2026-09-25)
 
-1. **iOS 取消→到期降級的乾淨驗證**(E) —— 最大風險,金流相關。
-2. **乾淨 sandbox 完整跑一輪最新 build**(E)—— 之前一直被幽靈訂閱干擾。
-3. **確認隱私標籤已 Publish/Submit**(iOS App Privacy 要 Publish、Play Data safety 要 Submit 才生效)。
+- **App Store**:1.6.1 通過審核、上架。訂閱 group「SecBizCard Cloud Scans」+
+  Plus + Pro 一併通過。(先被 3.1.2 打回一次,補 Description 的 EULA 連結後 resubmit 過關 — 見 F-1。)
+- **Google Play**:1.6.1 production release 通過、上架。訂閱一併通過。
 
-隱私標籤(iOS + Android,含 Purchases + Device ID)已勾選完成。
-法務/文案/素材/程式功能大致就緒;剩下主要是**測試驗證**。
+「新增付費訂閱(Plus/Pro)」這條線正式落地。
+
+### 上架後仍建議的觀察項(非阻擋,正式環境驗證)
+1. **iOS 取消→到期降級**:sandbox 沒完整驗過,現在可在正式環境用真實訂閱
+   (可退款)觀察一次到期降級是否正確回 Basic。後端邏輯與 Android 共用、已驗證。
+2. **正式環境的購買/還原**在真機各跑一次,確認 live 產品抓取與 RevenueCat 對接正常。
+3. 留意頭幾天的 RevenueCat / webhook log 有無異常事件。
 
 ---
 
@@ -90,9 +95,8 @@
        Ready for Review,會跟著一起重審,不用動。
   - 已線上驗證 EULA + Privacy 連結皆可通、內容含訂閱條款。
   - ⚠️ **常設規則**:提供訂閱的 app,**Description 必須含 EULA 連結**。以後每次送審沿用。
-  - **狀態:已修並 resubmit**(2026-09-25) — 5 語 Description 皆加
-    `Terms of Use (EULA): https://ixo.app/eula` + `Privacy Policy: https://ixo.app/privacy`,
-    已 Resubmit to App Review,等候結果。無需新 build。
+  - **狀態:✅ 已解決** — 5 語 Description 加 EULA + Privacy 連結後 resubmit,
+    審核通過上架(無需新 build)。
 
 ## G. 下一版再處理(不擋 1.6.1 送審)
 
