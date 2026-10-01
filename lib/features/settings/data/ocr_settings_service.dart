@@ -23,6 +23,10 @@ class OcrSettingsService {
 
   static const _kApiKey = 'ocr_cloud_vision_api_key';
 
+  /// The secure-storage key name for the BYOK Cloud Vision key. Exposed so
+  /// sign-out tests can assert it is cleared.
+  static const String kApiKeyForTest = _kApiKey;
+
   /// Shared-key free scans per user per month (mirrors the backend cap). Shown
   /// in the "using shared quota" description.
   static const int sharedPerUserMonthly = 5;

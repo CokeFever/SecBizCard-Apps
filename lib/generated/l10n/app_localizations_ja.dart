@@ -300,6 +300,14 @@ class AppLocalizationsJa extends AppLocalizations {
       '⚠️ バックアップされていない変更があります。ログアウトすると連絡先とプロフィールがこの端末から削除され、その変更は失われます。先に Google ドライブへバックアップしますか?';
 
   @override
+  String get drawerLogoutMagicWordNote =>
+      'マジックワードもこの端末から消去されます。マジックワードのバックアップを復元するには再入力が必要です。';
+
+  @override
+  String get drawerLogoutMagicWordNoteStrong =>
+      '⚠️ マジックワードがこの端末から消去されます。マジックワードのバックアップはそれでしか復元できません。ログアウト前に覚えているか確認してください。';
+
+  @override
   String get commonCancel => 'キャンセル';
 
   @override
@@ -1106,6 +1114,86 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get backupNoBackupFound => 'バックアップが見つかりません';
+
+  @override
+  String get magicWordSectionTitle => 'バックアップのマジックワード';
+
+  @override
+  String get magicWordSectionDescNone =>
+      '既定ではこのアプリだけが導出できる鍵でバックアップを暗号化します。自分のマジックワードを設定すると、あなただけがバックアップを開けます。私たちにも開けません。';
+
+  @override
+  String get magicWordSectionDescSet =>
+      'マジックワードが設定されています。バックアップはそれでしか開けません。大切に保管してください。秘書にバックアップを開いてほしい場合のみ共有してください。';
+
+  @override
+  String get magicWordSetButton => 'マジックワードを設定';
+
+  @override
+  String get magicWordChangeButton => 'マジックワードを変更';
+
+  @override
+  String get magicWordDialogTitle => 'マジックワードを設定';
+
+  @override
+  String get magicWordEnterLabel => 'マジックワード';
+
+  @override
+  String get magicWordConfirmLabel => 'マジックワードを再入力';
+
+  @override
+  String get magicWordRule =>
+      '8〜16文字。スペースと記号も使えます。大文字・小文字を区別します。ヒント:自分だけが覚えられる短いフレーズを。';
+
+  @override
+  String get magicWordMismatch => '2つの入力が一致しません。';
+
+  @override
+  String get magicWordLengthError => 'マジックワードは8〜16文字にしてください。';
+
+  @override
+  String get magicWordForgetWarning =>
+      '重要:このマジックワードを知っているのはあなただけです。忘れるとバックアップは二度と復元できず、私たちも復旧をお手伝いできません。';
+
+  @override
+  String get magicWordReveal => '表示';
+
+  @override
+  String get magicWordHide => '非表示';
+
+  @override
+  String get magicWordCopy => 'コピー';
+
+  @override
+  String get magicWordCopied => 'マジックワードをクリップボードにコピーしました。';
+
+  @override
+  String get magicWordSavedRepacking => 'マジックワードを保存し、バックアップを再梱包しています...';
+
+  @override
+  String get magicWordSaved => 'マジックワードを保存しました。バックアップはこれでロックされました。';
+
+  @override
+  String magicWordRepackFailed(String error) {
+    return 'バックアップの再梱包に失敗しました:$error';
+  }
+
+  @override
+  String get magicWordStoredLabel => 'あなたのマジックワード';
+
+  @override
+  String get magicWordRestorePromptTitle => 'マジックワードを入力';
+
+  @override
+  String get magicWordRestorePromptBody =>
+      'このバックアップはマジックワードでロックされています。復元するには入力してください。(大文字・小文字を区別します。)';
+
+  @override
+  String get magicWordRestoreWrong =>
+      'マジックワードが違います。これではバックアップを開けません。確認してもう一度お試しください。';
+
+  @override
+  String get commonContinue => '続ける';
 
   @override
   String vcardErrorReadingFile(String error) {

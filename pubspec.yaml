@@ -17,6 +17,11 @@ dependencies:
   google_sign_in: ^6.2.1 
   sign_in_with_apple: ^6.1.4
   crypto: ^3.0.6
+  cryptography: 2.7.0 # pinned: PBKDF2-HMAC-SHA256 + AES-256-GCM for the magic-word
+                      # backup codec (web-alignable params). Keep in sync with the
+                      # Web Crypto impl per docs/web_portal_and_e2e_encryption_plan.md.
+  unorm_dart: ^0.3.0 # Unicode NFC normalization for the magic word (trim + NFC),
+                      # so a word that "looks the same" always derives the same key.
   flutter_riverpod: ^2.5.1
   go_router: ^14.0.0
   google_fonts: ^6.2.1

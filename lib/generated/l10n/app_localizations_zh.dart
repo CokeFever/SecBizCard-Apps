@@ -299,6 +299,13 @@ class AppLocalizationsZh extends AppLocalizations {
       '⚠️ 你有尚未备份的更改。登出会将联系人与个人资料从这台设备移除,这些更改将会丢失。要先备份到 Google Drive 吗?';
 
   @override
+  String get drawerLogoutMagicWordNote => '你的密语也会从这台设备清除。还原密语备份时需要重新输入。';
+
+  @override
+  String get drawerLogoutMagicWordNoteStrong =>
+      '⚠️ 你的密语会从这台设备清除。密语备份“只能”用密语还原——登出前请确认你记得它。';
+
+  @override
   String get commonCancel => '取消';
 
   @override
@@ -1095,6 +1102,83 @@ class AppLocalizationsZh extends AppLocalizations {
   String get backupNoBackupFound => '未找到备份';
 
   @override
+  String get magicWordSectionTitle => '备份密语（Magic Word）';
+
+  @override
+  String get magicWordSectionDescNone =>
+      '默认会用只有这个 App 能推导的密钥加密你的备份。设定自己的密语后,只有你能解开备份——连我们都不行。';
+
+  @override
+  String get magicWordSectionDescSet =>
+      '已设定密语。你的备份只能用它解开。请妥善保管——只有想让秘书打开你的备份时才分享给对方。';
+
+  @override
+  String get magicWordSetButton => '设定密语';
+
+  @override
+  String get magicWordChangeButton => '更改密语';
+
+  @override
+  String get magicWordDialogTitle => '设定你的密语';
+
+  @override
+  String get magicWordEnterLabel => '密语';
+
+  @override
+  String get magicWordConfirmLabel => '再次输入密语';
+
+  @override
+  String get magicWordRule => '8 到 16 个字符。可用空格与符号。区分大小写。小提示:用一句只有你记得住的话。';
+
+  @override
+  String get magicWordMismatch => '两次输入不一致。';
+
+  @override
+  String get magicWordLengthError => '密语必须为 8 到 16 个字符。';
+
+  @override
+  String get magicWordForgetWarning =>
+      '重要:只有你会知道这个密语。一旦忘记,你的备份将“永远”无法还原,我们也无法协助你找回。';
+
+  @override
+  String get magicWordReveal => '显示';
+
+  @override
+  String get magicWordHide => '隐藏';
+
+  @override
+  String get magicWordCopy => '复制';
+
+  @override
+  String get magicWordCopied => '已复制密语到剪贴板。';
+
+  @override
+  String get magicWordSavedRepacking => '正在保存密语并重新打包你的备份...';
+
+  @override
+  String get magicWordSaved => '密语已保存。你的备份现在以它锁定。';
+
+  @override
+  String magicWordRepackFailed(String error) {
+    return '无法重新打包备份:$error';
+  }
+
+  @override
+  String get magicWordStoredLabel => '你的密语';
+
+  @override
+  String get magicWordRestorePromptTitle => '输入密语';
+
+  @override
+  String get magicWordRestorePromptBody => '这份备份以密语锁定。请输入以还原。(区分大小写。)';
+
+  @override
+  String get magicWordRestoreWrong => '密语错误——无法用它解开这份备份。请确认后再试一次。';
+
+  @override
+  String get commonContinue => '继续';
+
+  @override
   String vcardErrorReadingFile(String error) {
     return '读取文件时出错：$error';
   }
@@ -1830,6 +1914,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String get drawerLogoutUnbackedWarning =>
       '⚠️ 你有尚未備份的變更。登出會將聯絡人與個人資料從這台裝置移除,這些變更將會遺失。要先備份到 Google Drive 嗎?';
+
+  @override
+  String get drawerLogoutMagicWordNote => '你的密語也會從這台裝置清除。還原密語備份時需要重新輸入。';
+
+  @override
+  String get drawerLogoutMagicWordNoteStrong =>
+      '⚠️ 你的密語會從這台裝置清除。密語備份「只能」用密語還原——登出前請確認你記得它。';
 
   @override
   String get commonCancel => '取消';
@@ -2626,6 +2717,83 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get backupNoBackupFound => '找不到備份';
+
+  @override
+  String get magicWordSectionTitle => '備份密語（Magic Word）';
+
+  @override
+  String get magicWordSectionDescNone =>
+      '預設會用只有這個 App 能推導的金鑰加密你的備份。設定自己的密語後,只有你能解開備份——連我們都不行。';
+
+  @override
+  String get magicWordSectionDescSet =>
+      '已設定密語。你的備份只能用它解開。請妥善保管——只有想讓秘書開啟你的備份時才分享給對方。';
+
+  @override
+  String get magicWordSetButton => '設定密語';
+
+  @override
+  String get magicWordChangeButton => '變更密語';
+
+  @override
+  String get magicWordDialogTitle => '設定你的密語';
+
+  @override
+  String get magicWordEnterLabel => '密語';
+
+  @override
+  String get magicWordConfirmLabel => '再次輸入密語';
+
+  @override
+  String get magicWordRule => '8 到 16 個字元。可用空格與符號。區分大小寫。小提示:用一句只有你記得住的話。';
+
+  @override
+  String get magicWordMismatch => '兩次輸入不一致。';
+
+  @override
+  String get magicWordLengthError => '密語必須為 8 到 16 個字元。';
+
+  @override
+  String get magicWordForgetWarning =>
+      '重要:只有你會知道這個密語。一旦忘記,你的備份將「永遠」無法還原,我們也無法協助你救回。';
+
+  @override
+  String get magicWordReveal => '顯示';
+
+  @override
+  String get magicWordHide => '隱藏';
+
+  @override
+  String get magicWordCopy => '複製';
+
+  @override
+  String get magicWordCopied => '已複製密語到剪貼簿。';
+
+  @override
+  String get magicWordSavedRepacking => '正在儲存密語並重新打包你的備份...';
+
+  @override
+  String get magicWordSaved => '密語已儲存。你的備份現在以它鎖定。';
+
+  @override
+  String magicWordRepackFailed(String error) {
+    return '無法重新打包備份:$error';
+  }
+
+  @override
+  String get magicWordStoredLabel => '你的密語';
+
+  @override
+  String get magicWordRestorePromptTitle => '輸入密語';
+
+  @override
+  String get magicWordRestorePromptBody => '這份備份以密語鎖定。請輸入以還原。(區分大小寫。)';
+
+  @override
+  String get magicWordRestoreWrong => '密語錯誤——無法用它解開這份備份。請確認後再試一次。';
+
+  @override
+  String get commonContinue => '繼續';
 
   @override
   String vcardErrorReadingFile(String error) {

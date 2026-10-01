@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mockito/mockito.dart';
@@ -17,9 +17,37 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
+import 'package:secbizcard/features/settings/data/magic_word_service.dart';
 import 'package:secbizcard/features/storage/data/drive_repository.dart';
 import 'package:secbizcard/core/errors/failure.dart';
+import 'package:secbizcard/core/services/backup_codec.dart';
 import '../test_mocks.mocks.dart';
+
+/// In-memory [MagicWordService] so tests never touch flutter_secure_storage.
+/// Overrides the public methods with a plain field.
+class FakeMagicWordService extends MagicWordService {
+  FakeMagicWordService() : super(const FlutterSecureStorage());
+  String? _word;
+
+  @override
+  Future<String?> getMagicWord() async => _word;
+
+  @override
+  Future<void> setMagicWord(String value) async {
+    final normalized = MagicWordService.normalize(value);
+    if (normalized.length < MagicWordService.minLength ||
+        normalized.length > MagicWordService.maxLength) {
+      throw const MagicWordValidationFailure();
+    }
+    _word = normalized;
+  }
+
+  @override
+  Future<void> clearMagicWord() async => _word = null;
+
+  @override
+  Future<bool> hasMagicWord() async => _word != null;
+}
 
 // Helper for PathProvider mock
 class FakePathProviderPlatform extends PathProviderPlatform {
@@ -127,6 +155,7 @@ void main() {
   late MockAuthRepository mockAuthRepo;
   late MockContactsRepository mockContactsRepo;
   late FakeDriveRepository fakeDriveRepo; // Changed to Fake
+  late FakeMagicWordService fakeMagicWord;
   late ProviderContainer container;
 
   setUp(() async {
@@ -151,12 +180,14 @@ void main() {
     mockAuthRepo = MockAuthRepository();
     mockContactsRepo = MockContactsRepository();
     fakeDriveRepo = FakeDriveRepository();
+    fakeMagicWord = FakeMagicWordService();
 
     container = ProviderContainer(
       overrides: [
         authRepositoryProvider.overrideWithValue(mockAuthRepo),
         contactsRepositoryProvider.overrideWithValue(mockContactsRepo),
         driveRepositoryProvider.overrideWithValue(fakeDriveRepo),
+        magicWordServiceProvider.overrideWithValue(fakeMagicWord),
       ],
     );
   });
@@ -201,20 +232,16 @@ void main() {
       // Verify Upload Happened in Fake
       expect(fakeDriveRepo._files.containsKey('new_file_id'), true);
 
-      // 4. Verify Content (Encryption & Data)
+      // 4. Verify Content (Encryption & Data). No magic word set → the new
+      // file is SBCB v2 encMode=uid.
       final bytes = fakeDriveRepo._files['new_file_id']!;
+      expect(bytes.sublist(0, 4), BackupCodec.magic);
 
-      // Attempt Decrypt
-      final keyString = uid.padRight(32, '*').substring(0, 32);
-      final key = encrypt.Key.fromUtf8(keyString);
-      final iv = encrypt.IV(Uint8List.fromList(bytes.sublist(0, 16)));
-      final encryptedBytes = bytes.sublist(16);
+      final codec = BackupCodec();
+      final header = codec.readHeaderOrNull(bytes);
+      expect(header!.encMode, BackupCodec.encModeUid);
 
-      final encrypter = encrypt.Encrypter(encrypt.AES(key));
-      final decrypted = encrypter.decryptBytes(
-        encrypt.Encrypted(Uint8List.fromList(encryptedBytes)),
-        iv: iv,
-      );
+      final decrypted = await codec.decrypt(bytes, uid: uid);
 
       // Unzip
       final archive = ZipDecoder().decodeBytes(decrypted);
@@ -227,8 +254,37 @@ void main() {
       expect(data['settings']['theme_mode'], 'dark');
     });
 
-    test('restore() should decrypt, unzip and save data', () async {
-      // 1. Create a valid encrypted backup file in memory
+    test('backup() with a magic word set writes magicword mode', () async {
+      await fakeMagicWord.setMagicWord('correcthorse');
+      when(
+        mockContactsRepo.getSavedContacts(),
+      ).thenAnswer((_) async => right([]));
+
+      final service = container.read(backupServiceProvider);
+      final result = await service.backup();
+      expect(result.isRight(), true,
+          reason: result.fold((l) => l.message, (r) => ''));
+
+      final bytes = fakeDriveRepo._files['new_file_id']!;
+      final codec = BackupCodec();
+      final header = codec.readHeaderOrNull(bytes);
+      expect(header!.encMode, BackupCodec.encModeMagicWord);
+
+      // Only the magic word decrypts it; uid can no longer read it.
+      final decrypted =
+          await codec.decrypt(bytes, uid: uid, magicWord: 'correcthorse');
+      expect(ZipDecoder().decodeBytes(decrypted).findFile('data.json'),
+          isNotNull);
+      expect(
+        () => codec.decrypt(bytes, uid: uid, magicWord: 'wrongword123'),
+        throwsA(isA<WrongMagicWordFailure>()),
+      );
+    });
+
+    test('restore() should decrypt a LEGACY v1 file, unzip and save data',
+        () async {
+      // 1. Create a valid LEGACY (v1: IV(16)+CTR, uid-as-key) backup in memory.
+      // This exercises the forever-supported legacy decrypt path.
       final archive = Archive();
       final backupData = {
         'contacts': [
@@ -283,6 +339,86 @@ void main() {
       // Verify Settings Restoration
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getString('theme_mode'), 'light');
+    });
+
+    test('restore() of a magicword file requires the stored word', () async {
+      // Build a magicword SBCB v2 file and seed it as the cloud backup.
+      final zipArchive = Archive();
+      final backupData = {
+        'contacts': const <dynamic>[],
+        'settings': {'theme_mode': 'dark'},
+      };
+      final jsonBytes = utf8.encode(jsonEncode(backupData));
+      zipArchive.addFile(
+          ArchiveFile('data.json', jsonBytes.length, jsonBytes));
+      final zipBytes = ZipEncoder().encode(zipArchive);
+
+      final codec = BackupCodec();
+      final mwBytes = await codec.encryptNew(
+        zipBytes,
+        encMode: BackupCodec.encModeMagicWord,
+        keySource: 'correcthorse',
+      );
+      fakeDriveRepo._files['backup_id'] = mwBytes;
+      when(mockContactsRepo.getSavedContacts())
+          .thenAnswer((_) async => right([]));
+
+      final service = container.read(backupServiceProvider);
+
+      // No local magic word → clean WrongMagicWordFailure, never a uid fallback.
+      final noWord = await service.restore();
+      expect(noWord.isLeft(), true);
+      noWord.fold((l) => expect(l, isA<WrongMagicWordFailure>()),
+          (_) => fail('should fail without the word'));
+
+      // With the correct local word → restores.
+      await fakeMagicWord.setMagicWord('correcthorse');
+      final withWord = await service.restore();
+      expect(withWord.isRight(), true,
+          reason: withWord.fold((l) => l.message, (r) => ''));
+    });
+
+    test('setMagicWordAndRepack repacks a uid file into magicword mode',
+        () async {
+      // Seed an existing uid-mode SBCB v2 cloud file (what backup writes today).
+      final zipArchive = Archive();
+      final jsonBytes = utf8.encode(jsonEncode({
+        'contacts': const <dynamic>[],
+        'settings': {'theme_mode': 'dark'},
+      }));
+      zipArchive.addFile(
+          ArchiveFile('data.json', jsonBytes.length, jsonBytes));
+      final zipBytes = ZipEncoder().encode(zipArchive);
+
+      final codec = BackupCodec();
+      final uidBytes = await codec.encryptNew(
+        zipBytes,
+        encMode: BackupCodec.encModeUid,
+        keySource: uid,
+      );
+      // searchBackupFile returns 'backup_id' when _files has that key; download
+      // returns _files['backup_id'].
+      fakeDriveRepo._files['backup_id'] = uidBytes;
+
+      final service = container.read(backupServiceProvider);
+      final result = await service.setMagicWordAndRepack('mysecretword');
+      expect(result.isRight(), true,
+          reason: result.fold((l) => l.message, (r) => ''));
+
+      // The word is now stored, and the re-uploaded file is magicword mode.
+      expect(await fakeMagicWord.getMagicWord(), 'mysecretword');
+      final repacked = fakeDriveRepo._files['new_file_id']!;
+      final header = codec.readHeaderOrNull(repacked);
+      expect(header!.encMode, BackupCodec.encModeMagicWord);
+
+      // Only the word decrypts the repacked file; uid can no longer read it.
+      final out =
+          await codec.decrypt(repacked, uid: uid, magicWord: 'mysecretword');
+      expect(ZipDecoder().decodeBytes(out).findFile('data.json'), isNotNull);
+      expect(
+        () => codec.decrypt(repacked, uid: uid, magicWord: 'notitatall'),
+        throwsA(isA<WrongMagicWordFailure>()),
+      );
     });
   });
 }

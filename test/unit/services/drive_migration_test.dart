@@ -10,15 +10,30 @@ import 'package:mockito/mockito.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:secbizcard/core/errors/failure.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:secbizcard/core/services/backup_service.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
 import 'package:secbizcard/features/profile/data/profile_repository.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
+import 'package:secbizcard/features/settings/data/magic_word_service.dart';
 import 'package:secbizcard/features/storage/data/drive_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../test_mocks.mocks.dart';
+
+/// In-memory MagicWordService so these migration tests never touch
+/// flutter_secure_storage. Defaults to "no magic word" (uid mode), matching the
+/// legacy backups these tests fabricate.
+class _NoMagicWordService extends MagicWordService {
+  _NoMagicWordService() : super(const FlutterSecureStorage());
+  @override
+  Future<String?> getMagicWord() async => null;
+  @override
+  Future<bool> hasMagicWord() async => false;
+  @override
+  Future<void> clearMagicWord() async {}
+}
 
 const String _uid = 'test_uid_12345';
 const String _backupFileName = 'ixo_app_backup.zip';
@@ -190,6 +205,7 @@ void main() {
         contactsRepositoryProvider.overrideWithValue(mockContactsRepo),
         profileRepositoryProvider.overrideWithValue(mockProfileRepo),
         driveRepositoryProvider.overrideWithValue(fakeDrive),
+        magicWordServiceProvider.overrideWithValue(_NoMagicWordService()),
       ],
     );
   });

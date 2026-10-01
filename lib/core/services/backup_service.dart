@@ -1,19 +1,19 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:archive/archive_io.dart';
-import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:secbizcard/core/errors/failure.dart';
+import 'package:secbizcard/core/services/backup_codec.dart';
 import 'package:secbizcard/core/services/backup_reminder_service.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
 import 'package:secbizcard/features/profile/data/profile_repository.dart';
+import 'package:secbizcard/features/settings/data/magic_word_service.dart';
 import 'package:secbizcard/features/storage/data/drive_repository.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'package:secbizcard/core/config/theme_controller.dart';
@@ -31,6 +31,7 @@ BackupService backupService(Ref ref) {
     ref.read(contactsRepositoryProvider),
     ref.read(authRepositoryProvider),
     ref.read(profileRepositoryProvider),
+    ref.read(magicWordServiceProvider),
   );
 }
 
@@ -40,8 +41,20 @@ class BackupService {
   final ContactsRepository _contactsRepo;
   final AuthRepository _authRepo;
   final ProfileRepository _profileRepo;
+  final MagicWordService _magicWordService;
 
-  BackupService(this._ref, this._driveRepo, this._contactsRepo, this._authRepo, this._profileRepo);
+  BackupService(
+    this._ref,
+    this._driveRepo,
+    this._contactsRepo,
+    this._authRepo,
+    this._profileRepo,
+    this._magicWordService,
+  );
+
+  /// Codec that owns the backup byte layout (SBCB v2 + legacy v1). Shared so a
+  /// single instance's secure RNG is reused.
+  final BackupCodec _codec = BackupCodec();
 
   static const String _backupFileName = 'ixo_app_backup.zip';
   static const String _settingsKeyTheme = 'theme_mode'; // Example setting key
@@ -214,17 +227,10 @@ class BackupService {
       final zipEncoder = ZipEncoder();
       final encodedZip = zipEncoder.encode(archive);
 
-      // 4. Encrypt
-      // Use UID padded to 32 chars as key
-      final keyString = uid.padRight(32, '*').substring(0, 32);
-      final key = encrypt.Key.fromUtf8(keyString);
-      final iv = encrypt.IV.fromLength(16); // Random IV
-      final encrypter = encrypt.Encrypter(encrypt.AES(key));
-
-      final encrypted = encrypter.encryptBytes(encodedZip, iv: iv);
-
-      // Combine IV + Encrypted Data
-      final finalBytes = iv.bytes + encrypted.bytes;
+      // 4. Encrypt — ALWAYS write the new "SBCB" v2 format. The encMode is
+      // chosen from the locally stored magic word: `magicword` when the user
+      // has set one (then uid can no longer decrypt it), otherwise `uid`.
+      final finalBytes = await _encryptForUpload(encodedZip, uid: uid);
 
       // 5. Save Temp File
       final tempDir = await getTemporaryDirectory();
@@ -273,6 +279,27 @@ class BackupService {
     }
   }
 
+  /// Encrypts [zipBytes] into the new SBCB v2 format, choosing encMode from the
+  /// locally stored magic word (magicword if present, else uid).
+  Future<List<int>> _encryptForUpload(
+    List<int> zipBytes, {
+    required String uid,
+  }) async {
+    final magicWord = await _magicWordService.getMagicWord();
+    if (magicWord != null) {
+      return _codec.encryptNew(
+        zipBytes,
+        encMode: BackupCodec.encModeMagicWord,
+        keySource: magicWord,
+      );
+    }
+    return _codec.encryptNew(
+      zipBytes,
+      encMode: BackupCodec.encModeUid,
+      keySource: uid,
+    );
+  }
+
   /// Deletes the legacy root `ixo_app_backup.zip` ONLY after confirming the
   /// new-home file (inside [folderId]) is present and reads back as a
   /// non-empty, decryptable ZIP. Any failure aborts without deleting root.
@@ -298,7 +325,9 @@ class BackupService {
       final bytes = downloadResult.match((l) => null, (b) => b);
       if (bytes == null || bytes.isEmpty) return; // unreadable; keep root
 
-      if (!_isReadableBackup(bytes, uid)) return; // not decryptable; keep root
+      if (!await _isReadableBackup(bytes, uid)) {
+        return; // not decryptable; keep root
+      }
 
       // New home confirmed readable → safe to delete the legacy root file.
       await _driveRepo.deleteFile(rootId);
@@ -307,24 +336,16 @@ class BackupService {
     }
   }
 
-  /// Verifies [bytes] decrypt (IV + AES/UID) and unzip into an archive that
-  /// contains data.json. Returns false on any failure.
-  bool _isReadableBackup(List<int> bytes, String uid) {
+  /// Verifies [bytes] decrypt (via the codec, routing legacy/uid/magicword)
+  /// and unzip into an archive that contains data.json. Uses the locally stored
+  /// magic word when the file is in magicword mode. Returns false on any
+  /// failure.
+  Future<bool> _isReadableBackup(List<int> bytes, String uid) async {
     try {
-      if (bytes.length <= 16) return false;
-      final ivBytes = bytes.sublist(0, 16);
-      final contentBytes = bytes.sublist(16);
-
-      final keyString = uid.padRight(32, '*').substring(0, 32);
-      final key = encrypt.Key.fromUtf8(keyString);
-      final iv = encrypt.IV(Uint8List.fromList(ivBytes));
-      final encrypter = encrypt.Encrypter(encrypt.AES(key));
-
-      final decryptedBytes = encrypter.decryptBytes(
-        encrypt.Encrypted(Uint8List.fromList(contentBytes)),
-        iv: iv,
-      );
-
+      if (bytes.isEmpty) return false;
+      final magicWord = await _magicWordService.getMagicWord();
+      final decryptedBytes =
+          await _codec.decrypt(bytes, uid: uid, magicWord: magicWord);
       final archive = ZipDecoder().decodeBytes(decryptedBytes);
       return archive.findFile('data.json') != null;
     } catch (_) {
@@ -379,21 +400,26 @@ class BackupService {
 
         final downloadResult = await _driveRepo.downloadFile(fileId);
         return downloadResult.fold((l) => left(l), (bytes) async {
-          // 2. Decrypt
+          // 2. Decrypt — route by file format via the codec:
+          //  - legacy v1 (no SBCB) → uid + AES-CTR;
+          //  - v2 encMode=uid → PBKDF2(uid) + GCM;
+          //  - v2 encMode=magicword → PBKDF2(magic word) + GCM, NEVER uid.
+          // A magicword file with a wrong/absent local word surfaces cleanly as
+          // WrongMagicWordFailure (no uid fallback, no garbage).
+          final List<int> decryptedBytes;
           try {
-            final ivBytes = bytes.sublist(0, 16);
-            final contentBytes = bytes.sublist(16);
+            final magicWord = await _magicWordService.getMagicWord();
+            decryptedBytes =
+                await _codec.decrypt(bytes, uid: uid, magicWord: magicWord);
+          } on WrongMagicWordFailure catch (e) {
+            return left(e);
+          } on BackupFormatFailure catch (e) {
+            return left(e);
+          } catch (e) {
+            return left(GeneralFailure('Decryption failed: $e'));
+          }
 
-            final keyString = uid.padRight(32, '*').substring(0, 32);
-            final key = encrypt.Key.fromUtf8(keyString);
-            final iv = encrypt.IV(Uint8List.fromList(ivBytes));
-            final encrypter = encrypt.Encrypter(encrypt.AES(key));
-
-            final decryptedBytes = encrypter.decryptBytes(
-              encrypt.Encrypted(Uint8List.fromList(contentBytes)),
-              iv: iv,
-            );
-
+          try {
             // 3. Unzip
             final archive = ZipDecoder().decodeBytes(decryptedBytes);
 
@@ -505,5 +531,129 @@ class BackupService {
     } catch (e) {
       return left(GeneralFailure('Restore failed: $e'));
     }
+  }
+
+  /// Sets/changes the backup magic word and immediately repacks the cloud
+  /// backup into magicword mode.
+  ///
+  /// Flow (per docs/web_portal_and_e2e_encryption_plan.md "設定 / 變更 magic
+  /// word 的流程"):
+  ///  1. Validate + store [word] via [MagicWordService.setMagicWord]
+  ///     (throws [MagicWordValidationFailure] if length is not 8-16).
+  ///  2. If a cloud backup exists, download it and decrypt with the OLD key
+  ///     (the previous magic word if one was set, else uid) — routed by the
+  ///     file's own header.
+  ///  3. Re-encrypt that same ZIP with the NEW magic word and write it back to
+  ///     the SecBizCard folder (update-in-place), so the cloud file is now
+  ///     magicword mode and uid can no longer decrypt it.
+  ///
+  /// If no cloud backup exists yet, the word is still stored and the next
+  /// normal [backup] will write magicword mode. On a decryption/upload failure
+  /// the new word is rolled back to the previous value so the user is never
+  /// left with "stored a word that doesn't match the cloud file".
+  Future<Either<Failure, void>> setMagicWordAndRepack(String word) async {
+    final user = _authRepo.getCurrentUser();
+    if (user == null) return left(const AuthFailure('No user logged in'));
+    final uid = user.uid;
+
+    // Capture the OLD word (if any) so we can decrypt the existing cloud file.
+    final String? oldWord;
+    try {
+      oldWord = await _magicWordService.getMagicWord();
+    } catch (e) {
+      return left(GeneralFailure('Could not read current magic word: $e'));
+    }
+
+    // 1. Validate + store the new word.
+    try {
+      await _magicWordService.setMagicWord(word);
+    } on MagicWordValidationFailure catch (e) {
+      return left(e);
+    } catch (e) {
+      return left(GeneralFailure('Could not store magic word: $e'));
+    }
+
+    try {
+      // 2. Find the current cloud backup (new home first, then root).
+      final folderId = await _resolveSecBizCardFolderId();
+      String? fileId;
+      if (folderId != null) {
+        final newHome = await _driveRepo.searchBackupFile(
+          _backupFileName,
+          parentFolderId: folderId,
+        );
+        fileId = newHome.match((l) => null, (r) => r);
+      }
+      if (fileId == null) {
+        final rootSearch = await _driveRepo.searchBackupFile(_backupFileName);
+        fileId = rootSearch.match((l) => null, (r) => r);
+      }
+
+      // No cloud backup to repack — the stored word takes effect on next backup.
+      if (fileId == null) return right(null);
+
+      final downloadResult = await _driveRepo.downloadFile(fileId);
+      final bytes = downloadResult.match((l) => null, (b) => b);
+      if (bytes == null || bytes.isEmpty) {
+        return right(null); // nothing readable to repack; next backup handles it
+      }
+
+      // Decrypt with the OLD key (previous word if set, else uid), routed by
+      // the file's own header.
+      final zipBytes = await _codec.decrypt(
+        bytes,
+        uid: uid,
+        magicWord: oldWord,
+      );
+
+      // 3. Re-encrypt with the NEW magic word (now the stored value) and write
+      // back in place.
+      final repacked = await _codec.encryptNew(
+        zipBytes,
+        encMode: BackupCodec.encModeMagicWord,
+        keySource: await _magicWordService.getMagicWord() ?? word,
+      );
+
+      final tempDir = await getTemporaryDirectory();
+      final tempFile = File('${tempDir.path}/$_backupFileName');
+      await tempFile.writeAsBytes(repacked);
+
+      final uploadResult = await _driveRepo.uploadBackup(
+        tempFile,
+        _backupFileName,
+        existingFileId: fileId,
+        parentFolderId: folderId,
+      );
+
+      return uploadResult.fold(
+        (l) async {
+          await _rollbackMagicWord(oldWord);
+          return left(l);
+        },
+        (_) async {
+          try {
+            await BackupReminderService().markBackedUp();
+          } catch (_) {/* non-critical */}
+          return right(null);
+        },
+      );
+    } catch (e) {
+      // Decrypt/repack failed → roll the word back so the stored value always
+      // matches what can actually decrypt the cloud file.
+      await _rollbackMagicWord(oldWord);
+      return left(GeneralFailure('Repack failed: $e'));
+    }
+  }
+
+  /// Restores the magic word to [oldWord] (or clears it when null) after a
+  /// failed repack. Best-effort.
+  Future<void> _rollbackMagicWord(String? oldWord) async {
+    try {
+      if (oldWord == null) {
+        await _magicWordService.clearMagicWord();
+      } else {
+        await _magicWordService.setMagicWord(oldWord);
+      }
+    } catch (_) {/* best-effort rollback */}
   }
 }

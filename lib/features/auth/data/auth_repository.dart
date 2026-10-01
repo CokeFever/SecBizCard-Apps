@@ -16,6 +16,8 @@ import 'package:secbizcard/core/errors/failure.dart';
 import 'package:secbizcard/core/services/backup_reminder_service.dart';
 import 'package:secbizcard/features/profile/data/profile_repository.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
+import 'package:secbizcard/features/settings/data/magic_word_service.dart';
+import 'package:secbizcard/features/settings/data/ocr_settings_service.dart';
 
 part 'auth_repository.g.dart';
 
@@ -332,6 +334,23 @@ class AuthRepository {
       await BackupReminderService().clear();
     } catch (e) {
       if (kDebugMode) debugPrint('[Auth] backup-reminder clear on sign-out failed: $e');
+    }
+    // Clear the BYO Cloud Vision key from secure storage so the next account on
+    // this device doesn't inherit the previous user's key. (Previously this
+    // leaked — sign-out only wiped the contacts DB.) Fault-isolated: a secure
+    // storage error must never abort the rest of logout.
+    try {
+      await OcrSettingsService(buildSecureStorage()).clearApiKey();
+    } catch (e) {
+      if (kDebugMode) debugPrint('[Auth] BYOK clear on sign-out failed: $e');
+    }
+    // Clear the backup magic word too. Combined with the DB wipe this means a
+    // signed-out device holds no magicword — restoring a magicword backup after
+    // sign-in requires re-entering the word (see the layered logout warning).
+    try {
+      await MagicWordService(buildSecureStorage()).clearMagicWord();
+    } catch (e) {
+      if (kDebugMode) debugPrint('[Auth] magic-word clear on sign-out failed: $e');
     }
   }
 

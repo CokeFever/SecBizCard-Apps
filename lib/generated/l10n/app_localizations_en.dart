@@ -308,6 +308,14 @@ class AppLocalizationsEn extends AppLocalizations {
       '⚠️ You have changes that aren\'t backed up yet. Signing out will remove your contacts and profile from this device and those changes will be lost. Back up to Google Drive first?';
 
   @override
+  String get drawerLogoutMagicWordNote =>
+      'Your magic word will also be cleared from this device. You\'ll need to re-enter it to restore a magic-word backup.';
+
+  @override
+  String get drawerLogoutMagicWordNoteStrong =>
+      '⚠️ Your magic word will be cleared from this device. A magic-word backup can ONLY be restored with it — make sure you remember it before signing out.';
+
+  @override
   String get commonCancel => 'Cancel';
 
   @override
@@ -1132,6 +1140,88 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backupNoBackupFound => 'No Backup Found';
+
+  @override
+  String get magicWordSectionTitle => 'Backup Password (Magic Word)';
+
+  @override
+  String get magicWordSectionDescNone =>
+      'By default your backup is encrypted with a key only this app can derive. Set your own magic word and only you can unlock the backup — not even us.';
+
+  @override
+  String get magicWordSectionDescSet =>
+      'A magic word is set. Your backup can only be unlocked with it. Keep it safe — share it with a secretary only if you want them to open your backup.';
+
+  @override
+  String get magicWordSetButton => 'Set Magic Word';
+
+  @override
+  String get magicWordChangeButton => 'Change Magic Word';
+
+  @override
+  String get magicWordDialogTitle => 'Set Your Magic Word';
+
+  @override
+  String get magicWordEnterLabel => 'Magic word';
+
+  @override
+  String get magicWordConfirmLabel => 'Re-enter magic word';
+
+  @override
+  String get magicWordRule =>
+      '8 to 16 characters. Spaces and symbols allowed. Case-sensitive. Tip: use a short phrase only you would remember.';
+
+  @override
+  String get magicWordMismatch => 'The two entries do not match.';
+
+  @override
+  String get magicWordLengthError => 'Magic word must be 8 to 16 characters.';
+
+  @override
+  String get magicWordForgetWarning =>
+      'Important: only you will know this magic word. If you forget it, your backup can NEVER be restored and we cannot help you recover it.';
+
+  @override
+  String get magicWordReveal => 'Show';
+
+  @override
+  String get magicWordHide => 'Hide';
+
+  @override
+  String get magicWordCopy => 'Copy';
+
+  @override
+  String get magicWordCopied => 'Magic word copied to clipboard.';
+
+  @override
+  String get magicWordSavedRepacking =>
+      'Saving magic word and re-packing your backup...';
+
+  @override
+  String get magicWordSaved =>
+      'Magic word saved. Your backup is now locked with it.';
+
+  @override
+  String magicWordRepackFailed(String error) {
+    return 'Could not re-pack the backup: $error';
+  }
+
+  @override
+  String get magicWordStoredLabel => 'Your magic word';
+
+  @override
+  String get magicWordRestorePromptTitle => 'Enter Magic Word';
+
+  @override
+  String get magicWordRestorePromptBody =>
+      'This backup is locked with a magic word. Enter it to restore. (Case-sensitive.)';
+
+  @override
+  String get magicWordRestoreWrong =>
+      'Wrong magic word — this backup cannot be unlocked with it. Check it and try again.';
+
+  @override
+  String get commonContinue => 'Continue';
 
   @override
   String vcardErrorReadingFile(String error) {
