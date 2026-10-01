@@ -110,12 +110,78 @@ class DriveRepository {
     }
   }
 
-  Future<Either<Failure, String?>> searchBackupFile(String fileName) async {
+  /// Finds the app-created, non-trashed `SecBizCard` folder directly under
+  /// My Drive root, creating it if it does not exist, and returns its id.
+  ///
+  /// Uses the `drive.file` scope only: the folder is created by the app, so the
+  /// scope is sufficient and does NOT need widening. The returned id should be
+  /// persisted and reused so the folder's share relationships stay stable
+  /// (sharing lives on the folder, not the backup file inside it).
+  Future<Either<Failure, String>> ensureSecBizCardFolder() async {
     try {
       final apiResult = await _getDriveApi();
       return apiResult.fold((l) => left(l), (driveApi) async {
         final fileList = await driveApi.files.list(
-          q: "name = '$fileName' and trashed = false",
+          q: "name = 'SecBizCard' and "
+              "mimeType = 'application/vnd.google-apps.folder' and "
+              "'root' in parents and trashed = false",
+          $fields: 'files(id, name)',
+        );
+
+        final files = fileList.files;
+        if (files != null && files.isNotEmpty && files.first.id != null) {
+          return right(files.first.id!);
+        }
+
+        final folder = drive.File()
+          ..name = 'SecBizCard'
+          ..mimeType = 'application/vnd.google-apps.folder'
+          ..parents = ['root'];
+        final created = await driveApi.files.create(folder);
+        if (created.id == null) {
+          return left(const ServerFailure('Failed to create SecBizCard folder'));
+        }
+        return right(created.id!);
+      });
+    } catch (e) {
+      return left(ServerFailure(e.toString()));
+    }
+  }
+
+  /// Returns true if a non-trashed file/folder with [fileId] still exists.
+  Future<Either<Failure, bool>> fileExists(String fileId) async {
+    try {
+      final apiResult = await _getDriveApi();
+      return apiResult.fold((l) => left(l), (driveApi) async {
+        try {
+          final file = await driveApi.files.get(
+            fileId,
+            $fields: 'id, trashed',
+          ) as drive.File;
+          return right(file.trashed != true);
+        } catch (_) {
+          // 404 / not found → treat as "does not exist" rather than an error.
+          return right(false);
+        }
+      });
+    } catch (e) {
+      return left(ServerFailure(e.toString()));
+    }
+  }
+
+  Future<Either<Failure, String?>> searchBackupFile(
+    String fileName, {
+    String? parentFolderId,
+  }) async {
+    try {
+      final apiResult = await _getDriveApi();
+      return apiResult.fold((l) => left(l), (driveApi) async {
+        var q = "name = '$fileName' and trashed = false";
+        if (parentFolderId != null) {
+          q += " and '$parentFolderId' in parents";
+        }
+        final fileList = await driveApi.files.list(
+          q: q,
           $fields: 'files(id, name, createdTime, modifiedTime, size)',
         );
 
@@ -140,13 +206,18 @@ class DriveRepository {
   /// device clock), so it is reliable for "is the cloud copy newer than this
   /// device?" checks across multiple devices.
   Future<Either<Failure, DateTime?>> getBackupModifiedTime(
-    String fileName,
-  ) async {
+    String fileName, {
+    String? parentFolderId,
+  }) async {
     try {
       final apiResult = await _getDriveApi();
       return apiResult.fold((l) => left(l), (driveApi) async {
+        var q = "name = '$fileName' and trashed = false";
+        if (parentFolderId != null) {
+          q += " and '$parentFolderId' in parents";
+        }
         final fileList = await driveApi.files.list(
-          q: "name = '$fileName' and trashed = false",
+          q: q,
           $fields: 'files(id, name, modifiedTime)',
         );
 
@@ -188,15 +259,17 @@ class DriveRepository {
     File file,
     String fileName, {
     String? existingFileId,
+    String? parentFolderId,
   }) async {
     try {
       final apiResult = await _getDriveApi();
       return apiResult.fold((l) => left(l), (driveApi) async {
-        final driveFile = drive.File()..name = fileName;
         final media = drive.Media(file.openRead(), await file.length());
 
         if (existingFileId != null) {
-          // Update
+          // Update in place: do NOT change parents, so the file keeps living in
+          // the SecBizCard folder and preserves its share relationships.
+          final driveFile = drive.File()..name = fileName;
           final updated = await driveApi.files.update(
             driveFile,
             existingFileId,
@@ -204,7 +277,11 @@ class DriveRepository {
           );
           return right(updated.id!);
         } else {
-          // Create
+          // Create. When a parentFolderId is given, create inside that folder.
+          final driveFile = drive.File()..name = fileName;
+          if (parentFolderId != null) {
+            driveFile.parents = [parentFolderId];
+          }
           final created = await driveApi.files.create(
             driveFile,
             uploadMedia: media,

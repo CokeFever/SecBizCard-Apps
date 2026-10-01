@@ -38,8 +38,22 @@ class FakePathProviderPlatform extends PathProviderPlatform {
 class FakeDriveRepository implements DriveRepository {
   final Map<String, List<int>> _files = {};
 
+  // Fixed id handed back by ensureSecBizCardFolder()/fileExists().
+  static const String folderId = 'secbizcard_folder_id';
+
   @override
-  Future<Either<Failure, String?>> searchBackupFile(String fileName) async {
+  Future<Either<Failure, String>> ensureSecBizCardFolder() async =>
+      right(folderId);
+
+  @override
+  Future<Either<Failure, bool>> fileExists(String fileId) async =>
+      right(fileId == folderId);
+
+  @override
+  Future<Either<Failure, String?>> searchBackupFile(
+    String fileName, {
+    String? parentFolderId,
+  }) async {
     // Return a fake ID if file exists in our map or if testing restore
     if (_files.containsKey(fileName)) {
       return right(fileName); // Use name as ID for simplicity
@@ -75,6 +89,7 @@ class FakeDriveRepository implements DriveRepository {
     File file,
     String fileName, {
     String? existingFileId,
+    String? parentFolderId,
   }) async {
     final bytes = await file.readAsBytes();
     // Simulate upload by saving to map
@@ -90,8 +105,9 @@ class FakeDriveRepository implements DriveRepository {
 
   @override
   Future<Either<Failure, DateTime?>> getBackupModifiedTime(
-    String fileName,
-  ) async {
+    String fileName, {
+    String? parentFolderId,
+  }) async {
     // No cloud modified-time in this fake → null ("no cloud backup"), which
     // keeps the existing backup tests' behavior unchanged.
     return right(null);
