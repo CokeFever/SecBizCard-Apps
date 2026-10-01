@@ -356,7 +356,7 @@
   "magicWordCopy": "复制",
   "magicWordCopied": "已复制密语到剪贴板。",
   "magicWordSavedRepacking": "正在保存密语并重新打包你的备份...",
-  "magicWordSaved": "密语已保存。你的备份现在以它锁定。",
+  "magicWordSaved": "密语已设定，云端备份已用新密语重新打包。",
   "magicWordRepackFailed": "无法重新打包备份:{error}",
   "magicWordStoredLabel": "你的密语",
   "magicWordRestorePromptTitle": "输入密语",

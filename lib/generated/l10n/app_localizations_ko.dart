@@ -1172,7 +1172,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get magicWordSavedRepacking => '매직 워드를 저장하고 백업을 다시 포장하는 중...';
 
   @override
-  String get magicWordSaved => '매직 워드를 저장했습니다. 백업이 이제 그것으로 잠겼습니다.';
+  String get magicWordSaved => '매직 워드를 설정했습니다. 클라우드 백업을 새 워드로 다시 패킹했습니다.';
 
   @override
   String magicWordRepackFailed(String error) {

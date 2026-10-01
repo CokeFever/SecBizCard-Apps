@@ -2242,7 +2242,7 @@ abstract class AppLocalizations {
   /// No description provided for @magicWordSaved.
   ///
   /// In en, this message translates to:
-  /// **'Magic word saved. Your backup is now locked with it.'**
+  /// **'Magic word set. Your cloud backup has been re-packed with it.'**
   String get magicWordSaved;
 
   /// No description provided for @magicWordRepackFailed.
