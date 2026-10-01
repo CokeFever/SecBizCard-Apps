@@ -57,16 +57,40 @@ magic word 不是「對抗能拿到檔案的攻擊者的唯一防線」。**要�
 > (能取得 uid)還是能解開 magicword 檔 → 隱私承諾破功。uid 只用在「header 標記自己就是
 > uid 模式」的舊檔。這條是「乙模式=最強隱私」能成立的根本。
 
-### 備份檔 header(自描述,讓 app 新舊版 + web 都能正確解)
+### 備份檔格式(定案 2026-09-28 — app↔web 的二進位合約)
+
+**新格式檔案佈局**(magic word 功能上線後的新檔):
 ```
-version:  加密格式版本
-encMode:  "uid" | "magicword"
-kdf:      { algo, salt, iterations, ... }   // 僅 magicword 模式
+[4 bytes  magic = ASCII "SBCB"]
+[2 bytes  header 長度 (big-endian uint16)]
+[N bytes  JSON header (明文 UTF-8)]
+[12 bytes AES-GCM IV/nonce]
+[M bytes  AES-GCM 密文 + 16 bytes GCM tag]
 ```
-- salt 存 header(salt 非祕密),每份備份一個。
-- magicword 模式的 key = **KDF(magic word, salt)**,用加 salt 的 KDF(PBKDF2/scrypt/argon2id),
-  **不是裸 hash**(成本極低,避免弱密語+檔案萬一外流的最壞情況)。
-- app 與 web 端必須用**完全相同**的 KDF 參數與 AES 佈局,才能互解。
+JSON header(明文,因 version/mode/salt 本就非祕密):
+```json
+{ "version": 2, "encMode": "uid" | "magicword",
+  "kdf": { "algo": "PBKDF2-HMAC-SHA256", "iterations": 100000, "salt": "<base64, 16B>" } }
+```
+
+**舊格式(現況,version 1)**:`IV(16) + AES-CTR 密文`,**無 "SBCB" magic、無 header**。
+→ restore 時:檔頭不是 "SBCB" → 判定舊格式 → 用 uid + AES-CTR 舊邏輯解(永久保留)。
+
+**加密參數(定案)**:
+- **KDF = PBKDF2-HMAC-SHA256**,iterations **100,000**,salt **16 bytes**(每份隨機、存 header),
+  輸出 **32 bytes** 當 AES-256 key。選 PBKDF2 的理由:Dart `cryptography` 與瀏覽器原生
+  `Web Crypto` 都直接支援,app↔web 位元級對齊最容易(argon2/scrypt 純 JS 端較麻煩)。
+- **對稱加密 = AES-256-GCM**(新格式)。相較舊的 AES-CTR,GCM 有 **authentication tag**:
+  解密時同時驗證「金鑰正確 + 檔案未被竄改」。**magic word 輸錯會乾淨地解密失敗**(tag 驗證不過),
+  而不是解出一包垃圾 —— 這讓「乙模式不退 uid」的失敗判定很乾淨。
+- **key 來源**:
+  - `encMode=uid`:key = KDF(uid, salt)(新格式的 uid 模式也走 PBKDF2+GCM;與舊 version 1
+    的「uid 直接當 key + CTR」不同 —— 舊檔仍用舊邏輯解,新寫的 uid 檔用新邏輯)。
+  - `encMode=magicword`:key = KDF(magic word, salt)。
+- salt 非祕密,存 header。app 與 web 端必須用**完全相同**的 KDF 參數與 GCM 佈局才能互解。
+
+> 相容性方向:**新版 app 能讀舊檔(version 1 CTR + 新 version 2 GCM);但舊版 app 無法讀
+> 新格式**。使用者一旦用新版備份成新格式,就不能用舊版 app restore —— 預期行為,需心裡有數。
 
 ### magic word 規則(定案)
 - **長度 8–16。**
