@@ -420,5 +420,36 @@ void main() {
         throwsA(isA<WrongMagicWordFailure>()),
       );
     });
+
+    test(
+        'setMagicWordAndRepack writes an initial magicword backup when no cloud file exists',
+        () async {
+      // No cloud backup is seeded, so searchBackupFile returns null (fileId ==
+      // null). The method should still create a magicword-mode cloud file by
+      // running an immediate backup.
+      when(
+        mockContactsRepo.getSavedContacts(),
+      ).thenAnswer((_) async => right(<UserProfile>[]));
+
+      final service = container.read(backupServiceProvider);
+      final result = await service.setMagicWordAndRepack('mysecretword');
+      expect(result.isRight(), true,
+          reason: result.fold((l) => l.message, (r) => ''));
+
+      // The word is stored and a brand-new cloud file was written.
+      expect(await fakeMagicWord.getMagicWord(), 'mysecretword');
+      expect(fakeDriveRepo._files.containsKey('new_file_id'), true);
+
+      // The freshly written file is SBCB v2 magicword mode and only the word
+      // can decrypt it.
+      final codec = BackupCodec();
+      final written = fakeDriveRepo._files['new_file_id']!;
+      expect(written.sublist(0, 4), BackupCodec.magic);
+      final header = codec.readHeaderOrNull(written);
+      expect(header!.encMode, BackupCodec.encModeMagicWord);
+      final out =
+          await codec.decrypt(written, uid: uid, magicWord: 'mysecretword');
+      expect(ZipDecoder().decodeBytes(out).findFile('data.json'), isNotNull);
+    });
   });
 }

@@ -547,10 +547,11 @@ class BackupService {
   ///     the SecBizCard folder (update-in-place), so the cloud file is now
   ///     magicword mode and uid can no longer decrypt it.
   ///
-  /// If no cloud backup exists yet, the word is still stored and the next
-  /// normal [backup] will write magicword mode. On a decryption/upload failure
-  /// the new word is rolled back to the previous value so the user is never
-  /// left with "stored a word that doesn't match the cloud file".
+  /// If no cloud backup exists yet, the word is still stored and an immediate
+  /// [backup] (force: true) is run so the magicword-mode cloud file is created
+  /// right away. On a decryption/upload failure the new word is rolled back to
+  /// the previous value so the user is never left with "stored a word that
+  /// doesn't match the cloud file".
   Future<Either<Failure, void>> setMagicWordAndRepack(String word) async {
     final user = _authRepo.getCurrentUser();
     if (user == null) return left(const AuthFailure('No user logged in'));
@@ -589,8 +590,19 @@ class BackupService {
         fileId = rootSearch.match((l) => null, (r) => r);
       }
 
-      // No cloud backup to repack — the stored word takes effect on next backup.
-      if (fileId == null) return right(null);
+      // No cloud backup yet — the magic word is already stored, so run one
+      // backup now to create the magicword-mode cloud file right away rather
+      // than deferring to the next normal backup.
+      if (fileId == null) {
+        final backupResult = await backup(force: true);
+        return backupResult.fold(
+          (l) async {
+            await _rollbackMagicWord(oldWord);
+            return left(l);
+          },
+          (_) => right(null),
+        );
+      }
 
       final downloadResult = await _driveRepo.downloadFile(fileId);
       final bytes = downloadResult.match((l) => null, (b) => b);
