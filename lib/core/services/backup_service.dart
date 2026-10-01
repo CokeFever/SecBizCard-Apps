@@ -46,6 +46,34 @@ class BackupService {
   static const String _backupFileName = 'ixo_app_backup.zip';
   static const String _settingsKeyTheme = 'theme_mode'; // Example setting key
 
+  /// SharedPreferences key holding the stable Drive folderId of the
+  /// app-created `SecBizCard` folder (see FEAT-001 / plan "Google Drive 固定路徑").
+  static const String _prefsKeyFolderId = 'drive_secbizcard_folder_id';
+
+  /// Resolves the stable folderId of the `SecBizCard` Drive folder.
+  ///
+  /// Reuses a persisted id when it still resolves on Drive; otherwise
+  /// (missing/stale) re-finds or creates the folder, persists the id and
+  /// returns it. Prefers reuse over recreate so the folder's share
+  /// relationships stay stable. Returns null on failure (caller falls back to
+  /// the no-parent / root behavior).
+  Future<String?> _resolveSecBizCardFolderId() async {
+    final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getString(_prefsKeyFolderId);
+    if (stored != null && stored.isNotEmpty) {
+      final existsResult = await _driveRepo.fileExists(stored);
+      final stillExists = existsResult.match((_) => false, (ok) => ok);
+      if (stillExists) return stored;
+    }
+
+    final ensured = await _driveRepo.ensureSecBizCardFolder();
+    final id = ensured.match((_) => null, (id) => id);
+    if (id != null) {
+      await prefs.setString(_prefsKeyFolderId, id);
+    }
+    return id;
+  }
+
   /// Creates a backup and uploads to Drive.
   ///
   /// When [force] is false (default), the backup is aborted with a
@@ -60,15 +88,26 @@ class BackupService {
       if (user == null) return left(const AuthFailure('No user logged in'));
       final uid = user.uid;
 
+      // Resolve (and persist) the stable SecBizCard folderId up front so the
+      // conflict guard, upload target and migration all operate on the new
+      // home. null → folder could not be resolved; we degrade to the legacy
+      // root behavior so a backup is never blocked by a transient folder error.
+      final folderId = await _resolveSecBizCardFolderId();
+
       // Guard: don't let an older device silently overwrite a newer cloud
       // backup. Compare the Drive file's server-side modifiedTime against this
       // device's last local change. Uses the Drive server clock, so it is not
       // fooled by device clock differences. Best-effort: if the check itself
       // fails (network/permission), fall through and let the normal upload
       // path surface any real error rather than blocking a legitimate backup.
+      //
+      // Compare against the NEW-HOME (SecBizCard folder) file's modifiedTime so
+      // we never confuse a stale root file for the current backup.
       if (!force) {
-        final cloudTimeResult =
-            await _driveRepo.getBackupModifiedTime(_backupFileName);
+        final cloudTimeResult = await _driveRepo.getBackupModifiedTime(
+          _backupFileName,
+          parentFolderId: folderId,
+        );
         final cloudTime = cloudTimeResult.match((_) => null, (t) => t);
         if (cloudTime != null) {
           final localModified = await BackupReminderService().lastModifiedAt();
@@ -192,16 +231,33 @@ class BackupService {
       final tempFile = File('${tempDir.path}/$_backupFileName');
       await tempFile.writeAsBytes(finalBytes);
 
-      // 6. Upload
-      // Check existing
-      final searchResult = await _driveRepo.searchBackupFile(_backupFileName);
-      final existingId = searchResult.match((l) => null, (r) => r);
+      // 6. Upload (into the SecBizCard folder when resolvable)
+      // Look for an existing backup INSIDE the new-home folder; update it in
+      // place to preserve the folder-share relationship. If none exists in the
+      // folder yet, create a new file with parents:[folderId].
+      final newHomeSearch = await _driveRepo.searchBackupFile(
+        _backupFileName,
+        parentFolderId: folderId,
+      );
+      final existingNewHomeId = newHomeSearch.match((l) => null, (r) => r);
 
       final uploadResult = await _driveRepo.uploadBackup(
         tempFile,
         _backupFileName,
-        existingFileId: existingId,
+        existingFileId: existingNewHomeId,
+        parentFolderId: folderId,
       );
+
+      // 6.5 Migration: if a legacy root file exists but the new home did not
+      // yet have one, delete the root file ONLY AFTER the new-home upload
+      // succeeded AND the new-home file reads back as a non-empty, decryptable
+      // ZIP. Order must never reverse — a failed write/readback leaves root
+      // intact so no data is lost.
+      if (folderId != null &&
+          existingNewHomeId == null &&
+          uploadResult.isRight()) {
+        await _migrateDeleteRootIfSafe(uid: uid, folderId: folderId);
+      }
 
       if (uploadResult.isRight()) {
         // Data is now safely backed up — clears the "unbacked-up changes"
@@ -217,10 +273,79 @@ class BackupService {
     }
   }
 
-  /// Checks if a backup exists
+  /// Deletes the legacy root `ixo_app_backup.zip` ONLY after confirming the
+  /// new-home file (inside [folderId]) is present and reads back as a
+  /// non-empty, decryptable ZIP. Any failure aborts without deleting root.
+  Future<void> _migrateDeleteRootIfSafe({
+    required String uid,
+    required String folderId,
+  }) async {
+    try {
+      // Is there actually a legacy file in root to migrate?
+      final rootSearch = await _driveRepo.searchBackupFile(_backupFileName);
+      final rootId = rootSearch.match((l) => null, (r) => r);
+      if (rootId == null) return; // nothing to migrate
+
+      // Confirm the new-home file is readable before touching root.
+      final newHomeSearch = await _driveRepo.searchBackupFile(
+        _backupFileName,
+        parentFolderId: folderId,
+      );
+      final newHomeId = newHomeSearch.match((l) => null, (r) => r);
+      if (newHomeId == null) return; // new home not written; keep root
+
+      final downloadResult = await _driveRepo.downloadFile(newHomeId);
+      final bytes = downloadResult.match((l) => null, (b) => b);
+      if (bytes == null || bytes.isEmpty) return; // unreadable; keep root
+
+      if (!_isReadableBackup(bytes, uid)) return; // not decryptable; keep root
+
+      // New home confirmed readable → safe to delete the legacy root file.
+      await _driveRepo.deleteFile(rootId);
+    } catch (_) {
+      // Never let a migration cleanup failure break a successful backup.
+    }
+  }
+
+  /// Verifies [bytes] decrypt (IV + AES/UID) and unzip into an archive that
+  /// contains data.json. Returns false on any failure.
+  bool _isReadableBackup(List<int> bytes, String uid) {
+    try {
+      if (bytes.length <= 16) return false;
+      final ivBytes = bytes.sublist(0, 16);
+      final contentBytes = bytes.sublist(16);
+
+      final keyString = uid.padRight(32, '*').substring(0, 32);
+      final key = encrypt.Key.fromUtf8(keyString);
+      final iv = encrypt.IV(Uint8List.fromList(ivBytes));
+      final encrypter = encrypt.Encrypter(encrypt.AES(key));
+
+      final decryptedBytes = encrypter.decryptBytes(
+        encrypt.Encrypted(Uint8List.fromList(contentBytes)),
+        iv: iv,
+      );
+
+      final archive = ZipDecoder().decodeBytes(decryptedBytes);
+      return archive.findFile('data.json') != null;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Checks if a backup exists, preferring the SecBizCard folder and falling
+  /// back to the legacy root file.
   Future<bool> hasBackup() async {
-    final result = await _driveRepo.checkBackupExists(_backupFileName);
-    return result.fold((l) => false, (r) => r);
+    final folderId = await _resolveSecBizCardFolderId();
+    if (folderId != null) {
+      final newHome = await _driveRepo.searchBackupFile(
+        _backupFileName,
+        parentFolderId: folderId,
+      );
+      final newHomeId = newHome.match((l) => null, (r) => r);
+      if (newHomeId != null) return true;
+    }
+    final rootResult = await _driveRepo.checkBackupExists(_backupFileName);
+    return rootResult.fold((l) => false, (r) => r);
   }
 
   /// Restores from Drive
@@ -230,9 +355,24 @@ class BackupService {
       if (user == null) return left(const AuthFailure('No user logged in'));
       final uid = user.uid;
 
-      // 1. Search & Download
-      final searchResult = await _driveRepo.searchBackupFile(_backupFileName);
-      return searchResult.fold((l) => left(l), (fileId) async {
+      // 1. Search & Download — prefer SecBizCard/ixo_app_backup.zip (new home),
+      // then fall back to the legacy root ixo_app_backup.zip.
+      final folderId = await _resolveSecBizCardFolderId();
+
+      String? fileId;
+      if (folderId != null) {
+        final newHome = await _driveRepo.searchBackupFile(
+          _backupFileName,
+          parentFolderId: folderId,
+        );
+        fileId = newHome.match((l) => null, (r) => r);
+      }
+      if (fileId == null) {
+        final rootSearch = await _driveRepo.searchBackupFile(_backupFileName);
+        fileId = rootSearch.match((l) => null, (r) => r);
+      }
+
+      return Future<Either<Failure, void>>(() async {
         if (fileId == null) {
           return left(const GeneralFailure('No backup found'));
         }

@@ -2093,12 +2093,67 @@ class MockDriveRepository extends _i1.Mock implements _i18.DriveRepository {
       ) as _i7.Future<_i13.Either<_i14.Failure, void>>);
 
   @override
+  _i7.Future<_i13.Either<_i14.Failure, String>> ensureSecBizCardFolder() =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #ensureSecBizCardFolder,
+          [],
+        ),
+        returnValue: _i7.Future<_i13.Either<_i14.Failure, String>>.value(
+            _i10.dummyValue<_i13.Either<_i14.Failure, String>>(
+          this,
+          Invocation.method(
+            #ensureSecBizCardFolder,
+            [],
+          ),
+        )),
+        returnValueForMissingStub:
+            _i7.Future<_i13.Either<_i14.Failure, String>>.value(
+                _i10.dummyValue<_i13.Either<_i14.Failure, String>>(
+          this,
+          Invocation.method(
+            #ensureSecBizCardFolder,
+            [],
+          ),
+        )),
+      ) as _i7.Future<_i13.Either<_i14.Failure, String>>);
+
+  @override
+  _i7.Future<_i13.Either<_i14.Failure, bool>> fileExists(String? fileId) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #fileExists,
+          [fileId],
+        ),
+        returnValue: _i7.Future<_i13.Either<_i14.Failure, bool>>.value(
+            _i10.dummyValue<_i13.Either<_i14.Failure, bool>>(
+          this,
+          Invocation.method(
+            #fileExists,
+            [fileId],
+          ),
+        )),
+        returnValueForMissingStub:
+            _i7.Future<_i13.Either<_i14.Failure, bool>>.value(
+                _i10.dummyValue<_i13.Either<_i14.Failure, bool>>(
+          this,
+          Invocation.method(
+            #fileExists,
+            [fileId],
+          ),
+        )),
+      ) as _i7.Future<_i13.Either<_i14.Failure, bool>>);
+
+  @override
   _i7.Future<_i13.Either<_i14.Failure, String?>> searchBackupFile(
-          String? fileName) =>
+    String? fileName, {
+    String? parentFolderId,
+  }) =>
       (super.noSuchMethod(
         Invocation.method(
           #searchBackupFile,
           [fileName],
+          {#parentFolderId: parentFolderId},
         ),
         returnValue: _i7.Future<_i13.Either<_i14.Failure, String?>>.value(
             _i10.dummyValue<_i13.Either<_i14.Failure, String?>>(
@@ -2106,6 +2161,7 @@ class MockDriveRepository extends _i1.Mock implements _i18.DriveRepository {
           Invocation.method(
             #searchBackupFile,
             [fileName],
+            {#parentFolderId: parentFolderId},
           ),
         )),
         returnValueForMissingStub:
@@ -2115,6 +2171,7 @@ class MockDriveRepository extends _i1.Mock implements _i18.DriveRepository {
           Invocation.method(
             #searchBackupFile,
             [fileName],
+            {#parentFolderId: parentFolderId},
           ),
         )),
       ) as _i7.Future<_i13.Either<_i14.Failure, String?>>);
@@ -2148,11 +2205,14 @@ class MockDriveRepository extends _i1.Mock implements _i18.DriveRepository {
 
   @override
   _i7.Future<_i13.Either<_i14.Failure, DateTime?>> getBackupModifiedTime(
-          String? fileName) =>
+    String? fileName, {
+    String? parentFolderId,
+  }) =>
       (super.noSuchMethod(
         Invocation.method(
           #getBackupModifiedTime,
           [fileName],
+          {#parentFolderId: parentFolderId},
         ),
         returnValue: _i7.Future<_i13.Either<_i14.Failure, DateTime?>>.value(
             _i10.dummyValue<_i13.Either<_i14.Failure, DateTime?>>(
@@ -2160,6 +2220,7 @@ class MockDriveRepository extends _i1.Mock implements _i18.DriveRepository {
           Invocation.method(
             #getBackupModifiedTime,
             [fileName],
+            {#parentFolderId: parentFolderId},
           ),
         )),
         returnValueForMissingStub:
@@ -2169,6 +2230,7 @@ class MockDriveRepository extends _i1.Mock implements _i18.DriveRepository {
           Invocation.method(
             #getBackupModifiedTime,
             [fileName],
+            {#parentFolderId: parentFolderId},
           ),
         )),
       ) as _i7.Future<_i13.Either<_i14.Failure, DateTime?>>);
@@ -2205,6 +2267,7 @@ class MockDriveRepository extends _i1.Mock implements _i18.DriveRepository {
     _i19.File? file,
     String? fileName, {
     String? existingFileId,
+    String? parentFolderId,
   }) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -2213,7 +2276,10 @@ class MockDriveRepository extends _i1.Mock implements _i18.DriveRepository {
             file,
             fileName,
           ],
-          {#existingFileId: existingFileId},
+          {
+            #existingFileId: existingFileId,
+            #parentFolderId: parentFolderId,
+          },
         ),
         returnValue: _i7.Future<_i13.Either<_i14.Failure, String>>.value(
             _i10.dummyValue<_i13.Either<_i14.Failure, String>>(
@@ -2224,7 +2290,10 @@ class MockDriveRepository extends _i1.Mock implements _i18.DriveRepository {
               file,
               fileName,
             ],
-            {#existingFileId: existingFileId},
+            {
+              #existingFileId: existingFileId,
+              #parentFolderId: parentFolderId,
+            },
           ),
         )),
         returnValueForMissingStub:
@@ -2237,7 +2306,10 @@ class MockDriveRepository extends _i1.Mock implements _i18.DriveRepository {
               file,
               fileName,
             ],
-            {#existingFileId: existingFileId},
+            {
+              #existingFileId: existingFileId,
+              #parentFolderId: parentFolderId,
+            },
           ),
         )),
       ) as _i7.Future<_i13.Either<_i14.Failure, String>>);
