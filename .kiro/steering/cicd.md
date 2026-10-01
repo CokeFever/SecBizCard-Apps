@@ -72,3 +72,31 @@ and ci_post_clone.sh.
 Release with platform-prefixed tags, one per platform (usually same commit):
 `android/v<ver>` → Cloud Build → Play; `ios/v<ver>` → Xcode Cloud → App Store.
 Bare `v*` tags are retired. See .agent/workflows/deploy_release.md.
+
+## Provider deprecation notices — assessed, no action needed (as of 2026-10)
+
+Two Google emails arrived late Sep 2026. Both assessed as **not impacting** this
+project's current setup. Recorded so a future reader doesn't re-investigate.
+
+### Firebase Hosting on-demand site provisioning (effective 2026-10-15)
+- Change: NEW Firebase projects will no longer auto-create a default Hosting site;
+  it provisions on first deploy/use instead.
+- **Impact on us: none.** We deploy to the EXISTING project `ixo-app-secbizcard`
+  with an EXISTING default site (ixo.app). `firebase.json` hosting has no explicit
+  `site` field → uses the already-existing default site. The change only affects
+  pipelines that CREATE brand-new projects.
+- **Only relevant if** we ever spin up a brand-new Firebase project in CI — then
+  run `firebase hosting:sites:create <site-id> --project=<project-id>` BEFORE the
+  first `firebase deploy`, else it 404s. Does not apply to SecBizCard today.
+
+### Cloud Build worker VM release channels (regular becomes default 2027-03-28)
+- Change: Cloud Build adds release channels controlling the worker VM HOST env
+  (Debian/Docker versions). `regular` channel becomes the default 2027-03-28.
+- **Impact on us: negligible.** Our `cloudbuild.yaml` runs every step inside
+  pinned containers (`ghcr.io/cirruslabs/flutter:3.38.9`, `gcr.io/cloud-builders/gcloud`),
+  so all tool versions are container-controlled, not host-controlled. Host
+  Debian/Docker version doesn't affect a Flutter-build + fastlane-upload flow.
+- **Action: none now.** Optional: near 2027-03, run a test build on the `regular`
+  channel to confirm. Only pin to `stable` channel if a host-behavior issue ever
+  surfaces (unlikely given full containerization). Project flagged in the notice:
+  `ixo-app-secbizcard`.
