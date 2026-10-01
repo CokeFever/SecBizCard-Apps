@@ -643,6 +643,18 @@ abstract class AppLocalizations {
   /// **'⚠️ You have changes that aren\'t backed up yet. Signing out will remove your contacts and profile from this device and those changes will be lost. Back up to Google Drive first?'**
   String get drawerLogoutUnbackedWarning;
 
+  /// Appended logout note that the magic word is cleared
+  ///
+  /// In en, this message translates to:
+  /// **'Your magic word will also be cleared from this device. You\'ll need to re-enter it to restore a magic-word backup.'**
+  String get drawerLogoutMagicWordNote;
+
+  /// Stronger logout note when a magic word is set
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ Your magic word will be cleared from this device. A magic-word backup can ONLY be restored with it — make sure you remember it before signing out.'**
+  String get drawerLogoutMagicWordNoteStrong;
+
   /// No description provided for @commonCancel.
   ///
   /// In en, this message translates to:
@@ -2124,6 +2136,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No Backup Found'**
   String get backupNoBackupFound;
+
+  /// Section header for the optional backup magic word
+  ///
+  /// In en, this message translates to:
+  /// **'Backup Password (Magic Word)'**
+  String get magicWordSectionTitle;
+
+  /// Explains what setting a magic word does, privacy benefit
+  ///
+  /// In en, this message translates to:
+  /// **'By default your backup is encrypted with a key only this app can derive. Set your own magic word and only you can unlock the backup — not even us.'**
+  String get magicWordSectionDescNone;
+
+  /// Shown when a magic word is already set
+  ///
+  /// In en, this message translates to:
+  /// **'A magic word is set. Your backup can only be unlocked with it. Keep it safe — share it with a secretary only if you want them to open your backup.'**
+  String get magicWordSectionDescSet;
+
+  /// No description provided for @magicWordSetButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Magic Word'**
+  String get magicWordSetButton;
+
+  /// No description provided for @magicWordChangeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Magic Word'**
+  String get magicWordChangeButton;
+
+  /// No description provided for @magicWordDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Your Magic Word'**
+  String get magicWordDialogTitle;
+
+  /// No description provided for @magicWordEnterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Magic word'**
+  String get magicWordEnterLabel;
+
+  /// No description provided for @magicWordConfirmLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter magic word'**
+  String get magicWordConfirmLabel;
+
+  /// Composition rules for the magic word
+  ///
+  /// In en, this message translates to:
+  /// **'8 to 16 characters. Spaces and symbols allowed. Case-sensitive. Tip: use a short phrase only you would remember.'**
+  String get magicWordRule;
+
+  /// No description provided for @magicWordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The two entries do not match.'**
+  String get magicWordMismatch;
+
+  /// No description provided for @magicWordLengthError.
+  ///
+  /// In en, this message translates to:
+  /// **'Magic word must be 8 to 16 characters.'**
+  String get magicWordLengthError;
+
+  /// Strong irreversibility warning shown when setting a magic word
+  ///
+  /// In en, this message translates to:
+  /// **'Important: only you will know this magic word. If you forget it, your backup can NEVER be restored and we cannot help you recover it.'**
+  String get magicWordForgetWarning;
+
+  /// No description provided for @magicWordReveal.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get magicWordReveal;
+
+  /// No description provided for @magicWordHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get magicWordHide;
+
+  /// No description provided for @magicWordCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get magicWordCopy;
+
+  /// No description provided for @magicWordCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Magic word copied to clipboard.'**
+  String get magicWordCopied;
+
+  /// No description provided for @magicWordSavedRepacking.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving magic word and re-packing your backup...'**
+  String get magicWordSavedRepacking;
+
+  /// No description provided for @magicWordSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Magic word saved. Your backup is now locked with it.'**
+  String get magicWordSaved;
+
+  /// No description provided for @magicWordRepackFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not re-pack the backup: {error}'**
+  String magicWordRepackFailed(String error);
+
+  /// Label above the revealed stored magic word
+  ///
+  /// In en, this message translates to:
+  /// **'Your magic word'**
+  String get magicWordStoredLabel;
+
+  /// No description provided for @magicWordRestorePromptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Magic Word'**
+  String get magicWordRestorePromptTitle;
+
+  /// No description provided for @magicWordRestorePromptBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This backup is locked with a magic word. Enter it to restore. (Case-sensitive.)'**
+  String get magicWordRestorePromptBody;
+
+  /// Shown when restore fails due to a wrong magic word
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong magic word — this backup cannot be unlocked with it. Check it and try again.'**
+  String get magicWordRestoreWrong;
+
+  /// No description provided for @commonContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get commonContinue;
 
   /// No description provided for @vcardErrorReadingFile.
   ///

@@ -1,8 +1,11 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:mockito/mockito.dart';
 
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
+import 'package:secbizcard/features/settings/data/magic_word_service.dart';
+import 'package:secbizcard/features/settings/data/ocr_settings_service.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fire_auth;
 
 import 'package:fpdart/fpdart.dart';
@@ -31,6 +34,31 @@ class FakeRef extends Fake implements Ref {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  // Capture flutter_secure_storage calls so we can assert sign-out clears both
+  // the BYOK key and the magic word (both constructed directly in signOut).
+  const secureStorageChannel =
+      MethodChannel('plugins.it_nomads.com/flutter_secure_storage');
+  final deletedKeys = <String>[];
+
+  setUpAll(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(secureStorageChannel, (call) async {
+      if (call.method == 'delete') {
+        final key = (call.arguments as Map)['key'] as String?;
+        if (key != null) deletedKeys.add(key);
+      }
+      // Return null for read/write/delete; shape is fine for these calls.
+      return null;
+    });
+  });
+
+  tearDownAll(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(secureStorageChannel, null);
+  });
+
   late AuthRepository authRepo;
   late MockFirebaseAuth mockFirebaseAuth;
   late MockGoogleSignIn mockGoogleSignIn;
@@ -39,6 +67,7 @@ void main() {
 
   setUp(() {
     setupTestDummies();
+    deletedKeys.clear();
     mockFirebaseAuth = MockFirebaseAuth();
     mockGoogleSignIn = MockGoogleSignIn();
     mockProfileRepo = MockProfileRepository();
@@ -126,6 +155,10 @@ void main() {
 
       verify(mockFirebaseAuth.signOut()).called(1);
       verify(mockGoogleSignIn.signOut()).called(1);
+      // Sign-out must also clear the BYOK key AND the magic word from secure
+      // storage (each fault-isolated), so a shared device leaves no trace.
+      expect(deletedKeys, contains(OcrSettingsService.kApiKeyForTest));
+      expect(deletedKeys, contains(MagicWordService.kMagicWord));
     });
   });
 }

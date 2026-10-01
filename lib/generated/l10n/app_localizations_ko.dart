@@ -300,6 +300,14 @@ class AppLocalizationsKo extends AppLocalizations {
       '⚠️ 아직 백업되지 않은 변경사항이 있습니다. 로그아웃하면 연락처와 프로필이 이 기기에서 삭제되고 해당 변경사항이 사라집니다. 먼저 Google 드라이브에 백업하시겠습니까?';
 
   @override
+  String get drawerLogoutMagicWordNote =>
+      '매직 워드도 이 기기에서 삭제됩니다. 매직 워드 백업을 복원하려면 다시 입력해야 합니다.';
+
+  @override
+  String get drawerLogoutMagicWordNoteStrong =>
+      '⚠️ 매직 워드가 이 기기에서 삭제됩니다. 매직 워드 백업은 그것으로만 복원할 수 있습니다. 로그아웃 전에 기억하고 있는지 확인하세요.';
+
+  @override
   String get commonCancel => '취소';
 
   @override
@@ -1107,6 +1115,86 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get backupNoBackupFound => '백업을 찾을 수 없음';
+
+  @override
+  String get magicWordSectionTitle => '백업 비밀어(매직 워드)';
+
+  @override
+  String get magicWordSectionDescNone =>
+      '기본적으로 이 앱만 유도할 수 있는 키로 백업을 암호화합니다. 나만의 매직 워드를 설정하면 오직 당신만 백업을 열 수 있습니다. 저희도 열 수 없습니다.';
+
+  @override
+  String get magicWordSectionDescSet =>
+      '매직 워드가 설정되어 있습니다. 백업은 그것으로만 열 수 있습니다. 안전하게 보관하세요. 비서가 백업을 열기를 원할 때만 공유하세요.';
+
+  @override
+  String get magicWordSetButton => '매직 워드 설정';
+
+  @override
+  String get magicWordChangeButton => '매직 워드 변경';
+
+  @override
+  String get magicWordDialogTitle => '매직 워드 설정';
+
+  @override
+  String get magicWordEnterLabel => '매직 워드';
+
+  @override
+  String get magicWordConfirmLabel => '매직 워드 다시 입력';
+
+  @override
+  String get magicWordRule =>
+      '8~16자. 공백과 기호 사용 가능. 대소문자 구분. 팁: 당신만 기억할 수 있는 짧은 문구를 사용하세요.';
+
+  @override
+  String get magicWordMismatch => '두 입력이 일치하지 않습니다.';
+
+  @override
+  String get magicWordLengthError => '매직 워드는 8~16자여야 합니다.';
+
+  @override
+  String get magicWordForgetWarning =>
+      '중요: 이 매직 워드는 당신만 알게 됩니다. 잊어버리면 백업을 \'영원히\' 복원할 수 없으며 저희도 복구를 도와드릴 수 없습니다.';
+
+  @override
+  String get magicWordReveal => '표시';
+
+  @override
+  String get magicWordHide => '숨기기';
+
+  @override
+  String get magicWordCopy => '복사';
+
+  @override
+  String get magicWordCopied => '매직 워드를 클립보드에 복사했습니다.';
+
+  @override
+  String get magicWordSavedRepacking => '매직 워드를 저장하고 백업을 다시 포장하는 중...';
+
+  @override
+  String get magicWordSaved => '매직 워드를 저장했습니다. 백업이 이제 그것으로 잠겼습니다.';
+
+  @override
+  String magicWordRepackFailed(String error) {
+    return '백업을 다시 포장할 수 없습니다: $error';
+  }
+
+  @override
+  String get magicWordStoredLabel => '내 매직 워드';
+
+  @override
+  String get magicWordRestorePromptTitle => '매직 워드 입력';
+
+  @override
+  String get magicWordRestorePromptBody =>
+      '이 백업은 매직 워드로 잠겨 있습니다. 복원하려면 입력하세요. (대소문자 구분.)';
+
+  @override
+  String get magicWordRestoreWrong =>
+      '매직 워드가 틀렸습니다. 이것으로는 백업을 열 수 없습니다. 확인 후 다시 시도하세요.';
+
+  @override
+  String get commonContinue => '계속';
 
   @override
   String vcardErrorReadingFile(String error) {

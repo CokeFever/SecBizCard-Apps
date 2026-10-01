@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:secbizcard/core/services/backup_service.dart';
 import 'package:secbizcard/core/errors/failure.dart';
 import 'package:secbizcard/core/responsive/breakpoints.dart';
+import 'package:secbizcard/features/settings/data/magic_word_service.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:secbizcard/generated/l10n/app_localizations.dart';
@@ -24,12 +26,19 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   // it red/green without inspecting the (now localized) message text.
   bool _statusIsError = false;
   DateTime? _lastBackupTime;
+  bool _hasMagicWord = false;
 
   @override
   void initState() {
     super.initState();
     _loadLastBackupTime();
     _checkRemoteBackup();
+    _loadMagicWordState();
+  }
+
+  Future<void> _loadMagicWordState() async {
+    final has = await ref.read(magicWordServiceProvider).hasMagicWord();
+    if (mounted) setState(() => _hasMagicWord = has);
   }
 
   Future<void> _checkRemoteBackup() async {
@@ -184,8 +193,16 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
 
     if (!mounted) return;
 
-    result.fold(
-      (l) {
+    await result.fold(
+      (l) async {
+        // The cloud backup is locked with a magic word that isn't stored on
+        // this device (new device / reinstall / after logout). Prompt for it,
+        // store it, and retry — we only ask when the local value is absent.
+        if (l is WrongMagicWordFailure) {
+          final retried = await _promptMagicWordAndRetryRestore();
+          if (retried) return;
+        }
+        if (!mounted) return;
         setState(() {
           _isLoading = false;
           _statusMessage = l10n.backupRestoreFailed(l.message);
@@ -195,7 +212,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           SnackBar(content: Text(l10n.backupRestoreFailed(l.message))),
         );
       },
-      (r) {
+      (r) async {
         setState(() {
           _isLoading = false;
           _statusMessage = l10n.backupRestoreCompletedStatus;
@@ -206,6 +223,130 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         );
         // Optionally navigate home or force refresh
       },
+    );
+  }
+
+  /// Prompts for the backup's magic word (shown only when the local word is
+  /// absent and the cloud file is magicword-locked), stores it, and retries the
+  /// restore once. Returns true if the retry completed (success OR a handled
+  /// wrong-word message), so the caller does not also show its generic error.
+  Future<bool> _promptMagicWordAndRetryRestore() async {
+    final l10n = AppLocalizations.of(context)!;
+    final word = await _askForMagicWord();
+    if (word == null) {
+      // User cancelled — stop the spinner, leave a neutral status.
+      setState(() {
+        _isLoading = false;
+        _statusMessage = null;
+      });
+      return true;
+    }
+
+    // Store the entered word (normalized) so backup/restore use it from now on;
+    // this is the "remember it on this device" behaviour. Length is validated
+    // in the dialog, but guard anyway.
+    try {
+      await ref.read(magicWordServiceProvider).setMagicWord(word);
+    } catch (_) {/* validated in dialog */}
+    await _loadMagicWordState();
+
+    final service = ref.read(backupServiceProvider);
+    final result = await service.restore();
+    if (!mounted) return true;
+
+    result.fold(
+      (l) {
+        // Wrong word → clear it again so we prompt next time, and show a clear
+        // wrong-word message rather than silently remembering a bad value.
+        if (l is WrongMagicWordFailure) {
+          ref.read(magicWordServiceProvider).clearMagicWord();
+          _loadMagicWordState();
+          setState(() {
+            _isLoading = false;
+            _statusMessage = l10n.magicWordRestoreWrong;
+            _statusIsError = true;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.magicWordRestoreWrong)),
+          );
+          return;
+        }
+        setState(() {
+          _isLoading = false;
+          _statusMessage = l10n.backupRestoreFailed(l.message);
+          _statusIsError = true;
+        });
+      },
+      (r) {
+        setState(() {
+          _isLoading = false;
+          _statusMessage = l10n.backupRestoreCompletedStatus;
+          _statusIsError = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.backupRestoreSuccessBody)),
+        );
+      },
+    );
+    return true;
+  }
+
+  /// A single-field prompt for the magic word used during restore. Returns the
+  /// normalized word, or null if cancelled. Enforces length 8-16.
+  Future<String?> _askForMagicWord() {
+    final l10n = AppLocalizations.of(context)!;
+    final controller = TextEditingController();
+    bool obscure = true;
+    return showDialog<String>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setLocal) {
+          final value = controller.text;
+          final valid = MagicWordService.isValid(value);
+          return AlertDialog(
+            title: Text(l10n.magicWordRestorePromptTitle),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l10n.magicWordRestorePromptBody),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: controller,
+                  autofocus: true,
+                  obscureText: obscure,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  textCapitalization: TextCapitalization.none,
+                  onChanged: (_) => setLocal(() {}),
+                  decoration: InputDecoration(
+                    labelText: l10n.magicWordEnterLabel,
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                          obscure ? Icons.visibility : Icons.visibility_off),
+                      onPressed: () => setLocal(() => obscure = !obscure),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(l10n.commonCancel),
+              ),
+              FilledButton(
+                onPressed: valid
+                    ? () => Navigator.pop(
+                        context, MagicWordService.normalize(value))
+                    : null,
+                child: Text(l10n.commonContinue),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -305,6 +446,9 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
               ),
             ),
 
+            const SizedBox(height: 24),
+            _buildMagicWordSection(l10n),
+
             const Spacer(),
 
             SizedBox(
@@ -350,6 +494,286 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         ),
         ),
       ),
+    );
+  }
+
+  /// The "set / change magic word" section. Explains the privacy benefit and
+  /// the irreversibility risk, offers set/change, and (when a word is set) a
+  /// reveal + copy so the owner can send it to a secretary.
+  Widget _buildMagicWordSection(AppLocalizations l10n) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(_hasMagicWord ? Icons.lock : Icons.lock_open,
+                  size: 18, color: theme.colorScheme.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  l10n.magicWordSectionTitle,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 15),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _hasMagicWord
+                ? l10n.magicWordSectionDescSet
+                : l10n.magicWordSectionDescNone,
+            style: TextStyle(
+              fontSize: 12.5,
+              height: 1.4,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              OutlinedButton.icon(
+                onPressed: _isLoading ? null : _openSetMagicWordDialog,
+                icon: Icon(_hasMagicWord ? Icons.edit : Icons.key, size: 18),
+                label: Text(_hasMagicWord
+                    ? l10n.magicWordChangeButton
+                    : l10n.magicWordSetButton),
+              ),
+              if (_hasMagicWord) ...[
+                const SizedBox(width: 8),
+                TextButton.icon(
+                  onPressed: _isLoading ? null : _revealStoredMagicWord,
+                  icon: const Icon(Icons.visibility, size: 18),
+                  label: Text(l10n.magicWordReveal),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Shows the stored magic word with a copy button so the owner can resend it
+  /// (e.g. to a secretary via IM). Only reachable when a word is set.
+  Future<void> _revealStoredMagicWord() async {
+    final l10n = AppLocalizations.of(context)!;
+    final word = await ref.read(magicWordServiceProvider).getMagicWord();
+    if (!mounted || word == null) return;
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.magicWordStoredLabel),
+        content: SelectableText(
+          word,
+          style: const TextStyle(
+              fontFamily: 'monospace', fontSize: 18, fontWeight: FontWeight.w600),
+        ),
+        actions: [
+          TextButton.icon(
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: word));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(l10n.magicWordCopied)),
+              );
+            },
+            icon: const Icon(Icons.copy, size: 18),
+            label: Text(l10n.magicWordCopy),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.commonCancel),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Set/change dialog: two entry fields that must match, reveal toggle, copy,
+  /// a strong irreversibility warning, length 8-16. On confirm, runs the repack
+  /// flow so the cloud backup is immediately re-locked with the new word.
+  Future<void> _openSetMagicWordDialog() async {
+    final l10n = AppLocalizations.of(context)!;
+    final wordController = TextEditingController();
+    final confirmController = TextEditingController();
+    bool obscure = true;
+
+    final confirmed = await showDialog<String>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setLocal) {
+          final word = wordController.text;
+          final confirm = confirmController.text;
+          final normalized = MagicWordService.normalize(word);
+          final lengthOk = MagicWordService.isValid(word);
+          final match =
+              MagicWordService.normalize(word) ==
+                  MagicWordService.normalize(confirm);
+          String? errorText;
+          if (word.isNotEmpty && !lengthOk) {
+            errorText = l10n.magicWordLengthError;
+          } else if (confirm.isNotEmpty && !match) {
+            errorText = l10n.magicWordMismatch;
+          }
+          final canConfirm = lengthOk && match && confirm.isNotEmpty;
+
+          return AlertDialog(
+            title: Text(l10n.magicWordDialogTitle),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: wordController,
+                    autofocus: true,
+                    obscureText: obscure,
+                    autocorrect: false,
+                    enableSuggestions: false,
+                    textCapitalization: TextCapitalization.none,
+                    onChanged: (_) => setLocal(() {}),
+                    decoration: InputDecoration(
+                      labelText: l10n.magicWordEnterLabel,
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: Icon(obscure
+                            ? Icons.visibility
+                            : Icons.visibility_off),
+                        onPressed: () => setLocal(() => obscure = !obscure),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: confirmController,
+                    obscureText: obscure,
+                    autocorrect: false,
+                    enableSuggestions: false,
+                    textCapitalization: TextCapitalization.none,
+                    onChanged: (_) => setLocal(() {}),
+                    decoration: InputDecoration(
+                      labelText: l10n.magicWordConfirmLabel,
+                      border: const OutlineInputBorder(),
+                      errorText: errorText,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    l10n.magicWordRule,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  if (normalized.isNotEmpty)
+                    Row(
+                      children: [
+                        TextButton.icon(
+                          onPressed: () {
+                            Clipboard.setData(ClipboardData(text: normalized));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(l10n.magicWordCopied)),
+                            );
+                          },
+                          icon: const Icon(Icons.copy, size: 16),
+                          label: Text(l10n.magicWordCopy),
+                        ),
+                      ],
+                    ),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.warning_amber_rounded,
+                            size: 18, color: Colors.red),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            l10n.magicWordForgetWarning,
+                            style: const TextStyle(
+                                fontSize: 12, height: 1.4, color: Colors.red),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(l10n.commonCancel),
+              ),
+              FilledButton(
+                onPressed: canConfirm
+                    ? () => Navigator.pop(context, normalized)
+                    : null,
+                child: Text(l10n.commonContinue),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    if (confirmed == null || !mounted) return;
+    await _applyMagicWord(confirmed);
+  }
+
+  /// Runs the repack flow for a validated new magic word and reports the result.
+  Future<void> _applyMagicWord(String word) async {
+    final l10n = AppLocalizations.of(context)!;
+    setState(() {
+      _isLoading = true;
+      _statusMessage = l10n.magicWordSavedRepacking;
+      _statusIsError = false;
+    });
+
+    final service = ref.read(backupServiceProvider);
+    final result = await service.setMagicWordAndRepack(word);
+    if (!mounted) return;
+
+    await _loadMagicWordState();
+    await _loadLastBackupTime();
+
+    result.fold(
+      (l) {
+        final msg = l is MagicWordValidationFailure
+            ? l10n.magicWordLengthError
+            : l10n.magicWordRepackFailed(l.message);
+        setState(() {
+          _isLoading = false;
+          _statusMessage = msg;
+          _statusIsError = true;
+        });
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(msg)));
+      },
+      (_) {
+        setState(() {
+          _isLoading = false;
+          _statusMessage = l10n.magicWordSaved;
+          _statusIsError = false;
+          _hasRemoteBackup = true;
+        });
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.magicWordSaved)));
+      },
     );
   }
 }

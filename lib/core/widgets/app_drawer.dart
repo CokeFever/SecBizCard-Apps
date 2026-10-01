@@ -7,6 +7,7 @@ import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/profile/data/profile_repository.dart';
 import 'package:secbizcard/features/contacts/data/ocr_usage_provider.dart';
 import 'package:secbizcard/core/services/backup_reminder_service.dart';
+import 'package:secbizcard/features/settings/data/magic_word_service.dart';
 import 'package:secbizcard/core/config/theme_controller.dart';
 import 'package:secbizcard/core/widgets/profile_avatar.dart';
 
@@ -191,10 +192,18 @@ class AppDrawer extends ConsumerWidget {
               final hasUnbacked = await ref
                   .read(backupReminderServiceProvider)
                   .shouldRemind(hasData: true);
+              // A set magic word gets cleared on sign-out; warn more strongly
+              // because a magicword backup can ONLY be restored with it.
+              final hasMagicWord =
+                  await ref.read(magicWordServiceProvider).hasMagicWord();
               if (!context.mounted) return;
-              final body = hasUnbacked
+              final magicWordNote = hasMagicWord
+                  ? l10n.drawerLogoutMagicWordNoteStrong
+                  : l10n.drawerLogoutMagicWordNote;
+              final baseBody = hasUnbacked
                   ? l10n.drawerLogoutUnbackedWarning
                   : '${l10n.drawerConfirmLogoutBody}\n\n${l10n.drawerLogoutWipeNote}';
+              final body = '$baseBody\n\n$magicWordNote';
               final shouldLogout = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
