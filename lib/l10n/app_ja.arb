@@ -365,7 +365,7 @@
   "magicWordCopy": "コピー",
   "magicWordCopied": "マジックワードをクリップボードにコピーしました。",
   "magicWordSavedRepacking": "マジックワードを保存し、バックアップを再梱包しています...",
-  "magicWordSaved": "マジックワードを保存しました。バックアップはこれでロックされました。",
+  "magicWordSaved": "マジックワードを設定しました。クラウドのバックアップを新しいワードで再パックしました。",
   "magicWordRepackFailed": "バックアップの再梱包に失敗しました:{error}",
   "magicWordStoredLabel": "あなたのマジックワード",
   "magicWordRestorePromptTitle": "マジックワードを入力",

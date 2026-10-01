@@ -1156,7 +1156,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get magicWordSavedRepacking => '正在保存密语并重新打包你的备份...';
 
   @override
-  String get magicWordSaved => '密语已保存。你的备份现在以它锁定。';
+  String get magicWordSaved => '密语已设定，云端备份已用新密语重新打包。';
 
   @override
   String magicWordRepackFailed(String error) {
@@ -2773,7 +2773,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get magicWordSavedRepacking => '正在儲存密語並重新打包你的備份...';
 
   @override
-  String get magicWordSaved => '密語已儲存。你的備份現在以它鎖定。';
+  String get magicWordSaved => '密語已設定，雲端備份已用新密語重新打包。';
 
   @override
   String magicWordRepackFailed(String error) {

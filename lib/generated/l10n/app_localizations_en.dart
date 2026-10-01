@@ -1199,7 +1199,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get magicWordSaved =>
-      'Magic word saved. Your backup is now locked with it.';
+      'Magic word set. Your cloud backup has been re-packed with it.';
 
   @override
   String magicWordRepackFailed(String error) {

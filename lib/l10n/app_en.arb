@@ -822,7 +822,7 @@
   "@magicWordCopied": {},
   "magicWordSavedRepacking": "Saving magic word and re-packing your backup...",
   "@magicWordSavedRepacking": {},
-  "magicWordSaved": "Magic word saved. Your backup is now locked with it.",
+  "magicWordSaved": "Magic word set. Your cloud backup has been re-packed with it.",
   "@magicWordSaved": {},
   "magicWordRepackFailed": "Could not re-pack the backup: {error}",
   "@magicWordRepackFailed": { "placeholders": { "error": { "type": "String" } } },

@@ -1171,7 +1171,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get magicWordSavedRepacking => 'マジックワードを保存し、バックアップを再梱包しています...';
 
   @override
-  String get magicWordSaved => 'マジックワードを保存しました。バックアップはこれでロックされました。';
+  String get magicWordSaved => 'マジックワードを設定しました。クラウドのバックアップを新しいワードで再パックしました。';
 
   @override
   String magicWordRepackFailed(String error) {
