@@ -1125,13 +1125,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get magicWordEnterLabel => '密语';
 
   @override
-  String get magicWordConfirmLabel => '再次输入密语';
-
-  @override
   String get magicWordRule => '8 到 16 个字符。可用空格与符号。区分大小写。小提示:用一句只有你记得住的话。';
-
-  @override
-  String get magicWordMismatch => '两次输入不一致。';
 
   @override
   String get magicWordLengthError => '密语必须为 8 到 16 个字符。';
@@ -1156,7 +1150,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get magicWordSavedRepacking => '正在保存密语并重新打包你的备份...';
 
   @override
-  String get magicWordSaved => '密语已设定，云端备份已用新密语重新打包。';
+  String get magicWordSaved => '密语已设定，你的加密备份已上传到 Google Drive。';
 
   @override
   String magicWordRepackFailed(String error) {
@@ -2742,13 +2736,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get magicWordEnterLabel => '密語';
 
   @override
-  String get magicWordConfirmLabel => '再次輸入密語';
-
-  @override
   String get magicWordRule => '8 到 16 個字元。可用空格與符號。區分大小寫。小提示:用一句只有你記得住的話。';
-
-  @override
-  String get magicWordMismatch => '兩次輸入不一致。';
 
   @override
   String get magicWordLengthError => '密語必須為 8 到 16 個字元。';
@@ -2773,7 +2761,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get magicWordSavedRepacking => '正在儲存密語並重新打包你的備份...';
 
   @override
-  String get magicWordSaved => '密語已設定，雲端備份已用新密語重新打包。';
+  String get magicWordSaved => '密語已設定，你的加密備份已上傳到 Google Drive。';
 
   @override
   String magicWordRepackFailed(String error) {

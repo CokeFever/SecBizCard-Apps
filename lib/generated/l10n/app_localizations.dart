@@ -2179,23 +2179,11 @@ abstract class AppLocalizations {
   /// **'Magic word'**
   String get magicWordEnterLabel;
 
-  /// No description provided for @magicWordConfirmLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Re-enter magic word'**
-  String get magicWordConfirmLabel;
-
   /// Composition rules for the magic word
   ///
   /// In en, this message translates to:
   /// **'8 to 16 characters. Spaces and symbols allowed. Case-sensitive. Tip: use a short phrase only you would remember.'**
   String get magicWordRule;
-
-  /// No description provided for @magicWordMismatch.
-  ///
-  /// In en, this message translates to:
-  /// **'The two entries do not match.'**
-  String get magicWordMismatch;
 
   /// No description provided for @magicWordLengthError.
   ///
@@ -2242,7 +2230,7 @@ abstract class AppLocalizations {
   /// No description provided for @magicWordSaved.
   ///
   /// In en, this message translates to:
-  /// **'Magic word set. Your cloud backup has been re-packed with it.'**
+  /// **'Magic word set. Your encrypted backup has been uploaded to Google Drive.'**
   String get magicWordSaved;
 
   /// No description provided for @magicWordRepackFailed.

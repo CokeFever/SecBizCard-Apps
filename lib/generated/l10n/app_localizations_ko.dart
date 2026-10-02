@@ -1140,14 +1140,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get magicWordEnterLabel => '매직 워드';
 
   @override
-  String get magicWordConfirmLabel => '매직 워드 다시 입력';
-
-  @override
   String get magicWordRule =>
       '8~16자. 공백과 기호 사용 가능. 대소문자 구분. 팁: 당신만 기억할 수 있는 짧은 문구를 사용하세요.';
-
-  @override
-  String get magicWordMismatch => '두 입력이 일치하지 않습니다.';
 
   @override
   String get magicWordLengthError => '매직 워드는 8~16자여야 합니다.';
@@ -1172,7 +1166,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get magicWordSavedRepacking => '매직 워드를 저장하고 백업을 다시 포장하는 중...';
 
   @override
-  String get magicWordSaved => '매직 워드를 설정했습니다. 클라우드 백업을 새 워드로 다시 패킹했습니다.';
+  String get magicWordSaved => '매직 워드를 설정했습니다. 암호화된 백업을 Google 드라이브에 업로드했습니다.';
 
   @override
   String magicWordRepackFailed(String error) {

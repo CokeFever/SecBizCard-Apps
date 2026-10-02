@@ -1139,14 +1139,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get magicWordEnterLabel => 'マジックワード';
 
   @override
-  String get magicWordConfirmLabel => 'マジックワードを再入力';
-
-  @override
   String get magicWordRule =>
       '8〜16文字。スペースと記号も使えます。大文字・小文字を区別します。ヒント:自分だけが覚えられる短いフレーズを。';
-
-  @override
-  String get magicWordMismatch => '2つの入力が一致しません。';
 
   @override
   String get magicWordLengthError => 'マジックワードは8〜16文字にしてください。';
@@ -1171,7 +1165,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get magicWordSavedRepacking => 'マジックワードを保存し、バックアップを再梱包しています...';
 
   @override
-  String get magicWordSaved => 'マジックワードを設定しました。クラウドのバックアップを新しいワードで再パックしました。';
+  String get magicWordSaved =>
+      'マジックワードを設定しました。暗号化されたバックアップを Google ドライブにアップロードしました。';
 
   @override
   String magicWordRepackFailed(String error) {
