@@ -575,25 +575,34 @@ class BackupService {
     }
 
     try {
-      // 2. Find the current cloud backup (new home first, then root).
+      // 2. Find the current cloud backup. CRITICAL: keep the in-folder file and
+      // the legacy root file SEPARATE. Only an IN-FOLDER file is a safe
+      // update-in-place target; a root-only file must NOT be updated in place
+      // (that is the bug that left the repacked backup in Drive root). When the
+      // only existing file is in root, we CREATE a new file inside the folder
+      // and migrate-then-delete the root file after the new home reads back OK.
       final folderId = await _resolveSecBizCardFolderId();
-      String? fileId;
+
+      String? inFolderId;
       if (folderId != null) {
         final newHome = await _driveRepo.searchBackupFile(
           _backupFileName,
           parentFolderId: folderId,
         );
-        fileId = newHome.match((l) => null, (r) => r);
-      }
-      if (fileId == null) {
-        final rootSearch = await _driveRepo.searchBackupFile(_backupFileName);
-        fileId = rootSearch.match((l) => null, (r) => r);
+        inFolderId = newHome.match((l) => null, (r) => r);
       }
 
-      // No cloud backup yet — the magic word is already stored, so run one
-      // backup now to create the magicword-mode cloud file right away rather
-      // than deferring to the next normal backup.
-      if (fileId == null) {
+      final rootSearch = await _driveRepo.searchBackupFile(_backupFileName);
+      final rootId = rootSearch.match((l) => null, (r) => r);
+
+      // The file we download+decrypt to get the current ZIP: prefer the
+      // in-folder file, else fall back to the legacy root file.
+      final String? sourceId = inFolderId ?? rootId;
+
+      // No cloud backup anywhere — the magic word is already stored, so run one
+      // backup now to create the magicword-mode cloud file (inside the folder)
+      // right away rather than deferring to the next normal backup.
+      if (sourceId == null) {
         final backupResult = await backup(force: true);
         return backupResult.fold(
           (l) async {
@@ -604,7 +613,7 @@ class BackupService {
         );
       }
 
-      final downloadResult = await _driveRepo.downloadFile(fileId);
+      final downloadResult = await _driveRepo.downloadFile(sourceId);
       final bytes = downloadResult.match((l) => null, (b) => b);
       if (bytes == null || bytes.isEmpty) {
         return right(null); // nothing readable to repack; next backup handles it
@@ -618,8 +627,7 @@ class BackupService {
         magicWord: oldWord,
       );
 
-      // 3. Re-encrypt with the NEW magic word (now the stored value) and write
-      // back in place.
+      // 3. Re-encrypt with the NEW magic word (now the stored value).
       final repacked = await _codec.encryptNew(
         zipBytes,
         encMode: BackupCodec.encModeMagicWord,
@@ -630,19 +638,33 @@ class BackupService {
       final tempFile = File('${tempDir.path}/$_backupFileName');
       await tempFile.writeAsBytes(repacked);
 
+      // Decide the write target:
+      //  - If an IN-FOLDER file already exists → update it in place (keeps the
+      //    folder's share relationships).
+      //  - Otherwise (only a root file, or a resolved folder with no in-folder
+      //    file yet) → CREATE a new file with parents:[folderId]; NEVER update
+      //    the root file in place.
       final uploadResult = await _driveRepo.uploadBackup(
         tempFile,
         _backupFileName,
-        existingFileId: fileId,
+        existingFileId: inFolderId,
         parentFolderId: folderId,
       );
 
-      return uploadResult.fold(
+      return await uploadResult.fold(
         (l) async {
           await _rollbackMagicWord(oldWord);
           return left(l);
         },
         (_) async {
+          // Migrate-then-delete: if we just CREATED the in-folder file (there
+          // was no in-folder file before) and a legacy root file still exists,
+          // delete the root file ONLY after the new home reads back as a
+          // decryptable ZIP. Never reverse this order — a failed readback
+          // leaves root intact so no data is lost.
+          if (folderId != null && inFolderId == null) {
+            await _migrateDeleteRootIfSafe(uid: uid, folderId: folderId);
+          }
           try {
             await BackupReminderService().markBackedUp();
           } catch (_) {/* non-critical */}

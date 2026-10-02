@@ -267,13 +267,35 @@ class DriveRepository {
         final media = drive.Media(file.openRead(), await file.length());
 
         if (existingFileId != null) {
-          // Update in place: do NOT change parents, so the file keeps living in
-          // the SecBizCard folder and preserves its share relationships.
+          // Update in place. Normally we do NOT change parents, so the file
+          // keeps living in the SecBizCard folder and preserves its share
+          // relationships. Defense-in-depth: if a parentFolderId is supplied
+          // AND the file is not already under it, add it to the folder (and
+          // detach any other parents) so an update can never leave a stray
+          // backup in Drive root. googleapis files.update supports
+          // addParents/removeParents for exactly this relocation.
           final driveFile = drive.File()..name = fileName;
+          String? addParents;
+          String? removeParents;
+          if (parentFolderId != null) {
+            final existing = await driveApi.files.get(
+              existingFileId,
+              $fields: 'parents',
+            ) as drive.File;
+            final currentParents = existing.parents ?? const <String>[];
+            if (!currentParents.contains(parentFolderId)) {
+              addParents = parentFolderId;
+              if (currentParents.isNotEmpty) {
+                removeParents = currentParents.join(',');
+              }
+            }
+          }
           final updated = await driveApi.files.update(
             driveFile,
             existingFileId,
             uploadMedia: media,
+            addParents: addParents,
+            removeParents: removeParents,
           );
           return right(updated.id!);
         } else {

@@ -1165,14 +1165,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get magicWordEnterLabel => 'Magic word';
 
   @override
-  String get magicWordConfirmLabel => 'Re-enter magic word';
-
-  @override
   String get magicWordRule =>
       '8 to 16 characters. Spaces and symbols allowed. Case-sensitive. Tip: use a short phrase only you would remember.';
-
-  @override
-  String get magicWordMismatch => 'The two entries do not match.';
 
   @override
   String get magicWordLengthError => 'Magic word must be 8 to 16 characters.';
@@ -1199,7 +1193,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get magicWordSaved =>
-      'Magic word set. Your cloud backup has been re-packed with it.';
+      'Magic word set. Your encrypted backup has been uploaded to Google Drive.';
 
   @override
   String magicWordRepackFailed(String error) {

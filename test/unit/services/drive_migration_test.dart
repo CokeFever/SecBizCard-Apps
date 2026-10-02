@@ -122,6 +122,9 @@ class MigrationFakeDrive implements DriveRepository {
     return right(modifiedTimes[rootFileId]);
   }
 
+  String? lastUploadExistingFileId;
+  String? lastUploadParentFolderId;
+
   @override
   Future<Either<Failure, String>> uploadBackup(
     File file,
@@ -129,14 +132,32 @@ class MigrationFakeDrive implements DriveRepository {
     String? existingFileId,
     String? parentFolderId,
   }) async {
+    lastUploadExistingFileId = existingFileId;
+    lastUploadParentFolderId = parentFolderId;
     if (uploadShouldFail) {
       return left(const ServerFailure('upload failed'));
     }
     final bytes = await file.readAsBytes();
-    // Writes to the SecBizCard folder regardless of create/update in this fake.
-    files[folderFileId] = bytes;
-    modifiedTimes[folderFileId] = DateTime.now().toUtc();
-    return right(folderFileId);
+    // Model Drive faithfully so an update-in-place-on-root is observable:
+    //  - update-in-place writes to the SAME id (root stays root, folder stays
+    //    folder) UNLESS a different parentFolderId is supplied, which relocates
+    //    it (mirrors the addParents/removeParents defense-in-depth);
+    //  - a create goes to the folder when parentFolderId is set, else root.
+    final String targetId;
+    if (existingFileId != null) {
+      targetId = (parentFolderId == _folderId && existingFileId == rootFileId)
+          ? folderFileId // relocated into the folder
+          : existingFileId;
+      if (targetId == folderFileId && existingFileId == rootFileId) {
+        files.remove(rootFileId);
+        modifiedTimes.remove(rootFileId);
+      }
+    } else {
+      targetId = (parentFolderId == _folderId) ? folderFileId : rootFileId;
+    }
+    files[targetId] = bytes;
+    modifiedTimes[targetId] = DateTime.now().toUtc();
+    return right(targetId);
   }
 
   @override
@@ -232,6 +253,10 @@ void main() {
     final result = await service().backup(force: true);
 
     expect(result.isRight(), true, reason: result.fold((l) => l.message, (_) => ''));
+    // The write was a CREATE-IN-FOLDER (existingFileId null, parentFolderId
+    // set) — NOT an update-in-place on the root file.
+    expect(fakeDrive.lastUploadExistingFileId, isNull);
+    expect(fakeDrive.lastUploadParentFolderId, _folderId);
     // New home was written.
     expect(fakeDrive.files.containsKey(MigrationFakeDrive.folderFileId), true);
     // Root was deleted ONLY after new home confirmed readable.

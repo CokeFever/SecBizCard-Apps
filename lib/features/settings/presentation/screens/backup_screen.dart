@@ -27,6 +27,12 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   bool _statusIsError = false;
   DateTime? _lastBackupTime;
   bool _hasMagicWord = false;
+  // Inline reveal state for the stored magic word (Issue 2): the word is shown
+  // masked by default inside the section; the eye toggle reveals/hides it in
+  // place rather than opening a popup. Loaded lazily when the user first taps
+  // the eye so the secure value isn't held in memory longer than needed.
+  bool _magicWordRevealed = false;
+  String? _revealedMagicWord;
 
   @override
   void initState() {
@@ -38,7 +44,15 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
 
   Future<void> _loadMagicWordState() async {
     final has = await ref.read(magicWordServiceProvider).hasMagicWord();
-    if (mounted) setState(() => _hasMagicWord = has);
+    if (mounted) {
+      setState(() {
+        _hasMagicWord = has;
+        // Re-hide and drop any cached plaintext whenever the word state changes
+        // (set/change/clear) so a stale value is never shown.
+        _magicWordRevealed = false;
+        _revealedMagicWord = null;
+      });
+    }
   }
 
   Future<void> _checkRemoteBackup() async {
@@ -547,63 +561,115 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                     ? l10n.magicWordChangeButton
                     : l10n.magicWordSetButton),
               ),
-              if (_hasMagicWord) ...[
-                const SizedBox(width: 8),
-                TextButton.icon(
-                  onPressed: _isLoading ? null : _revealStoredMagicWord,
-                  icon: const Icon(Icons.visibility, size: 18),
-                  label: Text(l10n.magicWordReveal),
-                ),
-              ],
             ],
           ),
+          if (_hasMagicWord) ...[
+            const SizedBox(height: 12),
+            _buildStoredMagicWordField(l10n, theme),
+          ],
         ],
       ),
     );
   }
 
-  /// Shows the stored magic word with a copy button so the owner can resend it
-  /// (e.g. to a secretary via IM). Only reachable when a word is set.
-  Future<void> _revealStoredMagicWord() async {
+  /// Inline, read-only display of the stored magic word (Issue 2). Masked by
+  /// default (standard password-field pattern): the eye toggle reveals/hides it
+  /// in place and the copy button sends it to the clipboard so the owner can
+  /// resend it (e.g. to a secretary). Replaces the former plaintext popup.
+  Widget _buildStoredMagicWordField(AppLocalizations l10n, ThemeData theme) {
+    final revealed = _magicWordRevealed && _revealedMagicWord != null;
+    final display = revealed
+        ? _revealedMagicWord!
+        : '\u2022' * 8; // dots as a fixed-width mask, never the real length
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.magicWordStoredLabel,
+          style: TextStyle(
+            fontSize: 12,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 4),
+        InputDecorator(
+          decoration: InputDecoration(
+            isDense: true,
+            border: const OutlineInputBorder(),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            suffixIcon: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  tooltip:
+                      revealed ? l10n.magicWordHide : l10n.magicWordReveal,
+                  icon: Icon(
+                    revealed ? Icons.visibility_off : Icons.visibility,
+                    size: 20,
+                  ),
+                  onPressed: _isLoading ? null : _toggleRevealMagicWord,
+                ),
+                IconButton(
+                  tooltip: l10n.magicWordCopy,
+                  icon: const Icon(Icons.copy, size: 20),
+                  onPressed: _isLoading ? null : _copyStoredMagicWord,
+                ),
+              ],
+            ),
+          ),
+          child: Text(
+            display,
+            style: const TextStyle(
+              fontFamily: 'monospace',
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Toggles the inline reveal. On reveal it lazily reads the stored word; on
+  /// hide it drops the cached plaintext.
+  Future<void> _toggleRevealMagicWord() async {
+    if (_magicWordRevealed) {
+      setState(() {
+        _magicWordRevealed = false;
+        _revealedMagicWord = null;
+      });
+      return;
+    }
+    final word = await ref.read(magicWordServiceProvider).getMagicWord();
+    if (!mounted || word == null) return;
+    setState(() {
+      _revealedMagicWord = word;
+      _magicWordRevealed = true;
+    });
+  }
+
+  /// Copies the stored magic word to the clipboard (reads it fresh so copy
+  /// works whether or not it is currently revealed).
+  Future<void> _copyStoredMagicWord() async {
     final l10n = AppLocalizations.of(context)!;
     final word = await ref.read(magicWordServiceProvider).getMagicWord();
     if (!mounted || word == null) return;
-    await showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.magicWordStoredLabel),
-        content: SelectableText(
-          word,
-          style: const TextStyle(
-              fontFamily: 'monospace', fontSize: 18, fontWeight: FontWeight.w600),
-        ),
-        actions: [
-          TextButton.icon(
-            onPressed: () {
-              Clipboard.setData(ClipboardData(text: word));
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(l10n.magicWordCopied)),
-              );
-            },
-            icon: const Icon(Icons.copy, size: 18),
-            label: Text(l10n.magicWordCopy),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.commonCancel),
-          ),
-        ],
-      ),
+    await Clipboard.setData(ClipboardData(text: word));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.magicWordCopied)),
     );
   }
 
-  /// Set/change dialog: two entry fields that must match, reveal toggle, copy,
-  /// a strong irreversibility warning, length 8-16. On confirm, runs the repack
-  /// flow so the cloud backup is immediately re-locked with the new word.
+  /// Set/change dialog: a SINGLE entry field (Issue 3 — the magic word is
+  /// viewable in-app, so a typo is self-correctable; no second confirm field),
+  /// reveal toggle, copy, a strong irreversibility warning, length 8-16. On
+  /// confirm, runs the repack flow so the cloud backup is immediately re-locked
+  /// with the new word.
   Future<void> _openSetMagicWordDialog() async {
     final l10n = AppLocalizations.of(context)!;
     final wordController = TextEditingController();
-    final confirmController = TextEditingController();
     bool obscure = true;
 
     final confirmed = await showDialog<String>(
@@ -611,19 +677,11 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       builder: (context) => StatefulBuilder(
         builder: (context, setLocal) {
           final word = wordController.text;
-          final confirm = confirmController.text;
           final normalized = MagicWordService.normalize(word);
           final lengthOk = MagicWordService.isValid(word);
-          final match =
-              MagicWordService.normalize(word) ==
-                  MagicWordService.normalize(confirm);
-          String? errorText;
-          if (word.isNotEmpty && !lengthOk) {
-            errorText = l10n.magicWordLengthError;
-          } else if (confirm.isNotEmpty && !match) {
-            errorText = l10n.magicWordMismatch;
-          }
-          final canConfirm = lengthOk && match && confirm.isNotEmpty;
+          final errorText =
+              (word.isNotEmpty && !lengthOk) ? l10n.magicWordLengthError : null;
+          final canConfirm = lengthOk;
 
           return AlertDialog(
             title: Text(l10n.magicWordDialogTitle),
@@ -643,26 +701,13 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                     decoration: InputDecoration(
                       labelText: l10n.magicWordEnterLabel,
                       border: const OutlineInputBorder(),
+                      errorText: errorText,
                       suffixIcon: IconButton(
                         icon: Icon(obscure
                             ? Icons.visibility
                             : Icons.visibility_off),
                         onPressed: () => setLocal(() => obscure = !obscure),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: confirmController,
-                    obscureText: obscure,
-                    autocorrect: false,
-                    enableSuggestions: false,
-                    textCapitalization: TextCapitalization.none,
-                    onChanged: (_) => setLocal(() {}),
-                    decoration: InputDecoration(
-                      labelText: l10n.magicWordConfirmLabel,
-                      border: const OutlineInputBorder(),
-                      errorText: errorText,
                     ),
                   ),
                   const SizedBox(height: 10),
