@@ -274,6 +274,7 @@
   "editContactJobInfo": "工作信息",
   "editContactContact": "联系方式",
   "editContactEmail": "电子邮件",
+  "editContactMobile": "手机",
   "editContactOriginalScan": "原始扫描",
   "editContactFieldRequired": "{label} 为必填",
   "contactDetailTitle": "联系人详情",

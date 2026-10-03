@@ -283,6 +283,7 @@
   "editContactJobInfo": "직무 정보",
   "editContactContact": "연락처",
   "editContactEmail": "이메일",
+  "editContactMobile": "휴대전화",
   "editContactOriginalScan": "원본 스캔",
   "editContactFieldRequired": "{label}은(는) 필수입니다",
   "contactDetailTitle": "연락처 상세",

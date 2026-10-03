@@ -653,6 +653,8 @@
   "@editContactContact": { "description": "Section header for phone/email fields" },
   "editContactEmail": "Email",
   "@editContactEmail": {},
+  "editContactMobile": "Mobile",
+  "@editContactMobile": { "description": "Label for the mobile phone field in the contact edit/detail screens" },
   "editContactOriginalScan": "Original Scan",
   "@editContactOriginalScan": {},
   "editContactFieldRequired": "{label} is required",

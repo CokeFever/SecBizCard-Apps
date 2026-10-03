@@ -1,6 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:secbizcard/core/services/backup_reminder_service.dart';
+import 'package:secbizcard/features/profile/data/profile_repository.dart';
+import 'package:secbizcard/features/profile/domain/user_profile.dart';
+
+import '../test_mocks.mocks.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -158,5 +164,73 @@ void main() {
     expect(prefs.getInt(BackupReminderService.keySnoozedMonth), isNull);
     // A fresh account on this device is not nagged.
     expect(await s.shouldRemind(hasData: true), isFalse);
+  });
+
+  group('empty-account own-profile write does not arm the reminder (BUG 3)',
+      () {
+    test(
+        'createOrUpdateUser(ownProfile, markModified:false) does NOT stamp '
+        'last_modified_timestamp and is NOT reminded', () async {
+      // A brand-new account's only write is its own profile row, performed by
+      // the auth-driven userProfile stream with markModified:false. That write
+      // must NOT stamp the backup-reminder timestamp, so an empty install is
+      // never nagged. Guards the "empty account got the backup prompt"
+      // regression at its source (the ProfileRepository choke-point), not just
+      // in the service.
+      SharedPreferences.setMockInitialValues({});
+      final mockLocalDataSource = MockProfileLocalDataSource();
+      when(mockLocalDataSource.saveUser(any)).thenAnswer((_) async {});
+      final repo = ProfileRepository(mockLocalDataSource);
+
+      final ownProfile = UserProfile(
+        uid: 'own-uid',
+        email: 'owner@gmail.com', // free domain -> no image/path side-effects
+        displayName: 'Owner',
+        createdAt: DateTime(2026, 9, 20),
+      );
+
+      final result =
+          await repo.createOrUpdateUser(ownProfile, markModified: false);
+      expect(result, const Right(unit));
+      verify(mockLocalDataSource.saveUser(any)).called(1);
+
+      final prefs = await SharedPreferences.getInstance();
+      // The reminder timestamp was NOT stamped by the own-profile write.
+      expect(prefs.getInt(BackupReminderService.keyLastModified), isNull);
+
+      // And with no recorded change, the reminder stays silent even if the
+      // caller later believes there is "data".
+      final svc = BackupReminderService(
+        prefs: prefs,
+        now: () => DateTime(2026, 9, 21),
+      );
+      expect(await svc.shouldRemind(hasData: false), isFalse);
+      expect(await svc.shouldRemind(hasData: true), isFalse);
+    });
+
+    test(
+        'createOrUpdateUser with the default (markModified:true) DOES stamp '
+        'the timestamp', () async {
+      // Contract check: a real user edit (default flag) still arms the
+      // reminder, so the markModified:false path above is a genuine decouple
+      // and not a no-op.
+      SharedPreferences.setMockInitialValues({});
+      final mockLocalDataSource = MockProfileLocalDataSource();
+      when(mockLocalDataSource.saveUser(any)).thenAnswer((_) async {});
+      final repo = ProfileRepository(mockLocalDataSource);
+
+      final edited = UserProfile(
+        uid: 'own-uid',
+        email: 'owner@gmail.com',
+        displayName: 'Owner Edited',
+        createdAt: DateTime(2026, 9, 20),
+      );
+
+      final result = await repo.createOrUpdateUser(edited);
+      expect(result, const Right(unit));
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getInt(BackupReminderService.keyLastModified), isNotNull);
+    });
   });
 }

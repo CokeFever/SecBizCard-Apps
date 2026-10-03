@@ -283,6 +283,7 @@
   "editContactJobInfo": "職務情報",
   "editContactContact": "連絡先",
   "editContactEmail": "メール",
+  "editContactMobile": "携帯電話",
   "editContactOriginalScan": "元のスキャン",
   "editContactFieldRequired": "{label} は必須です",
   "contactDetailTitle": "連絡先の詳細",

@@ -32,6 +32,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
   late TextEditingController _titleController;
   late TextEditingController _companyController;
   late TextEditingController _phoneController;
+  late TextEditingController _mobileController;
   late TextEditingController _emailController;
   File? _cardFrontImage;
   File? _cardBackImage;
@@ -69,6 +70,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
     if (_titleController.text.trim() != (widget.user.title ?? '')) return true;
     if (_companyController.text.trim() != (widget.user.company ?? '')) return true;
     if (_phoneController.text.trim() != (widget.user.phone ?? '')) return true;
+    if (_mobileController.text.trim() != (widget.user.mobile ?? '')) return true;
     if (_emailController.text.trim() != (widget.user.email ?? '')) return true;
 
     // Compare custom fields
@@ -102,6 +104,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
     _titleController = TextEditingController(text: widget.user.title);
     _companyController = TextEditingController(text: widget.user.company);
     _phoneController = TextEditingController(text: widget.user.phone);
+    _mobileController = TextEditingController(text: widget.user.mobile);
     _emailController = TextEditingController(text: widget.user.email);
 
     widget.user.customFields.forEach((key, value) {
@@ -116,6 +119,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
     _titleController.addListener(_onFieldChanged);
     _companyController.addListener(_onFieldChanged);
     _phoneController.addListener(_onFieldChanged);
+    _mobileController.addListener(_onFieldChanged);
     _emailController.addListener(_onFieldChanged);
   }
 
@@ -130,6 +134,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
     _titleController.dispose();
     _companyController.dispose();
     _phoneController.dispose();
+    _mobileController.dispose();
     _emailController.dispose();
     for (var controller in _customFieldControllers.values) {
       controller.dispose();
@@ -209,6 +214,9 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
         phone: _phoneController.text.trim().isEmpty
             ? null
             : _phoneController.text.trim(),
+        mobile: _mobileController.text.trim().isEmpty
+            ? null
+            : _mobileController.text.trim(),
         email: _emailController.text.trim(),
         cardFrontPath: _isCardFrontRemoved
             ? null
@@ -346,6 +354,13 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
                 _phoneController,
                 l10n.editProfilePhone,
                 Icons.phone,
+                keyboardType: TextInputType.phone,
+              ),
+              const SizedBox(height: 16),
+              _buildTextField(
+                _mobileController,
+                l10n.editContactMobile,
+                Icons.smartphone,
                 keyboardType: TextInputType.phone,
               ),
               const SizedBox(height: 16),
