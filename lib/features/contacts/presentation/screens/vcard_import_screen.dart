@@ -340,14 +340,14 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
                 // Option 1: File Upload
                 CollapsibleSection(
                   title: l10n.vcardOption1,
-                  icon: Icons.file_download_outlined,
+                  icon: Icons.file_upload_outlined,
                   initiallyExpanded: true,
                   children: [
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
                         onPressed: _isImporting ? null : _pickFile,
-                        icon: const Icon(Icons.file_download),
+                        icon: const Icon(Icons.file_upload),
                         label: Text(l10n.vcardChooseFile),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: theme.colorScheme.primary,
