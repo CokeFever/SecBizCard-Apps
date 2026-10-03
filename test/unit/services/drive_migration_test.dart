@@ -90,14 +90,25 @@ class MigrationFakeDrive implements DriveRepository {
   Future<Either<Failure, String?>> searchBackupFile(
     String fileName, {
     String? parentFolderId,
+    bool rootOnly = false,
   }) async {
     if (fileName != _backupFileName) return right(null);
     if (parentFolderId == _folderId) {
       return right(files.containsKey(folderFileId) ? folderFileId : null);
     }
-    // No parent → look in root.
+    if (rootOnly) {
+      // Legacy-root lookup: only the actual root file.
+      return right(files.containsKey(rootFileId) ? rootFileId : null);
+    }
+    // "Search anywhere": real Drive matches a file in ANY parent. Prefer the
+    // in-folder file if present, else fall back to the root file.
+    if (files.containsKey(folderFileId)) return right(folderFileId);
     return right(files.containsKey(rootFileId) ? rootFileId : null);
   }
+
+  @override
+  Future<Either<Failure, String?>> searchRootBackupFile(String fileName) =>
+      searchBackupFile(fileName, rootOnly: true);
 
   @override
   Future<Either<Failure, bool>> checkBackupExists(String fileName) async {

@@ -114,15 +114,33 @@ class FakeDriveRepository implements DriveRepository {
   Future<Either<Failure, String?>> searchBackupFile(
     String fileName, {
     String? parentFolderId,
+    bool rootOnly = false,
   }) async {
     if (fileName != backupFileName) return right(null);
     for (final entry in _files.keys) {
-      if (_parents[entry] == parentFolderId) {
-        return right(entry);
+      final parent = _parents[entry];
+      final bool matches;
+      if (parentFolderId != null) {
+        // Constrained to a specific folder.
+        matches = parent == parentFolderId;
+      } else if (rootOnly) {
+        // Legacy-root lookup: ONLY a file that actually lives in root (null
+        // parent) matches. An in-folder file must never be seen as "root".
+        matches = parent == null;
+      } else {
+        // "Search anywhere": real Drive matches a file in ANY parent, so the
+        // fake must too. (The old fake modeled this as root-only, which hid
+        // the self-delete bug.)
+        matches = true;
       }
+      if (matches) return right(entry);
     }
     return right(null);
   }
+
+  @override
+  Future<Either<Failure, String?>> searchRootBackupFile(String fileName) =>
+      searchBackupFile(fileName, rootOnly: true);
 
   @override
   Future<Either<Failure, bool>> checkBackupExists(String fileName) async {
@@ -598,6 +616,70 @@ void main() {
       final out =
           await codec.decrypt(written, uid: uid, magicWord: 'mysecretword');
       expect(ZipDecoder().decodeBytes(out).findFile('data.json'), isNotNull);
+    });
+
+    // ISSUE 1 (+182) regression — brand-new account self-delete.
+    //
+    // Repro of the TestFlight report: a brand-new account (NO cloud file
+    // anywhere) runs its first backup. The success toast fired but the
+    // SecBizCard folder ended up empty, so the next restore failed. Root cause:
+    // the migrate step's "find legacy ROOT file" used an unscoped
+    // searchBackupFile, which matched the file JUST created inside the folder
+    // and then deleted it.
+    //
+    // This test MUST fail against the pre-fix source (the in-folder file is
+    // deleted / restore fails) and pass after (root-scoped search +
+    // rootId==newHomeId guard). It depends on the fakes modeling a no-parent,
+    // non-rootOnly search as "match any parent" (real-Drive semantics).
+    test('backup() on a brand-new account does NOT self-delete the new file',
+        () async {
+      // Brand-new account: seed NOTHING in Drive.
+      final contact = UserProfile(
+        uid: 'c1',
+        email: 'c1@test.com',
+        displayName: 'New Account Contact',
+        phone: '123',
+        createdAt: DateTime.now(),
+      );
+      when(mockContactsRepo.getSavedContacts())
+          .thenAnswer((_) async => right([contact]));
+      when(mockContactsRepo.saveContactLocally(any))
+          .thenAnswer((_) async => right(null));
+
+      final service = container.read(backupServiceProvider);
+
+      // First backup of a fresh account.
+      final result = await service.backup(force: true);
+      expect(result.isRight(), true,
+          reason: result.fold((l) => l.message, (r) => ''));
+
+      // The file was CREATED inside the SecBizCard folder.
+      expect(fakeDriveRepo.lastUploadExistingFileId, isNull);
+      expect(fakeDriveRepo.lastUploadParentFolderId,
+          FakeDriveRepository.folderId);
+      final createdId = fakeDriveRepo.lastUploadResultId!;
+
+      // (a) The in-folder file STILL EXISTS (was not self-deleted by migrate).
+      expect(
+        fakeDriveRepo.hasFileWithParent(
+            createdId, FakeDriveRepository.folderId),
+        true,
+        reason: 'the just-created in-folder backup must survive the migrate '
+            'step; +182 deleted it',
+      );
+      // (b) Nothing was deleted (there was no legacy root file to migrate).
+      expect(fakeDriveRepo.deleted, isEmpty);
+
+      // (c) A subsequent restore finds the file and succeeds.
+      final restored = await service.restore();
+      expect(restored.isRight(), true,
+          reason: restored.fold((l) => l.message, (r) => ''));
+      verify(
+        mockContactsRepo.saveContactLocally(
+          argThat(predicate<UserProfile>(
+              (u) => u.displayName == 'New Account Contact')),
+        ),
+      ).called(1);
     });
   });
 }
