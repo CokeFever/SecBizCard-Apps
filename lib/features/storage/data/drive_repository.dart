@@ -169,9 +169,21 @@ class DriveRepository {
     }
   }
 
+  /// Finds a non-trashed backup file named [fileName].
+  ///
+  /// Parent scoping:
+  ///  - [parentFolderId] != null → constrain to that folder.
+  ///  - [parentFolderId] == null && [rootOnly] == true → constrain to My Drive
+  ///    root (`'root' in parents`). Use this for legacy-root lookups so a
+  ///    just-created in-folder file is NEVER matched as the "root" file (that
+  ///    bug caused the migrate step to delete the file it had just created).
+  ///  - [parentFolderId] == null && [rootOnly] == false → no parent constraint
+  ///    ("search anywhere"), matching a file in ANY folder. Used by callers
+  ///    like [checkBackupExists] that only care whether a backup exists at all.
   Future<Either<Failure, String?>> searchBackupFile(
     String fileName, {
     String? parentFolderId,
+    bool rootOnly = false,
   }) async {
     try {
       final apiResult = await _getDriveApi();
@@ -179,6 +191,8 @@ class DriveRepository {
         var q = "name = '$fileName' and trashed = false";
         if (parentFolderId != null) {
           q += " and '$parentFolderId' in parents";
+        } else if (rootOnly) {
+          q += " and 'root' in parents";
         }
         final fileList = await driveApi.files.list(
           q: q,
@@ -194,6 +208,11 @@ class DriveRepository {
       return left(ServerFailure(e.toString()));
     }
   }
+
+  /// Finds a non-trashed backup named [fileName] that lives directly in My
+  /// Drive root. Thin wrapper over [searchBackupFile] with `rootOnly: true`.
+  Future<Either<Failure, String?>> searchRootBackupFile(String fileName) =>
+      searchBackupFile(fileName, rootOnly: true);
 
   /// Helper for UI to check if backup exists
   Future<Either<Failure, bool>> checkBackupExists(String fileName) async {

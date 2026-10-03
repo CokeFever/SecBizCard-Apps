@@ -2148,12 +2148,16 @@ class MockDriveRepository extends _i1.Mock implements _i18.DriveRepository {
   _i7.Future<_i13.Either<_i14.Failure, String?>> searchBackupFile(
     String? fileName, {
     String? parentFolderId,
+    bool? rootOnly = false,
   }) =>
       (super.noSuchMethod(
         Invocation.method(
           #searchBackupFile,
           [fileName],
-          {#parentFolderId: parentFolderId},
+          {
+            #parentFolderId: parentFolderId,
+            #rootOnly: rootOnly,
+          },
         ),
         returnValue: _i7.Future<_i13.Either<_i14.Failure, String?>>.value(
             _i10.dummyValue<_i13.Either<_i14.Failure, String?>>(
@@ -2161,7 +2165,10 @@ class MockDriveRepository extends _i1.Mock implements _i18.DriveRepository {
           Invocation.method(
             #searchBackupFile,
             [fileName],
-            {#parentFolderId: parentFolderId},
+            {
+              #parentFolderId: parentFolderId,
+              #rootOnly: rootOnly,
+            },
           ),
         )),
         returnValueForMissingStub:
@@ -2171,7 +2178,37 @@ class MockDriveRepository extends _i1.Mock implements _i18.DriveRepository {
           Invocation.method(
             #searchBackupFile,
             [fileName],
-            {#parentFolderId: parentFolderId},
+            {
+              #parentFolderId: parentFolderId,
+              #rootOnly: rootOnly,
+            },
+          ),
+        )),
+      ) as _i7.Future<_i13.Either<_i14.Failure, String?>>);
+
+  @override
+  _i7.Future<_i13.Either<_i14.Failure, String?>> searchRootBackupFile(
+          String? fileName) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #searchRootBackupFile,
+          [fileName],
+        ),
+        returnValue: _i7.Future<_i13.Either<_i14.Failure, String?>>.value(
+            _i10.dummyValue<_i13.Either<_i14.Failure, String?>>(
+          this,
+          Invocation.method(
+            #searchRootBackupFile,
+            [fileName],
+          ),
+        )),
+        returnValueForMissingStub:
+            _i7.Future<_i13.Either<_i14.Failure, String?>>.value(
+                _i10.dummyValue<_i13.Either<_i14.Failure, String?>>(
+          this,
+          Invocation.method(
+            #searchRootBackupFile,
+            [fileName],
           ),
         )),
       ) as _i7.Future<_i13.Either<_i14.Failure, String?>>);

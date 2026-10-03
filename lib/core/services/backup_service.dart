@@ -308,8 +308,11 @@ class BackupService {
     required String folderId,
   }) async {
     try {
-      // Is there actually a legacy file in root to migrate?
-      final rootSearch = await _driveRepo.searchBackupFile(_backupFileName);
+      // Is there actually a legacy file in ROOT to migrate? Scope strictly to
+      // My Drive root — a plain "search anywhere" would match the file we just
+      // created inside the folder and we would then delete it.
+      final rootSearch =
+          await _driveRepo.searchRootBackupFile(_backupFileName);
       final rootId = rootSearch.match((l) => null, (r) => r);
       if (rootId == null) return; // nothing to migrate
 
@@ -320,6 +323,12 @@ class BackupService {
       );
       final newHomeId = newHomeSearch.match((l) => null, (r) => r);
       if (newHomeId == null) return; // new home not written; keep root
+
+      // Hard guard: never delete when the resolved root match IS the in-folder
+      // file (same id). This is the self-delete that corrupted brand-new
+      // accounts; even if a future search regression resolves the in-folder
+      // file as "root", this makes the delete impossible.
+      if (rootId == newHomeId) return;
 
       final downloadResult = await _driveRepo.downloadFile(newHomeId);
       final bytes = downloadResult.match((l) => null, (b) => b);
@@ -592,7 +601,12 @@ class BackupService {
         inFolderId = newHome.match((l) => null, (r) => r);
       }
 
-      final rootSearch = await _driveRepo.searchBackupFile(_backupFileName);
+      // Scope the legacy lookup strictly to My Drive root. A plain "search
+      // anywhere" would match the in-folder file and could resolve it as the
+      // "root" source, leading the migrate-then-delete step to delete the very
+      // file we just repacked.
+      final rootSearch =
+          await _driveRepo.searchRootBackupFile(_backupFileName);
       final rootId = rootSearch.match((l) => null, (r) => r);
 
       // The file we download+decrypt to get the current ZIP: prefer the
