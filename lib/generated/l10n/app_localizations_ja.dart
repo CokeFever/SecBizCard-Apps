@@ -1246,7 +1246,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get vcardHowItWorksDesc =>
-      'お好みの AI アプリ（ChatGPT、Gemini、Grok など）で名刺の写真をスキャンし、結果を vCard 2.1 形式にするよう依頼してください。';
+      'お好みの AI アプリ（ChatGPT、Gemini、Grok など）で 1 枚以上の名刺写真（1 回につき最大 6 枚程度がおすすめ）をスキャンし、それぞれの結果を vCard 2.1 形式にするよう依頼してください。';
 
   @override
   String get vcardCopyPrompt => 'AI プロンプトをコピー';

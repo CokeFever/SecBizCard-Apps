@@ -27,6 +27,19 @@ bool looksLikeVCard(String input) {
   return upper.contains('BEGIN:VCARD') && upper.contains('END:VCARD');
 }
 
+/// The prompt copied to the clipboard by the "Copy AI Prompt" button.
+///
+/// Intentionally hardcoded ENGLISH (it is fed to an LLM such as ChatGPT,
+/// Gemini, or Grok, not shown as app UI, so it is NOT localized). It instructs
+/// the AI to handle a photo that may contain 1 to 6 business cards, emit one
+/// vCard 2.1 entry per card, and crop/straighten each card.
+const String kVCardAiPrompt =
+    'I have one or more photos of business cards. Each photo may contain 1 to 6 business cards. Please:\n'
+    '1. Detect every business card in the photo(s) and extract all contact information for EACH card separately.\n'
+    '2. For each card, create one vCard 2.1 (.vcf) entry. If there are multiple cards, concatenate the entries into a single block — one BEGIN:VCARD...END:VCARD block per card, back to back.\n'
+    '3. Also crop and straighten each business card from the photo(s) and provide each as a clean, individual image.\n\n'
+    'Finally, output the combined vCard text (all entries together) so I can copy it directly.';
+
 class VCardImportScreen extends ConsumerStatefulWidget {
   const VCardImportScreen({super.key});
 
@@ -266,12 +279,12 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // "How it works" — explanation + Copy-AI-Prompt + the two
-                // numbered steps, in a collapsible section (open by default so
-                // first-run guidance stays visible).
+                // numbered steps, in a collapsible section (collapsed by
+                // default to keep the screen compact; tap to expand guidance).
                 CollapsibleSection(
                   title: l10n.vcardHowItWorks,
                   icon: Icons.lightbulb_outline,
-                  initiallyExpanded: true,
+                  initiallyExpanded: false,
                   children: [
                     Text(
                       l10n.vcardHowItWorksDesc,
@@ -286,13 +299,9 @@ class _VCardImportScreenState extends ConsumerState<VCardImportScreen> {
                       width: double.infinity,
                       child: FilledButton.tonalIcon(
                         onPressed: () {
-                          Clipboard.setData(const ClipboardData(
-                            text: 'I have a photo of a business card. Please:\n'
-                                '1. Extract all contact information from the card.\n'
-                                '2. Format the result as vCard 2.1 (.vcf) format.\n'
-                                '3. Also crop and straighten the business card area from the photo and provide it as a clean image.\n\n'
-                                'Please output the vCard text so I can copy it directly.',
-                          ));
+                          Clipboard.setData(
+                            const ClipboardData(text: kVCardAiPrompt),
+                          );
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(l10n.vcardPromptCopied),

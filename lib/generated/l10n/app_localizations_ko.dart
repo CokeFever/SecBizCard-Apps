@@ -1246,7 +1246,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get vcardHowItWorksDesc =>
-      '즐겨 사용하는 AI 앱(ChatGPT, Gemini, Grok 등)으로 명함 사진을 스캔하고 결과를 vCard 2.1 형식으로 만들어 달라고 요청하세요.';
+      '즐겨 사용하는 AI 앱(ChatGPT, Gemini, Grok 등)으로 한 장 이상의 명함 사진(한 번에 최대 6장 권장)을 스캔하고 각 결과를 vCard 2.1 형식으로 만들어 달라고 요청하세요.';
 
   @override
   String get vcardCopyPrompt => 'AI 프롬프트 복사';
