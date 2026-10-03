@@ -121,7 +121,7 @@ class AppDrawer extends ConsumerWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.file_download),
+            leading: const Icon(Icons.file_upload),
             title: Text(l10n.drawerImportVcard),
             onTap: () {
               _dismiss(context);
