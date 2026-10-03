@@ -290,3 +290,48 @@ sensitivity tweaks of that rule DON'T need another release. That's how
   工程最重。目前明確不做。
 
 負責線:sbc-card-ocr(偵測/裁切)+ sbc-flutter-mobile(native)。
+
+---
+
+## 已排程 1.6.3:瞄準框 +25% 預裁切(方向 A 的強化版)
+
+**狀態:已完成可行性診斷,排入 1.6.3(不進 1.6.2;1.6.2 收斂送審)。**
+完整診斷報告:`.agents/tasks/precrop-investigation/findings.md`。
+
+### 構想
+送進偵測前,先把拍攝照片裁切到「瞄準框向外擴 25%」的區域,再跑現有 OpenCV/Vision
+偵測。使用者本來就把名片對進框裡,預裁切能先砍掉框外雜訊(桌面、花紋、其他卡),
+讓邊緣偵測在單純背景下更容易鎖定單張卡。是上面「方向 A」的強化版(在**偵測前**裁,
+而非只在偵測失敗 fallback 時裁)。
+
+### 硬前提(必須先解,否則裁歪)
+瞄準框是**整個螢幕**的 normalized 座標,但預覽是相機畫面的 **cover-crop**——螢幕上
+看到的是感光元件畫面的放大子區域。所以「螢幕 85% 寬的框」≠「照片 85% 寬」,兩者差一個
+cover-crop 的縮放/偏移,而這個轉換**目前沒被計算或儲存**。native 現在是直接把 normalized
+rect 乘上全圖寬高(`OpenCVProcessor.kt` guide 區塊、`AppDelegate.swift` guidePixelRect),
+已有潛在誤差——目前只因 guide 是**軟性 IoU prior(W_GUIDE 0.15)**才沒出事。一旦升級成
+**硬裁切**,誤差會把名片裁掉一部分。
+
+### 建議實作(native,非 Dart)
+native 已收到 guideRect + 知道真實 EXIF 校正後的照片像素,是唯一能裁對的地方。
+- **Dart**(`scan_card_screen.dart` `_processWithOpenCV` / `_normalizedGuideRect`):
+  補送 cover-crop 幾何(預覽 aspect、cover vs letterbox、isLargeScreen),讓 native
+  能把「螢幕座標 guide」換算成「照片座標 guide」。用 `card_detection_config.dart` 加一個
+  可遠端開關的 flag + margin(預設 0.25)。
+- **Android**(`OpenCVProcessor.kt` `processBusinessCard`):算出 guide→像素 → 外擴 25%
+  → clamp 到影像邊界 → 在該 ROI 跑偵測 → ROI 角點換算回全圖座標。
+- **iOS**(`AppDelegate.swift` `processImage`):baked 方向後,guidePixelRect 外擴 25% +
+  clamp → `CIImage.cropped(to:)` → 在 crop 上跑 Vision → 偵測點加回 crop 原點。
+- 評分模型不動(`CardScoring.swift` / `object S` 常數維持)。
+
+### 必備 fallback(防 regression)
+兩階段:(1) 先在 guide+25% ROI 偵測 →(2) 分數不過 `minAcceptScore` 就**退回全圖偵測**
+(現狀 code path)→(3) 再退回 guide 區域手動裁切。保證「只會更好或持平,絕不 regression」。
+預裁切是**多一次 first attempt**,不是取代。整個行為用 Remote Config flag 包起來可隨時關。
+
+### 風險(各 form factor 都要真機驗)
+cover-crop 誤差在 tablet/foldable(預覽與螢幕 aspect 差很多)可能較大;25% margin 緩解但
+無法完全吸收。horizontal/vertical + phone/large-screen 各變體的 guide 不同,預裁切要用
+使用者當下選的變體。使用者沒對準 → 卡片部分落在 ROI 外 → 靠全圖 fallback 接住。
+
+負責線:sbc-flutter-mobile(Android Kotlin + iOS Swift native)+ sbc-card-ocr(偵測調校)。
