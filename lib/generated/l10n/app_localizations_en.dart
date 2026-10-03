@@ -921,6 +921,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editContactEmail => 'Email';
 
   @override
+  String get editContactMobile => 'Mobile';
+
+  @override
   String get editContactOriginalScan => 'Original Scan';
 
   @override

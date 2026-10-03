@@ -889,6 +889,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get editContactEmail => '电子邮件';
 
   @override
+  String get editContactMobile => '手机';
+
+  @override
   String get editContactOriginalScan => '原始扫描';
 
   @override
@@ -2498,6 +2501,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get editContactEmail => '電子郵件';
+
+  @override
+  String get editContactMobile => '行動電話';
 
   @override
   String get editContactOriginalScan => '原始掃描';
