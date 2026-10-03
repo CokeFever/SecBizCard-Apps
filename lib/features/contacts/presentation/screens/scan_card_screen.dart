@@ -16,6 +16,26 @@ import 'package:secbizcard/features/settings/data/ocr_settings_service.dart';
 import 'package:secbizcard/core/responsive/breakpoints.dart';
 import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
+/// Pure helper: the width (logical px) of the landscape left column that holds
+/// the Horizontal/Vertical toggle plus the hint pill.
+///
+/// The guide frame is centered; in landscape (always a large screen — phones
+/// are portrait-locked) its WIDEST mode is the horizontal guide whose width is
+/// `0.75 * shortestSide`. Sizing the column off the wider guide guarantees it
+/// clears the frame in BOTH guide modes and never reflows when the user
+/// toggles. The column occupies the gutter from the left inset (16) to the
+/// frame, minus a 24px gap before the frame, clamped to a readable band.
+///
+/// Exposed as a top-level pure function so the layout tests can call it with
+/// the same constants the widget uses (no [BuildContext] needed).
+double landscapeLeftColumnWidth(Size size) {
+  final longSide = size.shortestSide * 0.75;
+  final widestGuideW = longSide; // horizontal guide is the wider mode
+  final frameLeft = (size.width - widestGuideW) / 2;
+  final avail = frameLeft - 16 /* left inset */ - 24 /* gap before frame */;
+  return avail.clamp(160.0, 360.0);
+}
+
 class ScanCardScreen extends ConsumerStatefulWidget {
   const ScanCardScreen({super.key});
 
@@ -627,155 +647,61 @@ class _ScanCardScreenState extends ConsumerState<ScanCardScreen>
               ),
             ),
 
-          // Orientation Toggle Overlay (hidden during processing).
-          // Portrait (phones + iPad portrait): top-center, horizontal chips.
-          // Landscape (iPad only): left edge, vertically centered, stacked.
+          // Toggle + instruction hint (hidden during processing).
+          // LANDSCAPE (iPad / unfolded foldables — always a large screen since
+          // phones are portrait-locked): a single left-anchored, vertically
+          // centered, width-constrained column — Horizontal/Vertical toggle on
+          // top, hint beneath. Sizing the column off the WIDER (horizontal)
+          // guide keeps it clear of the centered frame in BOTH guide modes and
+          // clear of the right-edge capture button, with the hint text wrapping
+          // inside the constrained width. This fixes the tall vertical frame
+          // overlapping the old top-center hint on iPad / iPad mini landscape.
+          // PORTRAIT (phones + iPad portrait): unchanged — toggle top-center,
+          // hint just below it, both centered full-width.
           if (!_isProcessing)
             if (isLandscape)
               Positioned(
-                left: 16,
-                top: 0,
-                bottom: 0,
-                child: Center(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black54,
-                      borderRadius: BorderRadius.circular(30),
-                    ),
+                left: 16 + padding.left,
+                top: padding.top + 16,
+                bottom: padding.bottom + 16,
+                child: SizedBox(
+                  width: _landscapeLeftColumnWidth(size),
+                  child: Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildToggleOption(
-                          label: AppLocalizations.of(context)!.scanToggleHorizontal,
-                          icon: Icons.crop_landscape,
-                          isSelected: !_isVertical,
-                          onTap: () => setState(() => _isVertical = false),
-                        ),
-                        _buildToggleOption(
-                          label: AppLocalizations.of(context)!.scanToggleVertical,
-                          icon: Icons.crop_portrait,
-                          isSelected: _isVertical,
-                          onTap: () => setState(() => _isVertical = true),
-                        ),
+                        _buildToggleContainer(context, Axis.horizontal),
+                        const SizedBox(height: 12),
+                        _buildHintPill(context),
                       ],
                     ),
                   ),
                 ),
               )
-            else
+            else ...[
               Positioned(
                 top: padding.top + 52,
                 left: 0,
                 right: 0,
                 child: Center(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black54,
-                      borderRadius: BorderRadius.circular(30),
+                  child: _buildToggleContainer(context, Axis.horizontal),
+                ),
+              ),
+              Positioned(
+                top: padding.top + 52 + 52,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: size.width * 0.9,
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _buildToggleOption(
-                          label: AppLocalizations.of(context)!.scanToggleHorizontal,
-                          icon: Icons.crop_landscape,
-                          isSelected: !_isVertical,
-                          onTap: () => setState(() => _isVertical = false),
-                        ),
-                        _buildToggleOption(
-                          label: AppLocalizations.of(context)!.scanToggleVertical,
-                          icon: Icons.crop_portrait,
-                          isSelected: _isVertical,
-                          onTap: () => setState(() => _isVertical = true),
-                        ),
-                      ],
-                    ),
+                    child: _buildHintPill(context),
                   ),
                 ),
               ),
-
-          // Instruction Text (hidden during processing).
-          // Anchored to the TOP of the screen — below the Horizontal/Vertical
-          // toggle and ABOVE the centered guide frame — so it never overlaps
-          // the frame in either orientation (the vertical frame is tall and
-          // used to collide with the old bottom-anchored pill) and stays clear
-          // of the bottom capture button. In portrait the toggle lives at
-          // top-center (padding.top + 52, ~52px tall), so the hint sits just
-          // under it; in landscape the toggle is on the LEFT edge, leaving the
-          // top-center free, so the hint anchors near the top inset. The pill
-          // width is constrained and the tip rows wrap via Flexible, keeping it
-          // readable across narrow/wide phones, foldables, and tablets/iPad.
-          if (!_isProcessing)
-            Positioned(
-              top: isLandscape
-                  ? padding.top + 16
-                  : padding.top + 52 + 52,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: size.width * 0.9,
-                  ),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.black54,
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.scanCardHint,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 16),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.credit_card,
-                                size: 13, color: Colors.white70),
-                            const SizedBox(width: 5),
-                            Flexible(
-                              child: Text(
-                                AppLocalizations.of(context)!.scanCardSingleTip,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                    color: Colors.white70, fontSize: 12),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.wallpaper_outlined,
-                                size: 13, color: Colors.white70),
-                            const SizedBox(width: 5),
-                            Flexible(
-                              child: Text(
-                                AppLocalizations.of(context)!
-                                    .scanCardBackgroundTip,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                    color: Colors.white70, fontSize: 12),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            ],
 
           // Back Button (always visible)
           Positioned(
@@ -968,6 +894,105 @@ class _ScanCardScreenState extends ConsumerState<ScanCardScreen>
       ),
     );
   }
+
+  /// The Horizontal/Vertical guide-mode toggle pill. Both portrait and
+  /// landscape now pass [Axis.horizontal] so the two chips sit side by side;
+  /// the retired landscape vertical [Column] stacking is gone. Chip styling,
+  /// icons, labels, and the `setState(() => _isVertical = ...)` callbacks are
+  /// unchanged from the inline versions this replaces.
+  Widget _buildToggleContainer(BuildContext context, Axis axis) {
+    final children = <Widget>[
+      _buildToggleOption(
+        label: AppLocalizations.of(context)!.scanToggleHorizontal,
+        icon: Icons.crop_landscape,
+        isSelected: !_isVertical,
+        onTap: () => setState(() => _isVertical = false),
+      ),
+      _buildToggleOption(
+        label: AppLocalizations.of(context)!.scanToggleVertical,
+        icon: Icons.crop_portrait,
+        isSelected: _isVertical,
+        onTap: () => setState(() => _isVertical = true),
+      ),
+    ];
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.black54,
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: axis == Axis.horizontal
+          ? Row(mainAxisSize: MainAxisSize.min, children: children)
+          : Column(mainAxisSize: MainAxisSize.min, children: children),
+    );
+  }
+
+  /// The three-line instruction pill (title + two tip rows). Uses
+  /// [MainAxisSize.min] + [Flexible] so the tip text wraps when the caller
+  /// constrains the width; the caller supplies any width constraint (portrait
+  /// wraps this in its existing [ConstrainedBox], landscape sizes the parent
+  /// [SizedBox]). Content, keys, pill styling, and text styles are unchanged
+  /// from the inline version this replaces.
+  Widget _buildHintPill(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 24,
+        vertical: 12,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.black54,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            AppLocalizations.of(context)!.scanCardHint,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white, fontSize: 16),
+          ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.credit_card, size: 13, color: Colors.white70),
+              const SizedBox(width: 5),
+              Flexible(
+                child: Text(
+                  AppLocalizations.of(context)!.scanCardSingleTip,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.wallpaper_outlined,
+                  size: 13, color: Colors.white70),
+              const SizedBox(width: 5),
+              Flexible(
+                child: Text(
+                  AppLocalizations.of(context)!.scanCardBackgroundTip,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Width (logical px) of the landscape left column that holds the toggle +
+  /// hint, chosen so the column clears the centered guide frame and never
+  /// reflows when the user toggles guide mode. Delegates to the top-level pure
+  /// [landscapeLeftColumnWidth] so the formula is unit-testable without a
+  /// [BuildContext].
+  double _landscapeLeftColumnWidth(Size size) =>
+      landscapeLeftColumnWidth(size);
 
   Widget _buildToggleOption({
     required String label,
