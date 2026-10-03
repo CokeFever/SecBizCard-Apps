@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:secbizcard/core/services/backup_service.dart';
 import 'package:secbizcard/core/errors/failure.dart';
 import 'package:secbizcard/core/responsive/breakpoints.dart';
+import 'package:secbizcard/core/widgets/collapsible_section.dart';
 import 'package:secbizcard/features/settings/data/magic_word_service.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -374,151 +375,145 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
         ),
       ),
+      // SafeArea(bottom) + a plain scrollable column (Task 2). Content scrolls
+      // naturally and the two bottom buttons sit at the end of the document
+      // with normal spacing — no Spacer()/IntrinsicHeight compression — while
+      // the bottom padding adds the system inset so they clear the Android nav
+      // bar.
       body: SafeArea(
         bottom: true,
-        child: LayoutBuilder(
-          builder: (context, viewport) => SingleChildScrollView(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: 24,
+            bottom: 24 + MediaQuery.paddingOf(context).bottom,
+          ),
+          child: Center(
             child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: viewport.maxHeight),
-              child: IntrinsicHeight(
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxWidth: Breakpoints.maxContentWidth,
-                    ),
-                    child: Container(
-        padding: EdgeInsets.only(
-          left: 24,
-          right: 24,
-          top: 24,
-          bottom: 24 + MediaQuery.paddingOf(context).bottom,
-        ),
-        width: double.infinity,
-        child: Column(
-          children: [
-            const Icon(
-              Icons.cloud_sync_outlined,
-              size: 80,
-              color: Colors.blueGrey,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              l10n.backupDriveTitle,
-              style: GoogleFonts.inter(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.backupDriveDesc,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(color: Colors.grey[600]),
-            ),
-            const SizedBox(height: 48),
-
-            // Status Card
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                ),
+              constraints: const BoxConstraints(
+                maxWidth: Breakpoints.maxContentWidth,
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (_checkingBackup)
-                    const LinearProgressIndicator(minHeight: 2),
+                  const Icon(
+                    Icons.cloud_sync_outlined,
+                    size: 80,
+                    color: Colors.blueGrey,
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    l10n.backupDriveTitle,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.backupDriveDesc,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(color: Colors.grey[600]),
+                  ),
+                  const SizedBox(height: 24),
 
-                  if (_isLoading) ...[
-                    const CircularProgressIndicator(),
-                    const SizedBox(height: 16),
-                    Text(_statusMessage ?? l10n.backupProcessing),
-                  ] else ...[
-                    Text(
-                      l10n.backupLastBackupLabel,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontSize: 12,
+                  // Last Backup status card (always visible).
+                  SectionCard(
+                    child: Column(
+                      children: [
+                        if (_checkingBackup)
+                          const LinearProgressIndicator(minHeight: 2),
+                        if (_isLoading) ...[
+                          const CircularProgressIndicator(),
+                          const SizedBox(height: 16),
+                          Text(_statusMessage ?? l10n.backupProcessing),
+                        ] else ...[
+                          Text(
+                            l10n.backupLastBackupLabel,
+                            style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                              fontSize: 12,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _lastBackupTime != null
+                                ? DateFormat.yMMMd()
+                                    .add_jm()
+                                    .format(_lastBackupTime!)
+                                : l10n.backupNever,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                          if (_statusMessage != null) ...[
+                            const SizedBox(height: 12),
+                            Text(
+                              _statusMessage!,
+                              style: TextStyle(
+                                color: _statusIsError
+                                    ? Colors.red
+                                    : Colors.green,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+                  // Magic Word section (always visible).
+                  _buildMagicWordSection(l10n),
+
+                  const SizedBox(height: 24),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _isLoading ? null : _performBackup,
+                      icon: const Icon(Icons.upload),
+                      label: Text(l10n.backupNowButton),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).primaryColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _lastBackupTime != null
-                          ? DateFormat.yMMMd().add_jm().format(_lastBackupTime!)
-                          : l10n.backupNever,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed:
+                          _isLoading || _checkingBackup || !_hasRemoteBackup
+                              ? null
+                              : _performRestore,
+                      icon: const Icon(Icons.download),
+                      label: Text(
+                        _checkingBackup
+                            ? l10n.backupChecking
+                            : (_hasRemoteBackup
+                                ? l10n.backupRestoreFromBackup
+                                : l10n.backupNoBackupFound),
                       ),
-                    ),
-                    if (_statusMessage != null) ...[
-                      const SizedBox(height: 12),
-                      Text(
-                        _statusMessage!,
-                        style: TextStyle(
-                          color: _statusIsError ? Colors.red : Colors.green,
-                          fontWeight: FontWeight.w500,
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        foregroundColor: Theme.of(context).colorScheme.primary,
+                        side: BorderSide(
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
-                    ],
-                  ],
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-            _buildMagicWordSection(l10n),
-
-            const Spacer(),
-
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _isLoading ? null : _performBackup,
-                icon: const Icon(Icons.upload),
-                label: Text(l10n.backupNowButton),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: _isLoading || _checkingBackup || !_hasRemoteBackup
-                    ? null
-                    : _performRestore,
-                icon: const Icon(Icons.download),
-                label: Text(
-                  _checkingBackup
-                      ? l10n.backupChecking
-                      : (_hasRemoteBackup
-                            ? l10n.backupRestoreFromBackup
-                            : l10n.backupNoBackupFound),
-                ),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  foregroundColor: Theme.of(context).colorScheme.primary,
-                  side: BorderSide(
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
-          ],
-                      ),
                     ),
                   ),
-                ),
+                ],
               ),
             ),
           ),
@@ -532,13 +527,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   /// reveal + copy so the owner can send it to a secretary.
   Widget _buildMagicWordSection(AppLocalizations l10n) {
     final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.colorScheme.outlineVariant),
-      ),
+    return SectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
