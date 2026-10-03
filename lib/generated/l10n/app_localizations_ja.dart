@@ -900,6 +900,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get editContactEmail => 'メール';
 
   @override
+  String get editContactMobile => '携帯電話';
+
+  @override
   String get editContactOriginalScan => '元のスキャン';
 
   @override

@@ -1747,6 +1747,12 @@ abstract class AppLocalizations {
   /// **'Email'**
   String get editContactEmail;
 
+  /// Label for the mobile phone field in the contact edit/detail screens
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile'**
+  String get editContactMobile;
+
   /// No description provided for @editContactOriginalScan.
   ///
   /// In en, this message translates to:

@@ -901,6 +901,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get editContactEmail => '이메일';
 
   @override
+  String get editContactMobile => '휴대전화';
+
+  @override
   String get editContactOriginalScan => '원본 스캔';
 
   @override
