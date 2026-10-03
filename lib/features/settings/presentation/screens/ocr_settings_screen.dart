@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:secbizcard/core/app_links.dart';
 import 'package:secbizcard/core/responsive/adaptive_container.dart';
+import 'package:secbizcard/core/widgets/collapsible_section.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/core/responsive/breakpoints.dart';
 import 'package:secbizcard/features/settings/data/ocr_settings_service.dart';
@@ -332,29 +333,27 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen>
               const SizedBox(height: 24),
 
               // How-to
-              _expandable(
-                theme,
+              CollapsibleSection(
                 title: l10n.ocrHowToTitle,
-                children: [
-                  _StepText(l10n.ocrHowTo1),
-                  _StepText(l10n.ocrHowTo2),
-                  _StepText(l10n.ocrHowTo3),
-                  _StepText(l10n.ocrHowTo4),
-                ],
                 actionLabel: l10n.ocrOpenConsole,
                 actionUrl:
                     'https://console.cloud.google.com/apis/library/vision.googleapis.com',
+                children: [
+                  SectionStepText(l10n.ocrHowTo1),
+                  SectionStepText(l10n.ocrHowTo2),
+                  SectionStepText(l10n.ocrHowTo3),
+                  SectionStepText(l10n.ocrHowTo4),
+                ],
               ),
               const SizedBox(height: 12),
               // Safety — lead with "your key stays on your device".
-              _expandable(
-                theme,
+              CollapsibleSection(
                 title: l10n.ocrSafetyTitle,
                 children: [
-                  _StepText(l10n.ocrSafety1),
-                  _StepText(l10n.ocrSafety2),
-                  _StepText(l10n.ocrSafety3),
-                  _StepText(l10n.ocrSafety4),
+                  SectionStepText(l10n.ocrSafety1),
+                  SectionStepText(l10n.ocrSafety2),
+                  SectionStepText(l10n.ocrSafety3),
+                  SectionStepText(l10n.ocrSafety4),
                 ],
               ),
             ],
@@ -397,8 +396,7 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen>
       );
     }
 
-    return _card(
-      theme,
+    return SectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -579,8 +577,7 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen>
 
   /// ② Basic-only explanation of the shared 800/month free pool + per-user 5.
   Widget _buildSharedPoolRule(ThemeData theme, AppLocalizations l10n) {
-    return _card(
-      theme,
+    return SectionCard(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -993,80 +990,4 @@ class _OcrSettingsScreenState extends ConsumerState<OcrSettingsScreen>
     );
   }
 
-  Widget _card(ThemeData theme, {required Widget child}) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.colorScheme.outlineVariant),
-      ),
-      child: child,
-    );
-  }
-
-  Widget _expandable(
-    ThemeData theme, {
-    required String title,
-    required List<Widget> children,
-    String? actionLabel,
-    String? actionUrl,
-    bool initiallyExpanded = false,
-  }) {
-    return Theme(
-      data: theme.copyWith(dividerColor: Colors.transparent),
-      child: ExpansionTile(
-        tilePadding: EdgeInsets.zero,
-        initiallyExpanded: initiallyExpanded,
-        childrenPadding: const EdgeInsets.only(bottom: 12),
-        expandedCrossAxisAlignment: CrossAxisAlignment.start,
-        expandedAlignment: Alignment.centerLeft,
-        title: Text(
-          title,
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-        ),
-        children: [
-          ...children,
-          if (actionLabel != null && actionUrl != null) ...[
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: () => launchUrl(
-                  Uri.parse(actionUrl),
-                  mode: LaunchMode.externalApplication,
-                ),
-                icon: const Icon(Icons.open_in_new, size: 16),
-                label: Text(actionLabel),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _StepText extends StatelessWidget {
-  const _StepText(this.text);
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
-      child: SizedBox(
-        width: double.infinity,
-        child: Text(
-          text,
-          textAlign: TextAlign.left,
-          style: TextStyle(
-            fontSize: 13,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-            height: 1.4,
-          ),
-        ),
-      ),
-    );
-  }
 }
