@@ -695,67 +695,83 @@ class _ScanCardScreenState extends ConsumerState<ScanCardScreen>
               ),
 
           // Instruction Text (hidden during processing).
-          // Shifted up by the bottom inset to keep its spacing above the
-          // capture button, which is itself offset by the same inset.
+          // Anchored to the TOP of the screen — below the Horizontal/Vertical
+          // toggle and ABOVE the centered guide frame — so it never overlaps
+          // the frame in either orientation (the vertical frame is tall and
+          // used to collide with the old bottom-anchored pill) and stays clear
+          // of the bottom capture button. In portrait the toggle lives at
+          // top-center (padding.top + 52, ~52px tall), so the hint sits just
+          // under it; in landscape the toggle is on the LEFT edge, leaving the
+          // top-center free, so the hint anchors near the top inset. The pill
+          // width is constrained and the tip rows wrap via Flexible, keeping it
+          // readable across narrow/wide phones, foldables, and tablets/iPad.
           if (!_isProcessing)
             Positioned(
-              bottom: padding.bottom + 160,
+              top: isLandscape
+                  ? padding.top + 16
+                  : padding.top + 52 + 52,
               left: 0,
               right: 0,
               child: Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: size.width * 0.9,
                   ),
-                  decoration: BoxDecoration(
-                    color: Colors.black54,
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.scanCardHint,
-                        style: const TextStyle(
-                            color: Colors.white, fontSize: 16),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.credit_card,
-                              size: 13, color: Colors.white70),
-                          const SizedBox(width: 5),
-                          Flexible(
-                            child: Text(
-                              AppLocalizations.of(context)!.scanCardSingleTip,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                  color: Colors.white70, fontSize: 12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black54,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.scanCardHint,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 16),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.credit_card,
+                                size: 13, color: Colors.white70),
+                            const SizedBox(width: 5),
+                            Flexible(
+                              child: Text(
+                                AppLocalizations.of(context)!.scanCardSingleTip,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                    color: Colors.white70, fontSize: 12),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.wallpaper_outlined,
-                              size: 13, color: Colors.white70),
-                          const SizedBox(width: 5),
-                          Flexible(
-                            child: Text(
-                              AppLocalizations.of(context)!
-                                  .scanCardBackgroundTip,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                  color: Colors.white70, fontSize: 12),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.wallpaper_outlined,
+                                size: 13, color: Colors.white70),
+                            const SizedBox(width: 5),
+                            Flexible(
+                              child: Text(
+                                AppLocalizations.of(context)!
+                                    .scanCardBackgroundTip,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                    color: Colors.white70, fontSize: 12),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
