@@ -302,7 +302,7 @@ class AppDrawer extends ConsumerWidget {
                     final packageInfo = snapshot.data;
                     if (packageInfo == null) return const SizedBox.shrink();
                     return Text(
-                      'v${packageInfo.version}',
+                      'v${packageInfo.version} (${packageInfo.buildNumber})',
                       style: GoogleFonts.inter(color: Colors.grey, fontSize: 11),
                     );
                   },
