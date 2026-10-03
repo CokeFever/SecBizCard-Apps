@@ -374,15 +374,26 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
         ),
       ),
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            maxWidth: Breakpoints.maxContentWidth,
-            minHeight: double.infinity,
-          ),
-          child: Container(
-        padding: const EdgeInsets.all(24),
+      body: SafeArea(
+        bottom: true,
+        child: LayoutBuilder(
+          builder: (context, viewport) => SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: viewport.maxHeight),
+              child: IntrinsicHeight(
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: Breakpoints.maxContentWidth,
+                    ),
+                    child: Container(
+        padding: EdgeInsets.only(
+          left: 24,
+          right: 24,
+          top: 24,
+          bottom: 24 + MediaQuery.paddingOf(context).bottom,
+        ),
         width: double.infinity,
         child: Column(
           children: [
@@ -504,8 +515,13 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
             ),
             const SizedBox(height: 32),
           ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
-        ),
         ),
       ),
     );

@@ -1630,11 +1630,14 @@ class MockProfileRepository extends _i1.Mock implements _i12.ProfileRepository {
 
   @override
   _i7.Future<_i13.Either<_i14.Failure, _i13.Unit>> createOrUpdateUser(
-          _i15.UserProfile? user) =>
+    _i15.UserProfile? user, {
+    bool? markModified = true,
+  }) =>
       (super.noSuchMethod(
         Invocation.method(
           #createOrUpdateUser,
           [user],
+          {#markModified: markModified},
         ),
         returnValue: _i7.Future<_i13.Either<_i14.Failure, _i13.Unit>>.value(
             _i10.dummyValue<_i13.Either<_i14.Failure, _i13.Unit>>(
@@ -1642,6 +1645,7 @@ class MockProfileRepository extends _i1.Mock implements _i12.ProfileRepository {
           Invocation.method(
             #createOrUpdateUser,
             [user],
+            {#markModified: markModified},
           ),
         )),
         returnValueForMissingStub:
@@ -1651,6 +1655,7 @@ class MockProfileRepository extends _i1.Mock implements _i12.ProfileRepository {
           Invocation.method(
             #createOrUpdateUser,
             [user],
+            {#markModified: markModified},
           ),
         )),
       ) as _i7.Future<_i13.Either<_i14.Failure, _i13.Unit>>);

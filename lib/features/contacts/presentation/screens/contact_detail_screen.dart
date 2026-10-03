@@ -529,6 +529,16 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
                     _copyToClipboard(_user.phone!, l10n.contactDetailLabelPhone),
               ),
 
+            if (_user.mobile != null && _user.mobile!.isNotEmpty)
+              _buildContactTile(
+                icon: Icons.smartphone,
+                label: l10n.editContactMobile,
+                value: _user.mobile!,
+                onTap: () => _launchPhone(_user.mobile!),
+                onLongPress: () =>
+                    _copyToClipboard(_user.mobile!, l10n.editContactMobile),
+              ),
+
             if (_user.title != null && _user.title!.isNotEmpty)
               _buildContactTile(
                 icon: Icons.work_outline,

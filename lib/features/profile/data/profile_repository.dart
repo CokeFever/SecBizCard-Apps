@@ -45,8 +45,9 @@ Stream<UserProfile?> userProfile(Ref ref) async* {
         emailVerifiedAt: user.emailVerified ? DateTime.now() : null,
       );
 
-      // Save to local storage
-      await repo.createOrUpdateUser(newProfile);
+      // Save to local storage. This is a system-driven own-profile bootstrap,
+      // not a user edit, so it must not stamp the backup-reminder timestamp.
+      await repo.createOrUpdateUser(newProfile, markModified: false);
 
       yield newProfile;
     },
@@ -54,7 +55,9 @@ Stream<UserProfile?> userProfile(Ref ref) async* {
       // Sync Google/Auth photoUrl if local is missing
       if (profile.photoUrl == null && user.photoURL != null) {
         final updated = profile.copyWith(photoUrl: user.photoURL);
-        await repo.createOrUpdateUser(updated);
+        // Auth photoUrl sync is a system-driven write, not a user edit, so it
+        // must not stamp the backup-reminder timestamp.
+        await repo.createOrUpdateUser(updated, markModified: false);
         yield updated;
       } else {
         yield profile;
@@ -80,7 +83,10 @@ class ProfileRepository {
     }
   }
 
-  Future<Either<Failure, Unit>> createOrUpdateUser(UserProfile user) async {
+  Future<Either<Failure, Unit>> createOrUpdateUser(
+    UserProfile user, {
+    bool markModified = true,
+  }) async {
     try {
       // 1. Move temporary image files to persistent storage if needed
       UserProfile processedUser = user;
@@ -111,10 +117,15 @@ class ProfileRepository {
       //    method and call saveUser directly, so they don't trip the reminder.
       //    Best-effort: the reminder timestamp must NEVER make a real save fail
       //    (e.g. if SharedPreferences is unavailable), so swallow its errors.
-      try {
-        await BackupReminderService().markDataModified();
-      } catch (_) {
-        /* reminder bookkeeping is non-critical */
+      //    The auth-driven own-profile auto-create/photo-sync writes pass
+      //    markModified:false so a brand-new empty account (whose only write is
+      //    its own profile row) is NOT flagged as having unbacked-up changes.
+      if (markModified) {
+        try {
+          await BackupReminderService().markDataModified();
+        } catch (_) {
+          /* reminder bookkeeping is non-critical */
+        }
       }
 
       return const Right(unit);
