@@ -375,7 +375,7 @@
   "vcardNoContactInfo": "無聯絡資訊",
   "vcardImportAction": "匯入",
   "vcardHowItWorks": "運作方式",
-  "vcardHowItWorksDesc": "使用您喜愛的 AI 應用程式（ChatGPT、Gemini、Grok 等）掃描名片照片，並請它將結果格式化為 vCard 2.1。",
+  "vcardHowItWorksDesc": "使用您喜愛的 AI 應用程式（ChatGPT、Gemini、Grok 等）掃描一張或多張名片照片（建議一次最多 6 張），並請它將每張結果格式化為 vCard 2.1。",
   "vcardCopyPrompt": "複製 AI 提示",
   "vcardPromptCopied": "已複製 AI 提示到剪貼簿！",
   "vcardThen": "接著：",

@@ -1273,7 +1273,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vcardHowItWorksDesc =>
-      'Use your favorite AI app (ChatGPT, Gemini, Grok, etc.) to scan a business card photo and ask it to format the result as vCard 2.1.';
+      'Use your favorite AI app (ChatGPT, Gemini, Grok, etc.) to scan one or more business card photos (up to 6 cards at a time works well) and ask it to format each result as vCard 2.1.';
 
   @override
   String get vcardCopyPrompt => 'Copy AI Prompt';

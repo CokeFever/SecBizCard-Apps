@@ -1228,7 +1228,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get vcardHowItWorksDesc =>
-      '使用您喜爱的 AI 应用（ChatGPT、Gemini、Grok 等）扫描名片照片，并让它将结果格式化为 vCard 2.1。';
+      '使用您喜爱的 AI 应用（ChatGPT、Gemini、Grok 等）扫描一张或多张名片照片（建议一次最多 6 张），并让它将每张结果格式化为 vCard 2.1。';
 
   @override
   String get vcardCopyPrompt => '复制 AI 提示';
@@ -2842,7 +2842,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get vcardHowItWorksDesc =>
-      '使用您喜愛的 AI 應用程式（ChatGPT、Gemini、Grok 等）掃描名片照片，並請它將結果格式化為 vCard 2.1。';
+      '使用您喜愛的 AI 應用程式（ChatGPT、Gemini、Grok 等）掃描一張或多張名片照片（建議一次最多 6 張），並請它將每張結果格式化為 vCard 2.1。';
 
   @override
   String get vcardCopyPrompt => '複製 AI 提示';
