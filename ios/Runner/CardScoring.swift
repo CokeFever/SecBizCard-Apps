@@ -49,6 +49,14 @@ enum CardScoring {
         // the flag allows an emergency rollback to the legacy x+y sort from the
         // console. See docs/card_detection_scoring.md.
         var useCentroidCornerSort = true
+        // Guide+25% pre-crop (route A). usePrecrop defaults ON; runs detection
+        // on the guide region (expanded by precropMarginRatio) FIRST, then
+        // falls back to full-image detection on a miss. The mandatory
+        // full-image fallback makes ON-by-default unable to regress detection.
+        // Flip OFF from the console as a remote kill-switch. See
+        // docs/card_detection_scoring.md.
+        var usePrecrop = true
+        var precropMarginRatio = 0.25
 
         init() {}
 
@@ -76,6 +84,8 @@ enum CardScoring {
             wArea = d("wArea", wArea)
             wGuide = d("wGuide", wGuide)
             useCentroidCornerSort = b("useCentroidCornerSort", useCentroidCornerSort)
+            usePrecrop = b("usePrecrop", usePrecrop)
+            precropMarginRatio = d("precropMarginRatio", precropMarginRatio)
         }
     }
 

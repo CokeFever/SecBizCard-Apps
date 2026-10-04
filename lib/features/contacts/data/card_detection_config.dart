@@ -73,6 +73,10 @@ class CardDetectionConfig {
     // SecBizCardOcr.parseLines(tuning:). Negative. Tunable via Remote Config;
     // the detection RULE itself is code in the OCR package.
     'pureTitleNamePenalty': -120.0,
+    // Guide+margin pre-crop: how far the guide rect is expanded outward on
+    // EACH side before the hard pre-crop (fraction of the guide dimension).
+    // 0.25 = +25% per side. Range-clamped. See docs/card_detection_scoring.md.
+    'precropMarginRatio': 0.25,
   };
 
   static const Map<String, bool> _flagDefaults = <String, bool>{
@@ -81,6 +85,12 @@ class CardDetectionConfig {
     // as the new correct behavior; can be flipped OFF from the console as an
     // emergency rollback to the legacy sort without a release.
     'useCentroidCornerSort': true,
+    // Guide+25% pre-crop: run card-edge detection on the guide region
+    // (expanded by precropMarginRatio) FIRST, then fall back to full-image
+    // detection on a miss. Defaults ON; flip OFF from the console as a remote
+    // kill-switch without a release. The mandatory full-image fallback makes
+    // ON-by-default unable to regress detection relative to today.
+    'usePrecrop': true,
   };
 
   static const Map<String, String> _stringDefaults = <String, String>{
@@ -115,6 +125,7 @@ class CardDetectionConfig {
     'cannyHighA': [1.0, 500.0],
     'cannyLowB': [1.0, 500.0],
     'cannyHighB': [1.0, 500.0],
+    'precropMarginRatio': [0.0, 1.0],
   };
 
   /// Fallback instance using only in-app defaults. Used before any successful

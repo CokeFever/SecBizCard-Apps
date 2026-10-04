@@ -104,11 +104,19 @@ Remote Config keys (double unless noted):
 minAcceptScore, wAngle, wParallel, wAspect, wArea, wGuide,
 angleToleranceDeg, parallelToleranceDeg, cardAspectRatio,
 minAreaRatio, maxAreaRatio,
-cannyLowA, cannyHighA, cannyLowB, cannyHighB
+cannyLowA, cannyHighA, cannyLowB, cannyHighB,
+precropMarginRatio       // default 0.25, range 0.0–1.0 (range-clamped). How far
+                         // the guide rect is expanded outward on EACH side
+                         // before the guide+25% hard pre-crop.
 
-// Gradual-rollout flag (bool)
+// Gradual-rollout flags (bool)
 useCentroidCornerSort    // default TRUE: centroid+atan2 corner sort (see below).
                          // Flip false to roll back to the legacy x+y sort.
+usePrecrop               // default TRUE: guide+25% pre-crop runs FIRST, then
+                         // falls back to full-image detection on a miss (see
+                         // the 1.6.3 section). Flip false as a remote
+                         // kill-switch; the mandatory full-image fallback makes
+                         // ON-by-default unable to regress detection.
 ```
 
 When changing a default here, change it in BOTH `OpenCVProcessor.kt` (`object S`)
@@ -293,10 +301,16 @@ sensitivity tweaks of that rule DON'T need another release. That's how
 
 ---
 
-## 已排程 1.6.3:瞄準框 +25% 預裁切(方向 A 的強化版)
+## 1.6.3:瞄準框 +25% 預裁切(方向 A 的強化版)— 已實作
 
-**狀態:已完成可行性診斷,排入 1.6.3(不進 1.6.2;1.6.2 收斂送審)。**
-完整診斷報告:`.agents/tasks/precrop-investigation/findings.md`。
+**狀態:已實作(1.6.3)。** 由 Remote Config flag `usePrecrop`(預設 ON)控制,
+擴張比例由 `precropMarginRatio`(預設 0.25,範圍 0.0–1.0)控制,兩者皆可從 console
+調整。座標校正數學(cover/contain)落在 Dart 的 `imageNormalizedGuide()`(純函式、
+有單元測試);native(`OpenCVProcessor.kt` / `AppDelegate.swift`)只負責機械式的
+expand→clamp→crop→偵測→平移回全圖座標→全圖 fallback,評分模型(`object S` /
+`CardScoring.swift`)完全未動。完整設計:
+`.agents/tasks/SecBizCard-Apps-feat-scan-precrop-and-landscape-hint-2026-10-03/design.md`。
+原始可行性診斷報告:`.agents/tasks/precrop-investigation/findings.md`。
 
 ### 構想
 送進偵測前,先把拍攝照片裁切到「瞄準框向外擴 25%」的區域,再跑現有 OpenCV/Vision
