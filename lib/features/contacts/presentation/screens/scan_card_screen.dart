@@ -11,6 +11,8 @@ import 'package:secbizcard/features/contacts/data/services/ocr_service.dart';
 import 'package:secbizcard/features/contacts/data/services/ocr_tier.dart';
 import 'package:secbizcard/features/contacts/data/ocr_usage_provider.dart';
 import 'package:secbizcard/features/contacts/presentation/ocr_tier_display.dart';
+import 'package:secbizcard/features/contacts/presentation/scan_guide_geometry.dart'
+    as guide_geom;
 import 'package:secbizcard/features/contacts/data/card_detection_config.dart';
 import 'package:secbizcard/features/settings/data/ocr_settings_service.dart';
 import 'package:secbizcard/core/responsive/breakpoints.dart';
@@ -57,6 +59,11 @@ class _ScanCardScreenState extends ConsumerState<ScanCardScreen>
   double? _lastDetectionScore;
   bool? _lastDetectionFallback;
   double? _lastAreaRatio;
+  // Capture/preview aspect-divergence guard result (see design §2a Finding 1).
+  // Report-payload/debug scope: forwarded on the /review-contact extra map
+  // alongside the other OCR-detection metadata, NOT an always-on analytics
+  // event. Null when native did not report it (old native / flag off).
+  bool? _lastAspectMismatch;
 
   // Permission state: null = still checking, true = denied, false = granted
   bool? _isPermissionDenied;
@@ -271,6 +278,7 @@ class _ScanCardScreenState extends ConsumerState<ScanCardScreen>
               'ocrDetectionFallback': _lastDetectionFallback,
               'ocrBestNameScore': outcome.bestNameScore,
               'ocrAreaRatio': _lastAreaRatio,
+              'ocrAspectMismatch': _lastAspectMismatch,
               // Non-zero server orientation means the raw capture was tilted/
               // flipped and we had to rotate it upright — the "looked fine
               // geometrically but was misoriented" case the feedback predictor
@@ -466,12 +474,51 @@ class _ScanCardScreenState extends ConsumerState<ScanCardScreen>
     const channel = MethodChannel('app.ixo.secbizcard/opencv');
     final outputPath = inputPath.replaceFirst('.jpg', '_processed.jpg');
 
+    // Cover-crop-corrected, image-normalized guide rect for the native hard
+    // pre-crop. The on-screen preview is a cover/contain fit of the sensor
+    // frame, so the screen-normalized guide is NOT the image-normalized guide;
+    // imageNormalizedGuide() mirrors the LIVE preview fit (phone=contain /
+    // large-screen=cover) to correct it. See design §2a.
+    final size = MediaQuery.sizeOf(context);
+    final isLandscape = size.width > size.height;
+    final isLargeScreen = size.shortestSide >= Breakpoints.medium;
+    final sg = _normalizedGuideRect();
+    final imageGuide = guide_geom.imageNormalizedGuide(
+      screenGuide: guide_geom.Rect(
+        sg['left']!,
+        sg['top']!,
+        sg['width']!,
+        sg['height']!,
+      ),
+      screenW: size.width,
+      screenH: size.height,
+      controllerAspect: _controller!.value.aspectRatio,
+      isLandscape: isLandscape,
+      previewFit: isLargeScreen
+          ? guide_geom.PreviewFit.cover
+          : guide_geom.PreviewFit.contain,
+    );
+
     try {
       final result = await channel.invokeMethod('processCard', {
         'inputPath': inputPath,
         'outputPath': outputPath,
         'isVertical': _isVertical,
-        'guideRect': _normalizedGuideRect(),
+        // UNCHANGED screen-normalized rect — stays the soft IoU prior native
+        // already uses (back-compat; drives W_GUIDE scoring, not the crop).
+        'guideRect': sg,
+        // NEW cover-crop-corrected, image-normalized rect — used ONLY for the
+        // hard pre-crop. With usePrecrop off, native ignores it entirely.
+        'imageGuideRect': {
+          'left': imageGuide.left,
+          'top': imageGuide.top,
+          'width': imageGuide.width,
+          'height': imageGuide.height,
+        },
+        // NEW: ALWAYS the orientation-free sensor ratio (never the
+        // orientation-adjusted previewAspect) for native's aspect-divergence
+        // guard. See design §2c "Orientation convention invariant".
+        'previewAspectUsed': _controller!.value.aspectRatio,
         // Remote-tunable detection params (route A). Native side treats every
         // entry as optional and falls back to its built-in constants.
         'tuning': CardDetectionConfig.current.toTuningMap(),
@@ -484,6 +531,7 @@ class _ScanCardScreenState extends ConsumerState<ScanCardScreen>
         _lastDetectionScore = (result['score'] as num?)?.toDouble();
         _lastDetectionFallback = isFallback;
         _lastAreaRatio = (result['areaRatio'] as num?)?.toDouble();
+        _lastAspectMismatch = result['aspectMismatch'] as bool?;
 
         if (!success) {
           throw Exception('Processing failed');

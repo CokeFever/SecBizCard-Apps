@@ -91,6 +91,15 @@ class OpenCVProcessor {
         // the flag lets it be turned OFF (back to legacy x+y) from the console
         // as an emergency rollback. See docs/card_detection_scoring.md.
         val useCentroidCornerSort = b("useCentroidCornerSort", true)
+
+        // Guide+25% pre-crop (route A). usePrecrop defaults ON; it runs edge
+        // detection on the guide region (expanded by precropMarginRatio) FIRST,
+        // then falls back to full-image detection on a miss. The mandatory
+        // full-image fallback makes ON-by-default unable to regress detection.
+        // Flip OFF from the console as a remote kill-switch. See
+        // docs/card_detection_scoring.md.
+        val usePrecrop = b("usePrecrop", true)
+        val precropMarginRatio = d("precropMarginRatio", 0.25)
     }
 
     fun processBusinessCard(
@@ -98,6 +107,8 @@ class OpenCVProcessor {
         outputPath: String,
         isVertical: Boolean,
         guideRect: Map<String, Double>? = null,
+        imageGuideRect: Map<String, Double>? = null,
+        previewAspectUsed: Double? = null,
         tuningMap: Map<*, *>? = null,
     ): Map<String, Any> {
         val resultData = HashMap<String, Any>()
@@ -106,6 +117,28 @@ class OpenCVProcessor {
             val src = loadMatWithExif(inputPath) ?: throw Exception("Failed to load")
             val originalWidth = src.cols()
             val originalHeight = src.rows()
+
+            // Capture/preview aspect-divergence guard (capture-aspect guard).
+            // The Dart transform assumes the captured photo's aspect equals the
+            // orientation-free sensor ratio it sent as previewAspectUsed. Both
+            // sides are orientation-free (max/min), so compare directly; a
+            // divergence is logged once and surfaced in the result map. The 25%
+            // margin + full-image fallback bound the worst case to "no worse
+            // than today" even when it diverges.
+            var aspectMismatch = false
+            if (previewAspectUsed != null && originalWidth > 0 && originalHeight > 0) {
+                val captureAspect =
+                    max(originalWidth, originalHeight).toDouble() /
+                        min(originalWidth, originalHeight)
+                if (abs(captureAspect - previewAspectUsed) > 0.02) {
+                    android.util.Log.w(
+                        "SecBizCard",
+                        "precrop: capture/preview aspect divergence " +
+                            "capture=$captureAspect preview=$previewAspectUsed",
+                    )
+                    aspectMismatch = true
+                }
+            }
 
             val maxDim = 1000.0
             val scale = if (src.cols() > maxDim || src.rows() > maxDim) {
@@ -128,18 +161,45 @@ class OpenCVProcessor {
                 Rect(l.toInt(), t.toInt(), w.toInt(), h.toInt())
             }
 
-            // 1. Collect candidate quads from multiple edge strategies.
-            val candidates = collectCandidates(resized, t)
+            // Detect on a (sub-)region: collect candidates, translate their
+            // ROI-local corners into FULL resized-image coords via roiOffset
+            // BEFORE scoring, so guide IoU + areaRatio stay in the same frame
+            // as today (imgArea is always the FULL resized area). Returns the
+            // best quad (in full resized coords) and its score.
+            val detect = fun(roi: Mat, roiOffset: Point): Pair<Array<Point>?, Double> {
+                val cands = collectCandidates(roi, t)
+                var bq: Array<Point>? = null
+                var bs = 0.0
+                for (q in cands) {
+                    val qFull = Array(q.size) { Point(q[it].x + roiOffset.x, q[it].y + roiOffset.y) }
+                    val s = scoreQuad(qFull, imgArea, guide, t)
+                    if (s > bs) { bs = s; bq = qFull }
+                }
+                return Pair(bq, bs)
+            }
 
-            // 2. Score every candidate with the shared model; pick the best.
             var bestQuad: Array<Point>? = null
             var bestScore = 0.0
-            for (quad in candidates) {
-                val score = scoreQuad(quad, imgArea, guide, t)
-                if (score > bestScore) {
-                    bestScore = score
-                    bestQuad = quad
+
+            // STAGE 1: pre-crop ROI (guide + margin), only if enabled & present.
+            if (t.usePrecrop && imageGuideRect != null) {
+                val roiRect = expandAndClamp(
+                    imageGuideRect, resized.cols(), resized.rows(), t.precropMarginRatio,
+                )
+                if (roiRect.width > 0 && roiRect.height > 0) {
+                    val roi = Mat(resized, roiRect) // submat view; no copy
+                    val (bq, bs) = detect(roi, Point(roiRect.x.toDouble(), roiRect.y.toDouble()))
+                    bestQuad = bq
+                    bestScore = bs
+                } else {
+                    android.util.Log.d("SecBizCard", "precrop: empty ROI, skipping stage 1")
                 }
+            }
+
+            // STAGE 2: full-image detection if pre-crop missed (or was off).
+            if (bestQuad == null || bestScore < t.minAcceptScore) {
+                val (bq, bs) = detect(resized, Point(0.0, 0.0))
+                if (bs > bestScore) { bestScore = bs; bestQuad = bq }
             }
 
             if (bestQuad != null && bestScore >= t.minAcceptScore) {
@@ -172,6 +232,7 @@ class OpenCVProcessor {
 
                 resultData["success"] = true
                 resultData["fallback"] = false
+                resultData["aspectMismatch"] = aspectMismatch
                 resultData["score"] = bestScore
                 // Fraction of the frame the detected card occupies. A small
                 // value means we found a card but it's tiny in the frame (poor
@@ -189,6 +250,7 @@ class OpenCVProcessor {
             saveMatAsJpeg(src, outputPath)
             resultData["success"] = true
             resultData["fallback"] = true
+            resultData["aspectMismatch"] = aspectMismatch
             resultData["score"] = bestScore
             resultData["areaRatio"] = 0.0 // no card detected
             resultData["imageWidth"] = originalWidth
@@ -228,6 +290,34 @@ class OpenCVProcessor {
             origW.toDouble(), origH.toDouble(),
             0.0, origH.toDouble(),
         )
+    }
+
+    /**
+     * Image-normalized rect → resized-pixel [Rect], expanded by `margin` on
+     * EACH side (margin * dimension) then clamped to [0,cols] × [0,rows]. A
+     * degenerate/zero rect yields a zero-size Rect (caller skips stage 1).
+     */
+    private fun expandAndClamp(
+        g: Map<String, Double>, cols: Int, rows: Int, margin: Double,
+    ): Rect {
+        val l = g["left"] ?: 0.0
+        val tp = g["top"] ?: 0.0
+        val w = g["width"] ?: 0.0
+        val h = g["height"] ?: 0.0
+        // Expand each side by margin * dimension.
+        val ex = w * margin
+        val ey = h * margin
+        var x0 = (l - ex) * cols
+        var y0 = (tp - ey) * rows
+        var x1 = (l + w + ex) * cols
+        var y1 = (tp + h + ey) * rows
+        x0 = x0.coerceIn(0.0, cols.toDouble())
+        y0 = y0.coerceIn(0.0, rows.toDouble())
+        x1 = x1.coerceIn(0.0, cols.toDouble())
+        y1 = y1.coerceIn(0.0, rows.toDouble())
+        val rw = (x1 - x0).toInt()
+        val rh = (y1 - y0).toInt()
+        return Rect(x0.toInt(), y0.toInt(), max(0, rw), max(0, rh))
     }
 
     /**

@@ -43,10 +43,20 @@ class MainActivity : FlutterActivity() {
                 val isVertical = call.argument<Boolean>("isVertical") ?: false
                 @Suppress("UNCHECKED_CAST")
                 val guideRect = call.argument<Map<String, Double>>("guideRect")
+                @Suppress("UNCHECKED_CAST")
+                val imageGuideRect = call.argument<Map<String, Double>>("imageGuideRect")
+                val previewAspectUsed = call.argument<Double>("previewAspectUsed")
                 val tuning = call.argument<Map<*, *>>("tuning")
 
                 if (inputPath != null && outputPath != null) {
-                    val resultMap = ocvProcessor.processBusinessCard(inputPath, outputPath, isVertical, guideRect, tuning)
+                    // New args (imageGuideRect, previewAspectUsed) sit in
+                    // positions 5-6, before tuning — see OpenCVProcessor
+                    // signature. The differing types make a wrong-slot order a
+                    // compile error (the intended guardrail).
+                    val resultMap = ocvProcessor.processBusinessCard(
+                        inputPath, outputPath, isVertical, guideRect,
+                        imageGuideRect, previewAspectUsed, tuning
+                    )
                     val success = resultMap["success"] as Boolean
                     if (success) {
                         result.success(resultMap)
