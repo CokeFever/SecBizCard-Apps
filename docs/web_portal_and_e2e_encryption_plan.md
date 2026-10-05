@@ -113,11 +113,43 @@ JSON header(明文,因 version/mode/salt 本就非祕密):
 - 設定頁可**顯示 + 複製** magic word(方便老闆用 IM 傳給秘書)——因為它本就存在本機。
 
 ### 設定 / 變更 magic word 的流程
-1. 使用者在「備份與還原」頁設定/變更 magic word(輸兩次確認)。
-2. **完成後立即執行一次 backup**,把雲端備份檔重新打包成新的 magicword 模式
-   (驗證舊的能解 → 用新 key 重新加密 → 寫回)。否則雲端還是舊 key 打包,會變成
-   「檔在、但新 magic word 解不開」的窘境。
+
+> 🔄 **2026-10-05 已重新設計 —— 下面這段原始流程(輸兩次確認 + 設定後立即 backup)
+> 已被取代。** 原設計把「設密語」綁上「立即解密舊雲端檔 → 重打包 → 覆寫」的副作用,
+> 導致兩個嚴重問題:(1) 舊雲端檔若是用別的密語加密、本機解不開 → repack 失敗並把
+> 剛設的密語 rollback;(2) 重裝後本機空時設密語會用空資料覆寫掉要還原的雲端備份
+> (資料遺失)。**新模型見下方「### magic word 模式(2026-10-05 定案,已實作)」。**
+> 以下三點保留作歷史記錄。
+
+1. ~~使用者在「備份與還原」頁設定/變更 magic word(輸兩次確認)。~~
+   (已改單次輸入;確認欄位於 fix-backup-drive-path task 移除。)
+2. ~~**完成後立即執行一次 backup**~~(**已取消**:設密語不再自動備份)。
 3. 一旦從 uid 模式切到 magicword 模式,那份檔就「升級」成 magicword;之後 uid 不再能解它。
+   (此點仍成立 —— 但「升級」發生在使用者**下次主動備份**時,不是設密語當下。)
+
+### magic word 模式(2026-10-05 定案,已實作於 main)
+
+**核心原則:三個動作完全解耦,各自只做一件事。核心不變量:空資料永不覆寫雲端;
+restore 永不寫雲端;設密語永不碰 Drive。**
+
+| 動作 | 做什麼 | 絕不做 |
+|---|---|---|
+| 設定 magic word | 只驗證 + 存本機偏好(secure storage) | 不碰 Drive、不備份、不解密任何東西 |
+| Back Up Now | 用本機資料 + 當前密語打包覆寫雲端 | 不解密舊檔;本機無 contact 時 disable |
+| Restore | 下載 → 解密 → 寫本機 | 不寫雲端;密語不吻合要求重輸 |
+
+落地要點(對照 code / 測試):
+- `BackupService.setMagicWord(word)`:純本機儲存,無 Drive op(取代
+  `setMagicWordAndRepack`)。UI 顯示「下次備份生效」,不觸發備份。
+- `BackupService.backup({force, allowEmpty})`:**contacts 為空時擋下**
+  (`EmptyBackupFailure`),連 `force:true` 都繞不過;空資料路徑不呼叫 `markBackedUp`。
+- `BackupService.restore({overrideMagicWord})`:只讀雲端;overrideMagicWord 只用於
+  本次解密、**不持久化**。成功後 UI 才詢問「要不要在這台裝置記住密語」。
+- restore 密語提示**三分狀態**:無密語 / 有但解不開(不同訊息)/ 有且吻合(不提示)。
+- 備份前若雲端 header `encMode==magicword` 但本機無密語 → **降級提示**
+  (`cloudIsMagicWordProtected`,不需解密,讀 header)。
+- restore 確認文案明說「覆寫本機」+ 若雲端比本機舊的**反向 staleness 警告**。
+- 詳盡 13 決策 + 情境模擬:見 `.agents/tasks/magic-word-model-redesign/design.md`。
 
 ### ⚠️ 組合風險(乙模式,UI 必須分層警示)
 最糟情境:**使用者設了 magic word 但沒記住 → 登出(清本機 magic word + 清聯絡人)→

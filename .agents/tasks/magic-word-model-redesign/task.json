@@ -1,0 +1,7 @@
+{
+  "task_id": "task-magic-word-model-redesign",
+  "task_description": "Redesign the SecBizCard backup 'magic word' model so the three actions (set magic word / back up / restore) are fully decoupled. Setting a magic word only stores a local preference (no Drive op); Back Up Now is disabled when local contacts are empty and warns before silently downgrading a magicword cloud file; Restore prompts for a magic word in three distinct states, never auto-stores the entered word (asks to remember after success), explicitly warns it overwrites local data, and warns when the cloud backup is older than local data. Harden backup() with an empty-data guard, reword l10n in 5 locales, and sync store copy.",
+  "status": "completed",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003"],
+  "blocked_reason": null
+}
