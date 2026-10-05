@@ -87,6 +87,10 @@ class FakeDriveRepository implements DriveRepository {
   int _createdCounter = 0;
   bool uploadShouldFail = false;
 
+  /// Settable server-side modifiedTime returned by [getBackupModifiedTime].
+  /// Defaults to null ("no cloud backup") to keep existing tests unchanged.
+  DateTime? backupModifiedTime;
+
   // Fixed id handed back by ensureSecBizCardFolder()/fileExists().
   static const String folderId = 'secbizcard_folder_id';
   static const String backupFileName = 'ixo_app_backup.zip';
@@ -203,9 +207,9 @@ class FakeDriveRepository implements DriveRepository {
     String fileName, {
     String? parentFolderId,
   }) async {
-    // No cloud modified-time in this fake → null ("no cloud backup"), which
-    // keeps the existing backup tests' behavior unchanged.
-    return right(null);
+    // Returns the settable [backupModifiedTime]; null by default ("no cloud
+    // backup"), which keeps the existing backup tests' behavior unchanged.
+    return right(backupModifiedTime);
   }
 
   @override
@@ -328,9 +332,17 @@ void main() {
 
     test('backup() with a magic word set writes magicword mode', () async {
       await fakeMagicWord.setMagicWord('correcthorse');
+      // Seed one contact so the new empty-data guard does not abort the backup.
+      final contact = UserProfile(
+        uid: 'c1',
+        email: 'c1@test.com',
+        displayName: 'Contact 1',
+        phone: '123',
+        createdAt: DateTime.now(),
+      );
       when(
         mockContactsRepo.getSavedContacts(),
-      ).thenAnswer((_) async => right([]));
+      ).thenAnswer((_) async => right([contact]));
 
       final service = container.read(backupServiceProvider);
       final result = await service.backup();
@@ -449,9 +461,10 @@ void main() {
           reason: withWord.fold((l) => l.message, (r) => ''));
     });
 
-    test('setMagicWordAndRepack repacks a uid file into magicword mode',
+    test('setMagicWord stores the word and performs NO Drive operation',
         () async {
-      // Seed an existing uid-mode SBCB v2 cloud file (what backup writes today).
+      // Seed an existing uid-mode cloud file so we can prove setMagicWord does
+      // NOT touch it (no download/upload/delete/repack).
       final zipArchive = Archive();
       final jsonBytes = utf8.encode(jsonEncode({
         'contacts': const <dynamic>[],
@@ -460,162 +473,197 @@ void main() {
       zipArchive.addFile(
           ArchiveFile('data.json', jsonBytes.length, jsonBytes));
       final zipBytes = ZipEncoder().encode(zipArchive);
-
       final codec = BackupCodec();
       final uidBytes = await codec.encryptNew(
         zipBytes,
         encMode: BackupCodec.encModeUid,
         keySource: uid,
       );
-      // ISSUE 1 regression: the ONLY existing file is a legacy ROOT file. The
-      // repack must NOT update it in place (that left the file in root); it
-      // must CREATE a new file INSIDE the SecBizCard folder and then
-      // migrate-then-delete the root file.
       fakeDriveRepo.seedFile('root_backup_id', uidBytes, parentFolderId: null);
 
       final service = container.read(backupServiceProvider);
-      final result = await service.setMagicWordAndRepack('mysecretword');
+      final result = await service.setMagicWord('mysecretword');
+
       expect(result.isRight(), true,
           reason: result.fold((l) => l.message, (r) => ''));
-
-      // The word is now stored.
+      // The word is stored locally.
       expect(await fakeMagicWord.getMagicWord(), 'mysecretword');
-
-      // The upload CREATED a new file inside the folder (existingFileId null,
-      // parentFolderId set) — it did NOT update the root file in place.
-      expect(fakeDriveRepo.lastUploadExistingFileId, isNull);
-      expect(fakeDriveRepo.lastUploadParentFolderId,
-          FakeDriveRepository.folderId);
-
-      // The repacked file lives INSIDE the folder and is magicword mode.
-      final newId = fakeDriveRepo.lastUploadResultId!;
-      expect(
-          fakeDriveRepo.hasFileWithParent(newId, FakeDriveRepository.folderId),
-          true);
-      final repacked = fakeDriveRepo.bytesOf(newId)!;
-      final header = codec.readHeaderOrNull(repacked);
-      expect(header!.encMode, BackupCodec.encModeMagicWord);
-
-      // Migrate-then-delete removed the legacy root file (after the new-home
-      // file read back OK).
-      expect(fakeDriveRepo.deleted, contains('root_backup_id'));
-
-      // Only the word decrypts the repacked file; uid can no longer read it.
-      final out =
-          await codec.decrypt(repacked, uid: uid, magicWord: 'mysecretword');
-      expect(ZipDecoder().decodeBytes(out).findFile('data.json'), isNotNull);
-      expect(
-        () => codec.decrypt(repacked, uid: uid, magicWord: 'notitatall'),
-        throwsA(isA<WrongMagicWordFailure>()),
-      );
+      // D1: zero Drive operations — nothing uploaded, nothing deleted.
+      expect(fakeDriveRepo.uploadCount, 0);
+      expect(fakeDriveRepo.deleted, isEmpty);
+      // The seeded cloud file is untouched (still uid mode).
+      final existing = fakeDriveRepo.bytesOf('root_backup_id')!;
+      expect(codec.readHeaderOrNull(existing)!.encMode,
+          BackupCodec.encModeUid);
     });
 
-    test(
-        'setMagicWordAndRepack updates the IN-FOLDER file in place when one exists',
-        () async {
-      // An in-folder uid-mode file already exists → the repack should UPDATE it
-      // in place (keeps the folder's share relationships), not create another.
-      final zipArchive = Archive();
-      final jsonBytes = utf8.encode(jsonEncode({
-        'contacts': const <dynamic>[],
-        'settings': {'theme_mode': 'dark'},
-      }));
-      zipArchive.addFile(
-          ArchiveFile('data.json', jsonBytes.length, jsonBytes));
-      final zipBytes = ZipEncoder().encode(zipArchive);
-
-      final codec = BackupCodec();
-      final uidBytes = await codec.encryptNew(
-        zipBytes,
-        encMode: BackupCodec.encModeUid,
-        keySource: uid,
-      );
-      fakeDriveRepo.seedFile('folder_backup_id', uidBytes,
-          parentFolderId: FakeDriveRepository.folderId);
-
+    test('setMagicWord rejects an invalid word', () async {
       final service = container.read(backupServiceProvider);
-      final result = await service.setMagicWordAndRepack('mysecretword');
-      expect(result.isRight(), true,
-          reason: result.fold((l) => l.message, (r) => ''));
-
-      // Update-in-place on the existing in-folder file.
-      expect(fakeDriveRepo.lastUploadExistingFileId, 'folder_backup_id');
-      expect(fakeDriveRepo.lastUploadParentFolderId,
-          FakeDriveRepository.folderId);
-      final repacked = fakeDriveRepo.bytesOf('folder_backup_id')!;
-      expect(codec.readHeaderOrNull(repacked)!.encMode,
-          BackupCodec.encModeMagicWord);
-    });
-
-    test(
-        'setMagicWordAndRepack with a root file keeps root until new home reads back',
-        () async {
-      // When upload of the new-home file fails, the legacy root file MUST NOT
-      // be deleted (migrate-then-delete ordering).
-      final zipArchive = Archive();
-      final jsonBytes = utf8.encode(jsonEncode({
-        'contacts': const <dynamic>[],
-        'settings': {'theme_mode': 'dark'},
-      }));
-      zipArchive.addFile(
-          ArchiveFile('data.json', jsonBytes.length, jsonBytes));
-      final zipBytes = ZipEncoder().encode(zipArchive);
-      final codec = BackupCodec();
-      final uidBytes = await codec.encryptNew(
-        zipBytes,
-        encMode: BackupCodec.encModeUid,
-        keySource: uid,
-      );
-      fakeDriveRepo.seedFile('root_backup_id', uidBytes, parentFolderId: null);
-      fakeDriveRepo.uploadShouldFail = true;
-
-      final service = container.read(backupServiceProvider);
-      final result = await service.setMagicWordAndRepack('mysecretword');
+      final result = await service.setMagicWord('short'); // < 8 chars
 
       expect(result.isLeft(), true);
-      // Root file preserved; nothing deleted.
-      expect(fakeDriveRepo.deleted, isEmpty);
-      expect(
-          fakeDriveRepo.hasFileWithParent('root_backup_id', null), true);
+      result.fold((l) => expect(l, isA<MagicWordValidationFailure>()),
+          (_) => fail('a too-short word must be rejected'));
+      // Nothing stored.
+      expect(await fakeMagicWord.getMagicWord(), isNull);
+      // And still no Drive activity.
+      expect(fakeDriveRepo.uploadCount, 0);
     });
 
-    test(
-        'setMagicWordAndRepack writes an initial magicword backup when no cloud file exists',
+    test('backup() aborts with EmptyBackupFailure when contacts are empty',
         () async {
-      // No cloud backup is seeded, so searchBackupFile returns null (fileId ==
-      // null). The method should still create a magicword-mode cloud file by
-      // running an immediate backup.
-      when(
-        mockContactsRepo.getSavedContacts(),
-      ).thenAnswer((_) async => right(<UserProfile>[]));
+      when(mockContactsRepo.getSavedContacts())
+          .thenAnswer((_) async => right(<UserProfile>[]));
 
       final service = container.read(backupServiceProvider);
-      final result = await service.setMagicWordAndRepack('mysecretword');
+      final result = await service.backup();
+
+      expect(result.isLeft(), true);
+      result.fold((l) => expect(l, isA<EmptyBackupFailure>()),
+          (_) => fail('empty contacts must abort the backup'));
+      expect(fakeDriveRepo.uploadCount, 0);
+    });
+
+    test('backup(force: true) still aborts on empty contacts (force cannot '
+        'bypass)', () async {
+      when(mockContactsRepo.getSavedContacts())
+          .thenAnswer((_) async => right(<UserProfile>[]));
+
+      final service = container.read(backupServiceProvider);
+      final result = await service.backup(force: true);
+
+      expect(result.isLeft(), true);
+      result.fold((l) => expect(l, isA<EmptyBackupFailure>()),
+          (_) => fail('force must NOT bypass the empty-data guard'));
+      expect(fakeDriveRepo.uploadCount, 0);
+    });
+
+    test('backup(allowEmpty: true) uploads even when contacts are empty',
+        () async {
+      when(mockContactsRepo.getSavedContacts())
+          .thenAnswer((_) async => right(<UserProfile>[]));
+
+      final service = container.read(backupServiceProvider);
+      final result = await service.backup(allowEmpty: true);
+
       expect(result.isRight(), true,
           reason: result.fold((l) => l.message, (r) => ''));
+      expect(fakeDriveRepo.uploadCount, 1);
+    });
 
-      // The word is stored and a brand-new cloud file was written INSIDE the
-      // SecBizCard folder (create-in-folder, no pre-existing file anywhere).
-      expect(await fakeMagicWord.getMagicWord(), 'mysecretword');
-      expect(fakeDriveRepo.lastUploadExistingFileId, isNull);
-      expect(fakeDriveRepo.lastUploadParentFolderId,
-          FakeDriveRepository.folderId);
-      final writtenId = fakeDriveRepo.lastUploadResultId!;
-      expect(
-          fakeDriveRepo.hasFileWithParent(
-              writtenId, FakeDriveRepository.folderId),
-          true);
-
-      // The freshly written file is SBCB v2 magicword mode and only the word
-      // can decrypt it.
+    test('restore(overrideMagicWord:) decrypts without persisting', () async {
+      // Seed a magicword cloud file keyed by 'correcthorse'.
+      final zipArchive = Archive();
+      final jsonBytes = utf8.encode(jsonEncode({
+        'contacts': const <dynamic>[],
+        'settings': {'theme_mode': 'dark'},
+      }));
+      zipArchive.addFile(
+          ArchiveFile('data.json', jsonBytes.length, jsonBytes));
+      final zipBytes = ZipEncoder().encode(zipArchive);
       final codec = BackupCodec();
-      final written = fakeDriveRepo.bytesOf(writtenId)!;
-      expect(written.sublist(0, 4), BackupCodec.magic);
-      final header = codec.readHeaderOrNull(written);
-      expect(header!.encMode, BackupCodec.encModeMagicWord);
-      final out =
-          await codec.decrypt(written, uid: uid, magicWord: 'mysecretword');
-      expect(ZipDecoder().decodeBytes(out).findFile('data.json'), isNotNull);
+      final mwBytes = await codec.encryptNew(
+        zipBytes,
+        encMode: BackupCodec.encModeMagicWord,
+        keySource: 'correcthorse',
+      );
+      fakeDriveRepo.seedFile('backup_id', mwBytes, parentFolderId: null);
+      when(mockContactsRepo.getSavedContacts())
+          .thenAnswer((_) async => right([]));
+
+      final service = container.read(backupServiceProvider);
+      // No stored word; the override alone must unlock the restore.
+      final result = await service.restore(overrideMagicWord: 'correcthorse');
+
+      expect(result.isRight(), true,
+          reason: result.fold((l) => l.message, (r) => ''));
+      // Override must NOT be persisted.
+      expect(await fakeMagicWord.getMagicWord(), isNull);
+    });
+
+    test('restore(overrideMagicWord: wrong) surfaces WrongMagicWordFailure',
+        () async {
+      final zipArchive = Archive();
+      final jsonBytes = utf8.encode(jsonEncode({
+        'contacts': const <dynamic>[],
+        'settings': {'theme_mode': 'dark'},
+      }));
+      zipArchive.addFile(
+          ArchiveFile('data.json', jsonBytes.length, jsonBytes));
+      final zipBytes = ZipEncoder().encode(zipArchive);
+      final codec = BackupCodec();
+      final mwBytes = await codec.encryptNew(
+        zipBytes,
+        encMode: BackupCodec.encModeMagicWord,
+        keySource: 'correcthorse',
+      );
+      fakeDriveRepo.seedFile('backup_id', mwBytes, parentFolderId: null);
+
+      final service = container.read(backupServiceProvider);
+      final result = await service.restore(overrideMagicWord: 'wrongword123');
+
+      expect(result.isLeft(), true);
+      result.fold((l) => expect(l, isA<WrongMagicWordFailure>()),
+          (_) => fail('a wrong override must fail'));
+      // Still nothing persisted.
+      expect(await fakeMagicWord.getMagicWord(), isNull);
+    });
+
+    test('cloudBackupModifiedTime returns the drive modifiedTime', () async {
+      final when = DateTime.utc(2026, 1, 2, 3, 4, 5);
+      fakeDriveRepo.backupModifiedTime = when;
+
+      final service = container.read(backupServiceProvider);
+      final t = await service.cloudBackupModifiedTime();
+
+      expect(t, when);
+    });
+
+    test('cloudIsMagicWordProtected true for a magicword file', () async {
+      final zipArchive = Archive();
+      final jsonBytes = utf8.encode(jsonEncode({
+        'contacts': const <dynamic>[],
+        'settings': {'theme_mode': 'dark'},
+      }));
+      zipArchive.addFile(
+          ArchiveFile('data.json', jsonBytes.length, jsonBytes));
+      final zipBytes = ZipEncoder().encode(zipArchive);
+      final codec = BackupCodec();
+      final mwBytes = await codec.encryptNew(
+        zipBytes,
+        encMode: BackupCodec.encModeMagicWord,
+        keySource: 'correcthorse',
+      );
+      fakeDriveRepo.seedFile('backup_id', mwBytes, parentFolderId: null);
+
+      final service = container.read(backupServiceProvider);
+      expect(await service.cloudIsMagicWordProtected(), true);
+    });
+
+    test('cloudIsMagicWordProtected false for a uid file', () async {
+      final zipArchive = Archive();
+      final jsonBytes = utf8.encode(jsonEncode({
+        'contacts': const <dynamic>[],
+        'settings': {'theme_mode': 'dark'},
+      }));
+      zipArchive.addFile(
+          ArchiveFile('data.json', jsonBytes.length, jsonBytes));
+      final zipBytes = ZipEncoder().encode(zipArchive);
+      final codec = BackupCodec();
+      final uidBytes = await codec.encryptNew(
+        zipBytes,
+        encMode: BackupCodec.encModeUid,
+        keySource: uid,
+      );
+      fakeDriveRepo.seedFile('backup_id', uidBytes, parentFolderId: null);
+
+      final service = container.read(backupServiceProvider);
+      expect(await service.cloudIsMagicWordProtected(), false);
+    });
+
+    test('cloudIsMagicWordProtected false when no cloud file exists', () async {
+      final service = container.read(backupServiceProvider);
+      expect(await service.cloudIsMagicWordProtected(), false);
     });
 
     // ISSUE 1 (+182) regression — brand-new account self-delete.

@@ -95,7 +95,17 @@ class BackupService {
   /// backup made from another device (the classic "old device clobbers new
   /// cloud data" mistake). Pass [force] = true after the user explicitly
   /// confirms they want to overwrite.
-  Future<Either<Failure, DateTime>> backup({bool force = false}) async {
+  ///
+  /// Empty-data guard (defense in depth): if there are no local contacts the
+  /// backup aborts with an [EmptyBackupFailure] and performs no upload, so
+  /// empty local data can never overwrite the cloud even if the UI gate is
+  /// bypassed. The guard is contacts-only and is independent of [force] —
+  /// `force: true` does NOT bypass it. Pass [allowEmpty] = true only for a
+  /// deliberate empty-state backup.
+  Future<Either<Failure, DateTime>> backup({
+    bool force = false,
+    bool allowEmpty = false,
+  }) async {
     try {
       final user = _authRepo.getCurrentUser();
       if (user == null) return left(const AuthFailure('No user logged in'));
@@ -140,6 +150,15 @@ class BackupService {
       // 1. Gather Data
       final contactsResult = await _contactsRepo.getSavedContacts();
       final contacts = contactsResult.getOrElse((l) => []);
+
+      // Empty-data guard (D6/D8/D13): never let empty local data overwrite the
+      // cloud backup. Contacts-only gate, independent of [force] — a forced
+      // backup must NOT be able to clobber the cloud with nothing. Returns
+      // before any upload and before markBackedUp(). Opt out only via
+      // [allowEmpty] for a deliberate empty-state backup.
+      if (contacts.isEmpty && !allowEmpty) {
+        return left(const EmptyBackupFailure());
+      }
 
       final prefs = await SharedPreferences.getInstance();
       final settings = {
@@ -378,8 +397,14 @@ class BackupService {
     return rootResult.fold((l) => false, (r) => r);
   }
 
-  /// Restores from Drive
-  Future<Either<Failure, void>> restore() async {
+  /// Restores from Drive.
+  ///
+  /// [overrideMagicWord], when supplied, is used for THIS decrypt only and is
+  /// NEVER persisted — it lets the UI retry a decrypt with a user-entered word
+  /// without first storing it (so a wrong guess doesn't leave a bad word
+  /// stored). When null the locally stored magic word is used. Restore never
+  /// writes to the cloud under any path.
+  Future<Either<Failure, void>> restore({String? overrideMagicWord}) async {
     try {
       final user = _authRepo.getCurrentUser();
       if (user == null) return left(const AuthFailure('No user logged in'));
@@ -417,7 +442,8 @@ class BackupService {
           // WrongMagicWordFailure (no uid fallback, no garbage).
           final List<int> decryptedBytes;
           try {
-            final magicWord = await _magicWordService.getMagicWord();
+            final magicWord =
+                overrideMagicWord ?? await _magicWordService.getMagicWord();
             decryptedBytes =
                 await _codec.decrypt(bytes, uid: uid, magicWord: magicWord);
           } on WrongMagicWordFailure catch (e) {
@@ -542,166 +568,76 @@ class BackupService {
     }
   }
 
-  /// Sets/changes the backup magic word and immediately repacks the cloud
-  /// backup into magicword mode.
+  /// Sets/changes the backup magic word as a LOCAL preference ONLY.
   ///
-  /// Flow (per docs/web_portal_and_e2e_encryption_plan.md "設定 / 變更 magic
-  /// word 的流程"):
-  ///  1. Validate + store [word] via [MagicWordService.setMagicWord]
-  ///     (throws [MagicWordValidationFailure] if length is not 8-16).
-  ///  2. If a cloud backup exists, download it and decrypt with the OLD key
-  ///     (the previous magic word if one was set, else uid) — routed by the
-  ///     file's own header.
-  ///  3. Re-encrypt that same ZIP with the NEW magic word and write it back to
-  ///     the SecBizCard folder (update-in-place), so the cloud file is now
-  ///     magicword mode and uid can no longer decrypt it.
+  /// This performs NO Drive operation and triggers NO backup (D1): it just
+  /// validates and stores [word] via [MagicWordService.setMagicWord]
+  /// (which throws [MagicWordValidationFailure] when the normalized length is
+  /// not 8-16). The new word takes effect on the NEXT [backup]; it never
+  /// repacks or overwrites the existing cloud file, so setting a word can never
+  /// clobber a backup the user still needs to restore.
   ///
-  /// If no cloud backup exists yet, the word is still stored and an immediate
-  /// [backup] (force: true) is run so the magicword-mode cloud file is created
-  /// right away. On a decryption/upload failure the new word is rolled back to
-  /// the previous value so the user is never left with "stored a word that
-  /// doesn't match the cloud file".
-  Future<Either<Failure, void>> setMagicWordAndRepack(String word) async {
-    final user = _authRepo.getCurrentUser();
-    if (user == null) return left(const AuthFailure('No user logged in'));
-    final uid = user.uid;
-
-    // Capture the OLD word (if any) so we can decrypt the existing cloud file.
-    final String? oldWord;
-    try {
-      oldWord = await _magicWordService.getMagicWord();
-    } catch (e) {
-      return left(GeneralFailure('Could not read current magic word: $e'));
-    }
-
-    // 1. Validate + store the new word.
+  /// Returns `right(null)` on success, `left(MagicWordValidationFailure)` for a
+  /// bad word, or `left(GeneralFailure)` for any other storage error.
+  Future<Either<Failure, void>> setMagicWord(String word) async {
     try {
       await _magicWordService.setMagicWord(word);
+      return right(null);
     } on MagicWordValidationFailure catch (e) {
       return left(e);
     } catch (e) {
       return left(GeneralFailure('Could not store magic word: $e'));
     }
+  }
 
+  /// Read-only: the server-side modifiedTime of the current cloud backup, or
+  /// null when there is none (or it cannot be determined). Resolves the
+  /// SecBizCard folder and asks Drive directly — no download, no decrypt, no
+  /// write. Used by the D12 stale-restore warning.
+  Future<DateTime?> cloudBackupModifiedTime() async {
+    final folderId = await _resolveSecBizCardFolderId();
+    final result = await _driveRepo.getBackupModifiedTime(
+      _backupFileName,
+      parentFolderId: folderId,
+    );
+    return result.match((_) => null, (t) => t);
+  }
+
+  /// Read-only: whether the current cloud backup is magic-word protected.
+  ///
+  /// Locates the cloud file (prefer the in-folder file, then the legacy root
+  /// file — mirroring [restore]'s lookup), downloads the bytes and parses ONLY
+  /// the header via [BackupCodec.readHeaderOrNull] (no payload decrypt). Used
+  /// by the D11 downgrade warning. Fails open: any error (no file, network,
+  /// legacy/unparseable file) returns false so a transient problem never
+  /// blocks a backup — the empty-data guard in [backup] remains the hard
+  /// safety net. Never writes anything.
+  Future<bool> cloudIsMagicWordProtected() async {
     try {
-      // 2. Find the current cloud backup. CRITICAL: keep the in-folder file and
-      // the legacy root file SEPARATE. Only an IN-FOLDER file is a safe
-      // update-in-place target; a root-only file must NOT be updated in place
-      // (that is the bug that left the repacked backup in Drive root). When the
-      // only existing file is in root, we CREATE a new file inside the folder
-      // and migrate-then-delete the root file after the new home reads back OK.
       final folderId = await _resolveSecBizCardFolderId();
 
-      String? inFolderId;
+      String? fileId;
       if (folderId != null) {
         final newHome = await _driveRepo.searchBackupFile(
           _backupFileName,
           parentFolderId: folderId,
         );
-        inFolderId = newHome.match((l) => null, (r) => r);
+        fileId = newHome.match((l) => null, (r) => r);
       }
-
-      // Scope the legacy lookup strictly to My Drive root. A plain "search
-      // anywhere" would match the in-folder file and could resolve it as the
-      // "root" source, leading the migrate-then-delete step to delete the very
-      // file we just repacked.
-      final rootSearch =
-          await _driveRepo.searchRootBackupFile(_backupFileName);
-      final rootId = rootSearch.match((l) => null, (r) => r);
-
-      // The file we download+decrypt to get the current ZIP: prefer the
-      // in-folder file, else fall back to the legacy root file.
-      final String? sourceId = inFolderId ?? rootId;
-
-      // No cloud backup anywhere — the magic word is already stored, so run one
-      // backup now to create the magicword-mode cloud file (inside the folder)
-      // right away rather than deferring to the next normal backup.
-      if (sourceId == null) {
-        final backupResult = await backup(force: true);
-        return backupResult.fold(
-          (l) async {
-            await _rollbackMagicWord(oldWord);
-            return left(l);
-          },
-          (_) => right(null),
-        );
+      if (fileId == null) {
+        final rootSearch = await _driveRepo.searchBackupFile(_backupFileName);
+        fileId = rootSearch.match((l) => null, (r) => r);
       }
+      if (fileId == null) return false;
 
-      final downloadResult = await _driveRepo.downloadFile(sourceId);
-      final bytes = downloadResult.match((l) => null, (b) => b);
-      if (bytes == null || bytes.isEmpty) {
-        return right(null); // nothing readable to repack; next backup handles it
-      }
+      final downloadResult = await _driveRepo.downloadFile(fileId);
+      final bytes = downloadResult.match((_) => null, (b) => b);
+      if (bytes == null || bytes.isEmpty) return false;
 
-      // Decrypt with the OLD key (previous word if set, else uid), routed by
-      // the file's own header.
-      final zipBytes = await _codec.decrypt(
-        bytes,
-        uid: uid,
-        magicWord: oldWord,
-      );
-
-      // 3. Re-encrypt with the NEW magic word (now the stored value).
-      final repacked = await _codec.encryptNew(
-        zipBytes,
-        encMode: BackupCodec.encModeMagicWord,
-        keySource: await _magicWordService.getMagicWord() ?? word,
-      );
-
-      final tempDir = await getTemporaryDirectory();
-      final tempFile = File('${tempDir.path}/$_backupFileName');
-      await tempFile.writeAsBytes(repacked);
-
-      // Decide the write target:
-      //  - If an IN-FOLDER file already exists → update it in place (keeps the
-      //    folder's share relationships).
-      //  - Otherwise (only a root file, or a resolved folder with no in-folder
-      //    file yet) → CREATE a new file with parents:[folderId]; NEVER update
-      //    the root file in place.
-      final uploadResult = await _driveRepo.uploadBackup(
-        tempFile,
-        _backupFileName,
-        existingFileId: inFolderId,
-        parentFolderId: folderId,
-      );
-
-      return await uploadResult.fold(
-        (l) async {
-          await _rollbackMagicWord(oldWord);
-          return left(l);
-        },
-        (_) async {
-          // Migrate-then-delete: if we just CREATED the in-folder file (there
-          // was no in-folder file before) and a legacy root file still exists,
-          // delete the root file ONLY after the new home reads back as a
-          // decryptable ZIP. Never reverse this order — a failed readback
-          // leaves root intact so no data is lost.
-          if (folderId != null && inFolderId == null) {
-            await _migrateDeleteRootIfSafe(uid: uid, folderId: folderId);
-          }
-          try {
-            await BackupReminderService().markBackedUp();
-          } catch (_) {/* non-critical */}
-          return right(null);
-        },
-      );
-    } catch (e) {
-      // Decrypt/repack failed → roll the word back so the stored value always
-      // matches what can actually decrypt the cloud file.
-      await _rollbackMagicWord(oldWord);
-      return left(GeneralFailure('Repack failed: $e'));
+      final header = _codec.readHeaderOrNull(bytes);
+      return header?.isMagicWord == true;
+    } catch (_) {
+      return false;
     }
-  }
-
-  /// Restores the magic word to [oldWord] (or clears it when null) after a
-  /// failed repack. Best-effort.
-  Future<void> _rollbackMagicWord(String? oldWord) async {
-    try {
-      if (oldWord == null) {
-        await _magicWordService.clearMagicWord();
-      } else {
-        await _magicWordService.setMagicWord(oldWord);
-      }
-    } catch (_) {/* best-effort rollback */}
   }
 }
