@@ -795,7 +795,11 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     });
 
     final service = ref.read(backupServiceProvider);
-    final result = await service.setMagicWordAndRepack(word);
+    // D1: setting a magic word is now a pure LOCAL store — no Drive repack and
+    // no backup. The new word takes effect on the next Back Up Now. (The full
+    // UI/messaging redesign lands in FEAT-003; this call-site swap keeps the
+    // screen compiling against the decoupled service signature.)
+    final result = await service.setMagicWord(word);
     if (!mounted) return;
 
     await _loadMagicWordState();

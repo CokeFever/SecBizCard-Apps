@@ -55,6 +55,16 @@ class MagicWordValidationFailure extends Failure {
   ]);
 }
 
+/// Signals that a backup was aborted because there is nothing to back up —
+/// the device has no local contacts. Empty local data must NEVER overwrite a
+/// cloud backup (the "reinstall then set magic word clobbers the cloud"
+/// mistake); this guard is independent of the newer-cloud conflict check and
+/// of the `force` flag. Pass `allowEmpty: true` to [BackupService.backup] only
+/// for a deliberate empty-state backup.
+class EmptyBackupFailure extends Failure {
+  const EmptyBackupFailure([super.message = 'No contacts to back up']);
+}
+
 /// Signals that a backup was blocked because the existing Google Drive backup
 /// is newer than this device's local data — backing up now would overwrite a
 /// more recent backup (e.g. one made from another device). Carries both
