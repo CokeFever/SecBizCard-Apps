@@ -151,12 +151,21 @@ editor 的欄位必須與 app 的 `UserProfile` + `customFields` 一致,restore 
 ---
 
 ## 9. 待驗證 POC(排序 = 風險)
-1. **Drive Picker + `drive.file` 跨 client 存取**(最高風險,⏳ 待真人驗證):web client 用
-   `drive.file` + Picker 能否讀寫老闆 app(不同 client)建立/分享的 `SecBizCard/` 檔。
-   POC 程式已備(`SecBizCard/website/poc/drive-picker/`),含真人驗證清單(POC_FINDINGS.md)。
-   情境 A(老闆同帳號跨 client)+ B(秘書分享資料夾)需真人用兩個 Google 帳號實測。
-   這決定秘書情境成不成立。**(註:身分層已不需要——editor 無 Firebase;此 POC 只驗
-   Drive Picker 的 `drive.file` 讀寫,正好對應 editor 實際所需。)**
+1. **Drive Picker + `drive.file` 跨 client 存取**(最高風險):
+   - ✅ **情境 A(老闆同帳號跨 client)已驗證 GREEN**(2026-10-05,真人實測):web client
+     用**只有 `drive.file`** scope + Picker,成功 READ 了手機 app(不同 client)建立的
+     `SecBizCard/ixo_app_backup.zip`(讀到 63642 bytes,開頭 `SBCB` = v2 magicword 備份),
+     且 **WRITE-BACK(files.update)原地更新成功、fileId 保留**(保住資料夾分享關係)。
+     → web editor 的 Drive 存取命門成立。
+   - ⏳ **情境 B(秘書:分享資料夾、第二帳號)尚未實測**(風險低——A 已證明 `drive.file`
+     跨 client 讀寫可行,B 只多一層資料夾分享權限;分享須給 **Editor** 否則 WRITE 會 403)。
+     要上線秘書功能前再驗。
+   - **關鍵發現(實作必用)**:`drive.file` 下 Picker 的 `DocsView` 必須
+     `.setMode(DocsViewMode.LIST)` + `.setParent('root')` + `setIncludeFolders(true)` +
+     `setSelectFolderEnabled(false)`,才能瀏覽進 `SecBizCard/` 並選到檔(選檔即授予該檔存取)。
+     沒設 setMode 會看不到別 client 建立的檔。
+   - POC 程式:`SecBizCard/website/poc/drive-picker/`(placeholder 版,憑證不入庫)。
+   - 身分層不需要(editor 無 Firebase);此 POC 只驗 `drive.file` 讀寫,正是 editor 所需。
 2. ✅ **Web Crypto ↔ app 位元級互通(已驗證 GREEN)**:JS/Web Crypto 的 SBCB v2 與
    app 的 `backup_codec.dart` 雙向位元級互通,含關鍵的 web→app 方向(app 能 restore
    瀏覽器寫的備份)。Node 20+ 與真實 Chrome 都驗過。POC 在
