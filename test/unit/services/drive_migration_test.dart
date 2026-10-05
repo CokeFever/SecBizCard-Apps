@@ -225,7 +225,21 @@ void main() {
     when(testUser.uid).thenReturn(_uid);
     when(testUser.email).thenReturn('test@example.com');
     when(mockAuthRepo.getCurrentUser()).thenReturn(testUser);
-    when(mockContactsRepo.getSavedContacts()).thenAnswer((_) async => right([]));
+    // Seed one local contact so the empty-data guard in backup() (which aborts
+    // an empty local state so it can never overwrite the cloud) does not fire —
+    // these tests exercise the migrate-then-delete path, which needs backup()
+    // to proceed to the upload/readback flow.
+    when(mockContactsRepo.getSavedContacts()).thenAnswer(
+      (_) async => right([
+        UserProfile(
+          uid: 'c1',
+          email: 'c1@test.com',
+          displayName: 'Contact 1',
+          phone: '123',
+          createdAt: DateTime.now(),
+        ),
+      ]),
+    );
     when(mockContactsRepo.saveContactLocally(any))
         .thenAnswer((_) async => right(null));
     when(mockProfileRepo.getUser(any))
