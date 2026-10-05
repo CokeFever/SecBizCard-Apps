@@ -1,8 +1,15 @@
-# Web Editor 設計規格(規劃中,實作等 1.6.2 上架後)
+# Web Editor 設計規格(✅ Stage B+C 已實作,⚠️ 未部署、待真機實測)
 
-> 狀態:**設計規格**。這是 `web_portal_and_e2e_encryption_plan.md` 階段 3「web 秘書
-> editor」的細化實作規格。**實作要等 1.6.2 雙平台上架**(magic word 機制正式上線、
-> 使用者實際產生 magicword 備份後,web editor 才有真實檔可對接)。規劃本身不需等。
+> 狀態(2026-10-05 更新):**設計已實作完成**。Stage B(開啟/檢視)+ Stage C(編輯/
+> 批次/合併/寫回)已在 **`SecBizCard`(backend/website)repo** 的 `/editor` 路由實作、
+> 68/68 測試過、review APPROVED、**已 push 到 backend main 但未部署**。
+> - 程式位置:`SecBizCard/website/app/pages/editor.vue` + `app/components/editor/*` +
+>   `app/stores/editor/` + `app/composables/editor/` + `app/utils/editor/`。
+> - 兩個技術命門 POC 皆 GREEN:crypto 互通(web↔app 位元級)、Drive Picker 情境 A。
+> - **上線前待辦**:本機真機實測(Picker/解密/存回/回 app restore)、OAuth 加
+>   `https://ixo.app` origin、情境 B(秘書分享)真人驗。見
+>   `SecBizCard/docs/handoff_2026-10-05_web-editor-and-infra.md` 的 pre-launch 清單。
+> 本文件以下為設計規格(實作的 source of truth),仍有效。
 > 排版檢視:Kiro/VS Code 開此檔按 `Cmd+Shift+V`。
 
 ---
