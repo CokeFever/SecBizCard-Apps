@@ -1058,7 +1058,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get backupRestoreConfirmTitle => '恢复备份？';
 
   @override
-  String get backupRestoreConfirmBody => '这会覆盖您当前的联系人与设置。请确认您有近期的备份。要继续吗？';
+  String get backupRestoreConfirmBody =>
+      '这会下载你的 Google 云端硬盘备份，并“覆盖”这台设备上的联系人与设置。要继续吗？';
 
   @override
   String get backupRestoreAction => '恢复';
@@ -1150,15 +1151,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get magicWordCopied => '已复制密语到剪贴板。';
 
   @override
-  String get magicWordSavedRepacking => '正在保存密语并重新打包你的备份...';
-
-  @override
-  String get magicWordSaved => '密语已设定，你的加密备份已上传到 Google Drive。';
-
-  @override
-  String magicWordRepackFailed(String error) {
-    return '无法重新打包备份:$error';
-  }
+  String get magicWordSaved => '密语已设定——会在你下次备份时生效。';
 
   @override
   String get magicWordStoredLabel => '你的密语';
@@ -1171,6 +1164,49 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get magicWordRestoreWrong => '密语错误——无法用它解开这份备份。请确认后再试一次。';
+
+  @override
+  String get magicWordRestorePromptBodyNoWord => '这份备份以密语锁定。请输入以还原。(区分大小写。)';
+
+  @override
+  String get magicWordRestorePromptBodyWrongWord =>
+      '这台设备上保存的密语无法解开这份备份。请输入正确的密语。(区分大小写。)';
+
+  @override
+  String get magicWordRememberTitle => '记住密语？';
+
+  @override
+  String get magicWordRememberBody => '要在这台设备上记住这个密语，让之后的备份与还原自动使用它吗？';
+
+  @override
+  String get magicWordRememberYes => '记住';
+
+  @override
+  String get magicWordRememberNo => '暂时不要';
+
+  @override
+  String get backupDowngradeTitle => '移除密语保护？';
+
+  @override
+  String get backupDowngradeBody =>
+      '你的 Google 云端硬盘备份目前以密语保护。这次备份将改用默认加密并移除该保护。要继续吗？';
+
+  @override
+  String get backupEmptyDisabledHint => '请先添加至少一位联系人再备份。';
+
+  @override
+  String get backupRestoreFirstHint => '你有云端备份，但本机没有数据。请先还原，再进行备份或设定密语。';
+
+  @override
+  String get backupSetWordNextBackupHint => '云端备份尚未套用新密语——请点“立即备份”以套用。';
+
+  @override
+  String get backupRestoreStaleTitle => '备份比你的数据还旧';
+
+  @override
+  String backupRestoreStaleBody(String cloudTime, String localTime) {
+    return '这份云端备份创建于 $cloudTime——比你最近一次的本机更改 $localTime 还旧。还原会用这份较旧的备份覆盖你较新的本机数据。要继续吗？';
+  }
 
   @override
   String get commonContinue => '继续';
@@ -2672,7 +2708,8 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get backupRestoreConfirmTitle => '還原備份？';
 
   @override
-  String get backupRestoreConfirmBody => '這會覆蓋您目前的聯絡人與設定。請確認您有近期的備份。要繼續嗎？';
+  String get backupRestoreConfirmBody =>
+      '這會下載你的 Google 雲端硬碟備份，並「覆蓋」這台裝置上的聯絡人與設定。要繼續嗎？';
 
   @override
   String get backupRestoreAction => '還原';
@@ -2764,15 +2801,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get magicWordCopied => '已複製密語到剪貼簿。';
 
   @override
-  String get magicWordSavedRepacking => '正在儲存密語並重新打包你的備份...';
-
-  @override
-  String get magicWordSaved => '密語已設定，你的加密備份已上傳到 Google Drive。';
-
-  @override
-  String magicWordRepackFailed(String error) {
-    return '無法重新打包備份:$error';
-  }
+  String get magicWordSaved => '密語已設定——會在你下次備份時生效。';
 
   @override
   String get magicWordStoredLabel => '你的密語';
@@ -2785,6 +2814,49 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get magicWordRestoreWrong => '密語錯誤——無法用它解開這份備份。請確認後再試一次。';
+
+  @override
+  String get magicWordRestorePromptBodyNoWord => '這份備份以密語鎖定。請輸入以還原。(區分大小寫。)';
+
+  @override
+  String get magicWordRestorePromptBodyWrongWord =>
+      '這台裝置上儲存的密語無法解開這份備份。請輸入正確的密語。(區分大小寫。)';
+
+  @override
+  String get magicWordRememberTitle => '記住密語？';
+
+  @override
+  String get magicWordRememberBody => '要在這台裝置上記住這個密語，讓之後的備份與還原自動使用它嗎？';
+
+  @override
+  String get magicWordRememberYes => '記住';
+
+  @override
+  String get magicWordRememberNo => '暫時不要';
+
+  @override
+  String get backupDowngradeTitle => '移除密語保護？';
+
+  @override
+  String get backupDowngradeBody =>
+      '你的 Google 雲端硬碟備份目前以密語保護。這次備份將改用預設加密並移除該保護。要繼續嗎？';
+
+  @override
+  String get backupEmptyDisabledHint => '請先新增至少一位聯絡人再備份。';
+
+  @override
+  String get backupRestoreFirstHint => '你有雲端備份，但本機沒有資料。請先還原，再進行備份或設定密語。';
+
+  @override
+  String get backupSetWordNextBackupHint => '雲端備份尚未套用新密語——請點「立即備份」以套用。';
+
+  @override
+  String get backupRestoreStaleTitle => '備份比你的資料還舊';
+
+  @override
+  String backupRestoreStaleBody(String cloudTime, String localTime) {
+    return '這份雲端備份建立於 $cloudTime——比你最近一次的本機變更 $localTime 還舊。還原會用這份較舊的備份覆蓋你較新的本機資料。要繼續嗎？';
+  }
 
   @override
   String get commonContinue => '繼續';

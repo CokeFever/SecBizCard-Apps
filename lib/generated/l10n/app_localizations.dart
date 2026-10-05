@@ -2056,7 +2056,7 @@ abstract class AppLocalizations {
   /// No description provided for @backupRestoreConfirmBody.
   ///
   /// In en, this message translates to:
-  /// **'This will overwrite your current contacts and settings. Make sure you have a recent backup. Continue?'**
+  /// **'This downloads your Google Drive backup and OVERWRITES the contacts and settings on this device. Continue?'**
   String get backupRestoreConfirmBody;
 
   /// No description provided for @backupRestoreAction.
@@ -2227,23 +2227,11 @@ abstract class AppLocalizations {
   /// **'Magic word copied to clipboard.'**
   String get magicWordCopied;
 
-  /// No description provided for @magicWordSavedRepacking.
+  /// Shown after setting a magic word; setting does not upload to Drive — it applies on the next backup
   ///
   /// In en, this message translates to:
-  /// **'Saving magic word and re-packing your backup...'**
-  String get magicWordSavedRepacking;
-
-  /// No description provided for @magicWordSaved.
-  ///
-  /// In en, this message translates to:
-  /// **'Magic word set. Your encrypted backup has been uploaded to Google Drive.'**
+  /// **'Magic word set — it takes effect on your next backup.'**
   String get magicWordSaved;
-
-  /// No description provided for @magicWordRepackFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not re-pack the backup: {error}'**
-  String magicWordRepackFailed(String error);
 
   /// Label above the revealed stored magic word
   ///
@@ -2268,6 +2256,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Wrong magic word — this backup cannot be unlocked with it. Check it and try again.'**
   String get magicWordRestoreWrong;
+
+  /// Restore prompt body when no magic word is stored on this device
+  ///
+  /// In en, this message translates to:
+  /// **'This backup is locked with a magic word. Enter it to restore. (Case-sensitive.)'**
+  String get magicWordRestorePromptBodyNoWord;
+
+  /// Restore prompt body when the stored magic word cannot decrypt the backup
+  ///
+  /// In en, this message translates to:
+  /// **'The magic word saved on this device can\'t unlock this backup. Enter the correct one. (Case-sensitive.)'**
+  String get magicWordRestorePromptBodyWrongWord;
+
+  /// Title of the dialog asking whether to store the entered magic word after a successful restore
+  ///
+  /// In en, this message translates to:
+  /// **'Remember magic word?'**
+  String get magicWordRememberTitle;
+
+  /// No description provided for @magicWordRememberBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember this magic word on this device so future backups and restores use it automatically?'**
+  String get magicWordRememberBody;
+
+  /// No description provided for @magicWordRememberYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember'**
+  String get magicWordRememberYes;
+
+  /// No description provided for @magicWordRememberNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get magicWordRememberNo;
+
+  /// Title of the warning shown before a backup would strip magic-word protection from the cloud file
+  ///
+  /// In en, this message translates to:
+  /// **'Remove magic-word protection?'**
+  String get backupDowngradeTitle;
+
+  /// No description provided for @backupDowngradeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Google Drive backup is currently protected with a magic word. This backup will switch to default encryption and remove that protection. Continue?'**
+  String get backupDowngradeBody;
+
+  /// Hint shown when Back Up Now is disabled because there are no local contacts
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one contact before backing up.'**
+  String get backupEmptyDisabledHint;
+
+  /// Hint steering the user to restore when local data is empty but a cloud backup exists
+  ///
+  /// In en, this message translates to:
+  /// **'You have a cloud backup but no local data. Restore it before backing up or setting a magic word.'**
+  String get backupRestoreFirstHint;
+
+  /// Persistent inline status after setting a magic word, before the next backup applies it
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud backup not yet updated with the new magic word — tap Back Up Now to apply it.'**
+  String get backupSetWordNextBackupHint;
+
+  /// Title of the warning shown when the cloud backup is older than the latest local change
+  ///
+  /// In en, this message translates to:
+  /// **'Backup is older than your data'**
+  String get backupRestoreStaleTitle;
+
+  /// No description provided for @backupRestoreStaleBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The cloud backup was made {cloudTime} — older than your latest local change {localTime}. Restoring will overwrite your newer local data with this older backup. Continue?'**
+  String backupRestoreStaleBody(String cloudTime, String localTime);
 
   /// No description provided for @commonContinue.
   ///

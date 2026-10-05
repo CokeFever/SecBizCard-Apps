@@ -1072,7 +1072,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get backupRestoreConfirmBody =>
-      '現在の連絡先と設定を上書きします。最近のバックアップがあることを確認してください。続行しますか？';
+      'Google ドライブのバックアップをダウンロードし、このデバイスの連絡先と設定を「上書き」します。続行しますか？';
 
   @override
   String get backupRestoreAction => '復元';
@@ -1165,16 +1165,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get magicWordCopied => 'マジックワードをクリップボードにコピーしました。';
 
   @override
-  String get magicWordSavedRepacking => 'マジックワードを保存し、バックアップを再梱包しています...';
-
-  @override
-  String get magicWordSaved =>
-      'マジックワードを設定しました。暗号化されたバックアップを Google ドライブにアップロードしました。';
-
-  @override
-  String magicWordRepackFailed(String error) {
-    return 'バックアップの再梱包に失敗しました:$error';
-  }
+  String get magicWordSaved => 'マジックワードを設定しました——次回のバックアップから有効になります。';
 
   @override
   String get magicWordStoredLabel => 'あなたのマジックワード';
@@ -1189,6 +1180,53 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get magicWordRestoreWrong =>
       'マジックワードが違います。これではバックアップを開けません。確認してもう一度お試しください。';
+
+  @override
+  String get magicWordRestorePromptBodyNoWord =>
+      'このバックアップはマジックワードでロックされています。復元するには入力してください。(大文字・小文字を区別します。)';
+
+  @override
+  String get magicWordRestorePromptBodyWrongWord =>
+      'このデバイスに保存されているマジックワードではこのバックアップを開けません。正しいものを入力してください。(大文字・小文字を区別します。)';
+
+  @override
+  String get magicWordRememberTitle => 'マジックワードを記憶しますか？';
+
+  @override
+  String get magicWordRememberBody =>
+      'このデバイスにこのマジックワードを記憶して、今後のバックアップと復元で自動的に使用しますか？';
+
+  @override
+  String get magicWordRememberYes => '記憶する';
+
+  @override
+  String get magicWordRememberNo => '今はしない';
+
+  @override
+  String get backupDowngradeTitle => 'マジックワード保護を解除しますか？';
+
+  @override
+  String get backupDowngradeBody =>
+      'Google ドライブのバックアップは現在マジックワードで保護されています。このバックアップは既定の暗号化に切り替わり、その保護は解除されます。続行しますか？';
+
+  @override
+  String get backupEmptyDisabledHint => 'バックアップする前に連絡先を 1 件以上追加してください。';
+
+  @override
+  String get backupRestoreFirstHint =>
+      'クラウドバックアップはありますが、ローカルデータがありません。バックアップやマジックワードの設定の前に復元してください。';
+
+  @override
+  String get backupSetWordNextBackupHint =>
+      'クラウドバックアップにはまだ新しいマジックワードが反映されていません——「今すぐバックアップ」をタップして適用してください。';
+
+  @override
+  String get backupRestoreStaleTitle => 'バックアップがデータより古いです';
+
+  @override
+  String backupRestoreStaleBody(String cloudTime, String localTime) {
+    return 'このクラウドバックアップは $cloudTime に作成され、最新のローカル変更 $localTime より古いものです。復元すると、より新しいローカルデータがこの古いバックアップで上書きされます。続行しますか？';
+  }
 
   @override
   String get commonContinue => '続ける';

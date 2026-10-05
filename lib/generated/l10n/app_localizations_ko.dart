@@ -1073,7 +1073,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get backupRestoreConfirmBody =>
-      '현재 연락처와 설정을 덮어씁니다. 최근 백업이 있는지 확인하세요. 계속할까요?';
+      'Google 드라이브 백업을 다운로드하여 이 기기의 연락처와 설정을 덮어씁니다. 계속할까요?';
 
   @override
   String get backupRestoreAction => '복원';
@@ -1166,15 +1166,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get magicWordCopied => '매직 워드를 클립보드에 복사했습니다.';
 
   @override
-  String get magicWordSavedRepacking => '매직 워드를 저장하고 백업을 다시 포장하는 중...';
-
-  @override
-  String get magicWordSaved => '매직 워드를 설정했습니다. 암호화된 백업을 Google 드라이브에 업로드했습니다.';
-
-  @override
-  String magicWordRepackFailed(String error) {
-    return '백업을 다시 포장할 수 없습니다: $error';
-  }
+  String get magicWordSaved => '매직 워드를 설정했습니다 — 다음 백업부터 적용됩니다.';
 
   @override
   String get magicWordStoredLabel => '내 매직 워드';
@@ -1189,6 +1181,53 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get magicWordRestoreWrong =>
       '매직 워드가 틀렸습니다. 이것으로는 백업을 열 수 없습니다. 확인 후 다시 시도하세요.';
+
+  @override
+  String get magicWordRestorePromptBodyNoWord =>
+      '이 백업은 매직 워드로 잠겨 있습니다. 복원하려면 입력하세요. (대소문자 구분.)';
+
+  @override
+  String get magicWordRestorePromptBodyWrongWord =>
+      '이 기기에 저장된 매직 워드로는 이 백업을 열 수 없습니다. 올바른 매직 워드를 입력하세요. (대소문자 구분.)';
+
+  @override
+  String get magicWordRememberTitle => '매직 워드를 기억할까요?';
+
+  @override
+  String get magicWordRememberBody =>
+      '이 기기에 이 매직 워드를 기억하여 이후 백업과 복원에 자동으로 사용할까요?';
+
+  @override
+  String get magicWordRememberYes => '기억하기';
+
+  @override
+  String get magicWordRememberNo => '나중에';
+
+  @override
+  String get backupDowngradeTitle => '매직 워드 보호를 해제할까요?';
+
+  @override
+  String get backupDowngradeBody =>
+      'Google 드라이브 백업이 현재 매직 워드로 보호되어 있습니다. 이 백업은 기본 암호화로 전환되어 해당 보호가 해제됩니다. 계속할까요?';
+
+  @override
+  String get backupEmptyDisabledHint => '백업하기 전에 연락처를 하나 이상 추가하세요.';
+
+  @override
+  String get backupRestoreFirstHint =>
+      '클라우드 백업은 있지만 로컬 데이터가 없습니다. 백업하거나 매직 워드를 설정하기 전에 먼저 복원하세요.';
+
+  @override
+  String get backupSetWordNextBackupHint =>
+      '클라우드 백업에 새 매직 워드가 아직 반영되지 않았습니다 — \'지금 백업\'을 눌러 적용하세요.';
+
+  @override
+  String get backupRestoreStaleTitle => '백업이 데이터보다 오래되었습니다';
+
+  @override
+  String backupRestoreStaleBody(String cloudTime, String localTime) {
+    return '이 클라우드 백업은 $cloudTime에 만들어져 최신 로컬 변경 $localTime보다 오래되었습니다. 복원하면 더 새로운 로컬 데이터가 이 오래된 백업으로 덮어쓰여집니다. 계속할까요?';
+  }
 
   @override
   String get commonContinue => '계속';

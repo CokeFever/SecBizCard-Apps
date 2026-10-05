@@ -1096,7 +1096,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backupRestoreConfirmBody =>
-      'This will overwrite your current contacts and settings. Make sure you have a recent backup. Continue?';
+      'This downloads your Google Drive backup and OVERWRITES the contacts and settings on this device. Continue?';
 
   @override
   String get backupRestoreAction => 'Restore';
@@ -1191,17 +1191,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get magicWordCopied => 'Magic word copied to clipboard.';
 
   @override
-  String get magicWordSavedRepacking =>
-      'Saving magic word and re-packing your backup...';
-
-  @override
   String get magicWordSaved =>
-      'Magic word set. Your encrypted backup has been uploaded to Google Drive.';
-
-  @override
-  String magicWordRepackFailed(String error) {
-    return 'Could not re-pack the backup: $error';
-  }
+      'Magic word set — it takes effect on your next backup.';
 
   @override
   String get magicWordStoredLabel => 'Your magic word';
@@ -1216,6 +1207,54 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get magicWordRestoreWrong =>
       'Wrong magic word — this backup cannot be unlocked with it. Check it and try again.';
+
+  @override
+  String get magicWordRestorePromptBodyNoWord =>
+      'This backup is locked with a magic word. Enter it to restore. (Case-sensitive.)';
+
+  @override
+  String get magicWordRestorePromptBodyWrongWord =>
+      'The magic word saved on this device can\'t unlock this backup. Enter the correct one. (Case-sensitive.)';
+
+  @override
+  String get magicWordRememberTitle => 'Remember magic word?';
+
+  @override
+  String get magicWordRememberBody =>
+      'Remember this magic word on this device so future backups and restores use it automatically?';
+
+  @override
+  String get magicWordRememberYes => 'Remember';
+
+  @override
+  String get magicWordRememberNo => 'Not now';
+
+  @override
+  String get backupDowngradeTitle => 'Remove magic-word protection?';
+
+  @override
+  String get backupDowngradeBody =>
+      'Your Google Drive backup is currently protected with a magic word. This backup will switch to default encryption and remove that protection. Continue?';
+
+  @override
+  String get backupEmptyDisabledHint =>
+      'Add at least one contact before backing up.';
+
+  @override
+  String get backupRestoreFirstHint =>
+      'You have a cloud backup but no local data. Restore it before backing up or setting a magic word.';
+
+  @override
+  String get backupSetWordNextBackupHint =>
+      'Cloud backup not yet updated with the new magic word — tap Back Up Now to apply it.';
+
+  @override
+  String get backupRestoreStaleTitle => 'Backup is older than your data';
+
+  @override
+  String backupRestoreStaleBody(String cloudTime, String localTime) {
+    return 'The cloud backup was made $cloudTime — older than your latest local change $localTime. Restoring will overwrite your newer local data with this older backup. Continue?';
+  }
 
   @override
   String get commonContinue => 'Continue';
