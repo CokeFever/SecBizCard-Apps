@@ -23,8 +23,9 @@
 - **多語支援(必做)**:對齊 app 的 5 語 **en / zh-TW / zh-CN / ja / ko**。官網目前
   **尚未裝 i18n 模組**(landing 用手動 navigator.languages fallback)。editor 的多語建議
   裝 `@nuxtjs/i18n`(較完整,editor 字串多),或沿用手動機制——**待定(見 §9)**。
-- **關鍵前端套件**:Google Picker/Drive(直接用 Google API JS)、`JSZip`(解/打包 zip)、
-  Web Crypto(PBKDF2 + AES-GCM,瀏覽器原生,不需外部 crypto lib)。
+- **身分**:**無**(不使用 Firebase Auth / 不碰 uid——見 §3A,只支援 magicword 模式)。
+- **關鍵前端套件**:Google Picker/Drive(Google API JS,`drive.file` 授權)、
+  `JSZip`(解/打包 zip)、Web Crypto(PBKDF2 + AES-GCM,瀏覽器原生,不需外部 crypto lib)。
 
 ---
 
@@ -46,15 +47,35 @@
 
 ---
 
-## 4. 流程(全前端)
-1. **進入 `/editor`** → 立刻引導登入 Google + 開 **Google Drive File Picker**。
+## 3A. 登入與授權架構(定案:只支援 magicword,無 Firebase)
+**web editor 只支援 magicword 模式的備份。完全不使用 Firebase Auth / 不碰 uid。**
+
+- 沒有「帳號登入」這一層。唯一需要的是 **Google Drive `drive.file` 授權 + Picker** 來
+  讀寫使用者選的那個檔(這是 Google 存取 Drive 的硬性要求,體感是「選檔時授權一下」,
+  不是登入帳號)。
+- 解密金鑰 = **使用者輸入的 magic word**。不需要 uid。
+- **老闆與秘書走完全相同的路徑**:開 Picker 選檔 → 輸入 magic word → 解密。沒有身分分支。
+
+**前提與限制(明確寫進 UI):**
+- 要用 web editor,**備份必須是 magicword 模式**(使用者已在 app 設過 magic word)。
+- **uid 模式(沒設 magic word)的備份:web editor 不支援。** editor 偵測到選中的檔
+  header 是 `encMode:uid` → 明確提示「請先在 App 設定備份密語(magic word),再用網頁編輯」。
+  不提供 Firebase 登入解 uid 的路徑(刻意不做,保持 editor 無身分、架構最簡)。
+- 這也強化產品動線:**要用 web editor / 給秘書 → 先在 app 設 magic word**(本來就是前提)。
+
+---
+
+## 4. 流程(全前端,無 Firebase)
+1. **進入 `/editor`** → 取得 **Google Drive `drive.file` 授權** → 開 **Google Drive
+   File Picker**(沒有帳號登入步驟)。
 2. 使用者選檔(自己的或老闆分享的 `SecBizCard/ixo_app_backup.zip`)。
-3. **輸入 magic word**(若該檔是 magicword 模式);uid 模式舊檔則不需要。
-   - 依檔案 header `encMode` 決定(鐵律:magicword 檔只用 magic word 解,錯了乾淨失敗)。
+3. 讀 header 確認是 **magicword 模式** → **輸入 magic word**。
+   - 若 header 是 `encMode:uid`(沒設密語)→ 不支援,提示「請先在 App 設定備份密語」。
+   - 鐵律:magicword 檔只用 magic word 解,錯了乾淨失敗(GCM tag 驗證)。
 4. **瀏覽器內解密 + 解 zip** → 載入 `data.json` + 圖片 → 渲染 master-detail。
 5. 使用者**編輯 / 批次刪除 / 合併**。
-6. **儲存** → 重新組 `data.json` + 圖片 → `JSZip` 打包 → Web Crypto 用**同一把 key**
-   (同 magic word 或 uid)重新加密成 SBCB v2 → **Drive API update 覆蓋同一個 fileId**
+6. **儲存** → 重新組 `data.json` + 圖片 → `JSZip` 打包 → Web Crypto 用**同一個 magic word**
+   重新加密成 SBCB v2 magicword 檔 → **Drive API update 覆蓋同一個 fileId**
    (保留資料夾分享關係,不刪不重建)。
 7. 老闆在 app **restore**(偵測雲端較新 → 還原)。
 
@@ -129,15 +150,19 @@ editor 的欄位必須與 app 的 `UserProfile` + `customFields` 一致,restore 
 
 ---
 
-## 9. 待驗證 POC(實作前先確認,排序 = 風險)
-1. **Drive Picker + `drive.file` 跨 client 存取**(最高風險):秘書的 web OAuth client 能否
-   透過 Picker 選到老闆 app(不同 client)建立/分享的 `SecBizCard/` 檔並讀寫。這決定整個
-   秘書情境成不成立。先驗。
-2. **Web Crypto ↔ app 位元級互通**:app 寫的 SBCB v2 檔 web 解得開;web 寫回的檔 app
-   restore 得回。寫個最小 round-trip POC。
-3. **Apple 登入者的 Drive 授權**:登入身分是 Apple、備份在 Google Drive → web 端要額外
-   授權 Google Drive（身分與雲端儲存分離）。
-4. **i18n 機制選型**:`@nuxtjs/i18n` vs 沿用官網手動機制。
+## 9. 待驗證 POC(排序 = 風險)
+1. **Drive Picker + `drive.file` 跨 client 存取**(最高風險,⏳ 待真人驗證):web client 用
+   `drive.file` + Picker 能否讀寫老闆 app(不同 client)建立/分享的 `SecBizCard/` 檔。
+   POC 程式已備(`SecBizCard/website/poc/drive-picker/`),含真人驗證清單(POC_FINDINGS.md)。
+   情境 A(老闆同帳號跨 client)+ B(秘書分享資料夾)需真人用兩個 Google 帳號實測。
+   這決定秘書情境成不成立。**(註:身分層已不需要——editor 無 Firebase;此 POC 只驗
+   Drive Picker 的 `drive.file` 讀寫,正好對應 editor 實際所需。)**
+2. ✅ **Web Crypto ↔ app 位元級互通(已驗證 GREEN)**:JS/Web Crypto 的 SBCB v2 與
+   app 的 `backup_codec.dart` 雙向位元級互通,含關鍵的 web→app 方向(app 能 restore
+   瀏覽器寫的備份)。Node 20+ 與真實 Chrome 都驗過。POC 在
+   `SecBizCard/website/poc/crypto-interop/`(commit 556cb39)+ Dart harness(SecBizCard-Apps b5696bd)。
+3. **i18n 機制選型**:`@nuxtjs/i18n`(官網全站 i18n 已採用,見 §10A)。
+   (原「Apple 登入者的 Drive 授權」POC **移除**——editor 不做身分登入,無此問題。)
 
 ---
 
