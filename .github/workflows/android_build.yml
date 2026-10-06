@@ -82,7 +82,13 @@ jobs:
         run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Run Tests
-        run: flutter test
+        # Scope to test/unit (the app's real unit suite), matching local
+        # `fvm flutter test test/unit`. Bare `flutter test` also runs
+        # test/poc/* — crypto-interop scratch harnesses for the web editor
+        # that read JS-generated vector files and need plugin channels, so
+        # they fail in this headless CI (not an app regression). The release
+        # path is GCP Cloud Build; this QA-APK job must not red-flag on POC.
+        run: flutter test test/unit
 
       - name: Setup Keystore
         env:
