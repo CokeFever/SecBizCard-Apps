@@ -73,3 +73,45 @@ Social(LinkedIn/Twitter/Facebook/Instagram/GitHub)、Date(Birthday/Anniversary)�
 
 > 批次 3/4 風險最高(資料 round-trip + 加密打包),務必含真機實測:web 編輯 → 重新打包 →
 > app restore 確認改動進去 + 無-profile 備份仍 restore 得回。
+
+
+---
+
+## 批次 5 — 四批上線後實測回饋(2026-10-06)
+
+> 使用者實測批次 1~4 後發現。F/G/H 是修正+改進,I 是新功能。
+
+### F. Profile 搬到 header + header 重新設計
+- **F1** profile(「我的名片」/`userProfile`)目前被當一列放進 ContactList。改為:
+  - 從 ContactList **移除** profile row → 搜尋 + 清單只剩真正的 contacts,變單純。
+  - profile **搬到現在顯示檔名的位置**(header 左上),當「這份備份的擁有者」卡片/入口,
+    點它進 profile 編輯。
+  - store 的 `profile` 與 `contacts` 本來就分開(`contacts.ts` + `activeIsProfile`),只是
+    顯示位置要改。
+- **F2 header 重新設計**(使用者指定):
+  - **移除左上的 logo**(完全不要)。
+  - 原本 logo+檔名的位置 → 放 **profile(我的名片)入口**(見 F1)。
+  - **檔名 `ixo_app_backup.zip` 靠右**,放在「Find duplicates」按鈕**前面**(弱化、當狀態標示)。
+- 確認:兩個「Jack Wang」= profile 一筆 + contacts 一筆,非重複,只是同名。
+
+### G. 「其他欄位」缺明顯的新增入口
+- **G1** `CustomFieldsEditor.vue` 有 `addRow()` 但 UI 看不到「新增欄位」按鈕(使用者只看到
+  每列的 ×)。→ 補明顯的「+ 新增欄位」入口。
+
+### H. 欄位 key 可自由打字 → 改壞 round-trip 風險
+- **H1** `CustomFieldsEditor.vue` 的 key 是 `<input v-model="row.key">`(自由文字)。使用者改
+  成亂碼會破壞 app round-trip(app 靠 key 讀資料)。修法分兩類:
+  - **下拉是封閉清單,只支援能對應 Google Contacts 的欄位類型**(對標 Google Contacts):
+    Phone(Mobile/Work/Home/Main/Fax/Other)、Email(Home/Work/Other)、
+    Address(Home/Work/Other)、Website/URL、Birthday/Date、Notes。
+    (Organization 的 company/title/department 已是主欄位,不重複進下拉。)
+  - **app 特有既有 key**(taxId/postalCode 等不在 Google Contacts 對應集合、但 app/OCR 寫入
+    的)→ key **鎖定唯讀**,只能改值或刪除,不可改 key。
+  - 目標:使用者只能從封閉清單選,無法把 app 認得的 key 改成 app 認不得的字串。
+
+### I. Excel 式批次編輯(新功能,大)
+- **I1** 上方功能列加一個「批次編輯 / 表格檢視」:contacts = rows、欄位 = columns、每格可
+  編輯,像試算表一次改所有 contacts。改完走現有 `collapseFields` → repack 流程存回。
+  需處理:多值欄位在表格怎麼呈現(可能攤平成 phone_work / email_personal 等欄)、新增列、
+  虛擬捲動(大量 contacts 效能)、與現有 master-detail 檢視切換。
+  → 獨立大功能,設計先行(序列化回 SBCB schema 同 H 的 key 規則)。
