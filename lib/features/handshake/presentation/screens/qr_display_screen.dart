@@ -456,7 +456,8 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Saved ${receiverProfile.displayName} to contacts'),
+            content: Text(AppLocalizations.of(context)!
+                .qrSavedToContacts(receiverProfile.displayName)),
           ),
         );
       }
@@ -667,21 +668,24 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
       child: _isLoading
           ? _buildLoadingSkeleton(context)
           : _error != null
-          ? Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                const SizedBox(height: 16),
-                Text(
-                  _errorIsFriendly ? _error! : l10n.qrErrorPrefix(_error!),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _generateQrCode,
-                  child: Text(l10n.qrRetry),
-                ),
-              ],
+          ? Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text(
+                    _errorIsFriendly ? _error! : l10n.qrErrorPrefix(_error!),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _generateQrCode,
+                    child: Text(l10n.qrRetry),
+                  ),
+                ],
+              ),
             )
           : SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
