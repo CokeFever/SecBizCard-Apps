@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:secbizcard/core/errors/failure.dart';
 import 'package:secbizcard/core/presentation/widgets/user_profile_avatar.dart';
 import 'package:secbizcard/core/responsive/adaptive_container.dart';
 import 'package:secbizcard/core/responsive/breakpoints.dart';
@@ -307,11 +308,15 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
     result.fold(
       (l) => ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context)!.contactDetailExportFailed(l.message)),
+          content: Text(
+            l is AuthFailure && l.message == kContactsPermissionDenied
+                ? l10n.contactDetailExportPermissionDenied
+                : l10n.contactDetailExportFailed(l.message),
+          ),
         ),
       ),
       (r) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.contactDetailExportSuccess)),
+        SnackBar(content: Text(l10n.contactDetailExportSuccess)),
       ),
     );
   }

@@ -510,6 +510,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get qrErrorSignInRequired => '정보를 공유하려면 로그인해야 합니다.';
 
   @override
+  String get qrErrorOffline =>
+      '인터넷에 연결되어 있지 않습니다. 인터넷에 연결한 후 공유 코드를 생성하고 \'다시 시도\'를 누르세요.';
+
+  @override
   String qrErrorPrefix(String message) {
     return '오류: $message';
   }
@@ -950,6 +954,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get contactDetailExportSuccess => '내보내기에 성공했습니다!';
+
+  @override
+  String get contactDetailExportPermissionDenied =>
+      '권한이 거부되었습니다. Google 주소록 접근을 허용한 후 다시 시도하세요.';
 
   @override
   String contactDetailShareVcardFailed(String error) {

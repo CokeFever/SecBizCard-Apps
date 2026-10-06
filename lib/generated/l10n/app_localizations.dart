@@ -1021,6 +1021,12 @@ abstract class AppLocalizations {
   /// **'You must be signed in to share your info.'**
   String get qrErrorSignInRequired;
 
+  /// No description provided for @qrErrorOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection. Connect to the internet to generate your share code, then tap Retry.'**
+  String get qrErrorOffline;
+
   /// No description provided for @qrErrorPrefix.
   ///
   /// In en, this message translates to:
@@ -1836,6 +1842,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Exported successfully!'**
   String get contactDetailExportSuccess;
+
+  /// No description provided for @contactDetailExportPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission denied. Allow access to your Google Contacts, then try again.'**
+  String get contactDetailExportPermissionDenied;
 
   /// 'vCard' kept in English
   ///

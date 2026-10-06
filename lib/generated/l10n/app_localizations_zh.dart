@@ -504,6 +504,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get qrErrorSignInRequired => '你必须先登录才能分享信息。';
 
   @override
+  String get qrErrorOffline => '没有网络连接。请连接网络以生成您的分享码，然后点按“重试”。';
+
+  @override
   String qrErrorPrefix(String message) {
     return '错误:$message';
   }
@@ -938,6 +941,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get contactDetailExportSuccess => '导出成功！';
+
+  @override
+  String get contactDetailExportPermissionDenied =>
+      '权限被拒绝。请允许访问您的 Google 通讯录后重试。';
 
   @override
   String contactDetailShareVcardFailed(String error) {
@@ -2154,6 +2161,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get qrErrorSignInRequired => '你必須先登入才能分享資訊。';
 
   @override
+  String get qrErrorOffline => '沒有網路連線。請連上網路以產生您的分享碼，然後點選「重試」。';
+
+  @override
   String qrErrorPrefix(String message) {
     return '錯誤:$message';
   }
@@ -2588,6 +2598,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get contactDetailExportSuccess => '匯出成功！';
+
+  @override
+  String get contactDetailExportPermissionDenied =>
+      '權限遭拒。請允許存取您的 Google 聯絡人後再試一次。';
 
   @override
   String contactDetailShareVcardFailed(String error) {

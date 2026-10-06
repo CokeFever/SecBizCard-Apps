@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'dart:convert';
 
+import 'package:secbizcard/core/errors/failure.dart';
 import 'package:secbizcard/features/handshake/data/handshake_repository.dart';
 import 'package:secbizcard/features/profile/domain/card_context.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
@@ -44,6 +45,11 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
   String? _sessionId;
   bool _isLoading = true;
   String? _error;
+
+  // When true, [_error] already holds a complete, user-facing message (e.g. the
+  // offline/no-network copy) and must be shown standalone — WITHOUT the generic
+  // "Error: {message}" prefix that wraps raw backend errors.
+  bool _errorIsFriendly = false;
 
   // Cache the requester's profile from the REQUESTED event
   // so we can use it in APPROVED/RETURNED log entries 
@@ -184,6 +190,7 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
       if (mounted) {
         setState(() {
           _error = AppLocalizations.of(context)!.qrErrorSignInRequired;
+          _errorIsFriendly = true;
           _isLoading = false;
         });
       }
@@ -193,6 +200,7 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
     setState(() {
       _isLoading = true;
       _error = null;
+      _errorIsFriendly = false;
       _sessionId = null;
       _expiresAt = null;
     });
@@ -206,11 +214,21 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
     );
 
     if (!mounted) return;
+    final l10n = AppLocalizations.of(context)!;
 
     result.fold(
       (failure) {
         setState(() {
-          _error = failure.message;
+          if (failure is ConnectionFailure) {
+            // Offline / backend unreachable: show the friendly standalone
+            // "no internet, connect and Retry" copy instead of the raw gRPC
+            // string ("unavailable: UNAVAILABLE").
+            _error = l10n.qrErrorOffline;
+            _errorIsFriendly = true;
+          } else {
+            _error = failure.message;
+            _errorIsFriendly = false;
+          }
           _isLoading = false;
         });
       },
@@ -220,6 +238,7 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
           _sessionId = session.sessionId;
           _isLoading = false;
           _error = null;
+          _errorIsFriendly = false;
         });
         _startCountdown();
         _listenToSession(session.sessionId);
@@ -653,7 +672,10 @@ class _QrDisplayScreenState extends ConsumerState<QrDisplayScreen>
               children: [
                 const Icon(Icons.error_outline, size: 64, color: Colors.red),
                 const SizedBox(height: 16),
-                Text(l10n.qrErrorPrefix(_error!), textAlign: TextAlign.center),
+                Text(
+                  _errorIsFriendly ? _error! : l10n.qrErrorPrefix(_error!),
+                  textAlign: TextAlign.center,
+                ),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: _generateQrCode,
