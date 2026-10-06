@@ -393,7 +393,12 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     if (result.allOk) {
       msg = l10n.mainExportedToGoogle(result.succeeded);
     } else if (result.succeeded == 0) {
-      msg = l10n.mainExportFailed(result.firstError ?? 'unknown error');
+      // A Contacts-scope denial surfaces as the shared sentinel string; show
+      // the friendly localized permission-denied message instead of leaking
+      // the raw sentinel (or a raw 403) into mainExportFailed.
+      msg = result.firstError == kContactsPermissionDenied
+          ? l10n.contactDetailExportPermissionDenied
+          : l10n.mainExportFailed(result.firstError ?? 'unknown error');
     } else {
       msg = l10n.mainExportedPartial(result.succeeded, result.total, result.failed);
     }

@@ -523,6 +523,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'You must be signed in to share your info.';
 
   @override
+  String get qrErrorOffline =>
+      'No internet connection. Connect to the internet to generate your share code, then tap Retry.';
+
+  @override
   String qrErrorPrefix(String message) {
     return 'Error: $message';
   }
@@ -970,6 +974,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get contactDetailExportSuccess => 'Exported successfully!';
+
+  @override
+  String get contactDetailExportPermissionDenied =>
+      'Permission denied. Allow access to your Google Contacts, then try again.';
 
   @override
   String contactDetailShareVcardFailed(String error) {

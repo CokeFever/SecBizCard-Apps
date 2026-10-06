@@ -15,6 +15,15 @@ import 'package:secbizcard/features/profile/data/profile_repository.dart';
 
 part 'contacts_repository.g.dart';
 
+/// Sentinel [AuthFailure] message shared between [ContactsRepository] and the
+/// UI call sites. When the Google Contacts (People API) scope is denied — the
+/// user declines the consent screen, or a Workspace admin has disabled the
+/// scope so the write 403s — the repository returns `AuthFailure` carrying this
+/// exact string, and the UI maps it to the friendly localized
+/// `contactDetailExportPermissionDenied` message instead of surfacing a raw
+/// 403 / `DetailedApiRequestError` to the user.
+const String kContactsPermissionDenied = 'contacts_permission_denied';
+
 @riverpod
 Future<List<UserProfile>> savedContacts(Ref ref) async {
   final currentUserId = ref.watch(authStateProvider).value?.uid;
@@ -99,6 +108,17 @@ class ContactsRepository {
         return left(const AuthFailure('User not signed in'));
       }
 
+      // Request the Contacts (read/write) OAuth scope BEFORE touching the
+      // People API. Without this the consent screen for the contacts scope is
+      // never shown, and an account that never granted it gets a 403
+      // "Request had insufficient authentication scopes". Mirrors how
+      // DriveRepository requests the Drive scope before using the Drive API.
+      final authorized = await _googleSignIn
+          .requestScopes([people.PeopleServiceApi.contactsScope]);
+      if (!authorized) {
+        return left(const AuthFailure(kContactsPermissionDenied));
+      }
+
       final authHeaders = await account.authHeaders;
       final authenticatedClient = _GoogleAuthClient(authHeaders);
 
@@ -113,8 +133,24 @@ class ContactsRepository {
 
       return right(null);
     } catch (e) {
-      return left(ServerFailure(e.toString()));
+      return left(_mapContactsError(e));
     }
+  }
+
+  /// Maps a People API error to a [Failure]. A 403 / insufficient-scope error
+  /// (e.g. a Workspace account where the admin disabled the Contacts scope)
+  /// becomes a clean [AuthFailure] carrying [kContactsPermissionDenied] so the
+  /// UI shows the friendly permission-denied message rather than the raw
+  /// `DetailedApiRequestError(status: 403...)` text. All other errors stay as
+  /// [ServerFailure].
+  Failure _mapContactsError(Object e) {
+    if (e is people.DetailedApiRequestError && e.status == 403) {
+      return const AuthFailure(kContactsPermissionDenied);
+    }
+    if (e.toString().contains('insufficient authentication scopes')) {
+      return const AuthFailure(kContactsPermissionDenied);
+    }
+    return ServerFailure(e.toString());
   }
 
   /// Maps a [UserProfile] into a People API [Person], populating every field
@@ -202,6 +238,14 @@ class ContactsRepository {
         return left(const AuthFailure('User not signed in'));
       }
 
+      // Same scope requirement as the write path: request the Contacts scope
+      // before reading via the People API, else a never-granted account 403s.
+      final authorized = await _googleSignIn
+          .requestScopes([people.PeopleServiceApi.contactsScope]);
+      if (!authorized) {
+        return left(const AuthFailure(kContactsPermissionDenied));
+      }
+
       final authHeaders = await account.authHeaders;
       final authenticatedClient = _GoogleAuthClient(authHeaders);
       final peopleApi = people.PeopleServiceApi(authenticatedClient);
@@ -241,7 +285,7 @@ class ContactsRepository {
 
       return right(profile);
     } catch (e) {
-      return left(ServerFailure(e.toString()));
+      return left(_mapContactsError(e));
     }
   }
 

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -9,6 +11,46 @@ import 'package:secbizcard/core/errors/failure.dart';
 import 'package:secbizcard/features/handshake/data/handshake_session.dart';
 
 part 'handshake_repository.g.dart';
+
+/// Firebase Functions error codes that mean "could not reach the backend"
+/// rather than a genuine application error. When the device is offline (or the
+/// gRPC channel is cold after a resume) the callable fails with one of these.
+const Set<String> kConnectivityFunctionCodes = {
+  'unavailable',
+  'internal',
+  'deadline-exceeded',
+};
+
+/// Maps a `FirebaseFunctionsException` (code + message) to a [Failure].
+///
+/// Connectivity/transient codes become a [ConnectionFailure] carrying the
+/// stable `'offline'` sentinel, so the UI can show a friendly "no internet"
+/// message with a Retry button instead of the raw gRPC string
+/// ("unavailable: UNAVAILABLE"). Everything else (auth, invalid-argument, …)
+/// stays a [ServerFailure] carrying the original code + message so a genuine
+/// backend problem is not hidden. Pure so it can be unit-tested directly.
+Failure mapFunctionsError(String code, String? message) {
+  if (kConnectivityFunctionCodes.contains(code)) {
+    return const ConnectionFailure('offline');
+  }
+  return ServerFailure('$code: ${message ?? 'Unknown error'}');
+}
+
+/// Maps a non-`FirebaseFunctionsException` error thrown while creating a
+/// handshake session. A no-connectivity error (e.g. a `SocketException`) is
+/// treated as offline; anything else is a generic [ServerFailure].
+Failure mapGenericError(Object e) {
+  final text = e.toString().toLowerCase();
+  if (e is SocketException ||
+      text.contains('socketexception') ||
+      text.contains('failed host lookup') ||
+      text.contains('network is unreachable') ||
+      text.contains('connection refused') ||
+      text.contains('connection closed')) {
+    return const ConnectionFailure('offline');
+  }
+  return ServerFailure(e.toString());
+}
 
 @riverpod
 HandshakeRepository handshakeRepository(Ref ref) {
@@ -65,18 +107,17 @@ class HandshakeRepository {
         // (auth, invalid-argument, etc.) so we don't hide a genuine problem.
         final isTransient = transientCodes.contains(e.code);
         if (!isTransient || attempt == maxAttempts - 1) {
-          return left(
-              ServerFailure('${e.code}: ${e.message ?? 'Unknown error'}'));
+          return left(mapFunctionsError(e.code, e.message));
         }
         // Backoff before retrying so the channel can reconnect: 400ms, 900ms.
         await Future<void>.delayed(Duration(milliseconds: 400 + attempt * 500));
       } catch (e) {
-        return left(ServerFailure(e.toString()));
+        return left(mapGenericError(e));
       }
     }
     // Unreachable in practice (loop returns), but satisfies the analyzer.
-    return left(ServerFailure(
-        '${lastError?.code ?? 'unknown'}: ${lastError?.message ?? 'Unknown error'}'));
+    return left(mapFunctionsError(
+        lastError?.code ?? 'unknown', lastError?.message));
   }
 
   /// Receiver sends a request to the Sender

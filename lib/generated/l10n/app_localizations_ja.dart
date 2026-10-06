@@ -510,6 +510,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get qrErrorSignInRequired => '情報を共有するにはサインインが必要です。';
 
   @override
+  String get qrErrorOffline =>
+      'インターネットに接続されていません。接続してから共有コードを生成し、「再試行」をタップしてください。';
+
+  @override
   String qrErrorPrefix(String message) {
     return 'エラー:$message';
   }
@@ -949,6 +953,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get contactDetailExportSuccess => 'エクスポートに成功しました！';
+
+  @override
+  String get contactDetailExportPermissionDenied =>
+      'アクセスが拒否されました。Google 連絡先へのアクセスを許可してから、もう一度お試しください。';
 
   @override
   String contactDetailShareVcardFailed(String error) {
