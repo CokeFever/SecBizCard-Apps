@@ -9,6 +9,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:secbizcard/core/errors/failure.dart';
 import 'package:secbizcard/core/services/backup_codec.dart';
+import 'package:secbizcard/core/services/backup_error_mapper.dart';
+import 'package:secbizcard/core/services/backup_phase.dart';
 import 'package:secbizcard/core/services/backup_reminder_service.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
@@ -105,6 +107,7 @@ class BackupService {
   Future<Either<Failure, DateTime>> backup({
     bool force = false,
     bool allowEmpty = false,
+    void Function(BackupPhase phase)? onPhase,
   }) async {
     try {
       final user = _authRepo.getCurrentUser();
@@ -148,6 +151,7 @@ class BackupService {
       }
 
       // 1. Gather Data
+      onPhase?.call(BackupPhase.preparing);
       final contactsResult = await _contactsRepo.getSavedContacts();
       final contacts = contactsResult.getOrElse((l) => []);
 
@@ -249,6 +253,7 @@ class BackupService {
       // 4. Encrypt — ALWAYS write the new "SBCB" v2 format. The encMode is
       // chosen from the locally stored magic word: `magicword` when the user
       // has set one (then uid can no longer decrypt it), otherwise `uid`.
+      onPhase?.call(BackupPhase.encrypting);
       final finalBytes = await _encryptForUpload(encodedZip, uid: uid);
 
       // 5. Save Temp File
@@ -266,6 +271,7 @@ class BackupService {
       );
       final existingNewHomeId = newHomeSearch.match((l) => null, (r) => r);
 
+      onPhase?.call(BackupPhase.uploading);
       final uploadResult = await _driveRepo.uploadBackup(
         tempFile,
         _backupFileName,
@@ -294,7 +300,13 @@ class BackupService {
       }
       return uploadResult.fold((l) => left(l), (r) => right(DateTime.now()));
     } catch (e) {
-      return left(GeneralFailure('Backup failed: $e'));
+      // Classify into a TYPED failure (offline / interrupted / auth / generic)
+      // so the UI shows a friendly, localized message instead of raw
+      // ClientException/PlatformException/DetailedApiRequestError text. Typed
+      // failures thrown earlier (AuthFailure, EmptyBackupFailure, etc.) are
+      // returned via `left(...)` and never reach here; mapBackupError also
+      // passes any Failure through unchanged as a safety net.
+      return left(mapBackupError(e));
     }
   }
 
@@ -404,7 +416,10 @@ class BackupService {
   /// without first storing it (so a wrong guess doesn't leave a bad word
   /// stored). When null the locally stored magic word is used. Restore never
   /// writes to the cloud under any path.
-  Future<Either<Failure, void>> restore({String? overrideMagicWord}) async {
+  Future<Either<Failure, void>> restore({
+    String? overrideMagicWord,
+    void Function(BackupPhase phase)? onPhase,
+  }) async {
     try {
       final user = _authRepo.getCurrentUser();
       if (user == null) return left(const AuthFailure('No user logged in'));
@@ -432,6 +447,7 @@ class BackupService {
           return left(const GeneralFailure('No backup found'));
         }
 
+        onPhase?.call(BackupPhase.downloading);
         final downloadResult = await _driveRepo.downloadFile(fileId);
         return downloadResult.fold((l) => left(l), (bytes) async {
           // 2. Decrypt — route by file format via the codec:
@@ -442,6 +458,7 @@ class BackupService {
           // WrongMagicWordFailure (no uid fallback, no garbage).
           final List<int> decryptedBytes;
           try {
+            onPhase?.call(BackupPhase.decrypting);
             final magicWord =
                 overrideMagicWord ?? await _magicWordService.getMagicWord();
             decryptedBytes =
@@ -456,6 +473,7 @@ class BackupService {
 
           try {
             // 3. Unzip
+            onPhase?.call(BackupPhase.restoring);
             final archive = ZipDecoder().decodeBytes(decryptedBytes);
 
             // 4. Parse JSON
@@ -564,7 +582,9 @@ class BackupService {
         });
       });
     } catch (e) {
-      return left(GeneralFailure('Restore failed: $e'));
+      // Friendly, typed classification for restore too (interrupted download,
+      // offline, Drive auth, generic) — never surface raw transport text.
+      return left(mapBackupError(e));
     }
   }
 

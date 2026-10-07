@@ -1029,6 +1029,48 @@ class AppLocalizationsZh extends AppLocalizations {
   String get backupCreating => '创建备份中…';
 
   @override
+  String get backupPhasePreparing => '准备中…';
+
+  @override
+  String get backupPhaseEncrypting => '加密中…';
+
+  @override
+  String get backupPhaseUploading => '上传中…';
+
+  @override
+  String get restorePhaseDownloading => '下载中…';
+
+  @override
+  String get restorePhaseDecrypting => '解密中…';
+
+  @override
+  String get restorePhaseRestoring => '恢复中…';
+
+  @override
+  String get backupErrorOffline => '没有网络连接。请连接网络后重试。';
+
+  @override
+  String get backupErrorInterrupted => '备份上传被中断。请检查网络连接后重试。';
+
+  @override
+  String get backupErrorAuth => '无法访问 Google 云端硬盘。请重新登录后再试一次。';
+
+  @override
+  String get backupErrorGeneric => '备份失败，请重试。';
+
+  @override
+  String get restoreErrorOffline => '没有网络连接。请连接网络后重试。';
+
+  @override
+  String get restoreErrorInterrupted => '恢复下载被中断。请检查网络连接后重试。';
+
+  @override
+  String get restoreErrorAuth => '无法访问 Google 云端硬盘。请重新登录后再试一次。';
+
+  @override
+  String get restoreErrorGeneric => '恢复失败，请重试。';
+
+  @override
   String get backupCloudNewerStatus => '云端备份比此设备更新';
 
   @override
@@ -2684,6 +2726,48 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get backupCreating => '建立備份中…';
+
+  @override
+  String get backupPhasePreparing => '準備中…';
+
+  @override
+  String get backupPhaseEncrypting => '加密中…';
+
+  @override
+  String get backupPhaseUploading => '上傳中…';
+
+  @override
+  String get restorePhaseDownloading => '下載中…';
+
+  @override
+  String get restorePhaseDecrypting => '解密中…';
+
+  @override
+  String get restorePhaseRestoring => '還原中…';
+
+  @override
+  String get backupErrorOffline => '沒有網路連線。請連上網路後再試一次。';
+
+  @override
+  String get backupErrorInterrupted => '備份上傳中斷了。請檢查你的網路連線後再試一次。';
+
+  @override
+  String get backupErrorAuth => '無法存取 Google 雲端硬碟。請重新登入後再試一次。';
+
+  @override
+  String get backupErrorGeneric => '備份失敗，請再試一次。';
+
+  @override
+  String get restoreErrorOffline => '沒有網路連線。請連上網路後再試一次。';
+
+  @override
+  String get restoreErrorInterrupted => '還原下載中斷了。請檢查你的網路連線後再試一次。';
+
+  @override
+  String get restoreErrorAuth => '無法存取 Google 雲端硬碟。請重新登入後再試一次。';
+
+  @override
+  String get restoreErrorGeneric => '還原失敗，請再試一次。';
 
   @override
   String get backupCloudNewerStatus => '雲端備份比此裝置更新';

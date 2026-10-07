@@ -1067,6 +1067,54 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backupCreating => 'Creating backup...';
 
   @override
+  String get backupPhasePreparing => 'Preparing…';
+
+  @override
+  String get backupPhaseEncrypting => 'Encrypting…';
+
+  @override
+  String get backupPhaseUploading => 'Uploading…';
+
+  @override
+  String get restorePhaseDownloading => 'Downloading…';
+
+  @override
+  String get restorePhaseDecrypting => 'Decrypting…';
+
+  @override
+  String get restorePhaseRestoring => 'Restoring…';
+
+  @override
+  String get backupErrorOffline =>
+      'No internet connection. Connect to the internet and try again.';
+
+  @override
+  String get backupErrorInterrupted =>
+      'Backup upload was interrupted. Check your connection and try again.';
+
+  @override
+  String get backupErrorAuth =>
+      'Couldn\'t access Google Drive. Please sign in again and try once more.';
+
+  @override
+  String get backupErrorGeneric => 'Backup failed. Please try again.';
+
+  @override
+  String get restoreErrorOffline =>
+      'No internet connection. Connect to the internet and try again.';
+
+  @override
+  String get restoreErrorInterrupted =>
+      'Restore download was interrupted. Check your connection and try again.';
+
+  @override
+  String get restoreErrorAuth =>
+      'Couldn\'t access Google Drive. Please sign in again and try once more.';
+
+  @override
+  String get restoreErrorGeneric => 'Restore failed. Please try again.';
+
+  @override
   String get backupCloudNewerStatus => 'Cloud backup is newer than this device';
 
   @override

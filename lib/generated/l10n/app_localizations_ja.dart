@@ -1043,6 +1043,51 @@ class AppLocalizationsJa extends AppLocalizations {
   String get backupCreating => 'バックアップを作成中…';
 
   @override
+  String get backupPhasePreparing => '準備中…';
+
+  @override
+  String get backupPhaseEncrypting => '暗号化中…';
+
+  @override
+  String get backupPhaseUploading => 'アップロード中…';
+
+  @override
+  String get restorePhaseDownloading => 'ダウンロード中…';
+
+  @override
+  String get restorePhaseDecrypting => '復号中…';
+
+  @override
+  String get restorePhaseRestoring => '復元中…';
+
+  @override
+  String get backupErrorOffline => 'インターネットに接続していません。接続してからもう一度お試しください。';
+
+  @override
+  String get backupErrorInterrupted =>
+      'バックアップのアップロードが中断されました。接続を確認してもう一度お試しください。';
+
+  @override
+  String get backupErrorAuth =>
+      'Google ドライブにアクセスできませんでした。もう一度サインインしてからお試しください。';
+
+  @override
+  String get backupErrorGeneric => 'バックアップに失敗しました。もう一度お試しください。';
+
+  @override
+  String get restoreErrorOffline => 'インターネットに接続していません。接続してからもう一度お試しください。';
+
+  @override
+  String get restoreErrorInterrupted => '復元のダウンロードが中断されました。接続を確認してもう一度お試しください。';
+
+  @override
+  String get restoreErrorAuth =>
+      'Google ドライブにアクセスできませんでした。もう一度サインインしてからお試しください。';
+
+  @override
+  String get restoreErrorGeneric => '復元に失敗しました。もう一度お試しください。';
+
+  @override
   String get backupCloudNewerStatus => 'クラウドのバックアップがこの端末より新しいです';
 
   @override
