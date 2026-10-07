@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mockito/mockito.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+import 'package:secbizcard/core/services/backup_reminder_service.dart';
 import 'package:secbizcard/core/services/backup_service.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -664,6 +665,107 @@ void main() {
     test('cloudIsMagicWordProtected false when no cloud file exists', () async {
       final service = container.read(backupServiceProvider);
       expect(await service.cloudIsMagicWordProtected(), false);
+    });
+
+    // FIX 1 — conflict guard compares cloud modifiedTime against THIS device's
+    // last successful backup (keyLastBackup), not the local data-change time.
+    // Seeds keyLastBackup via SharedPreferences and drives cloudTime via the
+    // fake's settable backupModifiedTime.
+    group('backup() conflict guard (last-backup based)', () {
+      final contact = UserProfile(
+        uid: 'c1',
+        email: 'c1@test.com',
+        displayName: 'Contact 1',
+        phone: '123',
+        createdAt: DateTime.now(),
+      );
+
+      void seedOneContact() {
+        when(mockContactsRepo.getSavedContacts())
+            .thenAnswer((_) async => right([contact]));
+      }
+
+      // Re-seed SharedPreferences with the base theme AND a last-backup
+      // timestamp, then rebuild the container so BackupService reads the
+      // seeded prefs. (BackupReminderService() uses the shared singleton.)
+      Future<void> seedLastBackup(DateTime? t) async {
+        SharedPreferences.setMockInitialValues({
+          'theme_mode': 'dark',
+          if (t != null)
+            BackupReminderService.keyLastBackup: t.millisecondsSinceEpoch,
+        });
+        container = ProviderContainer(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(mockAuthRepo),
+            contactsRepositoryProvider.overrideWithValue(mockContactsRepo),
+            driveRepositoryProvider.overrideWithValue(fakeDriveRepo),
+            magicWordServiceProvider.overrideWithValue(fakeMagicWord),
+          ],
+        );
+      }
+
+      test('(a) same-device re-backup, no data change (cloudTime ≈ '
+          'lastBackup) → NO conflict, uploads', () async {
+        final t = DateTime.utc(2026, 10, 7, 12, 0, 0);
+        await seedLastBackup(t);
+        // Cloud file is this device's own backup; its server time is a few
+        // seconds after our local markBackedUp stamp — within skew.
+        fakeDriveRepo.backupModifiedTime = t.add(const Duration(seconds: 5));
+        seedOneContact();
+
+        final service = container.read(backupServiceProvider);
+        final result = await service.backup();
+
+        expect(result.isRight(), true,
+            reason: result.fold((l) => l.message, (r) => ''));
+        expect(fakeDriveRepo.uploadCount, 1);
+      });
+
+      test('(b) another device wrote cloud AFTER our last backup → conflict, '
+          'no upload', () async {
+        final t = DateTime.utc(2026, 10, 7, 12, 0, 0);
+        await seedLastBackup(t);
+        fakeDriveRepo.backupModifiedTime = t.add(const Duration(minutes: 10));
+        seedOneContact();
+
+        final service = container.read(backupServiceProvider);
+        final result = await service.backup();
+
+        expect(result.isLeft(), true);
+        result.fold((l) => expect(l, isA<BackupConflictFailure>()),
+            (_) => fail('a newer other-device backup must conflict'));
+        expect(fakeDriveRepo.uploadCount, 0);
+      });
+
+      test('(c) fresh device, never backed up, cloud exists → conflict',
+          () async {
+        await seedLastBackup(null); // no keyLastBackup
+        fakeDriveRepo.backupModifiedTime = DateTime.utc(2026, 10, 7, 12, 0, 0);
+        seedOneContact();
+
+        final service = container.read(backupServiceProvider);
+        final result = await service.backup();
+
+        expect(result.isLeft(), true);
+        result.fold((l) => expect(l, isA<BackupConflictFailure>()),
+            (_) => fail('first-run-on-new-device with a cloud file must '
+                'conflict'));
+        expect(fakeDriveRepo.uploadCount, 0);
+      });
+
+      test('(d) force: true bypasses the conflict guard, uploads', () async {
+        final t = DateTime.utc(2026, 10, 7, 12, 0, 0);
+        await seedLastBackup(t);
+        fakeDriveRepo.backupModifiedTime = t.add(const Duration(minutes: 10));
+        seedOneContact();
+
+        final service = container.read(backupServiceProvider);
+        final result = await service.backup(force: true);
+
+        expect(result.isRight(), true,
+            reason: result.fold((l) => l.message, (r) => ''));
+        expect(fakeDriveRepo.uploadCount, 1);
+      });
     });
 
     // ISSUE 1 (+182) regression — brand-new account self-delete.

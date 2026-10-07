@@ -63,6 +63,17 @@ class BackupReminderService {
     return ms == null ? null : DateTime.fromMillisecondsSinceEpoch(ms);
   }
 
+  /// This device's last successful backup time (set by [markBackedUp]), or null
+  /// if this device has never backed up (or restored). Used by the backup
+  /// conflict guard to decide whether the cloud file was written by ANOTHER
+  /// device AFTER this device last backed up — the only case where overwriting
+  /// would clobber a newer backup.
+  Future<DateTime?> lastBackupAt() async {
+    final prefs = await _prefs;
+    final ms = prefs.getInt(keyLastBackup);
+    return ms == null ? null : DateTime.fromMillisecondsSinceEpoch(ms);
+  }
+
   /// Snooze the reminder for the remainder of the current calendar month.
   Future<void> snoozeThisMonth() async {
     final prefs = await _prefs;
