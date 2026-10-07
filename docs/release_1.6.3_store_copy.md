@@ -2,20 +2,25 @@
 
 > 排版檢視:Kiro/VS Code 開此檔按 `Cmd+Shift+V`。1.6.3 上架後,可刪除
 > `release_1.6.2_store_copy.md`(保持「只留當前版本一份」)。
+> **本檔已更新到送審版本 `1.6.3+188`**(含 186 的掃描預裁切/離線 QR,187 的 Google
+> Sign-In 分離,188 的 backup UX/resumable/conflict 修正/contacts export UX)。
 >
-> 版本:**`1.6.3+186`**。tag `android/v1.6.3+186`(→ Cloud Build → Play internal)、
-> `ios/v1.6.3+186`(→ Xcode Cloud → TestFlight)。
+> 送審版本:**`1.6.3+188`**。tag `android/v1.6.3+188`(→ Cloud Build → Play internal)、
+> `ios/v1.6.3+188`(→ Xcode Cloud → TestFlight)。已於 Pixel 9 Pro + iPad Mini 真機測試。
 
 1.6.3 **沒有新的訂閱/IAP 變動**(訂閱沿用 1.6.1 已上架的 Plus/Pro)。這版對使用者
 **有感**的是:
 1. **掃描更準**:名片掃描前先用畫面導引框做預裁切(native),邊緣偵測更穩;橫向名片
    有專屬提示。
-2. **分享更穩**:離線時產生分享 QR 會顯示清楚的「請連網」提示,不再是看不懂的錯誤碼。
-3. **UI 小修**:匯入/上傳改用正確的「上傳」圖示(原本是下載樣式的向下箭頭)。
+2. **備份更穩、更清楚**:大型備份改用分段上傳(resumable),網路不穩時更可靠;按「立即備份」
+   有即時的進度提示(準備/加密/上傳),不會像當掉;所有備份/分享/網路錯誤都改成看得懂的
+   訊息,不再是生硬的錯誤碼。
+3. **UI 小修**:匯入/上傳改用正確的「上傳」圖示。
 
-其餘(備份 magic word 模式重新設計 = 設密語不再立即重打包、三動作解耦;修正「存到
-Google 聯絡人」在未授權帳號上的 403;備份安全防護字串等)多為幕後改進或行為修正,
-**原則上不寫進 What's New**,但 reviewer notes 要說明 Contacts 權限那段(見下)。
+其餘(備份 magic word 模式重新設計 = 設密語不再立即重打包、三動作解耦;修正「存到 Google
+聯絡人」的授權流程 + 將其與 Drive 備份授權分離;修正「剛備份完再按一次」被誤判為衝突;
+「存到 Google 聯絡人」的進度/防重複點擊)多為幕後改進或行為修正,**原則上不細列進
+What's New**,但 reviewer notes 要說明 Contacts 權限那段(見下)。
 
 ---
 
@@ -27,27 +32,27 @@ Google 聯絡人」在未授權帳號上的 403;備份安全防護字串等)多�
 
 ### en-US
 ```
-Sharper scanning: the camera now uses the on-screen guide to pre-crop your card before edge detection, so it locks on more reliably — with a dedicated hint for landscape cards. Sharing is steadier too: if you're offline, the share QR now shows a clear "connect to the internet" message instead of a cryptic error. Plus a cleaner upload icon and the usual reliability fixes. Thanks for using SecBizCard!
+Sharper scanning: the camera pre-crops your card using the on-screen guide before edge detection, so it locks on more reliably — with a dedicated hint for landscape cards. Steadier backups: large backups now upload in resumable chunks for shaky networks, "Back Up Now" shows live progress so it never looks stuck, and every backup/sharing/network error now reads as a clear message instead of a cryptic code. Plus a cleaner upload icon and reliability fixes. Thanks for using SecBizCard!
 ```
 
 ### zh-Hant
 ```
-掃描更準:相機會先用畫面上的導引框預裁切名片,再做邊緣偵測,鎖定更穩定,橫向名片也有專屬提示。分享也更穩:離線時分享 QR 會顯示清楚的「請連接網路」提示,不再是看不懂的錯誤碼。另有更合適的上傳圖示與例行穩定性修正。感謝您使用 SecBizCard!
+掃描更準:相機會先用畫面上的導引框預裁切名片,再做邊緣偵測,鎖定更穩定,橫向名片也有專屬提示。備份更穩:大型備份改用分段上傳,網路不穩時更可靠;「立即備份」會顯示即時進度,不再像當掉;所有備份、分享、網路的錯誤都改成看得懂的訊息,不再是看不懂的錯誤碼。另有更合適的上傳圖示與穩定性修正。感謝您使用 SecBizCard!
 ```
 
 ### zh-Hans
 ```
-扫描更准:相机会先用画面上的引导框预裁切名片,再做边缘检测,锁定更稳定,横向名片也有专属提示。分享也更稳:离线时分享 QR 会显示清楚的「请连接网络」提示,不再是看不懂的错误码。另有更合适的上传图标与例行稳定性修正。感谢您使用 SecBizCard!
+扫描更准:相机会先用画面上的引导框预裁切名片,再做边缘检测,锁定更稳定,横向名片也有专属提示。备份更稳:大型备份改用分段上传,网络不稳时更可靠;「立即备份」会显示实时进度,不再像卡住;所有备份、分享、网络的错误都改成看得懂的信息,不再是看不懂的错误码。另有更合适的上传图标与稳定性修正。感谢您使用 SecBizCard!
 ```
 
 ### ja
 ```
-スキャンがより正確に:カメラが画面上のガイド枠でカードを先に切り抜いてからエッジ検出するため、より確実に捉えられます。横向きのカード用のヒントも追加。共有も安定:オフライン時は共有 QR に分かりにくいエラーの代わりに「インターネットに接続してください」と明確に表示します。さらに分かりやすいアップロードアイコンと通常の安定性改善も。SecBizCard をご利用いただきありがとうございます!
+スキャンがより正確に:カメラが画面上のガイド枠でカードを先に切り抜いてからエッジ検出するため、より確実に捉えられます。横向きのカード用のヒントも追加。バックアップがより安定:大きなバックアップは分割アップロードに対応し、不安定なネットワークでも確実に。「今すぐバックアップ」は進捗をリアルタイム表示するので固まったように見えません。バックアップ・共有・ネットワークのエラーは分かりにくいコードではなく明確なメッセージで表示します。さらに分かりやすいアップロードアイコンと安定性改善も。SecBizCard をご利用いただきありがとうございます!
 ```
 
 ### ko
 ```
-더 정확한 스캔: 카메라가 화면의 안내 틀로 명함을 먼저 잘라낸 뒤 가장자리를 인식해 더 안정적으로 잡아냅니다. 가로 명함용 안내도 추가되었습니다. 공유도 더 안정적입니다: 오프라인일 때 공유 QR이 알 수 없는 오류 대신 "인터넷에 연결하세요"라고 명확히 안내합니다. 여기에 더 알맞은 업로드 아이콘과 일반적인 안정성 개선도 포함되었습니다. SecBizCard를 이용해 주셔서 감사합니다!
+더 정확한 스캔: 카메라가 화면의 안내 틀로 명함을 먼저 잘라낸 뒤 가장자리를 인식해 더 안정적으로 잡아냅니다. 가로 명함용 안내도 추가되었습니다. 더 안정적인 백업: 큰 백업은 분할 업로드로 처리해 불안정한 네트워크에서도 안정적이며, "지금 백업"은 실시간 진행 상태를 표시해 멈춘 것처럼 보이지 않습니다. 백업·공유·네트워크 오류는 알 수 없는 코드 대신 명확한 메시지로 안내합니다. 여기에 더 알맞은 업로드 아이콘과 안정성 개선도 포함되었습니다. SecBizCard를 이용해 주셔서 감사합니다!
 ```
 
 ---
@@ -66,8 +71,11 @@ WHAT'S NEW (1.6.3)
 - Sharper scanning: the camera pre-crops the card using the on-screen guide frame
   before edge detection (native implementation), improving lock-on; a dedicated
   hint is shown for landscape-oriented cards.
-- Steadier sharing: when the device is offline, the share-QR screen now shows a
-  clear, localized "connect to the internet" message instead of a raw error code.
+- Steadier backups: large Google Drive backups now upload in resumable chunks so
+  they survive flaky networks; "Back Up Now" shows live progress (preparing /
+  encrypting / uploading) and guards against double-taps; offline and transfer
+  errors across backup/restore/sharing now show clear localized messages instead
+  of raw error codes.
 - Cleaner upload icon; plus reliability fixes.
 - Backup "magic word" flow was redesigned so setting a passphrase no longer
   re-packs the cloud backup immediately (it takes effect on the next backup).
@@ -79,6 +87,9 @@ GOOGLE CONTACTS PERMISSION (important for this review)
   that had not previously granted the Contacts permission: the app now explicitly
   requests the Contacts scope (https://www.googleapis.com/auth/contacts) before
   writing, so the Google consent screen is shown as expected.
+- The Contacts authorization is now fully SEPARATE from the Google Drive backup
+  authorization (two independent Google Sign-In clients). Using "Save to Google
+  Contacts" no longer affects Drive backup/restore, and vice-versa.
 - The app writes ONLY the contacts the user explicitly chooses to save (via the
   People API createContact). It does not bulk-read, sell, or share the user's
   contacts, and does not use contacts data for advertising.
@@ -116,19 +127,19 @@ Thank you, and have a great day.
 ## Play Console — release notes(單一欄位,tag blocks)
 ```
 <en-US>
-Sharper scanning: the camera now uses the on-screen guide to pre-crop your card before edge detection, so it locks on more reliably — with a dedicated hint for landscape cards. Sharing is steadier too: if you're offline, the share QR now shows a clear "connect to the internet" message instead of a cryptic error. Plus a cleaner upload icon and the usual reliability fixes. Thanks for using SecBizCard!
+Sharper scanning: the camera pre-crops your card using the on-screen guide before edge detection, so it locks on more reliably — with a dedicated hint for landscape cards. Steadier backups: large backups now upload in resumable chunks for shaky networks, "Back Up Now" shows live progress so it never looks stuck, and every backup/sharing/network error now reads as a clear message instead of a cryptic code. Plus a cleaner upload icon and reliability fixes. Thanks for using SecBizCard!
 </en-US>
 <zh-TW>
-掃描更準:相機會先用畫面上的導引框預裁切名片,再做邊緣偵測,鎖定更穩定,橫向名片也有專屬提示。分享也更穩:離線時分享 QR 會顯示清楚的「請連接網路」提示,不再是看不懂的錯誤碼。另有更合適的上傳圖示與例行穩定性修正。感謝您使用 SecBizCard!
+掃描更準:相機會先用畫面上的導引框預裁切名片,再做邊緣偵測,鎖定更穩定,橫向名片也有專屬提示。備份更穩:大型備份改用分段上傳,網路不穩時更可靠;「立即備份」會顯示即時進度,不再像當掉;所有備份、分享、網路的錯誤都改成看得懂的訊息,不再是看不懂的錯誤碼。另有更合適的上傳圖示與穩定性修正。感謝您使用 SecBizCard!
 </zh-TW>
 <zh-CN>
-扫描更准:相机会先用画面上的引导框预裁切名片,再做边缘检测,锁定更稳定,横向名片也有专属提示。分享也更稳:离线时分享 QR 会显示清楚的「请连接网络」提示,不再是看不懂的错误码。另有更合适的上传图标与例行稳定性修正。感谢您使用 SecBizCard!
+扫描更准:相机会先用画面上的引导框预裁切名片,再做边缘检测,锁定更稳定,横向名片也有专属提示。备份更稳:大型备份改用分段上传,网络不稳时更可靠;「立即备份」会显示实时进度,不再像卡住;所有备份、分享、网络的错误都改成看得懂的信息,不再是看不懂的错误码。另有更合适的上传图标与稳定性修正。感谢您使用 SecBizCard!
 </zh-CN>
 <ja-JP>
-スキャンがより正確に:カメラが画面上のガイド枠でカードを先に切り抜いてからエッジ検出するため、より確実に捉えられます。横向きのカード用のヒントも追加。共有も安定:オフライン時は共有 QR に分かりにくいエラーの代わりに「インターネットに接続してください」と明確に表示します。さらに分かりやすいアップロードアイコンと通常の安定性改善も。SecBizCard をご利用いただきありがとうございます!
+スキャンがより正確に:カメラが画面上のガイド枠でカードを先に切り抜いてからエッジ検出するため、より確実に捉えられます。横向きのカード用のヒントも追加。バックアップがより安定:大きなバックアップは分割アップロードに対応し、不安定なネットワークでも確実に。「今すぐバックアップ」は進捗をリアルタイム表示するので固まったように見えません。バックアップ・共有・ネットワークのエラーは分かりにくいコードではなく明確なメッセージで表示します。さらに分かりやすいアップロードアイコンと安定性改善も。SecBizCard をご利用いただきありがとうございます!
 </ja-JP>
 <ko-KR>
-더 정확한 스캔: 카메라가 화면의 안내 틀로 명함을 먼저 잘라낸 뒤 가장자리를 인식해 더 안정적으로 잡아냅니다. 가로 명함용 안내도 추가되었습니다. 공유도 더 안정적입니다: 오프라인일 때 공유 QR이 알 수 없는 오류 대신 "인터넷에 연결하세요"라고 명확히 안내합니다. 여기에 더 알맞은 업로드 아이콘과 일반적인 안정성 개선도 포함되었습니다. SecBizCard를 이용해 주셔서 감사합니다!
+더 정확한 스캔: 카메라가 화면의 안내 틀로 명함을 먼저 잘라낸 뒤 가장자리를 인식해 더 안정적으로 잡아냅니다. 가로 명함용 안내도 추가되었습니다. 더 안정적인 백업: 큰 백업은 분할 업로드로 처리해 불안정한 네트워크에서도 안정적이며, "지금 백업"은 실시간 진행 상태를 표시해 멈춘 것처럼 보이지 않습니다. 백업·공유·네트워크 오류는 알 수 없는 코드 대신 명확한 메시지로 안내합니다. 여기에 더 알맞은 업로드 아이콘과 안정성 개선도 포함되었습니다. SecBizCard를 이용해 주셔서 감사합니다!
 </ko-KR>
 ```
 
