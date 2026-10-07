@@ -41,7 +41,9 @@ Future<List<UserProfile>> savedContacts(Ref ref) async {
 @riverpod
 ContactsRepository contactsRepository(Ref ref) {
   return ContactsRepository(
-    ref.watch(googleSignInProvider),
+    // Dedicated contacts-only GoogleSignIn instance, independent from the Drive
+    // instance so the contacts scope grant never touches drive.file.
+    ref.watch(contactsGoogleSignInProvider),
     ref.watch(profileRepositoryProvider),
     ref.watch(contactsLocalDataSourceProvider),
   );

@@ -62,6 +62,7 @@ void main() {
   late AuthRepository authRepo;
   late MockFirebaseAuth mockFirebaseAuth;
   late MockGoogleSignIn mockGoogleSignIn;
+  late MockGoogleSignIn mockContactsGoogleSignIn;
   late MockProfileRepository mockProfileRepo;
   late FakeRef fakeRef;
 
@@ -70,6 +71,7 @@ void main() {
     deletedKeys.clear();
     mockFirebaseAuth = MockFirebaseAuth();
     mockGoogleSignIn = MockGoogleSignIn();
+    mockContactsGoogleSignIn = MockGoogleSignIn();
     mockProfileRepo = MockProfileRepository();
     fakeRef = FakeRef();
     // Ensure _init()'s stream path terminates deterministically: no cached
@@ -78,7 +80,12 @@ void main() {
     when(mockFirebaseAuth.currentUser).thenReturn(null);
     when(mockFirebaseAuth.authStateChanges())
         .thenAnswer((_) => const Stream<fire_auth.User?>.empty());
-    authRepo = AuthRepository(mockFirebaseAuth, mockGoogleSignIn, fakeRef);
+    authRepo = AuthRepository(
+      mockFirebaseAuth,
+      mockGoogleSignIn,
+      fakeRef,
+      contactsGoogleSignIn: mockContactsGoogleSignIn,
+    );
   });
 
   group('AuthRepository', () {
@@ -150,15 +157,42 @@ void main() {
       when(mockIdTokenResult.signInProvider).thenReturn('google.com');
       when(mockFirebaseAuth.signOut()).thenAnswer((_) async {});
       when(mockGoogleSignIn.signOut()).thenAnswer((_) async => null);
+      when(mockContactsGoogleSignIn.signOut()).thenAnswer((_) async => null);
 
       await authRepo.signOut();
 
       verify(mockFirebaseAuth.signOut()).called(1);
+      // Logout must clear BOTH independent Google instances (drive.file and
+      // contacts) so no Google grant lingers for the next account.
       verify(mockGoogleSignIn.signOut()).called(1);
+      verify(mockContactsGoogleSignIn.signOut()).called(1);
       // Sign-out must also clear the BYOK key AND the magic word from secure
       // storage (each fault-isolated), so a shared device leaves no trace.
       expect(deletedKeys, contains(OcrSettingsService.kApiKeyForTest));
       expect(deletedKeys, contains(MagicWordService.kMagicWord));
+    });
+  });
+
+  group('Google Sign-In instance split', () {
+    test('Drive and Contacts receive DISTINCT GoogleSignIn instances', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final driveInstance = container.read(driveGoogleSignInProvider);
+      final contactsInstance = container.read(contactsGoogleSignInProvider);
+
+      // The whole point of the fix: the two features must never share one
+      // GoogleSignIn object, else requesting the pending-verification contacts
+      // scope poisons the shared grant and breaks the drive.file token request.
+      expect(identical(driveInstance, contactsInstance), isFalse);
+
+      // Both keep the Firebase web client ID so the Google credential still
+      // links to the correct web client.
+      expect(driveInstance.serverClientId, contactsInstance.serverClientId);
+      expect(
+        driveInstance.serverClientId,
+        '769422548283-rvuciu2cmfj9149fudj9q59pql4ofo8q.apps.googleusercontent.com',
+      );
     });
   });
 }
