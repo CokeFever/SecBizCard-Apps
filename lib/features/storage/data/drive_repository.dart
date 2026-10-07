@@ -14,8 +14,10 @@ part 'drive_repository.g.dart';
 
 @riverpod
 DriveRepository driveRepository(Ref ref) {
-  // Use the shared provider from AuthRepo
-  return DriveRepository(ref.watch(googleSignInProvider));
+  // Dedicated drive.file-only GoogleSignIn instance. Kept independent from the
+  // contacts instance so requesting the pending-verification contacts scope can
+  // never poison this instance's drive.file token request.
+  return DriveRepository(ref.watch(driveGoogleSignInProvider));
 }
 
 class DriveRepository {

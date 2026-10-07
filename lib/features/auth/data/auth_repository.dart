@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:google_sign_in/google_sign_in.dart' as google_sign_in;
+import 'package:googleapis/drive/v3.dart' as drive;
+import 'package:googleapis/people/v1.dart' as people;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
@@ -23,11 +25,38 @@ part 'auth_repository.g.dart';
 
 final authInitializationStateProvider = StateProvider<bool>((ref) => true);
 
+// The Web client ID from Firebase console (client_type: 3 in
+// google-services.json). Required on BOTH GoogleSignIn instances so Firebase
+// can link the Google credential to the correct web client.
+const String _kServerClientId =
+    '769422548283-rvuciu2cmfj9149fudj9q59pql4ofo8q.apps.googleusercontent.com';
+
+/// Dedicated GoogleSignIn instance for Drive backup/restore.
+///
+/// This instance declares ONLY the `drive.file` scope at construction and is
+/// the only one injected into [DriveRepository] and [AuthRepository]. Keeping
+/// its scope set fixed to drive.file means the Drive sign-in / token flow can
+/// never surface or attach the pending-verification `contacts` scope — which is
+/// what previously poisoned the shared grant and made the drive.file token
+/// request fail with GMS Auth `BAD_REQUEST`, breaking backup/restore.
 @riverpod
-google_sign_in.GoogleSignIn googleSignIn(Ref ref) {
+google_sign_in.GoogleSignIn driveGoogleSignIn(Ref ref) {
   return google_sign_in.GoogleSignIn(
-    // The Web client ID from Firebase console (client_type: 3 in google-services.json)
-    serverClientId: '769422548283-rvuciu2cmfj9149fudj9q59pql4ofo8q.apps.googleusercontent.com',
+    serverClientId: _kServerClientId,
+    scopes: [drive.DriveApi.driveFileScope],
+  );
+}
+
+/// Dedicated GoogleSignIn instance for Save-to-Google-Contacts.
+///
+/// A SEPARATE GoogleSignIn object from [driveGoogleSignIn] so the two features'
+/// grants stay independent: requesting the `contacts` scope on this instance
+/// never touches the Drive instance's drive.file token request.
+@riverpod
+google_sign_in.GoogleSignIn contactsGoogleSignIn(Ref ref) {
+  return google_sign_in.GoogleSignIn(
+    serverClientId: _kServerClientId,
+    scopes: [people.PeopleServiceApi.contactsScope],
   );
 }
 
@@ -35,8 +64,9 @@ google_sign_in.GoogleSignIn googleSignIn(Ref ref) {
 AuthRepository authRepository(Ref ref) {
   return AuthRepository(
     fire_auth.FirebaseAuth.instance,
-    ref.watch(googleSignInProvider),
+    ref.watch(driveGoogleSignInProvider),
     ref,
+    contactsGoogleSignIn: ref.watch(contactsGoogleSignInProvider),
   );
 }
 
@@ -47,9 +77,19 @@ Stream<fire_auth.User?> authState(Ref ref) {
 
 class AuthRepository {
   final fire_auth.FirebaseAuth _firebaseAuth;
+  // Drive instance (login / silent sign-in / Google re-auth all run through
+  // this one — they only ever touch basic + drive.file scopes).
   final google_sign_in.GoogleSignIn _googleSignIn;
+  // Contacts instance, held only so signOut()/deleteAccount() can fully clear
+  // Google state across BOTH grants.
+  final google_sign_in.GoogleSignIn _contactsGoogleSignIn;
 
-  AuthRepository(this._firebaseAuth, this._googleSignIn, this._ref) {
+  AuthRepository(
+    this._firebaseAuth,
+    this._googleSignIn,
+    this._ref, {
+    required google_sign_in.GoogleSignIn contactsGoogleSignIn,
+  }) : _contactsGoogleSignIn = contactsGoogleSignIn {
     _init();
   }
 
@@ -308,7 +348,11 @@ class AuthRepository {
       final provider = await _getSignInProvider();
       await _firebaseAuth.signOut();
       if (provider == 'google.com') {
+        // Sign out of BOTH Google instances. They are independent GoogleSignIn
+        // objects (drive.file vs contacts), so logout must clear each one to
+        // fully reset Google state for the next account on this device.
         await _googleSignIn.signOut();
+        await _contactsGoogleSignIn.signOut();
       }
       // Apple Sign-In does not require explicit sign-out
     } catch (e) {
@@ -410,9 +454,11 @@ class AuthRepository {
       // Delete the Firebase Auth account
       await user.delete();
 
-      // Sign out of Google if applicable
+      // Sign out of Google if applicable — clear BOTH instances so no Google
+      // grant (drive.file or contacts) lingers after account deletion.
       if (provider == 'google.com') {
         await _googleSignIn.signOut();
+        await _contactsGoogleSignIn.signOut();
       }
 
       return const Right(unit);
