@@ -61,6 +61,17 @@ class BackupService {
   static const String _backupFileName = 'ixo_app_backup.zip';
   static const String _settingsKeyTheme = 'theme_mode'; // Example setting key
 
+  /// Clock-skew / upload-latency tolerance for the backup conflict guard.
+  ///
+  /// This device's OWN just-written cloud file has a server-side modifiedTime
+  /// (Drive clock) that is close to — but not identical with — the local
+  /// [BackupReminderService.markBackedUp] timestamp (device clock, stamped a
+  /// moment AFTER the upload returns). A 2-minute margin comfortably absorbs
+  /// that difference so a same-device re-backup is NOT flagged as a conflict,
+  /// while a genuine other-device write (realistically minutes/hours later)
+  /// still trips the guard.
+  static const Duration _conflictSkew = Duration(seconds: 120);
+
   /// SharedPreferences key holding the stable Drive folderId of the
   /// app-created `SecBizCard` folder (see FEAT-001 / plan "Google Drive 固定路徑").
   static const String _prefsKeyFolderId = 'drive_secbizcard_folder_id';
@@ -92,11 +103,13 @@ class BackupService {
   /// Creates a backup and uploads to Drive.
   ///
   /// When [force] is false (default), the backup is aborted with a
-  /// [BackupConflictFailure] if the existing Drive backup is newer than this
-  /// device's local data — this guards against overwriting a more recent
-  /// backup made from another device (the classic "old device clobbers new
-  /// cloud data" mistake). Pass [force] = true after the user explicitly
-  /// confirms they want to overwrite.
+  /// [BackupConflictFailure] if the existing Drive backup was written AFTER
+  /// this device's own last successful backup — this guards against
+  /// overwriting a more recent backup made from another device (the classic
+  /// "old device clobbers new cloud data" mistake). A same-device re-backup
+  /// (where the cloud file is the one THIS device wrote) is NOT a conflict.
+  /// Pass [force] = true after the user explicitly confirms they want to
+  /// overwrite.
   ///
   /// Empty-data guard (defense in depth): if there are no local contacts the
   /// backup aborts with an [EmptyBackupFailure] and performs no upload, so
@@ -120,12 +133,16 @@ class BackupService {
       // root behavior so a backup is never blocked by a transient folder error.
       final folderId = await _resolveSecBizCardFolderId();
 
-      // Guard: don't let an older device silently overwrite a newer cloud
-      // backup. Compare the Drive file's server-side modifiedTime against this
-      // device's last local change. Uses the Drive server clock, so it is not
-      // fooled by device clock differences. Best-effort: if the check itself
-      // fails (network/permission), fall through and let the normal upload
-      // path surface any real error rather than blocking a legitimate backup.
+      // Guard: don't let an older device silently overwrite a backup ANOTHER
+      // device wrote AFTER this device last backed up. Compare the Drive file's
+      // server-side modifiedTime against THIS device's last successful backup
+      // time (not the local data-change time — that stale timestamp caused the
+      // false-positive "backup is newer" on a same-device re-backup with no
+      // edits). Uses the Drive server clock, so it is not fooled by device
+      // clock differences. Best-effort: if the check itself fails
+      // (network/permission → cloudTime null), fall through and let the normal
+      // upload path surface any real error rather than blocking a legitimate
+      // backup.
       //
       // Compare against the NEW-HOME (SecBizCard folder) file's modifiedTime so
       // we never confuse a stale root file for the current backup.
@@ -136,15 +153,23 @@ class BackupService {
         );
         final cloudTime = cloudTimeResult.match((_) => null, (t) => t);
         if (cloudTime != null) {
-          final localModified = await BackupReminderService().lastModifiedAt();
-          // Cloud is "newer" when the local data has never changed on this
-          // device, or last changed before the cloud backup was written.
-          final cloudIsNewer = localModified == null ||
-              cloudTime.toUtc().isAfter(localModified.toUtc());
-          if (cloudIsNewer) {
+          final lastBackup = await BackupReminderService().lastBackupAt();
+          // Conflict rule:
+          //  - lastBackup == null: this device never backed up, yet a cloud
+          //    file exists it didn't write → genuine first-run-on-new-device
+          //    conflict (safety: don't clobber someone else's backup).
+          //  - lastBackup != null: conflict ONLY when the cloud file was
+          //    written meaningfully AFTER our last backup (another device).
+          //    The skew tolerance keeps this device's OWN just-written file
+          //    (cloudTime ≈ lastBackup) from registering as a conflict.
+          final bool isConflict = lastBackup == null ||
+              cloudTime
+                  .toUtc()
+                  .isAfter(lastBackup.toUtc().add(_conflictSkew));
+          if (isConflict) {
             return left(BackupConflictFailure(
               cloudModifiedTime: cloudTime,
-              localModifiedTime: localModified,
+              localModifiedTime: lastBackup,
             ));
           }
         }
