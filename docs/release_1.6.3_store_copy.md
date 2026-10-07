@@ -158,6 +158,20 @@ Sharper scanning: the camera pre-crops your card using the on-screen guide befor
 - **App Privacy / Data safety**:相較 1.6.2 **無新增資料類型**,維持不變。Contacts 權限
   本來就已存在(非本版新增的資料收集),僅修正其授權流程。
 
+## 若被退審才用:contacts「未驗證應用程式」警告的回覆彈藥(內部備註,預設不主動提)
+策略:**不主動在 reviewer notes 提 contacts OAuth verification 仍在審**(前幾版都沒被發現,
+主動提反而招審查)。只有在審核員**實際遇到「未驗證應用程式」畫面並以此退審/提問**時,才回覆。
+備好的英文回覆(屆時貼進 Resolution Center / reviewer notes):
+> The "Save to Google Contacts" feature is OPTIONAL and user-initiated. It uses the
+> Google Contacts scope, which is currently in Google's OAuth verification review.
+> While that review is in progress, Google shows a standard "unverified app" screen
+> that the user can pass via "Advanced → continue"; this is Google's own flow, not
+> an app defect, and it does not affect any core functionality (scan, store, exchange,
+> backup/restore all work independently). We only write contacts the user explicitly
+> chooses to save and never read, sell, or share the user's contacts.
+備註:若想完全避開審核員遇到警告,可在送審前把示範/測試用的 Google 帳號**預先授權過
+contacts**(已授權帳號不跳警告),並在 App Review 的 demo 帳號填那一組。
+
 ## 文案宣稱注意(沿用 1.6.2,仍適用)
 - "we cannot access the backup" 這類**最強隱私**宣稱,**只適用於「使用者有設 magic word」**。
   預設(未設密語)仍以帳號衍生金鑰加密,我方理論上可解。reviewer notes 的措辭已限定在
