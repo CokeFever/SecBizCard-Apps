@@ -520,6 +520,7 @@
   "mainExportZipSubtitle": "欄位加名片照片，可重新匯入",
   "mainShareFailed": "分享失敗：{error}",
   "mainExporting": "正在匯出 {count} 位聯絡人…",
+  "mainExportingProgress": "正在匯出 {done}/{total}…",
   "mainExportedToGoogle": "已將 {count} 位聯絡人匯出到 Google 通訊錄",
   "mainExportFailed": "匯出失敗：{error}",
   "mainExportedPartial": "已匯出 {total} 位中的 {succeeded} 位；{failed} 位失敗"

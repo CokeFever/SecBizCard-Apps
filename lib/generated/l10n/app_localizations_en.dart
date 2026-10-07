@@ -1756,6 +1756,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String mainExportingProgress(int done, int total) {
+    return 'Exporting $done/$total…';
+  }
+
+  @override
   String mainExportedToGoogle(int count) {
     return 'Exported $count contact(s) to Google Contacts';
   }

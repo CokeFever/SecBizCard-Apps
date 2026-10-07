@@ -529,6 +529,7 @@
   "mainExportZipSubtitle": "項目と名刺写真、再インポート可能",
   "mainShareFailed": "共有に失敗しました：{error}",
   "mainExporting": "{count} 件の連絡先をエクスポート中…",
+  "mainExportingProgress": "{done}/{total} 件をエクスポート中…",
   "mainExportedToGoogle": "{count} 件の連絡先を Google 連絡先にエクスポートしました",
   "mainExportFailed": "エクスポートに失敗しました：{error}",
   "mainExportedPartial": "{total} 件中 {succeeded} 件をエクスポート、{failed} 件失敗"

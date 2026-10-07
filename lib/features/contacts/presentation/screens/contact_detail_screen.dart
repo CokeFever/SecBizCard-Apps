@@ -293,32 +293,67 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
 
     if (choice == null) return;
 
+    // Re-entrancy guard: if an export is already running, ignore this tap.
+    if (_isExporting) return;
+    if (!mounted) return;
     setState(() => _isExporting = true);
 
-    final repo = ref.read(contactsRepositoryProvider);
-    final result = await repo.saveToGoogleContacts(
-      _user,
-      forceAccountSelection: choice == 'switch',
-    );
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context, rootNavigator: true);
 
-    if (!mounted) return;
-
-    setState(() => _isExporting = false);
-
-    result.fold(
-      (l) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            l is AuthFailure && l.message == kContactsPermissionDenied
-                ? l10n.contactDetailExportPermissionDenied
-                : l10n.contactDetailExportFailed(l.message),
-          ),
+    // Persistent (non-dismissible) progress indicator while the single-contact
+    // save runs. The request may show the Google consent screen and does a
+    // network createContact, so a transient hint would look hung. Dismissed in
+    // finally.
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogCtx) => AlertDialog(
+        content: Row(
+          children: [
+            const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 3),
+            ),
+            const SizedBox(width: 20),
+            Expanded(child: Text(l10n.contactDetailSaveToGoogle)),
+          ],
         ),
       ),
-      (r) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.contactDetailExportSuccess)),
-      ),
     );
+
+    try {
+      final repo = ref.read(contactsRepositoryProvider);
+      final result = await repo.saveToGoogleContacts(
+        _user,
+        forceAccountSelection: choice == 'switch',
+      );
+
+      if (!mounted) return;
+
+      result.fold(
+        (l) => messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              l is AuthFailure && l.message == kContactsPermissionDenied
+                  ? l10n.contactDetailExportPermissionDenied
+                  : l10n.contactDetailExportFailed(l.message),
+            ),
+          ),
+        ),
+        (r) => messenger.showSnackBar(
+          SnackBar(content: Text(l10n.contactDetailExportSuccess)),
+        ),
+      );
+    } finally {
+      // Dismiss the progress dialog and release the guard on BOTH success and
+      // failure (the pre-fix code leaked the flag if an exception was thrown).
+      if (mounted) {
+        navigator.pop();
+        setState(() => _isExporting = false);
+      }
+    }
   }
 
   Future<void> _shareAsVCard() async {

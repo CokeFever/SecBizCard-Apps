@@ -529,6 +529,7 @@
   "mainExportZipSubtitle": "필드와 명함 사진, 다시 가져오기 가능",
   "mainShareFailed": "공유 실패: {error}",
   "mainExporting": "연락처 {count}개 내보내는 중…",
+  "mainExportingProgress": "{done}/{total}개 내보내는 중…",
   "mainExportedToGoogle": "연락처 {count}개를 Google 주소록으로 내보냈습니다",
   "mainExportFailed": "내보내기 실패: {error}",
   "mainExportedPartial": "{total}개 중 {succeeded}개 내보냄, {failed}개 실패"

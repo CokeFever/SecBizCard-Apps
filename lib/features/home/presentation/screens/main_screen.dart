@@ -26,6 +26,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   late int _currentIndex;
   bool _isProcessingTap = false;
 
+  // Re-entrancy guard for the batch "Save to Google Contacts" export. Set the
+  // MOMENT the user taps (before any async work) and released in finally so a
+  // second tap can never start a concurrent export mid-run.
+  bool _isExportingToGoogle = false;
+
   // Ensures the backup reminder is evaluated at most once per app launch
   // (process lifetime), not on every navigation to /home. Because it lives in
   // memory it resets only on a true cold start — so a change made during a
@@ -379,31 +384,80 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   }
 
   Future<void> _batchExportToGoogle() async {
+    // Re-entrancy guard: set BEFORE any await so a double-tap can't launch a
+    // second export. Released in finally on both success and failure.
+    if (_isExportingToGoogle) return;
+    _isExportingToGoogle = true;
+
     final profiles = _selectedProfiles();
-    if (profiles.isEmpty) return;
+    if (profiles.isEmpty) {
+      _isExportingToGoogle = false;
+      return;
+    }
     final l10n = AppLocalizations.of(context)!;
     final messenger = ScaffoldMessenger.of(context);
-    messenger.showSnackBar(
-      SnackBar(content: Text(l10n.mainExporting(profiles.length))),
-    );
     final service = ref.read(contactExportServiceProvider);
-    final result = await service.exportToGoogle(profiles);
-    if (!mounted) return;
-    final String msg;
-    if (result.allOk) {
-      msg = l10n.mainExportedToGoogle(result.succeeded);
-    } else if (result.succeeded == 0) {
-      // A Contacts-scope denial surfaces as the shared sentinel string; show
-      // the friendly localized permission-denied message instead of leaking
-      // the raw sentinel (or a raw 403) into mainExportFailed.
-      msg = result.firstError == kContactsPermissionDenied
-          ? l10n.contactDetailExportPermissionDenied
-          : l10n.mainExportFailed(result.firstError ?? 'unknown error');
-    } else {
-      msg = l10n.mainExportedPartial(result.succeeded, result.total, result.failed);
+
+    // Persistent (non-dismissible) progress dialog driven by a live counter —
+    // replaces the transient SnackBar that vanished and made the export look
+    // hung. The counter increments as each contact finishes.
+    final progress = ValueNotifier<int>(0);
+    final total = profiles.length;
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogCtx) => AlertDialog(
+        content: Row(
+          children: [
+            const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 3),
+            ),
+            const SizedBox(width: 20),
+            Expanded(
+              child: ValueListenableBuilder<int>(
+                valueListenable: progress,
+                builder: (_, done, __) =>
+                    Text(l10n.mainExportingProgress(done, total)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      final result = await service.exportToGoogle(
+        profiles,
+        onProgress: (done, _) => progress.value = done,
+      );
+      if (!mounted) return;
+      final String msg;
+      if (result.allOk) {
+        msg = l10n.mainExportedToGoogle(result.succeeded);
+      } else if (result.succeeded == 0) {
+        // A Contacts-scope denial surfaces as the shared sentinel string; show
+        // the friendly localized permission-denied message instead of leaking
+        // the raw sentinel (or a raw 403) into mainExportFailed.
+        msg = result.firstError == kContactsPermissionDenied
+            ? l10n.contactDetailExportPermissionDenied
+            : l10n.mainExportFailed(result.firstError ?? 'unknown error');
+      } else {
+        msg = l10n.mainExportedPartial(
+            result.succeeded, result.total, result.failed);
+      }
+      messenger.showSnackBar(SnackBar(content: Text(msg)));
+      _exitSelection();
+    } finally {
+      // Dismiss the progress dialog and dispose the counter regardless of
+      // outcome, then release the re-entrancy guard.
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+      progress.dispose();
+      _isExportingToGoogle = false;
     }
-    messenger.showSnackBar(SnackBar(content: Text(msg)));
-    _exitSelection();
   }
 
   Widget _buildSearchField(ThemeData theme) {
