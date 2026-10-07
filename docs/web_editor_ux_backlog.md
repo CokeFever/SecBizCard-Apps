@@ -115,3 +115,17 @@ Social(LinkedIn/Twitter/Facebook/Instagram/GitHub)、Date(Birthday/Anniversary)�
   需處理:多值欄位在表格怎麼呈現(可能攤平成 phone_work / email_personal 等欄)、新增列、
   虛擬捲動(大量 contacts 效能)、與現有 master-detail 檢視切換。
   → 獨立大功能,設計先行(序列化回 SBCB schema 同 H 的 key 規則)。
+
+
+---
+
+## 批次 6 — Excel view 打磨(2026-10-07 實測回饋)
+
+> 使用者實測 Excel 表格視圖後列的改進。純前端 UI,不碰 SBCB codec / round-trip / 授權。
+
+- **J1 表格切換鈕位置**:List|Table 切換鈕從上方工具列移到**搜尋聯絡人框的右側**(跟聯絡人清單同區,語意更合)。
+- **J2 隱藏空白欄位**:加一個「隱藏空白欄位」toggle —— 整欄所有 contact 都沒資料的 column 可隱藏,讓有資料的欄位有更多顯示空間。
+- **J3 Excel 式捲動(重要)**:header / footer / 工具列**固定不動**,只有表格資料區域**內部**往右/往下捲動(sticky header + 容器內 overflow scroll)。目前是整頁橫向撐開把 header/footer 推走,要改掉。
+- **J4 Formula bar 編輯列(取代欄寬自適應)**:表格 cell 維持**固定適中欄寬**,超長內容截斷顯示(…);選中某個 cell 時,在表格**上方一條固定編輯列**顯示該 cell 的**完整內容**並可在那編輯(Excel/Sheets 的 formula bar 模式)。編輯列與 cell 雙向同步。這同時解決「長 email/地址撐爆欄寬」和「內容被切看不到」。**不要**做欄寬自適應(會把表格橫向撐爆)。
+
+> 全部純 UI/版面;序列化仍走 field-grouping.ts collapseFields,sbcb-codec / data.json / round-trip 不動。
