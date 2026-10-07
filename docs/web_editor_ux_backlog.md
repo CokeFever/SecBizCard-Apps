@@ -150,3 +150,19 @@ Social(LinkedIn/Twitter/Facebook/Instagram/GitHub)、Date(Birthday/Anniversary)�
   - 新增多值走 formula bar 旁的動作(選中某 phone/email cell 時出現「+ 新增同類」),或該類型最後
     一個有值 cell 旁才長出新欄 —— 像 Google Sheets 需要時才長欄,不用時不佔空間。
   - 序列化仍走 field-grouping.ts({category}_{label}[_N]),app round-trip 不變。
+
+
+---
+
+## 批次 8 — hideEmpty 記憶 + 新增 contact + profile 點擊修正(2026-10-07)
+
+- **L1 隱藏空白欄位記憶**:`hideEmpty` 目前是 ContactTable 的 local ref(切清單/表格會歸零)。移到
+  store(或 localStorage),切換模式 / 重進維持勾選狀態。
+- **L2 新增聯絡人**(目前完全不能新增一筆):兩模式各給符合直覺的入口(方案 c):
+  - 清單模式:清單上方/下方「+ 新增聯絡人」按鈕 → 新增一筆空白 contact → 進編輯。
+  - 表格模式:底部一列空白可直接輸入(Excel 式,在最後一列打字即新增)。
+  - 新增的 contact 走現有 store 新增 + collapseFields 序列化,round-trip 不變;標記 dirty。
+- **L3 profile 點擊在表格模式沒反應**:SaveBar「我的名片」呼叫 activateProfile() 設
+  activeIsProfile=true,但 profile 編輯走 list/detail 右側 pane,表格模式不顯示該 pane → 看似
+  沒反應。修法:點「我的名片」時若在表格模式 → **自動切回清單模式**,才看得到 profile 編輯。
+  文案保留「我的名片」(身份標示 + 可點編輯),不改成「編輯我的名片」。
