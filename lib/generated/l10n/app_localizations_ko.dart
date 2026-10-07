@@ -1714,6 +1714,11 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String mainExportingProgress(int done, int total) {
+    return '$done/$total개 내보내는 중…';
+  }
+
+  @override
   String mainExportedToGoogle(int count) {
     return '연락처 $count개를 Google 주소록으로 내보냈습니다';
   }

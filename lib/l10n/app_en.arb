@@ -1155,6 +1155,13 @@
   "@mainShareFailed": { "placeholders": { "error": { "type": "String" } } },
   "mainExporting": "Exporting {count} contact(s)…",
   "@mainExporting": { "placeholders": { "count": { "type": "int" } } },
+  "mainExportingProgress": "Exporting {done}/{total}…",
+  "@mainExportingProgress": {
+    "placeholders": {
+      "done": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
   "mainExportedToGoogle": "Exported {count} contact(s) to Google Contacts",
   "@mainExportedToGoogle": { "placeholders": { "count": { "type": "int" } } },
   "mainExportFailed": "Export failed: {error}",

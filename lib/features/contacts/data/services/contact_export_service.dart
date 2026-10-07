@@ -205,9 +205,15 @@ class ContactExportService {
   ///
   /// [forceAccountSelection] forces the Google account chooser on the first
   /// call (subsequent calls reuse the chosen account).
+  ///
+  /// [onProgress] (optional) is invoked after EACH contact is processed
+  /// (success or failure) with `(done, total)` so the UI can show live
+  /// "Exporting n/total…" progress. It does not affect the success/failure
+  /// tally.
   Future<GoogleExportResult> exportToGoogle(
     List<UserProfile> profiles, {
     bool forceAccountSelection = false,
+    void Function(int done, int total)? onProgress,
   }) async {
     var succeeded = 0;
     var failed = 0;
@@ -226,6 +232,7 @@ class ContactExportService {
         },
         (_) => succeeded++,
       );
+      onProgress?.call(i + 1, profiles.length);
     }
 
     return GoogleExportResult(

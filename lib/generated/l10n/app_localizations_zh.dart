@@ -1688,6 +1688,11 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String mainExportingProgress(int done, int total) {
+    return '正在导出 $done/$total…';
+  }
+
+  @override
   String mainExportedToGoogle(int count) {
     return '已将 $count 位联系人导出到 Google 通讯录';
   }
@@ -3384,6 +3389,11 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String mainExporting(int count) {
     return '正在匯出 $count 位聯絡人…';
+  }
+
+  @override
+  String mainExportingProgress(int done, int total) {
+    return '正在匯出 $done/$total…';
   }
 
   @override

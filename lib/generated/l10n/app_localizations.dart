@@ -3223,6 +3223,12 @@ abstract class AppLocalizations {
   /// **'Exporting {count} contact(s)…'**
   String mainExporting(int count);
 
+  /// No description provided for @mainExportingProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Exporting {done}/{total}…'**
+  String mainExportingProgress(int done, int total);
+
   /// No description provided for @mainExportedToGoogle.
   ///
   /// In en, this message translates to:

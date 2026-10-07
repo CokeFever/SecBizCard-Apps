@@ -1715,6 +1715,11 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String mainExportingProgress(int done, int total) {
+    return '$done/$total 件をエクスポート中…';
+  }
+
+  @override
   String mainExportedToGoogle(int count) {
     return '$count 件の連絡先を Google 連絡先にエクスポートしました';
   }
