@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:secbizcard/core/errors/failure.dart';
+import 'package:secbizcard/core/services/backup_error_mapper.dart';
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 
 part 'drive_repository.g.dart';
@@ -272,7 +273,9 @@ class DriveRepository {
         return right(dataStore);
       });
     } catch (e) {
-      return left(ServerFailure(e.toString()));
+      // A dropped connection mid-download surfaces as the friendly interrupted/
+      // offline message (C) rather than a raw ClientException string.
+      return left(mapBackupError(e));
     }
   }
 
@@ -286,6 +289,17 @@ class DriveRepository {
       final apiResult = await _getDriveApi();
       return apiResult.fold((l) => left(l), (driveApi) async {
         final media = drive.Media(file.openRead(), await file.length());
+
+        // Resumable transport (B): chunk the upload (1 MB chunks) with
+        // built-in per-chunk retry + exponential backoff, so a large backup on
+        // a flaky mobile network survives transient drops instead of failing
+        // the whole multipart POST. This is a PURE TRANSPORT change — same
+        // bytes, same temp file, same find/folder/fileId logic below; only HOW
+        // the bytes travel changes.
+        final uploadOptions = drive.ResumableUploadOptions(
+          numberOfAttempts: 5,
+          chunkSize: 1024 * 1024,
+        );
 
         if (existingFileId != null) {
           // Update in place. Normally we do NOT change parents, so the file
@@ -315,6 +329,7 @@ class DriveRepository {
             driveFile,
             existingFileId,
             uploadMedia: media,
+            uploadOptions: uploadOptions,
             addParents: addParents,
             removeParents: removeParents,
           );
@@ -328,12 +343,16 @@ class DriveRepository {
           final created = await driveApi.files.create(
             driveFile,
             uploadMedia: media,
+            uploadOptions: uploadOptions,
           );
           return right(created.id!);
         }
       });
     } catch (e) {
-      return left(ServerFailure(e.toString()));
+      // Classify transport failures (interrupted upload, offline, Drive auth)
+      // into a TYPED failure so the UI shows a friendly, localized message
+      // instead of a raw ClientException/DetailedApiRequestError string.
+      return left(mapBackupError(e));
     }
   }
 }

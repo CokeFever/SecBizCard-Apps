@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:secbizcard/core/services/backup_service.dart';
+import 'package:secbizcard/core/services/backup_phase.dart';
 import 'package:secbizcard/core/services/backup_reminder_service.dart';
 import 'package:secbizcard/core/errors/failure.dart';
 import 'package:secbizcard/core/responsive/breakpoints.dart';
@@ -22,6 +23,12 @@ class BackupScreen extends ConsumerStatefulWidget {
 
 class _BackupScreenState extends ConsumerState<BackupScreen> {
   bool _isLoading = false;
+  // A1: hard re-entrancy guard that covers the ENTIRE operation, including the
+  // async pre-flight (confirm dialogs, cloud checks) that runs BEFORE
+  // _isLoading flips true. A second tap during that window returns immediately
+  // so it can never start a concurrent backup/restore. Set/cleared in a
+  // try/finally so it is released on BOTH success and failure.
+  bool _opInProgress = false;
   bool _checkingBackup = true;
   bool _hasRemoteBackup = false;
   String? _statusMessage;
@@ -108,7 +115,82 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     setState(() => _hasRemoteBackup = true);
   }
 
-  Future<void> _performBackup({bool force = false}) async {
+  /// A2: maps a backup phase to its localized "Preparing… / Encrypting… /
+  /// Uploading…" (and restore equivalents) status text.
+  String _backupPhaseLabel(BackupPhase phase, AppLocalizations l10n) {
+    switch (phase) {
+      case BackupPhase.preparing:
+        return l10n.backupPhasePreparing;
+      case BackupPhase.encrypting:
+        return l10n.backupPhaseEncrypting;
+      case BackupPhase.uploading:
+        return l10n.backupPhaseUploading;
+      case BackupPhase.downloading:
+        return l10n.restorePhaseDownloading;
+      case BackupPhase.decrypting:
+        return l10n.restorePhaseDecrypting;
+      case BackupPhase.restoring:
+        return l10n.restorePhaseRestoring;
+    }
+  }
+
+  /// C (backup): selects a friendly, localized message by failure TYPE so the
+  /// user NEVER sees raw ClientException/PlatformException text. Returns null
+  /// for failures that already have their own dedicated UI handling
+  /// (conflict/empty/magic-word), so the caller can keep that behavior.
+  String? _backupErrorMessage(Failure l, AppLocalizations l10n) {
+    if (l is ConnectionFailure) return l10n.backupErrorOffline;
+    if (l is InterruptedTransferFailure) return l10n.backupErrorInterrupted;
+    if (l is AuthFailure) return l10n.backupErrorAuth;
+    if (l is EmptyBackupFailure) return l10n.backupErrorGeneric;
+    if (l is BackupConflictFailure) return null; // handled by caller
+    return l10n.backupErrorGeneric;
+  }
+
+  /// C (restore): friendly, localized message by failure TYPE for restore.
+  /// Returns null for WrongMagicWordFailure (the caller runs its own retry
+  /// prompt).
+  String? _restoreErrorMessage(Failure l, AppLocalizations l10n) {
+    if (l is WrongMagicWordFailure) return null; // handled by caller
+    if (l is ConnectionFailure) return l10n.restoreErrorOffline;
+    if (l is InterruptedTransferFailure) return l10n.restoreErrorInterrupted;
+    if (l is AuthFailure) return l10n.restoreErrorAuth;
+    return l10n.restoreErrorGeneric;
+  }
+
+  /// A1: the ONLY public entry for a backup. Sets the re-entrancy guard and
+  /// shows immediate "Preparing…" feedback at the VERY FIRST line — before any
+  /// cloud check or confirm dialog — so a tap never feels dead, and a second
+  /// tap during the pre-flight is ignored. The guard/spinner are released in a
+  /// finally so they clear on BOTH success and failure. A conflict→overwrite
+  /// retry runs inside this same guarded session via [_runBackup].
+  Future<void> _performBackup() async {
+    if (_opInProgress) return;
+    final l10n = AppLocalizations.of(context)!;
+    setState(() {
+      _opInProgress = true;
+      _isLoading = true;
+      _statusMessage = l10n.backupPhasePreparing;
+      _statusIsError = false;
+    });
+    try {
+      await _runBackup(force: false);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _opInProgress = false;
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  /// Runs one backup attempt. Assumes the caller ([_performBackup]) already set
+  /// the re-entrancy guard and immediate feedback; this never touches
+  /// `_opInProgress`. On a newer-cloud conflict it asks to overwrite and, on
+  /// confirmation, retries once with `force: true` INSIDE the same guarded
+  /// session (no second public entry, so no concurrent op can slip in).
+  Future<void> _runBackup({required bool force}) async {
     final l10n = AppLocalizations.of(context)!;
     final service = ref.read(backupServiceProvider);
 
@@ -131,13 +213,19 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       }
     }
 
-    setState(() {
-      _isLoading = true;
-      _statusMessage = l10n.backupCreating;
-      _statusIsError = false;
-    });
-
-    final result = await service.backup(force: force);
+    // Keep the staged "Preparing…" already shown by _performBackup; the phase
+    // callback below advances it to Encrypting… / Uploading… wired to the real
+    // work in BackupService.
+    final result = await service.backup(
+      force: force,
+      onPhase: (phase) {
+        if (!mounted) return;
+        setState(() {
+          _statusMessage = _backupPhaseLabel(phase, l10n);
+          _statusIsError = false;
+        });
+      },
+    );
 
     if (!mounted) return;
 
@@ -147,29 +235,29 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         // overwrite silently — warn the user and only force on confirmation.
         if (l is BackupConflictFailure) {
           setState(() {
-            _isLoading = false;
             _statusMessage = l10n.backupCloudNewerStatus;
             _statusIsError = true;
           });
           final overwrite = await _confirmOverwriteNewerBackup(l);
           if (overwrite == true) {
-            await _performBackup(force: true);
+            await _runBackup(force: true);
           }
           return;
         }
+        // C: friendly, localized message by failure TYPE — never the raw
+        // ClientException/PlatformException text.
+        final msg = _backupErrorMessage(l, l10n) ?? l10n.backupErrorGeneric;
         setState(() {
-          _isLoading = false;
-          _statusMessage = l10n.backupFailed(l.message);
+          _statusMessage = msg;
           _statusIsError = true;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.backupFailed(l.message))),
+          SnackBar(content: Text(msg)),
         );
       },
       (time) async {
         _saveLastBackupTime(time);
         setState(() {
-          _isLoading = false;
           _statusMessage = l10n.backupSuccessStatus;
           _statusIsError = false;
         });
@@ -235,7 +323,28 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     );
   }
 
+  /// A1: the ONLY public entry for a restore. The re-entrancy guard is set at
+  /// the VERY FIRST line so a double-tap can never open two confirm dialogs or
+  /// start two restores; it is released in a finally on BOTH success and
+  /// failure. The confirm dialog itself is the immediate feedback for the first
+  /// tap; the "Downloading…/Decrypting…/Restoring…" spinner appears once the
+  /// user confirms and the real work starts.
   Future<void> _performRestore() async {
+    if (_opInProgress) return;
+    _opInProgress = true;
+    try {
+      await _runRestore();
+    } finally {
+      if (mounted) {
+        setState(() {
+          _opInProgress = false;
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _runRestore() async {
     final l10n = AppLocalizations.of(context)!;
     // Confirm dialog
     final confirm = await showDialog<bool>(
@@ -283,11 +392,19 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
 
     setState(() {
       _isLoading = true;
-      _statusMessage = l10n.backupRestoringStatus;
+      _statusMessage = l10n.restorePhaseDownloading;
       _statusIsError = false;
     });
 
-    final result = await service.restore();
+    final result = await service.restore(
+      onPhase: (phase) {
+        if (!mounted) return;
+        setState(() {
+          _statusMessage = _backupPhaseLabel(phase, l10n);
+          _statusIsError = false;
+        });
+      },
+    );
 
     if (!mounted) return;
 
@@ -303,13 +420,15 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           if (retried) return;
         }
         if (!mounted) return;
+        // C: friendly, localized message by failure TYPE — never raw
+        // ClientException/PlatformException text.
+        final msg = _restoreErrorMessage(l, l10n) ?? l10n.restoreErrorGeneric;
         setState(() {
-          _isLoading = false;
-          _statusMessage = l10n.backupRestoreFailed(l.message);
+          _statusMessage = msg;
           _statusIsError = true;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.backupRestoreFailed(l.message))),
+          SnackBar(content: Text(msg)),
         );
       },
       (r) async {
@@ -318,7 +437,6 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         await _loadLocalDataState();
         if (!mounted) return;
         setState(() {
-          _isLoading = false;
           _statusMessage = l10n.backupRestoreCompletedStatus;
           _statusIsError = false;
         });
@@ -370,9 +488,9 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     final l10n = AppLocalizations.of(context)!;
     final word = await _askForMagicWord(hadLocalWord);
     if (word == null) {
-      // User cancelled — stop the spinner, leave a neutral status.
+      // User cancelled — leave a neutral status; the spinner is cleared by the
+      // finally in _performRestore when the guarded session unwinds.
       setState(() {
-        _isLoading = false;
         _statusMessage = null;
       });
       return true;
@@ -382,7 +500,16 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     // the retry. restore(overrideMagicWord:) decrypts with the override without
     // storing it.
     final service = ref.read(backupServiceProvider);
-    final result = await service.restore(overrideMagicWord: word);
+    final result = await service.restore(
+      overrideMagicWord: word,
+      onPhase: (phase) {
+        if (!mounted) return;
+        setState(() {
+          _statusMessage = _backupPhaseLabel(phase, l10n);
+          _statusIsError = false;
+        });
+      },
+    );
     if (!mounted) return true;
 
     await result.fold(
@@ -390,7 +517,6 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         // Wrong word again — show a clear message and store nothing.
         if (l is WrongMagicWordFailure) {
           setState(() {
-            _isLoading = false;
             _statusMessage = l10n.magicWordRestoreWrong;
             _statusIsError = true;
           });
@@ -399,11 +525,15 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           );
           return;
         }
+        // C: friendly, localized message by failure TYPE.
+        final msg = _restoreErrorMessage(l, l10n) ?? l10n.restoreErrorGeneric;
         setState(() {
-          _isLoading = false;
-          _statusMessage = l10n.backupRestoreFailed(l.message);
+          _statusMessage = msg;
           _statusIsError = true;
         });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg)),
+        );
       },
       (r) async {
         // Restore succeeded with the entered word. Refresh the contacts gate,
@@ -412,7 +542,6 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         await _loadLocalDataState();
         if (!mounted) return;
         setState(() {
-          _isLoading = false;
           _statusMessage = l10n.backupRestoreCompletedStatus;
           _statusIsError = false;
         });
@@ -632,7 +761,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                       // contacts — an empty local state must never overwrite the
                       // cloud. Set/Change Magic Word stays enabled (it no longer
                       // backs up).
-                      onPressed: _isLoading || !_hasLocalContacts
+                      onPressed: _isLoading || _opInProgress || !_hasLocalContacts
                           ? null
                           : _performBackup,
                       icon: const Icon(Icons.upload),
@@ -663,10 +792,12 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed:
-                          _isLoading || _checkingBackup || !_hasRemoteBackup
-                              ? null
-                              : _performRestore,
+                      onPressed: _isLoading ||
+                              _opInProgress ||
+                              _checkingBackup ||
+                              !_hasRemoteBackup
+                          ? null
+                          : _performRestore,
                       icon: const Icon(Icons.download),
                       label: Text(
                         _checkingBackup

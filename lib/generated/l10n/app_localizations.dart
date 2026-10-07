@@ -2005,6 +2005,90 @@ abstract class AppLocalizations {
   /// **'Creating backup...'**
   String get backupCreating;
 
+  /// No description provided for @backupPhasePreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing…'**
+  String get backupPhasePreparing;
+
+  /// No description provided for @backupPhaseEncrypting.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypting…'**
+  String get backupPhaseEncrypting;
+
+  /// No description provided for @backupPhaseUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading…'**
+  String get backupPhaseUploading;
+
+  /// No description provided for @restorePhaseDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading…'**
+  String get restorePhaseDownloading;
+
+  /// No description provided for @restorePhaseDecrypting.
+  ///
+  /// In en, this message translates to:
+  /// **'Decrypting…'**
+  String get restorePhaseDecrypting;
+
+  /// No description provided for @restorePhaseRestoring.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring…'**
+  String get restorePhaseRestoring;
+
+  /// No description provided for @backupErrorOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection. Connect to the internet and try again.'**
+  String get backupErrorOffline;
+
+  /// No description provided for @backupErrorInterrupted.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup upload was interrupted. Check your connection and try again.'**
+  String get backupErrorInterrupted;
+
+  /// No description provided for @backupErrorAuth.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t access Google Drive. Please sign in again and try once more.'**
+  String get backupErrorAuth;
+
+  /// No description provided for @backupErrorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup failed. Please try again.'**
+  String get backupErrorGeneric;
+
+  /// No description provided for @restoreErrorOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection. Connect to the internet and try again.'**
+  String get restoreErrorOffline;
+
+  /// No description provided for @restoreErrorInterrupted.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore download was interrupted. Check your connection and try again.'**
+  String get restoreErrorInterrupted;
+
+  /// No description provided for @restoreErrorAuth.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t access Google Drive. Please sign in again and try once more.'**
+  String get restoreErrorAuth;
+
+  /// No description provided for @restoreErrorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore failed. Please try again.'**
+  String get restoreErrorGeneric;
+
   /// No description provided for @backupCloudNewerStatus.
   ///
   /// In en, this message translates to:

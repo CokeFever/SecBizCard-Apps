@@ -1044,6 +1044,49 @@ class AppLocalizationsKo extends AppLocalizations {
   String get backupCreating => '백업 생성 중…';
 
   @override
+  String get backupPhasePreparing => '준비 중…';
+
+  @override
+  String get backupPhaseEncrypting => '암호화 중…';
+
+  @override
+  String get backupPhaseUploading => '업로드 중…';
+
+  @override
+  String get restorePhaseDownloading => '다운로드 중…';
+
+  @override
+  String get restorePhaseDecrypting => '복호화 중…';
+
+  @override
+  String get restorePhaseRestoring => '복원 중…';
+
+  @override
+  String get backupErrorOffline => '인터넷에 연결되어 있지 않습니다. 인터넷에 연결한 후 다시 시도해 주세요.';
+
+  @override
+  String get backupErrorInterrupted => '백업 업로드가 중단되었습니다. 연결을 확인한 후 다시 시도해 주세요.';
+
+  @override
+  String get backupErrorAuth => 'Google 드라이브에 접근할 수 없습니다. 다시 로그인한 후 시도해 주세요.';
+
+  @override
+  String get backupErrorGeneric => '백업에 실패했습니다. 다시 시도해 주세요.';
+
+  @override
+  String get restoreErrorOffline => '인터넷에 연결되어 있지 않습니다. 인터넷에 연결한 후 다시 시도해 주세요.';
+
+  @override
+  String get restoreErrorInterrupted =>
+      '복원 다운로드가 중단되었습니다. 연결을 확인한 후 다시 시도해 주세요.';
+
+  @override
+  String get restoreErrorAuth => 'Google 드라이브에 접근할 수 없습니다. 다시 로그인한 후 시도해 주세요.';
+
+  @override
+  String get restoreErrorGeneric => '복원에 실패했습니다. 다시 시도해 주세요.';
+
+  @override
   String get backupCloudNewerStatus => '클라우드 백업이 이 기기보다 최신입니다';
 
   @override

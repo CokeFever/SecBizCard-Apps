@@ -14,6 +14,18 @@ class ConnectionFailure extends Failure {
   const ConnectionFailure(super.message);
 }
 
+/// A backup/restore transfer was interrupted mid-flight: the connection dropped
+/// while bytes were in transit (socket reset, `ClientException` reporting fewer
+/// bytes than the declared `contentLength`, a stream closed early, or a
+/// timeout). Distinct from [ConnectionFailure] (`'offline'`, no connectivity at
+/// all) so the UI can tell the user "the upload was interrupted, check your
+/// connection and try again" rather than "you have no internet". Carries the
+/// stable `'interrupted'` sentinel; the UI selects localized copy by TYPE and
+/// never shows this raw message.
+class InterruptedTransferFailure extends Failure {
+  const InterruptedTransferFailure([super.message = 'interrupted']);
+}
+
 class AuthFailure extends Failure {
   const AuthFailure(super.message);
 }
