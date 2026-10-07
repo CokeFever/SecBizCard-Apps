@@ -129,3 +129,24 @@ Social(LinkedIn/Twitter/Facebook/Instagram/GitHub)、Date(Birthday/Anniversary)�
 - **J4 Formula bar 編輯列(取代欄寬自適應)**:表格 cell 維持**固定適中欄寬**,超長內容截斷顯示(…);選中某個 cell 時,在表格**上方一條固定編輯列**顯示該 cell 的**完整內容**並可在那編輯(Excel/Sheets 的 formula bar 模式)。編輯列與 cell 雙向同步。這同時解決「長 email/地址撐爆欄寬」和「內容被切看不到」。**不要**做欄寬自適應(會把表格橫向撐爆)。
 
 > 全部純 UI/版面;序列化仍走 field-grouping.ts collapseFields,sbcb-codec / data.json / round-trip 不動。
+
+
+---
+
+## 批次 7 — EntryGate collapse + Excel 欄寬(2026-10-07 實測回饋)
+
+- **K1 EntryGate 完成步驟 collapse**:三步 stepper 現在全展開 + 按鈕都留著 → 太高要上下捲。
+  改成:步驟完成後 collapse 成單行狀態(①「✓ 授權 Google 雲端硬碟」按鈕消失;②「✓ 已選擇:
+  ixo_app_backup.zip」按鈕+toggle 收起),只有**當前步驟**展開顯示操作。
+- **K2 步驟③ compact**:「輸入通關密語」(step 標題)和「輸入您的備份暗語」(內層標題)重複,
+  合併成一個;輸入框 + 解鎖鈕縮緊。
+- **K3 Excel 欄寬自適應(含上限)**:目前固定 ~11rem,短內容欄(姓名/暱稱/部門)佔太寬、又要橫捲。
+  改成欄寬**自適應內容但設 max-width 上限** —— 短欄縮窄、長欄到上限截斷(配合 formula bar 看完整)。
+  關鍵:設上限避免長內容把表格橫向撐爆。
+- **K4 多值欄位改成 Sheets/Excel 式按需長出**:移除表格欄 header 上那排固定的「+」(目前每種
+  類型都預掛一個新增多值欄的 +,語意不清又佔空間)。改成:
+  - 預設只顯示**有資料的**出現欄(contact 有 2 支行動電話 → 顯示「行動電話」「行動電話 2」;只有
+    1 支 → 只顯示 1 欄)。空的 _2/_3 欄不預先出現。
+  - 新增多值走 formula bar 旁的動作(選中某 phone/email cell 時出現「+ 新增同類」),或該類型最後
+    一個有值 cell 旁才長出新欄 —— 像 Google Sheets 需要時才長欄,不用時不佔空間。
+  - 序列化仍走 field-grouping.ts({category}_{label}[_N]),app round-trip 不變。
