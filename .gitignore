@@ -61,3 +61,7 @@ ios/build/
 
 # FVM Version Cache
 .fvm/
+
+# Dummy/test backup fixtures produced by tool/make_dummy_backup.dart (never commit test data)
+.agents/tmp/
+secbizcard-dummy.zip
