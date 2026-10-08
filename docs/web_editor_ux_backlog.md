@@ -166,3 +166,24 @@ Social(LinkedIn/Twitter/Facebook/Instagram/GitHub)、Date(Birthday/Anniversary)�
   activeIsProfile=true,但 profile 編輯走 list/detail 右側 pane,表格模式不顯示該 pane → 看似
   沒反應。修法:點「我的名片」時若在表格模式 → **自動切回清單模式**,才看得到 profile 編輯。
   文案保留「我的名片」(身份標示 + 可點編輯),不改成「編輯我的名片」。
+
+
+---
+
+## 批次 10 — detail/edit contextual 動作條 + 編輯互斥(2026-10-08)
+
+> 依賴:先完成「fix-merge-modestate」(editor mode 狀態機 browsing/editing/merging/repacking)。
+> 本批建立在那個 mode 模型上,不要另造一組 ad hoc 判斷。
+
+- **M1 contextual 動作條(方案 b)**:全域工具列(我的名片/尋找重複/復原/重新打包/離開)**不動**。
+  單筆 contact 的操作改放在 **detail pane 頂部一條 contextual 動作條**,與全域工具列視覺對齊但語意分開:
+  - 檢視模式(detailMode=view):顯示「編輯這張」「刪除這張」。
+  - 編輯模式(detailMode=edit):顯示「完成」「取消/刪除這張」+「+ 新增欄位」入口可留在表單內或提到這條。
+  - 把現在散在 ContactDetail/ContactEditor 內的「編輯/完成/新增欄位/刪除」整理到這條,位置一致。
+- **M2 編輯時的互斥(用 mode=editing)**:
+  - 編輯某 contact 時(mode=editing),擋掉會造成狀態衝突的全域動作:尋找重複、切換表格模式。
+  - 切去編輯**另一筆** contact / 點別的列 → 應先「完成」或「取消」當前編輯(或自動 commit,因編輯已 auto-persist 到工作副本,擇一並記錄)。
+  - repacking 時(沿用 mode 模型)動作條也 disabled。
+  - 所有 disabled 綁到統一的 mode getter,不要再散落判斷。
+- 單筆「刪除這張」要有確認;刪除後回到清單/空 detail;標記 dirty;走現有 deleteContacts 路徑。
+- 純前端;不碰 codec/schema/round-trip/scope。5 語 i18n。
