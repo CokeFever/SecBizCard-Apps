@@ -1,6 +1,7 @@
 // Dev tool: generates a dummy SecBizCard backup (`secbizcard-dummy.zip`) in the
 // real SBCB v2 magic-word format so the web editor (ixo.app/editor) and the app
-// can both open and decrypt it with the magic word "abc123".
+// can both open and decrypt it with the magic word "abcd1234" (8 chars, meets
+// the 8-16 char magic-word rule).
 //
 // It reuses the SHIPPING codec path (BackupCodec.encryptNew with
 // encMode=magicword) so the bytes are bit-compatible with what the app writes —
@@ -30,7 +31,7 @@ import 'package:secbizcard/features/profile/domain/user_profile.dart';
 /// Magic word for the dummy file. NOTE: shorter than the app's 8-char UI
 /// minimum (MagicWordService), but the codec itself enforces no length — this
 /// is a dev fixture, and the editor/app decrypt path only re-derives the key.
-const String kMagicWord = 'abc123';
+const String kMagicWord = 'abcd1234';
 
 /// Mirrors MagicWordService.normalize (trim + Unicode NFC) so the key we derive
 /// matches what the app/editor derive from the user-typed word.
