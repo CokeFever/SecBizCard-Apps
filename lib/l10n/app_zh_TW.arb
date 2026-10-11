@@ -348,7 +348,7 @@
   "backupRestoreCompletedStatus": "還原完成！",
   "backupRestoreSuccessBody": "資料還原成功。必要時請重新啟動應用程式。",
   "backupDriveDesc": "將您的聯絡人與設定以加密檔案安全備份到 Google 雲端硬碟。",
-  "backupWebEditorTitle": "SecBizCard 網頁編輯器",
+  "backupWebEditorTitle": "Secured Web Editor",
   "backupWebEditorBody": "我們提供一個網頁編輯器，可在電腦瀏覽器中開啟，批次整理、編輯與合併您的聯絡人。開啟後，依畫面上的步驟連結您的 Google 雲端硬碟即可。",
   "backupWebEditorUrlCopied": "已複製網頁編輯器連結到剪貼簿。",
   "backupProcessing": "處理中…",

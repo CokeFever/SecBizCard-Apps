@@ -743,27 +743,6 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
 
                   const SizedBox(height: 24),
 
-                  // Web Editor info (default collapsed). Explains the companion
-                  // web editor and exposes its URL as tap-to-copy (no browser).
-                  CollapsibleSection(
-                    title: l10n.backupWebEditorTitle,
-                    initiallyExpanded: false,
-                    children: [
-                      SectionStepText(l10n.backupWebEditorBody),
-                      const SizedBox(height: 8),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: TextButton.icon(
-                          onPressed: _copyWebEditorUrl,
-                          icon: const Icon(Icons.copy, size: 16),
-                          label: const Text(_webEditorUrl),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 24),
-
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
@@ -824,6 +803,27 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                         ),
                       ),
                     ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Web Editor info (default collapsed). Explains the companion
+                  // web editor and exposes its URL as tap-to-copy (no browser).
+                  CollapsibleSection(
+                    title: l10n.backupWebEditorTitle,
+                    initiallyExpanded: false,
+                    children: [
+                      SectionStepText(l10n.backupWebEditorBody),
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          onPressed: _copyWebEditorUrl,
+                          icon: const Icon(Icons.copy, size: 16),
+                          label: const Text(_webEditorUrl),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

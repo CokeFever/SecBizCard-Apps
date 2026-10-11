@@ -1148,7 +1148,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get backupDriveDesc => '連絡先と設定を暗号化ファイルとして Google ドライブに安全にバックアップします。';
 
   @override
-  String get backupWebEditorTitle => 'SecBizCard ウェブエディター';
+  String get backupWebEditorTitle => 'Secured Web Editor';
 
   @override
   String get backupWebEditorBody =>

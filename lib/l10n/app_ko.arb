@@ -357,7 +357,7 @@
   "backupRestoreCompletedStatus": "복원 완료!",
   "backupRestoreSuccessBody": "데이터를 복원했습니다. 필요하면 앱을 다시 시작하세요.",
   "backupDriveDesc": "연락처와 설정을 암호화된 파일로 Google 드라이브에 안전하게 백업합니다.",
-  "backupWebEditorTitle": "SecBizCard 웹 편집기",
+  "backupWebEditorTitle": "Secured Web Editor",
   "backupWebEditorBody": "컴퓨터 브라우저에서 열 수 있는 웹 편집기가 있어 연락처를 한 번에 정리·편집·병합할 수 있습니다. 연 다음 화면의 안내에 따라 Google 드라이브를 연결하세요.",
   "backupWebEditorUrlCopied": "웹 편집기 링크를 클립보드에 복사했습니다.",
   "backupProcessing": "처리 중…",

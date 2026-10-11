@@ -1131,7 +1131,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get backupDriveDesc => '将您的联系人与设置以加密文件安全备份到 Google 云端硬盘。';
 
   @override
-  String get backupWebEditorTitle => 'SecBizCard 网页编辑器';
+  String get backupWebEditorTitle => 'Secured Web Editor';
 
   @override
   String get backupWebEditorBody =>
@@ -2842,7 +2842,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get backupDriveDesc => '將您的聯絡人與設定以加密檔案安全備份到 Google 雲端硬碟。';
 
   @override
-  String get backupWebEditorTitle => 'SecBizCard 網頁編輯器';
+  String get backupWebEditorTitle => 'Secured Web Editor';
 
   @override
   String get backupWebEditorBody =>
