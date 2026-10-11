@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'dart:async';
@@ -52,6 +54,25 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
     debugPrint('[Main] Firebase initialized successfully');
+
+    // Initialize Firebase App Check (best-effort, client-side only). This only
+    // ADDS Play Integrity / App Attest attestation tokens that the backend may
+    // verify LATER; the live backend does not enforce App Check today and must
+    // keep accepting requests. Activation is wrapped so a failure to activate or
+    // mint a token only logs and continues — it must never crash startup or gate
+    // any feature. Debug builds use the debug provider so emulators/dev devices
+    // can still attest.
+    try {
+      await FirebaseAppCheck.instance.activate(
+        androidProvider:
+            kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
+        appleProvider:
+            kDebugMode ? AppleProvider.debug : AppleProvider.appAttest,
+      );
+      debugPrint('[Main] Firebase App Check activated');
+    } catch (e) {
+      debugPrint('[Main] Firebase App Check activation failed (continuing): $e');
+    }
 
     // Load remote-tunable card-detection config (non-blocking). Uses in-app
     // defaults until a fetch activates; restart-to-apply. Never blocks startup.
