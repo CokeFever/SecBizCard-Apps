@@ -1173,11 +1173,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Data restored successfully. Please restart app if needed.';
 
   @override
-  String get backupDriveTitle => 'Google Drive Backup';
-
-  @override
   String get backupDriveDesc =>
       'Securely backup your contacts and settings to your Google Drive as an encrypted file.';
+
+  @override
+  String get backupWebEditorTitle => 'SecBizCard Web Editor';
+
+  @override
+  String get backupWebEditorBody =>
+      'There\'s a companion web editor you can open in a computer browser to organize, edit, and merge your contacts in bulk. After opening it, just follow the on-screen steps to connect your Google Drive.';
+
+  @override
+  String get backupWebEditorUrlCopied => 'Web editor link copied to clipboard.';
 
   @override
   String get backupProcessing => 'Processing...';

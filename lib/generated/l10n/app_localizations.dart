@@ -2185,17 +2185,29 @@ abstract class AppLocalizations {
   /// **'Data restored successfully. Please restart app if needed.'**
   String get backupRestoreSuccessBody;
 
-  /// No description provided for @backupDriveTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Google Drive Backup'**
-  String get backupDriveTitle;
-
   /// No description provided for @backupDriveDesc.
   ///
   /// In en, this message translates to:
   /// **'Securely backup your contacts and settings to your Google Drive as an encrypted file.'**
   String get backupDriveDesc;
+
+  /// No description provided for @backupWebEditorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'SecBizCard Web Editor'**
+  String get backupWebEditorTitle;
+
+  /// No description provided for @backupWebEditorBody.
+  ///
+  /// In en, this message translates to:
+  /// **'There\'s a companion web editor you can open in a computer browser to organize, edit, and merge your contacts in bulk. After opening it, just follow the on-screen steps to connect your Google Drive.'**
+  String get backupWebEditorBody;
+
+  /// No description provided for @backupWebEditorUrlCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Web editor link copied to clipboard.'**
+  String get backupWebEditorUrlCopied;
 
   /// No description provided for @backupProcessing.
   ///
