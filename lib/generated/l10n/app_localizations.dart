@@ -2194,7 +2194,7 @@ abstract class AppLocalizations {
   /// No description provided for @backupWebEditorTitle.
   ///
   /// In en, this message translates to:
-  /// **'SecBizCard Web Editor'**
+  /// **'Secured Web Editor'**
   String get backupWebEditorTitle;
 
   /// No description provided for @backupWebEditorBody.

@@ -1147,7 +1147,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get backupDriveDesc => '연락처와 설정을 암호화된 파일로 Google 드라이브에 안전하게 백업합니다.';
 
   @override
-  String get backupWebEditorTitle => 'SecBizCard 웹 편집기';
+  String get backupWebEditorTitle => 'Secured Web Editor';
 
   @override
   String get backupWebEditorBody =>

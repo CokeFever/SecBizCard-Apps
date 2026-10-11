@@ -1177,7 +1177,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Securely backup your contacts and settings to your Google Drive as an encrypted file.';
 
   @override
-  String get backupWebEditorTitle => 'SecBizCard Web Editor';
+  String get backupWebEditorTitle => 'Secured Web Editor';
 
   @override
   String get backupWebEditorBody =>
