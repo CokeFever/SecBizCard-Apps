@@ -22,6 +22,10 @@ class BackupScreen extends ConsumerStatefulWidget {
 }
 
 class _BackupScreenState extends ConsumerState<BackupScreen> {
+  // Companion web editor URL. Shown in the collapsible info section and
+  // copied to the clipboard on tap (never opened in a browser).
+  static const _webEditorUrl = 'https://ixo.app/editor';
+
   bool _isLoading = false;
   // A1: hard re-entrancy guard that covers the ENTIRE operation, including the
   // async pre-flight (confirm dialogs, cloud checks) that runs BEFORE
@@ -676,21 +680,6 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Icon(
-                    Icons.cloud_sync_outlined,
-                    size: 80,
-                    color: Colors.blueGrey,
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    l10n.backupDriveTitle,
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
                   Text(
                     l10n.backupDriveDesc,
                     textAlign: TextAlign.center,
@@ -751,6 +740,27 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                   const SizedBox(height: 24),
                   // Magic Word section (always visible).
                   _buildMagicWordSection(l10n),
+
+                  const SizedBox(height: 24),
+
+                  // Web Editor info (default collapsed). Explains the companion
+                  // web editor and exposes its URL as tap-to-copy (no browser).
+                  CollapsibleSection(
+                    title: l10n.backupWebEditorTitle,
+                    initiallyExpanded: false,
+                    children: [
+                      SectionStepText(l10n.backupWebEditorBody),
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          onPressed: _copyWebEditorUrl,
+                          icon: const Icon(Icons.copy, size: 16),
+                          label: const Text(_webEditorUrl),
+                        ),
+                      ),
+                    ],
+                  ),
 
                   const SizedBox(height: 24),
 
@@ -966,6 +976,17 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.magicWordCopied)),
+    );
+  }
+
+  /// Copies the web editor URL to the clipboard and confirms with a snackbar.
+  /// The URL is never opened in a browser — tapping only copies it.
+  Future<void> _copyWebEditorUrl() async {
+    final l10n = AppLocalizations.of(context)!;
+    await Clipboard.setData(const ClipboardData(text: _webEditorUrl));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.backupWebEditorUrlCopied)),
     );
   }
 

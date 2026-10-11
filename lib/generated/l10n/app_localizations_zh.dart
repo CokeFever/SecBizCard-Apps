@@ -1128,10 +1128,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get backupRestoreSuccessBody => '数据恢复成功。必要时请重启应用。';
 
   @override
-  String get backupDriveTitle => 'Google 云端硬盘备份';
+  String get backupDriveDesc => '将您的联系人与设置以加密文件安全备份到 Google 云端硬盘。';
 
   @override
-  String get backupDriveDesc => '将您的联系人与设置以加密文件安全备份到 Google 云端硬盘。';
+  String get backupWebEditorTitle => 'SecBizCard 网页编辑器';
+
+  @override
+  String get backupWebEditorBody =>
+      '我们提供一个网页编辑器，可在电脑浏览器中打开，批量整理、编辑与合并您的联系人。打开后，按照屏幕上的步骤连接您的 Google 云端硬盘即可。';
+
+  @override
+  String get backupWebEditorUrlCopied => '已复制网页编辑器链接到剪贴板。';
 
   @override
   String get backupProcessing => '处理中…';
@@ -2832,10 +2839,17 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get backupRestoreSuccessBody => '資料還原成功。必要時請重新啟動應用程式。';
 
   @override
-  String get backupDriveTitle => 'Google 雲端硬碟備份';
+  String get backupDriveDesc => '將您的聯絡人與設定以加密檔案安全備份到 Google 雲端硬碟。';
 
   @override
-  String get backupDriveDesc => '將您的聯絡人與設定以加密檔案安全備份到 Google 雲端硬碟。';
+  String get backupWebEditorTitle => 'SecBizCard 網頁編輯器';
+
+  @override
+  String get backupWebEditorBody =>
+      '我們提供一個網頁編輯器，可在電腦瀏覽器中開啟，批次整理、編輯與合併您的聯絡人。開啟後，依畫面上的步驟連結您的 Google 雲端硬碟即可。';
+
+  @override
+  String get backupWebEditorUrlCopied => '已複製網頁編輯器連結到剪貼簿。';
 
   @override
   String get backupProcessing => '處理中…';

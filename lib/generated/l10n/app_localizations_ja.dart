@@ -1145,10 +1145,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String get backupRestoreSuccessBody => 'データを復元しました。必要に応じてアプリを再起動してください。';
 
   @override
-  String get backupDriveTitle => 'Google ドライブ バックアップ';
+  String get backupDriveDesc => '連絡先と設定を暗号化ファイルとして Google ドライブに安全にバックアップします。';
 
   @override
-  String get backupDriveDesc => '連絡先と設定を暗号化ファイルとして Google ドライブに安全にバックアップします。';
+  String get backupWebEditorTitle => 'SecBizCard ウェブエディター';
+
+  @override
+  String get backupWebEditorBody =>
+      'パソコンのブラウザで開けるウェブエディターがあり、連絡先をまとめて整理・編集・統合できます。開いたら、画面の手順に従って Google ドライブを連携してください。';
+
+  @override
+  String get backupWebEditorUrlCopied => 'ウェブエディターのリンクをクリップボードにコピーしました。';
 
   @override
   String get backupProcessing => '処理中…';

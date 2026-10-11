@@ -1144,10 +1144,17 @@ class AppLocalizationsKo extends AppLocalizations {
   String get backupRestoreSuccessBody => '데이터를 복원했습니다. 필요하면 앱을 다시 시작하세요.';
 
   @override
-  String get backupDriveTitle => 'Google 드라이브 백업';
+  String get backupDriveDesc => '연락처와 설정을 암호화된 파일로 Google 드라이브에 안전하게 백업합니다.';
 
   @override
-  String get backupDriveDesc => '연락처와 설정을 암호화된 파일로 Google 드라이브에 안전하게 백업합니다.';
+  String get backupWebEditorTitle => 'SecBizCard 웹 편집기';
+
+  @override
+  String get backupWebEditorBody =>
+      '컴퓨터 브라우저에서 열 수 있는 웹 편집기가 있어 연락처를 한 번에 정리·편집·병합할 수 있습니다. 연 다음 화면의 안내에 따라 Google 드라이브를 연결하세요.';
+
+  @override
+  String get backupWebEditorUrlCopied => '웹 편집기 링크를 클립보드에 복사했습니다.';
 
   @override
   String get backupProcessing => '처리 중…';
