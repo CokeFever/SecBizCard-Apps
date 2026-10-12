@@ -13,13 +13,17 @@
 
 1.6.4 **沒有新的訂閱/IAP 變動**(訂閱沿用 1.6.1 已上架的 Plus/Pro)。這版對使用者
 **有感**的是:
-1. **電腦版網頁編輯器揭露(Secured Web Editor)**:Backup & Restore 頁新增一個預設收起的
-   說明區塊,介紹可在電腦瀏覽器(ixo.app/editor)大量整理/編輯/合併名片;點網址即複製到
-   剪貼簿(不開瀏覽器,因為是給電腦用的)。
-2. **Backup 頁版面精簡**:移除頂部放大的雲端圖示與重複標題,保留說明;Web Editor 區塊移到
-   「立即備份 / 還原」兩顆按鈕下方,讓主要操作更突出。
+1. **Backup & Restore 頁版面精簡**:移除頂部放大的雲端圖示與重複標題,保留說明,主要操作
+   (立即備份 / 還原)更突出。
+2. **(附帶)配套工具提示**:Backup 頁新增一個預設收起的小區塊,告知需要大量整理名片時可用
+   電腦上的配套工具;純文字說明 + 點擊複製網址(**app 不會主動開啟外部瀏覽器**)。
 3. **幕後:App Check(Play Integrity / App Attest)初始化**(fail-open,不影響任何現有功能;
    後端尚未 enforce)。
+
+> 文案策略(2026-10-11 調整):**What's New 以「app 的 Backup 頁改進」為主詞**,配套 web editor
+> 僅附帶提及、**不放 `ixo.app/editor` 網址**、不叫使用者離開 app(避免 Apple 對「導出 app」的
+> 敏感 + 不稀釋 app 價值)。**Reviewer Notes 則保留**對 web editor 的說明(審核員會在 Backup 頁
+> 看到那段文字,主動解釋可消除疑慮,屬防禦性)。
 
 > **幕後但重要(不列進 What's New,但內部須知):** 189 已加入 Firebase App Check client 初始化。
 > 這是「鎖定後端只給自家 app」的第一步,目前**只在 client 送 attestation、後端不 enforce**,
@@ -36,27 +40,27 @@
 
 ### en-US
 ```
-Organize on a bigger screen: the Backup & Restore screen now points you to the Secured Web Editor — a companion tool at ixo.app/editor that opens in a desktop browser so you can clean up, edit, and merge a large collection of contacts far faster than on a phone. Your backup is decrypted inside your browser; your data never reaches our servers. We also tidied up the Backup screen layout. Thanks for using SecBizCard!
+We tidied up the Backup & Restore screen so your main actions — Back Up Now and Restore — stand out more. It also notes that if you ever need to organize a large collection of contacts, a companion tool is available on a computer. Plus reliability improvements under the hood. Thanks for using SecBizCard!
 ```
 
 ### zh-Hant
 ```
-在大螢幕上整理名片:Backup & Restore 頁面現在會指引你使用 Secured Web Editor —— 一個在電腦瀏覽器開啟的輔助工具(ixo.app/editor),可以比在手機上更快地整理、編輯、合併大量名片。備份會在你的瀏覽器內解密,資料不會傳到我們的伺服器。我們也精簡了備份頁面的版面。感謝您使用 SecBizCard!
+我們精簡了 Backup & Restore 頁面的版面,讓主要操作(立即備份、還原)更清楚。頁面也會告訴你:若需要大量整理名片,還有一個在電腦上使用的配套工具可用。另有幕後的穩定性改善。感謝您使用 SecBizCard!
 ```
 
 ### zh-Hans
 ```
-在大屏幕上整理名片:Backup & Restore 页面现在会引导你使用 Secured Web Editor —— 一个在电脑浏览器打开的辅助工具(ixo.app/editor),可以比在手机上更快地整理、编辑、合并大量名片。备份会在你的浏览器内解密,数据不会传到我们的服务器。我们也精简了备份页面的版面。感谢您使用 SecBizCard!
+我们精简了 Backup & Restore 页面的版面,让主要操作(立即备份、还原)更清楚。页面也会告诉你:若需要大量整理名片,还有一个在电脑上使用的配套工具可用。另有幕后的稳定性改善。感谢您使用 SecBizCard!
 ```
 
 ### ja
 ```
-大きな画面で整理:Backup & Restore 画面から Secured Web Editor をご案内するようになりました。これは ixo.app/editor でデスクトップのブラウザで開く補助ツールで、多数の連絡先をスマートフォンよりずっと速く整理・編集・統合できます。バックアップはブラウザ内で復号され、データが当社のサーバーに届くことはありません。バックアップ画面のレイアウトも整理しました。SecBizCard をご利用いただきありがとうございます!
+Backup & Restore 画面のレイアウトを整理し、主な操作(今すぐバックアップ・復元)が分かりやすくなりました。多数の連絡先を整理したいときに使える、パソコン向けの補助ツールの案内も表示されます。さらに、裏側での安定性の改善も含まれています。SecBizCard をご利用いただきありがとうございます!
 ```
 
 ### ko
 ```
-큰 화면에서 정리하기: Backup & Restore 화면에서 이제 Secured Web Editor를 안내합니다. ixo.app/editor에서 데스크톱 브라우저로 여는 보조 도구로, 많은 연락처를 휴대폰보다 훨씬 빠르게 정리·편집·병합할 수 있습니다. 백업은 브라우저 안에서 복호화되며 데이터가 당사 서버에 전달되지 않습니다. 백업 화면 레이아웃도 정리했습니다. SecBizCard를 이용해 주셔서 감사합니다!
+Backup & Restore 화면의 레이아웃을 정리해 주요 작업(지금 백업·복원)이 더 잘 보이도록 했습니다. 많은 연락처를 정리해야 할 때 컴퓨터에서 사용할 수 있는 보조 도구 안내도 표시됩니다. 여기에 눈에 보이지 않는 안정성 개선도 포함되었습니다. SecBizCard를 이용해 주셔서 감사합니다!
 ```
 
 ---
@@ -72,15 +76,19 @@ and approved in 1.6.1 and are unchanged). Core functionality (scan, store,
 exchange business cards) remains fully usable for free.
 
 WHAT'S NEW (1.6.4)
-- Secured Web Editor disclosure: the Backup & Restore screen now shows a
-  collapsible section describing a companion desktop-browser tool
-  (https://ixo.app/editor) for bulk-organizing/editing/merging contacts. The URL
-  is copy-to-clipboard only (it does not open a browser from the app, since the
-  editor is meant for a computer). The web editor decrypts the user's own Google
-  Drive backup entirely in their browser (drive.file scope); no contact data is
-  sent to our servers.
 - Backup screen layout tidy-up: removed a redundant hero icon/title, kept the
-  description, and moved the web-editor section below the primary action buttons.
+  description, so the primary actions (Back Up Now / Restore) stand out.
+- Informational note about a companion tool: the Backup & Restore screen shows a
+  small, collapsed-by-default section mentioning that a companion tool is
+  available on a computer for organizing a large collection of contacts. IMPORTANT
+  for review: this is PLAIN TEXT plus a tap-to-COPY URL — the app does NOT open an
+  external browser, does not embed a web view, and does not drive the user out of
+  the app. It is informational only. (If you tap the URL it is copied to the
+  clipboard so the user can paste it on a computer later.) The companion web tool,
+  if used, decrypts the user's own Google Drive backup entirely in their browser
+  (drive.file scope); no contact data is sent to our servers. We mention this only
+  so the on-screen text you may see in the Backup screen is clear; it is not a new
+  app capability or an external link the app navigates to.
 - Behind the scenes: the app now initializes Firebase App Check (Play Integrity /
   App Attest). This only attaches attestation tokens; it is fail-open and does not
   gate or change any user-facing functionality.
@@ -111,10 +119,10 @@ HOW TO TEST (no special setup)
   Verification code: 654321
 - Sign in with Google: use the provided demo credentials (see the demo account
   fields / attached).
-- Secured Web Editor (optional, informational): open the Backup & Restore screen
-  to see the new collapsible section; tapping the URL copies it to the clipboard.
-  To try the editor itself, open https://ixo.app/editor in a desktop browser,
-  authorize Google Drive, pick a backup, and enter the magic word.
+- Companion-tool note (informational only): open the Backup & Restore screen to
+  see the small collapsed section; expanding it shows plain text and a tap-to-copy
+  URL. The app does not open a browser or navigate out — tapping only copies the
+  URL to the clipboard. No action required to test the app's own features.
 - Business-card scanning: tap scan, point at a single card on a plain background.
 - QR exchange works best with two devices; with one device, try the demo page:
   https://ixo.app/demo
@@ -125,19 +133,19 @@ Thank you, and have a great day.
 ## Play Console — release notes(單一欄位,tag blocks)
 ```
 <en-US>
-Organize on a bigger screen: the Backup & Restore screen now points you to the Secured Web Editor — a companion tool at ixo.app/editor that opens in a desktop browser so you can clean up, edit, and merge a large collection of contacts far faster than on a phone. Your backup is decrypted inside your browser; your data never reaches our servers. We also tidied up the Backup screen layout. Thanks for using SecBizCard!
+We tidied up the Backup & Restore screen so your main actions — Back Up Now and Restore — stand out more. It also notes that if you ever need to organize a large collection of contacts, a companion tool is available on a computer. Plus reliability improvements under the hood. Thanks for using SecBizCard!
 </en-US>
 <zh-TW>
-在大螢幕上整理名片:Backup & Restore 頁面現在會指引你使用 Secured Web Editor —— 一個在電腦瀏覽器開啟的輔助工具(ixo.app/editor),可以比在手機上更快地整理、編輯、合併大量名片。備份會在你的瀏覽器內解密,資料不會傳到我們的伺服器。我們也精簡了備份頁面的版面。感謝您使用 SecBizCard!
+我們精簡了 Backup & Restore 頁面的版面,讓主要操作(立即備份、還原)更清楚。頁面也會告訴你:若需要大量整理名片,還有一個在電腦上使用的配套工具可用。另有幕後的穩定性改善。感謝您使用 SecBizCard!
 </zh-TW>
 <zh-CN>
-在大屏幕上整理名片:Backup & Restore 页面现在会引导你使用 Secured Web Editor —— 一个在电脑浏览器打开的辅助工具(ixo.app/editor),可以比在手机上更快地整理、编辑、合并大量名片。备份会在你的浏览器内解密,数据不会传到我们的服务器。我们也精简了备份页面的版面。感谢您使用 SecBizCard!
+我们精简了 Backup & Restore 页面的版面,让主要操作(立即备份、还原)更清楚。页面也会告诉你:若需要大量整理名片,还有一个在电脑上使用的配套工具可用。另有幕后的稳定性改善。感谢您使用 SecBizCard!
 </zh-CN>
 <ja-JP>
-大きな画面で整理:Backup & Restore 画面から Secured Web Editor をご案内するようになりました。これは ixo.app/editor でデスクトップのブラウザで開く補助ツールで、多数の連絡先をスマートフォンよりずっと速く整理・編集・統合できます。バックアップはブラウザ内で復号され、データが当社のサーバーに届くことはありません。バックアップ画面のレイアウトも整理しました。SecBizCard をご利用いただきありがとうございます!
+Backup & Restore 画面のレイアウトを整理し、主な操作(今すぐバックアップ・復元)が分かりやすくなりました。多数の連絡先を整理したいときに使える、パソコン向けの補助ツールの案内も表示されます。さらに、裏側での安定性の改善も含まれています。SecBizCard をご利用いただきありがとうございます!
 </ja-JP>
 <ko-KR>
-큰 화면에서 정리하기: Backup & Restore 화면에서 이제 Secured Web Editor를 안내합니다. ixo.app/editor에서 데스크톱 브라우저로 여는 보조 도구로, 많은 연락처를 휴대폰보다 훨씬 빠르게 정리·편집·병합할 수 있습니다. 백업은 브라우저 안에서 복호화되며 데이터가 당사 서버에 전달되지 않습니다. 백업 화면 레이아웃도 정리했습니다. SecBizCard를 이용해 주셔서 감사합니다!
+Backup & Restore 화면의 레이아웃을 정리해 주요 작업(지금 백업·복원)이 더 잘 보이도록 했습니다. 많은 연락처를 정리해야 할 때 컴퓨터에서 사용할 수 있는 보조 도구 안내도 표시됩니다. 여기에 눈에 보이지 않는 안정성 개선도 포함되었습니다. SecBizCard를 이용해 주셔서 감사합니다!
 </ko-KR>
 ```
 
