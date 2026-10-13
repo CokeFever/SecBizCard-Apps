@@ -1,7 +1,7 @@
 name: secbizcard
 description: "A new Flutter project."
 publish_to: 'none'
-version: 1.6.4+191
+version: 1.6.5+192
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -83,7 +83,7 @@ dependencies:
       # version and a rebuild can't drift onto a newer parser (protects
       # submitted/released builds). Bump this deliberately when adopting a new
       # OCR change. See docs/card_detection_scoring.md (tuning layers §3).
-      ref: 1def446d9e03bc36598481617d18196ad0717fc7
+      ref: 97e45a535032267d09c5c798d1915c2f5dd692f9
 
 dev_dependencies:
   flutter_test:
