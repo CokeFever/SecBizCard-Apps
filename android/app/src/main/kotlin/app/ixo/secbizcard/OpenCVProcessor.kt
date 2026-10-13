@@ -100,6 +100,12 @@ class OpenCVProcessor {
         // docs/card_detection_scoring.md.
         val usePrecrop = b("usePrecrop", true)
         val precropMarginRatio = d("precropMarginRatio", 0.25)
+
+        // STATE 2 guide-crop fallback margin (+20% per side by default). When
+        // card-edge detection fails, the saved/OCR image is the guide region
+        // expanded by THIS fraction (not the full frame). Distinct from
+        // precropMarginRatio (detection ROI). See docs/card_detection_scoring.md.
+        val fallbackGuideMarginRatio = d("fallbackGuideMarginRatio", 0.20)
     }
 
     fun processBusinessCard(
@@ -232,6 +238,7 @@ class OpenCVProcessor {
 
                 resultData["success"] = true
                 resultData["fallback"] = false
+                resultData["fallbackState"] = "state3"
                 resultData["aspectMismatch"] = aspectMismatch
                 resultData["score"] = bestScore
                 // Fraction of the frame the detected card occupies. A small
@@ -245,17 +252,81 @@ class OpenCVProcessor {
                 return resultData
             }
 
-            // 3. Fallback: hand off the GUIDE region (not the whole image) to
-            //    the manual 4-corner adjuster.
-            saveMatAsJpeg(src, outputPath)
+            // 3. Fallback (detection miss). Degrade STATE 3 → STATE 2 → STATE 1:
+            //    save the GUIDE region cropped from the ORIGINAL frame
+            //    (STATE 2, guide + fallbackGuideMarginRatio), NOT the full
+            //    uncropped frame. Only when no usable guide ROI exists do we
+            //    save the full frame (STATE 1). The saved file is BOTH the
+            //    stored original AND the OCR input (same bytes), so this fixes
+            //    the "full portrait photo as original scan" bug.
+            //
+            //    Coordinate space: imageGuideRect is in PHOTO-normalized space
+            //    (cover-crop- and orientation-corrected by Dart's
+            //    imageNormalizedGuide). We expand+clamp it in RESIZED pixels via
+            //    the same expandAndClamp used for detection, then scale that ROI
+            //    back to ORIGINAL src pixels for the crop.
+            var fallbackState = "state1"
+            if (imageGuideRect != null) {
+                val roiResized = expandAndClamp(
+                    imageGuideRect, resized.cols(), resized.rows(),
+                    t.fallbackGuideMarginRatio,
+                )
+                if (roiResized.width > 0 && roiResized.height > 0) {
+                    // Scale ROI from resized space back to original src pixels,
+                    // then clamp to the original bounds.
+                    val ox = (roiResized.x / scale).toInt().coerceIn(0, originalWidth)
+                    val oy = (roiResized.y / scale).toInt().coerceIn(0, originalHeight)
+                    val ow = (roiResized.width / scale).toInt()
+                        .coerceIn(0, originalWidth - ox)
+                    val oh = (roiResized.height / scale).toInt()
+                        .coerceIn(0, originalHeight - oy)
+                    if (ow > 0 && oh > 0) {
+                        var cropped = Mat(src, Rect(ox, oy, ow, oh))
+                        // Match the success path's orientation handling so a
+                        // STATE 2 crop lands in the same upright orientation.
+                        if (isVertical) {
+                            if (cropped.cols() > cropped.rows()) {
+                                Core.rotate(cropped, cropped, Core.ROTATE_90_CLOCKWISE)
+                            }
+                        } else {
+                            if (cropped.rows() > cropped.cols()) {
+                                Core.rotate(cropped, cropped, Core.ROTATE_90_CLOCKWISE)
+                            }
+                        }
+                        saveMatAsJpeg(cropped, outputPath)
+                        fallbackState = "state2"
+                    }
+                }
+            }
+            if (fallbackState == "state1") {
+                // No usable guide ROI → last-resort full frame (STATE 1).
+                saveMatAsJpeg(src, outputPath)
+            }
+
             resultData["success"] = true
             resultData["fallback"] = true
+            resultData["fallbackState"] = fallbackState
             resultData["aspectMismatch"] = aspectMismatch
             resultData["score"] = bestScore
             resultData["areaRatio"] = 0.0 // no card detected
             resultData["imageWidth"] = originalWidth
             resultData["imageHeight"] = originalHeight
-            resultData["points"] = fallbackPoints(guide, scale, originalWidth, originalHeight)
+            // Manual-crop seed. Prefer the best sub-threshold detected quad (in
+            // ORIGINAL pixels) if one exists; else the guide-region corners.
+            // Never the loose 80% default. On STATE 2 the saved image is already
+            // the guide crop, so Dart seeds manual-crop over that image.
+            val subThresholdQuad = bestQuad
+            if (subThresholdQuad != null) {
+                val quadPts = ArrayList<Double>()
+                for (p in subThresholdQuad) {
+                    quadPts.add(p.x / scale)
+                    quadPts.add(p.y / scale)
+                }
+                resultData["points"] = quadPts
+            } else {
+                resultData["points"] =
+                    fallbackPoints(guide, scale, originalWidth, originalHeight)
+            }
             return resultData
         } catch (e: Exception) {
             e.printStackTrace()

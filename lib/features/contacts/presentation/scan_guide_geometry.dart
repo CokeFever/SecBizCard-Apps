@@ -109,3 +109,46 @@ Rect imageNormalizedGuide({
 }
 
 double _clamp01(double v) => math.max(0.0, math.min(1.0, v));
+
+/// STATE 2 (guide-crop fallback) coordinate math, expressed purely so it can be
+/// unit-tested without a device. Mirrors the native `expandAndClamp`
+/// (`OpenCVProcessor.kt` / `AppDelegate.swift`) so all three implementations
+/// agree on which pixels the fallback crop covers.
+///
+/// [imageGuide] is the PHOTO-normalized guide (0..1), already cover-crop- and
+/// orientation-corrected by [imageNormalizedGuide] — i.e. the SAME value Dart
+/// sends to native as `imageGuideRect`. It is expanded by [margin] (fraction of
+/// the guide's own width/height) on EACH side, scaled into pixels of the
+/// [photoW]×[photoH] photo, and clamped to `[0,photoW]×[0,photoH]`.
+///
+/// Returns an integer-pixel [Rect] (top-left origin). A degenerate/empty guide
+/// yields a zero-size rect (the caller then falls back to STATE 1 / the full
+/// frame). Because the input is already in photo space, a portrait guide on a
+/// landscape photo maps to a portrait sub-region (not the whole frame and not
+/// transposed) — the main coordinate-mapping risk this helper is tested for.
+Rect expandGuideToPhotoPixels({
+  required Rect imageGuide,
+  required int photoW,
+  required int photoH,
+  required double margin,
+}) {
+  final double ex = imageGuide.width * margin;
+  final double ey = imageGuide.height * margin;
+
+  double x0 = (imageGuide.left - ex) * photoW;
+  double y0 = (imageGuide.top - ey) * photoH;
+  double x1 = (imageGuide.left + imageGuide.width + ex) * photoW;
+  double y1 = (imageGuide.top + imageGuide.height + ey) * photoH;
+
+  x0 = math.max(0.0, math.min(photoW.toDouble(), x0));
+  y0 = math.max(0.0, math.min(photoH.toDouble(), y0));
+  x1 = math.max(0.0, math.min(photoW.toDouble(), x1));
+  y1 = math.max(0.0, math.min(photoH.toDouble(), y1));
+
+  final int rx = x0.toInt();
+  final int ry = y0.toInt();
+  final int rw = math.max(0, (x1 - x0).toInt());
+  final int rh = math.max(0, (y1 - y0).toInt());
+
+  return Rect(rx.toDouble(), ry.toDouble(), rw.toDouble(), rh.toDouble());
+}

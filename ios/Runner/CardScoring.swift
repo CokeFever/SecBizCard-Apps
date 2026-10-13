@@ -57,6 +57,11 @@ enum CardScoring {
         // docs/card_detection_scoring.md.
         var usePrecrop = true
         var precropMarginRatio = 0.25
+        // STATE 2 guide-crop fallback margin (+20% per side by default). When
+        // card-edge detection fails, the saved/OCR image is the guide region
+        // expanded by THIS fraction (not the full frame). Distinct from
+        // precropMarginRatio (detection ROI). See docs/card_detection_scoring.md.
+        var fallbackGuideMarginRatio = 0.20
 
         init() {}
 
@@ -86,6 +91,7 @@ enum CardScoring {
             useCentroidCornerSort = b("useCentroidCornerSort", useCentroidCornerSort)
             usePrecrop = b("usePrecrop", usePrecrop)
             precropMarginRatio = d("precropMarginRatio", precropMarginRatio)
+            fallbackGuideMarginRatio = d("fallbackGuideMarginRatio", fallbackGuideMarginRatio)
         }
     }
 
