@@ -1713,6 +1713,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String mainExportedPartial(int succeeded, int total, int failed) {
     return '已导出 $total 位中的 $succeeded 位；$failed 位失败';
   }
+
+  @override
+  String get versionGateUpdateTitle => '有可用的更新';
+
+  @override
+  String get versionGateUpdateBody => 'SecBizCard 有新版本可用,请更新后继续使用。';
+
+  @override
+  String get versionGateUpdateAction => '更新';
+
+  @override
+  String get versionGateLaterAction => '稍后';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -3424,4 +3436,16 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String mainExportedPartial(int succeeded, int total, int failed) {
     return '已匯出 $total 位中的 $succeeded 位；$failed 位失敗';
   }
+
+  @override
+  String get versionGateUpdateTitle => '有可用的更新';
+
+  @override
+  String get versionGateUpdateBody => 'SecBizCard 有新版本可用,請更新後繼續使用。';
+
+  @override
+  String get versionGateUpdateAction => '更新';
+
+  @override
+  String get versionGateLaterAction => '稍後';
 }

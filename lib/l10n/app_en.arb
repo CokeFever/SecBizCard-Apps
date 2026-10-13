@@ -1177,5 +1177,13 @@
       "total": { "type": "int" },
       "failed": { "type": "int" }
     }
-  }
+  },
+  "versionGateUpdateTitle": "Update available",
+  "@versionGateUpdateTitle": {},
+  "versionGateUpdateBody": "A newer version of SecBizCard is available. Please update to continue.",
+  "@versionGateUpdateBody": {},
+  "versionGateUpdateAction": "Update",
+  "@versionGateUpdateAction": {},
+  "versionGateLaterAction": "Later",
+  "@versionGateLaterAction": {}
 }

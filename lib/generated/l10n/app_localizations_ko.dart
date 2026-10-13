@@ -1739,4 +1739,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String mainExportedPartial(int succeeded, int total, int failed) {
     return '$total개 중 $succeeded개 내보냄, $failed개 실패';
   }
+
+  @override
+  String get versionGateUpdateTitle => '업데이트 가능';
+
+  @override
+  String get versionGateUpdateBody => 'SecBizCard의 새 버전이 있습니다. 계속하려면 업데이트하세요.';
+
+  @override
+  String get versionGateUpdateAction => '업데이트';
+
+  @override
+  String get versionGateLaterAction => '나중에';
 }

@@ -525,5 +525,9 @@
   "mainExportingProgress": "正在匯出 {done}/{total}…",
   "mainExportedToGoogle": "已將 {count} 位聯絡人匯出到 Google 通訊錄",
   "mainExportFailed": "匯出失敗：{error}",
-  "mainExportedPartial": "已匯出 {total} 位中的 {succeeded} 位；{failed} 位失敗"
+  "mainExportedPartial": "已匯出 {total} 位中的 {succeeded} 位；{failed} 位失敗",
+  "versionGateUpdateTitle": "有可用的更新",
+  "versionGateUpdateBody": "SecBizCard 有新版本可用,請更新後繼續使用。",
+  "versionGateUpdateAction": "更新",
+  "versionGateLaterAction": "稍後"
 }

@@ -1740,4 +1740,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String mainExportedPartial(int succeeded, int total, int failed) {
     return '$total 件中 $succeeded 件をエクスポート、$failed 件失敗';
   }
+
+  @override
+  String get versionGateUpdateTitle => 'アップデートがあります';
+
+  @override
+  String get versionGateUpdateBody =>
+      'SecBizCard の新しいバージョンが利用できます。続行するには更新してください。';
+
+  @override
+  String get versionGateUpdateAction => '更新';
+
+  @override
+  String get versionGateLaterAction => '後で';
 }
