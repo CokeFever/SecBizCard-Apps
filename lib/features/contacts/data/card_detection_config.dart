@@ -33,11 +33,12 @@ import 'package:flutter/foundation.dart';
 /// in the passed map as optional — so if this map is empty or a key is missing,
 /// behavior is exactly the current shipped behavior.
 class CardDetectionConfig {
-  CardDetectionConfig._(this._values, this._flags, this._strings);
+  CardDetectionConfig._(this._values, this._flags, this._strings, this._ints);
 
   final Map<String, double> _values;
   final Map<String, bool> _flags;
   final Map<String, String> _strings;
+  final Map<String, int> _ints;
 
   // ---- In-app defaults: MUST match OpenCVProcessor.kt `object S` and
   //      CardScoring.swift `static let`. Keep in sync with the spec. ---------
@@ -100,6 +101,27 @@ class CardDetectionConfig {
     'usePrecrop': true,
   };
 
+  // ---- Integer-valued remote config: the APP VERSION GATE thresholds. -------
+  //
+  // These two keys drive the remote-controlled version gate (force-update +
+  // soft-alert). They are compared against the running app BUILD NUMBER (int),
+  // never a version string. They live here so the gate reuses the SAME
+  // activated Remote Config instance as card-detection (no second RC setup).
+  //
+  //  - min_supported_build (default 180): FORCE threshold. A build below this
+  //    gets the non-dismissible update wall (and is blocked from running an
+  //    older sideloaded/downgraded build while online).
+  //  - latest_build (default 0): SOFT-ALERT threshold. 0 = soft alert OFF.
+  //
+  // Restart-to-apply, same as the other keys. FAIL-OPEN is handled by the gate
+  // (see version_gate_decision.dart / version_gate_provider.dart), NOT here:
+  // this map only supplies defaults so a missing/invalid remote value falls
+  // back to the shipped default rather than null.
+  static const Map<String, int> _intDefaults = <String, int>{
+    'min_supported_build': 180,
+    'latest_build': 0,
+  };
+
   static const Map<String, String> _stringDefaults = <String, String>{
     // Regex the BYOK settings screen uses to validate a pasted Google Cloud
     // API key before enabling Save. Externalized so that if Google ever changes
@@ -142,6 +164,7 @@ class CardDetectionConfig {
         Map.of(_defaults),
         Map.of(_flagDefaults),
         Map.of(_stringDefaults),
+        Map.of(_intDefaults),
       );
 
   /// The current activated configuration, or in-app defaults if init hasn't
@@ -170,6 +193,7 @@ class CardDetectionConfig {
         for (final e in _defaults.entries) e.key: e.value,
         for (final e in _flagDefaults.entries) e.key: e.value,
         for (final e in _stringDefaults.entries) e.key: e.value,
+        for (final e in _intDefaults.entries) e.key: e.value,
       });
 
       // Activate values fetched on a previous launch, then fetch for next time.
@@ -214,13 +238,27 @@ class CardDetectionConfig {
       }
       strings[key] = raw;
     }
-    return CardDetectionConfig._(values, flags, strings);
+    // Integer version-gate thresholds. A negative remote value is nonsensical
+    // for a build number => keep the default. (Fail-open on unavailability is
+    // the gate's job; here we just guard against a bad console value.)
+    final ints = Map.of(_intDefaults);
+    for (final key in _intDefaults.keys) {
+      final raw = rc.getInt(key);
+      if (raw >= 0) {
+        ints[key] = raw;
+      } // else keep default (negative / nonsensical)
+    }
+    return CardDetectionConfig._(values, flags, strings, ints);
   }
 
   double value(String key) => _values[key] ?? _defaults[key] ?? 0.0;
   bool flag(String key) => _flags[key] ?? _flagDefaults[key] ?? false;
   String string(String key) =>
       _strings[key] ?? _stringDefaults[key] ?? '';
+
+  /// Reads an integer remote-config value (version-gate thresholds). Returns
+  /// the shipped default if the key is unknown.
+  int intValue(String key) => _ints[key] ?? _intDefaults[key] ?? 0;
 
   /// Packs the current tuning into a map for the native `processCard` /
   /// `manualCrop` method-channel calls. The native side treats every entry as

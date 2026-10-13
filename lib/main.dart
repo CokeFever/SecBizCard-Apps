@@ -18,6 +18,7 @@ import 'firebase_options.dart';
 import 'core/config/theme.dart'; // 引入 Skill 1 產生的 Theme
 import 'core/router/app_router.dart';
 import 'core/config/theme_controller.dart';
+import 'core/version_gate/version_gate.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -154,6 +155,12 @@ class _IxoAppState extends ConsumerState<IxoApp> with WidgetsBindingObserver {
       themeMode: themeMode,
       // 設定路由 (來自 core/router/app_router.dart)
       routerConfig: router,
+
+      // Wrap every route with the version gate. Sits above all routes under
+      // the localization context; a force-blocked user never reaches a route.
+      // Non-blocking + fail-open (see VersionGate).
+      builder: (context, child) =>
+          VersionGate(child: child ?? const SizedBox.shrink()),
 
       // 開發時可關閉右上角的 debug 標籤
       debugShowCheckedModeBanner: false,

@@ -1781,4 +1781,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String mainExportedPartial(int succeeded, int total, int failed) {
     return 'Exported $succeeded of $total; $failed failed';
   }
+
+  @override
+  String get versionGateUpdateTitle => 'Update available';
+
+  @override
+  String get versionGateUpdateBody =>
+      'A newer version of SecBizCard is available. Please update to continue.';
+
+  @override
+  String get versionGateUpdateAction => 'Update';
+
+  @override
+  String get versionGateLaterAction => 'Later';
 }

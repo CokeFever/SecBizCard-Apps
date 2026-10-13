@@ -3258,6 +3258,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Exported {succeeded} of {total}; {failed} failed'**
   String mainExportedPartial(int succeeded, int total, int failed);
+
+  /// No description provided for @versionGateUpdateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update available'**
+  String get versionGateUpdateTitle;
+
+  /// No description provided for @versionGateUpdateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A newer version of SecBizCard is available. Please update to continue.'**
+  String get versionGateUpdateBody;
+
+  /// No description provided for @versionGateUpdateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get versionGateUpdateAction;
+
+  /// No description provided for @versionGateLaterAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get versionGateLaterAction;
 }
 
 class _AppLocalizationsDelegate

@@ -534,5 +534,9 @@
   "mainExportingProgress": "{done}/{total}개 내보내는 중…",
   "mainExportedToGoogle": "연락처 {count}개를 Google 주소록으로 내보냈습니다",
   "mainExportFailed": "내보내기 실패: {error}",
-  "mainExportedPartial": "{total}개 중 {succeeded}개 내보냄, {failed}개 실패"
+  "mainExportedPartial": "{total}개 중 {succeeded}개 내보냄, {failed}개 실패",
+  "versionGateUpdateTitle": "업데이트 가능",
+  "versionGateUpdateBody": "SecBizCard의 새 버전이 있습니다. 계속하려면 업데이트하세요.",
+  "versionGateUpdateAction": "업데이트",
+  "versionGateLaterAction": "나중에"
 }
