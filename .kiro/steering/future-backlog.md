@@ -1,0 +1,29 @@
+# Future Backlog — 已決定但尚未實作(cross-session)
+
+重開 session 時,這裡記錄「已討論、owner 同意未來要做、但還沒排進版本」的項目。做了就從這裡移除
+並寫進對應 handoff。
+
+## 強制更新機制 + Remote Config version gate(未來 app 版本)
+**背景:** app 目前**沒有**強制更新機制(2026-10-12 grep 確認)。但 app 已在用 Firebase Remote
+Config(`lib/features/contacts/data/card_detection_config.dart` 已讀 RC),所以加 gate 不用從零開始。
+
+**要做的(未來某個 app 版本,例如 1.6.5+):**
+- app 啟動時讀一個 Remote Config 值,例如 `min_supported_build`(整數,對應 pubspec 的 build number)。
+- 若當前 app build < `min_supported_build` → 顯示**擋住的更新畫面**(五語:en/zh-TW/zh-CN/ja/ko),
+  附「前往商店更新」按鈕(用 url_launcher 開對應商店),不給繼續用。
+- 之後要「強更」時,只要在 Firebase Console 把 `min_supported_build` 設成目標 build → 所有舊版
+  app 下次啟動被擋 → 被迫更新。**純後台遠端控制,不用再發 app 版本。**
+
+**先天限制(務必記得):** version gate 只能擋「安裝了含 gate 那版之後」的使用者。現在停在 1.6.3/更舊
+的使用者沒有 gate 程式,事後設 RC 擋不到他們 —— 他們只能靠商店自然更新。gate 是防止**未來**使用者
+卡舊版,以及讓 owner 之後能把 1.6.5+ 的人往上推。
+
+**為什麼要做(動機):** 搭配後端 App Check enforce 的 5 步前置鐵律(見 `backend-protection.md`)——
+gate 是「步驟 4:雙平台強更把舊版趕上來」的實作手段,讓 unverified(無 App Check)流量歸零,
+才能安全翻後端 enforce。
+
+**平台原生強更的限制(為什麼要自建 RC gate):**
+- Android Play In-App Updates 有 immediate 模式,但要 app 接 `in_app_update` plugin 才會觸發
+  (目前沒接);Play 後台沒有「遠端一鍵強更」。
+- iOS App Store **沒有**原生強更,一定要 app 自己做 version gate。
+- 結論:兩平台都必須 app 端有程式。RC gate 是跨雙平台、owner 可遠端控制的乾淨解。
