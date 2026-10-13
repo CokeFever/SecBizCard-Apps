@@ -279,6 +279,7 @@ import ImageIO
                     result([
                         "success": true,
                         "fallback": false,
+                        "fallbackState": "state3",
                         "aspectMismatch": aspectMismatch,
                         "score": score,
                         "areaRatio": areaRatio,
@@ -297,12 +298,87 @@ import ImageIO
     }
 
     // ------------------------------------------------------------
-    // emitGuideFallback: genuine zero-candidate / low-score → hand the GUIDE
-    // region (not the whole image) to the manual 4-corner adjuster, exactly as
-    // today. Reserved for a real miss — NOT for Vision errors (OPTION a).
-    func emitGuideFallback(score: Double) {
+    // emitGuideFallback: detection miss. Degrade STATE 3 → STATE 2 → STATE 1:
+    // crop the ORIGINAL frame to the guide region (expanded by
+    // fallbackGuideMarginRatio, PHOTO coords) and WRITE that JPEG to outputPath
+    // (STATE 2) — NOT the full uncropped frame. Only when no usable guide ROI
+    // exists do we write the full bakedImage (STATE 1). The written file is BOTH
+    // the stored original AND the OCR input, fixing the "full photo as original
+    // scan" bug. Mirrors Android's fallback branch. Reserved for a real miss —
+    // NOT for Vision errors on stage 1 (OPTION a).
+    //
+    // `subThresholdQuad` (if present) is the best below-threshold detected quad
+    // in full-image TL pixels; it seeds manual-crop. Otherwise the guide-region
+    // corners seed it. Never an 80% default.
+    func emitGuideFallback(score: Double, subThresholdQuad: [CGPoint]?) {
+        // Compute the STATE 2 ROI in TL-origin photo pixels.
+        var state2Roi: CGRect? = nil
+        if let ig = imageGuideRect {
+            let roi = expandAndClamp(ig, extent: bakedImage.extent,
+                                     margin: tuning.fallbackGuideMarginRatio)
+            if roi.width > 0 && roi.height > 0 { state2Roi = roi }
+        }
+
+        var fallbackState = "state1"
+        if let roi = state2Roi {
+            // CIImage is BOTTOM-LEFT origin: convert the TL ROI to CI (BL) space,
+            // crop, re-origin to (0,0), then run the SAME orient/enhance/save
+            // pipeline as finish (minus perspective correction).
+            let ciRoi = CGRect(x: roi.minX, y: imgH - roi.maxY,
+                               width: roi.width, height: roi.height)
+            let cropCI = bakedImage.cropped(to: ciRoi)
+                .transformed(by: CGAffineTransform(translationX: -ciRoi.minX,
+                                                   y: -ciRoi.minY))
+            if let croppedCG = ctxLocal.createCGImage(cropCI, from: cropCI.extent) {
+                var cropImage = UIImage(cgImage: croppedCG)
+                // Orientation correction (matches finish / Android).
+                let cw = cropImage.size.width
+                let ch = cropImage.size.height
+                if isVertical && cw > ch {
+                    cropImage = self.rotateUIImage90CW(cropImage)
+                } else if !isVertical && ch > cw {
+                    cropImage = self.rotateUIImage90CW(cropImage)
+                }
+                // Enhancement (matches finish's CIColorControls).
+                let cropCGf = cropImage.cgImage!
+                let enhancedCI = CIImage(cgImage: cropCGf)
+                    .applyingFilter("CIColorControls", parameters: [
+                        kCIInputContrastKey: 1.2,
+                        kCIInputBrightnessKey: 0.04,
+                    ])
+                if let enhancedCG = ctxLocal.createCGImage(enhancedCI, from: enhancedCI.extent),
+                   let jpegData = UIImage(cgImage: enhancedCG).jpegData(compressionQuality: 0.9) {
+                    do {
+                        try jpegData.write(to: URL(fileURLWithPath: outputPath))
+                        fallbackState = "state2"
+                    } catch {
+                        print("STATE 2 save error: \(error)")
+                    }
+                }
+            }
+        }
+
+        if fallbackState == "state1" {
+            // No usable guide ROI (or STATE 2 render failed) → last-resort full
+            // frame (STATE 1): write the full baked image so the fallback path
+            // ALWAYS produces a file.
+            if let fullCG = ctxLocal.createCGImage(bakedImage, from: bakedImage.extent),
+               let jpegData = UIImage(cgImage: fullCG).jpegData(compressionQuality: 0.9) {
+                try? jpegData.write(to: URL(fileURLWithPath: outputPath))
+            }
+        }
+
+        // Manual-crop seed: best sub-threshold quad if present, else guide
+        // corners, else full-frame corners. Never an 80% default.
         let pts: [Double]
-        if let g = guidePixelRect {
+        if let q = subThresholdQuad, q.count == 4 {
+            pts = [
+                Double(q[0].x), Double(q[0].y),
+                Double(q[1].x), Double(q[1].y),
+                Double(q[2].x), Double(q[2].y),
+                Double(q[3].x), Double(q[3].y),
+            ]
+        } else if let g = guidePixelRect {
             pts = [
                 Double(g.minX), Double(g.minY),
                 Double(g.maxX), Double(g.minY),
@@ -312,10 +388,13 @@ import ImageIO
         } else {
             pts = [0.0, 0.0, Double(imgW), 0.0, Double(imgW), Double(imgH), 0.0, Double(imgH)]
         }
+
+        let fallbackStateOut = fallbackState
         DispatchQueue.main.async {
             result([
                 "success": true,
                 "fallback": true,
+                "fallbackState": fallbackStateOut,
                 "aspectMismatch": aspectMismatch,
                 "score": score,
                 "areaRatio": 0.0, // no card detected
@@ -333,11 +412,11 @@ import ImageIO
     // image used); do NOT emit fallback:true for that error.
     func runStage2(previousBest: ([CGPoint]?, Double)) {
         detectBest(on: bakedImage, offset: .zero) { q2, s2, errored2 in
-            if errored2 && previousBest.0 == nil {
-                DispatchQueue.main.async { result(["success": false]) }
-                return
-            }
-            // Pick the higher-scoring of (previousBest, stage-2 result).
+            // Pick the higher-scoring of (previousBest, stage-2 result). On a
+            // stage-2 Vision ERROR with no stage-1 winner, previousBest is nil
+            // and q2 is nil — we still emit STATE 2 (guide crop) rather than
+            // success:false, so an error yields the guide crop (→ STATE 1 only
+            // when no guide is available), never a full raw frame.
             var winner = previousBest.0
             var winScore = previousBest.1
             if let q2 = q2, s2 > winScore {
@@ -347,7 +426,8 @@ import ImageIO
             if let w = winner, winScore >= tuning.minAcceptScore {
                 finish(winner: w, score: winScore)
             } else {
-                emitGuideFallback(score: winScore)
+                // winner here is the best sub-threshold quad (if any) → seed.
+                emitGuideFallback(score: winScore, subThresholdQuad: winner)
             }
         }
     }

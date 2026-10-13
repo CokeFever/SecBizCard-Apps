@@ -77,6 +77,13 @@ class CardDetectionConfig {
     // EACH side before the hard pre-crop (fraction of the guide dimension).
     // 0.25 = +25% per side. Range-clamped. See docs/card_detection_scoring.md.
     'precropMarginRatio': 0.25,
+    // STATE 2 guide-crop fallback: when card-edge detection fails, the stored
+    // "original scan" (and OCR input) is a crop of the guide region expanded by
+    // this fraction on EACH side — NOT the full camera frame. Distinct from
+    // precropMarginRatio (which only scopes the detection ROI, 0.25); this is
+    // the SAVED/OCR crop tightness, defaulting to 0.20 (+20% per side) per the
+    // owner spec. Range-clamped. See docs/card_detection_scoring.md.
+    'fallbackGuideMarginRatio': 0.20,
   };
 
   static const Map<String, bool> _flagDefaults = <String, bool>{
@@ -126,6 +133,7 @@ class CardDetectionConfig {
     'cannyLowB': [1.0, 500.0],
     'cannyHighB': [1.0, 500.0],
     'precropMarginRatio': [0.0, 1.0],
+    'fallbackGuideMarginRatio': [0.0, 1.0],
   };
 
   /// Fallback instance using only in-app defaults. Used before any successful

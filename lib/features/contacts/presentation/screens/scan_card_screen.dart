@@ -59,6 +59,11 @@ class _ScanCardScreenState extends ConsumerState<ScanCardScreen>
   double? _lastDetectionScore;
   bool? _lastDetectionFallback;
   double? _lastAreaRatio;
+  // Native image-state emitted on the most recent processCard: 'state3'
+  // (detected card), 'state2' (guide crop on detection miss), or 'state1'
+  // (full frame, last resort). Forwarded to /review-contact. Null on old
+  // native that doesn't report it.
+  String? _lastFallbackState;
   // Capture/preview aspect-divergence guard result (see design §2a Finding 1).
   // Report-payload/debug scope: forwarded on the /review-contact extra map
   // alongside the other OCR-detection metadata, NOT an always-on analytics
@@ -279,6 +284,8 @@ class _ScanCardScreenState extends ConsumerState<ScanCardScreen>
               'ocrBestNameScore': outcome.bestNameScore,
               'ocrAreaRatio': _lastAreaRatio,
               'ocrAspectMismatch': _lastAspectMismatch,
+              // Which image state fed OCR / was stored: state3/state2/state1.
+              'ocrFallbackState': _lastFallbackState,
               // Non-zero server orientation means the raw capture was tilted/
               // flipped and we had to rotate it upright — the "looked fine
               // geometrically but was misoriented" case the feedback predictor
@@ -454,6 +461,21 @@ class _ScanCardScreenState extends ConsumerState<ScanCardScreen>
     }
   }
 
+  /// Decodes [path] just far enough to read its pixel dimensions. Used to seed
+  /// manual-crop over the STATE 2 image (its size differs from the raw frame).
+  /// Returns null on failure (caller falls back to the native-reported size).
+  Future<Size?> _imagePixelSize(String path) async {
+    try {
+      final bytes = await File(path).readAsBytes();
+      final decoded = img.decodeImage(bytes);
+      if (decoded == null) return null;
+      return Size(decoded.width.toDouble(), decoded.height.toDouble());
+    } catch (e) {
+      debugPrint('[Scan] image size decode failed: $e');
+      return null;
+    }
+  }
+
   /// A short, friendly message when OCR fell back or is near a usage limit.
   /// Returns null when nothing needs to be surfaced (the common case).
   String? _ocrNoteMessage(AppLocalizations l10n, OcrOutcome outcome) {
@@ -532,23 +554,45 @@ class _ScanCardScreenState extends ConsumerState<ScanCardScreen>
         _lastDetectionFallback = isFallback;
         _lastAreaRatio = (result['areaRatio'] as num?)?.toDouble();
         _lastAspectMismatch = result['aspectMismatch'] as bool?;
+        // Which image state native emitted: state3 (detected card),
+        // state2 (guide crop on detection miss), or state1 (full frame, only
+        // when no usable guide). Forwarded to /review-contact as feedback
+        // metadata so degradation is observable. Null on old native.
+        _lastFallbackState = result['fallbackState'] as String?;
 
         if (!success) {
           throw Exception('Processing failed');
         }
 
         if (isFallback) {
-          final width = (result['imageWidth'] as int?)?.toDouble() ?? 1080.0;
-          final height = (result['imageHeight'] as int?)?.toDouble() ?? 1920.0;
-          final points =
-              (result['points'] as List?)?.cast<double>() ??
-              [0.0, 0.0, width, 0.0, width, height, 0.0, height];
+          // Native has ALREADY written STATE 2 (a guide-region crop; STATE 1
+          // only when no usable guide) to outputPath — this is the stored
+          // original AND the OCR input. We still OFFER manual-crop as intended
+          // UX, seeded OVER the STATE 2 image: imagePath=outputPath with
+          // full-image corners, so the user fine-crops the already-cropped
+          // card. imagePath↔initialPoints stay in the same coordinate space
+          // (the STATE 2 image), avoiding the old 80% full-frame default.
+          // Whether the user confirms or cancels, the default saved/OCR image
+          // is STATE 2 (outputPath) — never null, never the raw input frame.
+          final cropW = await _imagePixelSize(outputPath);
+          final width = cropW?.width ??
+              (result['imageWidth'] as int?)?.toDouble() ??
+              1080.0;
+          final height = cropW?.height ??
+              (result['imageHeight'] as int?)?.toDouble() ??
+              1920.0;
+          final points = <double>[
+            0.0, 0.0,
+            width, 0.0,
+            width, height,
+            0.0, height,
+          ];
 
           if (mounted) {
             final manualResult = await context.push<String>(
               '/manual-crop',
               extra: {
-                'imagePath': inputPath,
+                'imagePath': outputPath,
                 'initialPoints': points,
                 'imageWidth': width,
                 'imageHeight': height,
@@ -558,7 +602,8 @@ class _ScanCardScreenState extends ConsumerState<ScanCardScreen>
 
             if (manualResult != null) return manualResult;
           }
-          return null;
+          // User cancelled / plugin missing manual-crop: keep STATE 2.
+          return outputPath;
         }
 
         return outputPath;

@@ -95,35 +95,19 @@ class _ManualCropScreenState extends State<ManualCropScreen> {
                   }
                 }
 
-                // Check if it is the Full Screen Fallback (0,0 -> 1,0 -> 1,1 -> 0,1)
-                // This happens when Auto Detection fails. We prefer Smart Default over Full Screen.
-                bool isFullScreen = false;
-                if (valid && loadedCorners.length == 4) {
-                  // Check corners proximity to 0,0 / 1,0 / 1,1 / 0,1
-                  const tol = 0.05; // 5% tolerance
-                  bool tl =
-                      loadedCorners[0].dx < tol && loadedCorners[0].dy < tol;
-                  bool tr =
-                      loadedCorners[1].dx > (1 - tol) &&
-                      loadedCorners[1].dy < tol;
-                  bool br =
-                      loadedCorners[2].dx > (1 - tol) &&
-                      loadedCorners[2].dy > (1 - tol);
-                  bool bl =
-                      loadedCorners[3].dx < tol &&
-                      loadedCorners[3].dy > (1 - tol);
-
-                  if (tl && tr && br && bl) isFullScreen = true;
-                }
-
-                if (valid && !isFullScreen) {
+                // A full-image seed (0,0 -> 1,0 -> 1,1 -> 0,1) now means the
+                // image passed in is ALREADY the STATE 2 guide crop (the scan
+                // screen seeds manual-crop over the cropped card, not the raw
+                // frame). The whole crop IS the correct starting selection, so
+                // we HONOR it rather than discarding it for the old loose 80%
+                // smart-default. Smart-default is reserved for genuinely
+                // absent/invalid seeds.
+                if (valid) {
                   _corners = loadedCorners;
                   debugPrint('ManualCrop: Using Initial Points');
                 } else {
                   _setSmartDefault();
-                  debugPrint(
-                    'ManualCrop: Using Smart Default (FullScreen=$isFullScreen)',
-                  );
+                  debugPrint('ManualCrop: Using Smart Default (invalid seed)');
                 }
               } else {
                 _setSmartDefault();
