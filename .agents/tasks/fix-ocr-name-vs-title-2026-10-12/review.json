@@ -1,0 +1,8 @@
+{
+  "verdict": "APPROVED",
+  "findings": [
+    "Non-blocking: the 0.5 single-name coverage tier yields +40, below the +45 Latin structure bonus. Harmless for the tested cases (competing titles take the -120 pure-title penalty) but could let a title win if it ever carries only the structure bonus. Consider raising the single-name tier or its multiplier in a future tune.",
+    "Non-blocking: the demotion's startsKnownSurname guard reuses the CJK-only _commonChineseSurnames set against a Latin token, so it never fires on the Latin demotion path it guards. Behavior is still correct (real Latin names are protected by coverage > 0), but the guard is effectively dead code and diverges from the plan's intended general surname check. Optionally drop or replace with a Latin surname check."
+  ],
+  "reviewDoc": "/Users/jack/_Projects/SecBizCard-Apps/.agents/tasks/fix-ocr-name-vs-title-2026-10-12/review.md"
+}
