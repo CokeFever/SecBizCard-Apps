@@ -73,6 +73,16 @@ Release with platform-prefixed tags, one per platform (usually same commit):
 `android/v<ver>` → Cloud Build → Play; `ios/v<ver>` → Xcode Cloud → App Store.
 Bare `v*` tags are retired. See .agent/workflows/deploy_release.md.
 
+🚨 **ALWAYS include the build number in the tag: `android/v<ver>+<build>` /
+`ios/v<ver>+<build>`** (e.g. `android/v1.6.3+188`, `ios/v1.6.4+191`). This matches
+the pubspec `version: X.Y.Z+BUILD`. **Mistake to avoid (happened on 1.6.4):** a tag
+was pushed as bare `android/v1.6.4` (no `+build`), pointing at the wrong/older
+commit (the +189 build) — the owner had to retag with `+191`. The Cloud Build
+trigger is `^android/v.*` so a build-numbered tag still fires; the build-number
+suffix is what keeps each release traceable to its exact build. Before pushing a
+release tag: confirm the tag's `+<build>` matches the pubspec build number on the
+commit you are tagging.
+
 ## Provider deprecation notices — assessed, no action needed (as of 2026-10)
 
 Two Google emails arrived late Sep 2026. Both assessed as **not impacting** this
