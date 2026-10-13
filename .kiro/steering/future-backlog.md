@@ -46,9 +46,15 @@ SecBizCard_OCR:
 3. build + 驗證姓名解析(可跑 app 的相關測試)。
 這一步跟 1.6.5 的其他改動(問題 1 precrop fallback 存檔、強更 version gate 若一起做)一起發。
 
-## 問題 1 — precrop fallback 存整張原圖(待修,未來版本)
-投資報告:`.agents/tasks/investigate-ocr-precrop-name/findings.md`。根因:precrop 是真的邊緣偵測,
-但偵測分數沒過 `minAcceptScore`(0.55)時走 fallback → 存整張原圖 + 手動裁切給鬆散 80% 框。
-修法(client-only,排序):A(推薦)fallback 時裁到導引框再存(改 OpenCVProcessor.kt + AppDelegate.swift);
-B(免發版)Remote Config 調 Canny/minAcceptScore 降低 fallback 率;C 手動裁切預設給偵測到的 quad。
-owner 決定先修問題 2(姓名,已完成),問題 1 之後再處理。
+## 問題 1 — precrop fallback 存整張原圖 → ✅ 已修(commit `8850b76`,本地 main 未 push)
+投資報告:`.agents/tasks/investigate-ocr-precrop-name/findings.md`。
+**已實作(2026-10-12,commit `8850b76` 在 SecBizCard-Apps 本地 main,未 push、未發版):**
+降級順序改成 **STATE 3(偵測邊緣)→ STATE 2(導引框+20%,photo 座標)→ STATE 1(整張,極端才用)**。
+STATE 2 現在是 OCR 輸入 + 存檔原圖(同一張),不再 fallback 到整張。20% = Remote Config tunable
+`fallbackGuideMarginRatio`(default 0.20,可免發版調)。手動裁切改以 STATE 2 為基準(不再 80% 鬆框)。
+動了 Android OpenCVProcessor.kt / iOS AppDelegate.swift+CardScoring.swift / Dart
+scan_card_screen.dart+manual_crop_screen.dart+scan_guide_geometry.dart,+7 座標映射單元測試。
+**⚠️ native 影像裁切 CI 驗不了 → 有一份 9 案例真機測試清單在
+`.agents/tasks/fix-precrop-state2-fallback-2026-10-12/verification.md`,owner 發版前/後務必真機測
+(尤其 iPad 橫向原生畫面這個最大回歸風險)。**
+這個改動跟姓名 ref bump 一起進 1.6.5。
