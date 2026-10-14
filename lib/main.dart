@@ -10,6 +10,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:secbizcard/generated/l10n/app_localizations.dart';
+import 'package:secbizcard/core/i18n/locale_resolver.dart';
 import 'package:secbizcard/features/contacts/data/card_detection_config.dart';
 import 'package:secbizcard/features/contacts/data/ocr_usage_provider.dart';
 import 'package:secbizcard/features/subscription/data/subscription_service.dart';
@@ -148,6 +149,7 @@ class _IxoAppState extends ConsumerState<IxoApp> with WidgetsBindingObserver {
       title: 'SecBizCard',
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      localeListResolutionCallback: LocaleResolver.resolve,
 
       // 設定主題 (來自 core/config/theme.dart)
       theme: AppTheme.lightTheme,
