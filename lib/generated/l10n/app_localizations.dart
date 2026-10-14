@@ -100,7 +100,8 @@ abstract class AppLocalizations {
     Locale('ja'),
     Locale('ko'),
     Locale('zh'),
-    Locale('zh', 'TW')
+    Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
+    Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant')
   ];
 
   /// The title of the application
@@ -3302,13 +3303,15 @@ class _AppLocalizationsDelegate
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
-  // Lookup logic when language+country codes are specified.
+  // Lookup logic when language+script codes are specified.
   switch (locale.languageCode) {
     case 'zh':
       {
-        switch (locale.countryCode) {
-          case 'TW':
-            return AppLocalizationsZhTw();
+        switch (locale.scriptCode) {
+          case 'Hans':
+            return AppLocalizationsZhHans();
+          case 'Hant':
+            return AppLocalizationsZhHant();
         }
         break;
       }
