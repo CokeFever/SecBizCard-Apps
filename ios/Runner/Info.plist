@@ -17,7 +17,7 @@
 	<key>CFBundleLocalizations</key>
 	<array>
 		<string>en</string>
-		<string>zh</string>
+		<string>zh-Hans</string>
 		<string>zh-Hant</string>
 		<string>ja</string>
 		<string>ko</string>
