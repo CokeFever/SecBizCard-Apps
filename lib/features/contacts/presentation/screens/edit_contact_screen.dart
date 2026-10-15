@@ -31,6 +31,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
   late TextEditingController _nicknameController;
   late TextEditingController _titleController;
   late TextEditingController _companyController;
+  late TextEditingController _departmentController;
   late TextEditingController _phoneController;
   late TextEditingController _mobileController;
   late TextEditingController _emailController;
@@ -69,6 +70,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
     if (_nicknameController.text.trim() != (widget.user.customFields['Nickname'] ?? '')) return true;
     if (_titleController.text.trim() != (widget.user.title ?? '')) return true;
     if (_companyController.text.trim() != (widget.user.company ?? '')) return true;
+    if (_departmentController.text.trim() != (widget.user.department ?? '')) return true;
     if (_phoneController.text.trim() != (widget.user.phone ?? '')) return true;
     if (_mobileController.text.trim() != (widget.user.mobile ?? '')) return true;
     if (_emailController.text.trim() != (widget.user.email ?? '')) return true;
@@ -103,6 +105,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
     );
     _titleController = TextEditingController(text: widget.user.title);
     _companyController = TextEditingController(text: widget.user.company);
+    _departmentController = TextEditingController(text: widget.user.department);
     _phoneController = TextEditingController(text: widget.user.phone);
     _mobileController = TextEditingController(text: widget.user.mobile);
     _emailController = TextEditingController(text: widget.user.email);
@@ -118,6 +121,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
     _nicknameController.addListener(_onFieldChanged);
     _titleController.addListener(_onFieldChanged);
     _companyController.addListener(_onFieldChanged);
+    _departmentController.addListener(_onFieldChanged);
     _phoneController.addListener(_onFieldChanged);
     _mobileController.addListener(_onFieldChanged);
     _emailController.addListener(_onFieldChanged);
@@ -133,6 +137,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
     _nicknameController.dispose();
     _titleController.dispose();
     _companyController.dispose();
+    _departmentController.dispose();
     _phoneController.dispose();
     _mobileController.dispose();
     _emailController.dispose();
@@ -211,6 +216,9 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
         company: _companyController.text.trim().isEmpty
             ? null
             : _companyController.text.trim(),
+        department: _departmentController.text.trim().isEmpty
+            ? null
+            : _departmentController.text.trim(),
         phone: _phoneController.text.trim().isEmpty
             ? null
             : _phoneController.text.trim(),
@@ -340,6 +348,15 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
               ),
               const SizedBox(height: 16),
               _buildTextField(_companyController, l10n.editProfileCompany, Icons.business),
+              const SizedBox(height: 16),
+              // Reuse the detail-screen's contactDetailLabelDepartment key here
+              // (deliberate cross-namespace reuse: same five-language term, no
+              // separate edit key). Icon matches contact_detail_screen.dart.
+              _buildTextField(
+                _departmentController,
+                l10n.contactDetailLabelDepartment,
+                Icons.business_outlined,
+              ),
               const SizedBox(height: 24),
 
               Text(
