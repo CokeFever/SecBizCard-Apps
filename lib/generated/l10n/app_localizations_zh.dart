@@ -35,6 +35,1729 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboardingWelcome => '歡迎使用 SecBizCard';
 
   @override
+  String get ocrRecognizingCloudVision => '使用 Cloud Vision 辨識中…';
+
+  @override
+  String get ocrRecognizingOnDevice => '使用裝置端辨識中…';
+
+  @override
+  String get ocrSourceCloudVisionOwn => 'Cloud Vision · 你的金鑰';
+
+  @override
+  String ocrSourceCloudVisionShared(int used, int cap) {
+    return 'Cloud Vision · 本月 $used/$cap';
+  }
+
+  @override
+  String get ocrSourceOnDevice => '裝置端辨識';
+
+  @override
+  String get aiRecognitionTitle => 'AI 辨識';
+
+  @override
+  String get ocrUsingOwnKey => '使用你的 Cloud Vision 金鑰';
+
+  @override
+  String get ocrUsingOwnKeyDesc => '最佳品質，費用計入你自己的 Google Cloud 帳號。';
+
+  @override
+  String get ocrUsingSharedQuota => '使用共用額度';
+
+  @override
+  String ocrUsingSharedQuotaDesc(int perUser) {
+    return '每月最多 $perUser 次免費 AI 辨識，用完後自動改用快速的裝置端辨識。在下方加入自己的金鑰即可享有無限次最佳品質辨識。';
+  }
+
+  @override
+  String ocrUsageThisMonth(int used, int cap) {
+    return '本月：$used / $cap';
+  }
+
+  @override
+  String get ocrOwnKeyNearLimitWarn =>
+      '你已使用超過每月免費額度的 80%，本月後續辨識可能會對你的 Google Cloud 帳號產生費用。';
+
+  @override
+  String get ocrUseOwnKeyHeading => '使用你自己的 API 金鑰';
+
+  @override
+  String get ocrUpdateOwnKeyHeading => '更新你的 API 金鑰';
+
+  @override
+  String get ocrKeyHint => '貼上你的 Cloud Vision API 金鑰';
+
+  @override
+  String get ocrKeySaved => '金鑰已安全儲存在此裝置。';
+
+  @override
+  String get ocrKeyRemoved => '已從此裝置移除金鑰。';
+
+  @override
+  String get ocrKeyMasked => '此裝置已儲存一組金鑰。';
+
+  @override
+  String get save => '儲存';
+
+  @override
+  String get update => '更新';
+
+  @override
+  String get remove => '移除';
+
+  @override
+  String get cancel => '取消';
+
+  @override
+  String get ocrReplaceKeyTitle => '取代已儲存的金鑰？';
+
+  @override
+  String get ocrReplaceKeyBody => '這會覆蓋目前儲存在此裝置的 API 金鑰。';
+
+  @override
+  String get ocrRemoveKeyTitle => '移除已儲存的金鑰？';
+
+  @override
+  String get ocrRemoveKeyBody => '此裝置將改回使用共用的每月額度。你隨時可以再次加入金鑰。';
+
+  @override
+  String get ocrHowToTitle => '如何取得 Cloud Vision API 金鑰';
+
+  @override
+  String get ocrHowTo1 => '1. 前往 Google Cloud Console，建立（或選擇）一個專案。';
+
+  @override
+  String get ocrHowTo2 => '2. 為該專案啟用「Cloud Vision API」。';
+
+  @override
+  String get ocrHowTo3 => '3. 在「API 與服務 → 憑證」中建立 API 金鑰。';
+
+  @override
+  String get ocrHowTo4 => '4. 複製金鑰並貼到上方。';
+
+  @override
+  String get ocrOpenConsole => '開啟 Google Cloud Console';
+
+  @override
+  String get ocrSafetyTitle => '你的金鑰只留在你的裝置上';
+
+  @override
+  String get ocrSafety1 =>
+      '• 金鑰只儲存在此裝置的安全金鑰鏈（Keychain）中，絕不會上傳到我們的伺服器、不會同步、也不會離開你的手機。';
+
+  @override
+  String get ocrSafety2 =>
+      '• App 會用你的金鑰把名片影像直接送到 Google Cloud Vision，因此辨識費用計入你自己的帳號。';
+
+  @override
+  String get ocrSafety3 =>
+      '• 建議在 Google Cloud 將此金鑰限制為僅能使用 Cloud Vision API，並設定預算／配額上限以控制花費。';
+
+  @override
+  String get ocrSafety4 => '• 萬一金鑰外洩，請到 Cloud Console 刪除它，再於此處貼上新的金鑰。';
+
+  @override
+  String ocrSharedKeyUsage(int used, int cap) {
+    return 'Cloud Vision · 共用金鑰本月 $used/$cap';
+  }
+
+  @override
+  String get ocrTierBasic => 'Basic';
+
+  @override
+  String get ocrTierPlus => 'Plus';
+
+  @override
+  String get ocrTierPro => 'Pro';
+
+  @override
+  String get ocrTierVip => 'VIP';
+
+  @override
+  String get ocrTierFlex => 'Flex';
+
+  @override
+  String ocrTierUsageCount(int used, int cap) {
+    return '本月 $used/$cap';
+  }
+
+  @override
+  String get ocrUsageByok => 'BYOK';
+
+  @override
+  String ocrTierBadge(String tier, String usage) {
+    return '$tier · $usage';
+  }
+
+  @override
+  String get ocrUsageUnknown => '無法取得用量';
+
+  @override
+  String get ocrYourPlan => '你的方案';
+
+  @override
+  String get ocrSubscribe => '訂閱';
+
+  @override
+  String get ocrUpgradeToPro => '升級到 Pro';
+
+  @override
+  String get ocrSubscribeComingSoon => '訂閱功能即將推出。';
+
+  @override
+  String get ocrAdminObservability => '管理者 · 共用金鑰用量';
+
+  @override
+  String get ocrAdminShared800 => '免費額度池（Basic）';
+
+  @override
+  String get ocrAdminTotal => 'CV 總呼叫次數';
+
+  @override
+  String get ocrKeyFormatHint => 'Google Cloud API 金鑰以「AIza」開頭,長度為 39 個字元。';
+
+  @override
+  String get ocrPaywallPlanPlus => 'SecBizCard Plus';
+
+  @override
+  String get ocrPaywallPlanPro => 'SecBizCard Pro';
+
+  @override
+  String get qrScanToExchange => 'Scan to Exchange';
+
+  @override
+  String get navShare => 'Share';
+
+  @override
+  String get navCard => 'Card';
+
+  @override
+  String get navNotifications => 'Notifications';
+
+  @override
+  String get unsavedChangesTitle => '尚未儲存的變更';
+
+  @override
+  String get unsavedChangesBody => '你有尚未儲存的變更。確定要捨棄並離開嗎?';
+
+  @override
+  String get unsavedChangesStay => '留下';
+
+  @override
+  String get unsavedChangesDiscard => '捨棄';
+
+  @override
+  String get drawerNotLoggedIn => '尚未登入';
+
+  @override
+  String get drawerDefaultUser => '使用者';
+
+  @override
+  String get drawerMyProfile => '我的個人資料';
+
+  @override
+  String get drawerManageContexts => '管理情境';
+
+  @override
+  String get drawerErrorLoadingProfile => '載入個人資料時發生錯誤';
+
+  @override
+  String get drawerBackupRestore => '備份與還原';
+
+  @override
+  String get drawerAiRecognition => 'AI 辨識';
+
+  @override
+  String get drawerImportVcard => '匯入 vCard';
+
+  @override
+  String get drawerAppearance => '外觀';
+
+  @override
+  String get drawerThemeAuto => '自動';
+
+  @override
+  String get drawerThemeLight => '淺色';
+
+  @override
+  String get drawerThemeDark => '深色';
+
+  @override
+  String get drawerLogout => '登出';
+
+  @override
+  String get drawerConfirmLogoutTitle => '確認登出';
+
+  @override
+  String get drawerConfirmLogoutBody => '確定要登出嗎?';
+
+  @override
+  String get drawerLogoutWipeNote =>
+      '登出會將你的聯絡人與個人資料從這台裝置移除。請先確認已備份 —— 重新登入後可從 Google Drive 還原。';
+
+  @override
+  String get drawerLogoutUnbackedWarning =>
+      '⚠️ 你有尚未備份的變更。登出會將聯絡人與個人資料從這台裝置移除,這些變更將會遺失。要先備份到 Google Drive 嗎?';
+
+  @override
+  String get drawerLogoutMagicWordNote => '你的密語也會從這台裝置清除。還原密語備份時需要重新輸入。';
+
+  @override
+  String get drawerLogoutMagicWordNoteStrong =>
+      '⚠️ 你的密語會從這台裝置清除。密語備份「只能」用密語還原——登出前請確認你記得它。';
+
+  @override
+  String get commonCancel => '取消';
+
+  @override
+  String get drawerLinkPrivacy => '隱私權';
+
+  @override
+  String get drawerLinkTerms => '條款';
+
+  @override
+  String get drawerLinkGuide => '指南';
+
+  @override
+  String loginSignInError(String error) {
+    return '登入錯誤:$error';
+  }
+
+  @override
+  String contactsNoneFoundFor(String query) {
+    return '找不到符合「$query」的聯絡人';
+  }
+
+  @override
+  String get contactsNoneYet => '尚無聯絡人';
+
+  @override
+  String get contactsEmptyHint => '交換或掃描的名片會顯示在這裡';
+
+  @override
+  String contactsDeleteFailed(String error) {
+    return '刪除失敗:$error';
+  }
+
+  @override
+  String get contactsDeleted => '已刪除聯絡人';
+
+  @override
+  String get contactsDelete => '刪除';
+
+  @override
+  String get contactsSearchHint => '搜尋聯絡人…';
+
+  @override
+  String commonErrorWithDetail(String error) {
+    return '錯誤:$error';
+  }
+
+  @override
+  String get onboardingSetupProfile => '設定個人資料';
+
+  @override
+  String get onboardingGetStarted => '快速開始';
+
+  @override
+  String get onboardingImportDesc => '從你的 Google 聯絡人名片匯入個人資料,省去手動輸入。';
+
+  @override
+  String get onboardingImportFromGoogle => '從 Google 匯入';
+
+  @override
+  String get onboardingEnterManually => '手動輸入';
+
+  @override
+  String get onboardingReviewInfo => '檢視你的資訊';
+
+  @override
+  String get onboardingMasterProfileDesc => '這些資訊會成為你的「主要個人資料」。你可以稍後選擇要分享哪些內容。';
+
+  @override
+  String get onboardingRecoveryTip => '提示:建議使用你的個人電話與 Gmail,以利帳號復原與可信驗證。';
+
+  @override
+  String get onboardingFieldName => '全名(必填)';
+
+  @override
+  String get onboardingFieldPhone => '電話(選填)';
+
+  @override
+  String get onboardingFieldEmail => '電子郵件(選填)';
+
+  @override
+  String get onboardingFieldTitle => '職稱';
+
+  @override
+  String get onboardingFieldCompany => '公司';
+
+  @override
+  String get onboardingNameRequired => '姓名為必填';
+
+  @override
+  String get onboardingContinue => '繼續';
+
+  @override
+  String get onboardingSmartContexts => '智慧情境';
+
+  @override
+  String get onboardingContextsDesc => '我們已為你設定 3 個預設情境。你可以隨時在設定中自訂。';
+
+  @override
+  String get onboardingContextWorkShares => '分享:姓名、職稱、公司、電話、電子郵件';
+
+  @override
+  String get onboardingContextPersonalShares => '分享:姓名、個人電子郵件、頭像';
+
+  @override
+  String get onboardingContextQuickShares => '分享:僅姓名';
+
+  @override
+  String get onboardingLooksGood => '看起來不錯';
+
+  @override
+  String get onboardingAllSet => '一切就緒!';
+
+  @override
+  String get onboardingReadyDesc => '你的數位名片已準備好可以分享。';
+
+  @override
+  String get onboardingStartUsing => '開始使用 SecBizCard';
+
+  @override
+  String get profileNotFound => '找不到個人資料';
+
+  @override
+  String get profileEdit => '編輯個人資料';
+
+  @override
+  String get profileDeleteAccount => '刪除帳號';
+
+  @override
+  String get profileVerifyInfoTitle => '驗證你的資訊';
+
+  @override
+  String get profileVerifyEmail => '驗證電子郵件';
+
+  @override
+  String get profileVerifyPhone => '驗證電話';
+
+  @override
+  String get profileVerifyHint => '驗證';
+
+  @override
+  String get profileDeleteAccountWarning =>
+      '這將永久刪除你的帳號與所有資料，此操作無法復原。\n\n⚠️ 強烈建議先使用「設定」中的備份功能匯出聯絡人，再刪除帳號。\n\n你需要重新驗證身分以確認。';
+
+  @override
+  String get profileContinueToDelete => '繼續刪除';
+
+  @override
+  String get profileAreYouSure => '你確定嗎?';
+
+  @override
+  String get profileDeleteLastChance => '這是你最後的機會。你的帳號、個人資料與所有聯絡人將被永久刪除。';
+
+  @override
+  String get profileDeleteForever => '永久刪除';
+
+  @override
+  String commonFailedWithDetail(String error) {
+    return '失敗:$error';
+  }
+
+  @override
+  String get qrGenerating => '產生安全的 QRCode 中…';
+
+  @override
+  String get qrBatchApproval => '批次核准';
+
+  @override
+  String get qrBatchApprovalOn => '自動核准所有請求';
+
+  @override
+  String get qrBatchApprovalOff => '逐一手動核准請求';
+
+  @override
+  String qrResetsIn(String time) {
+    return '$time 後重設';
+  }
+
+  @override
+  String qrRefreshAvailableIn(int seconds) {
+    return '$seconds 秒後可用';
+  }
+
+  @override
+  String get qrRefreshTooltip => '重新產生 QRCode';
+
+  @override
+  String get qrUrlCopied => '已複製網址到剪貼簿';
+
+  @override
+  String get qrCopyUrl => '複製網址';
+
+  @override
+  String get qrRetry => '重試';
+
+  @override
+  String get qrErrorSignInRequired => '你必須先登入才能分享資訊。';
+
+  @override
+  String get qrErrorOffline => '沒有網路連線。請連上網路以產生您的分享碼，然後點選「重試」。';
+
+  @override
+  String qrErrorPrefix(String message) {
+    return '錯誤:$message';
+  }
+
+  @override
+  String get qrErrorNotAuthenticated => '尚未驗證身分';
+
+  @override
+  String get qrErrorCompleteProfile => '請先完成你的個人資料';
+
+  @override
+  String get qrCannotShare => '無法分享';
+
+  @override
+  String get commonOk => '確定';
+
+  @override
+  String get qrInfoSharedBack => '對方也分享了資訊!';
+
+  @override
+  String qrAlsoSharedInfo(String name) {
+    return '$name 也分享了他們的資訊。';
+  }
+
+  @override
+  String get qrSaveToContacts => '儲存到聯絡人';
+
+  @override
+  String get commonClose => '關閉';
+
+  @override
+  String get qrContactSaved => '已儲存聯絡人!';
+
+  @override
+  String qrSavedToContacts(String name) {
+    return '已將 $name 儲存到聯絡人';
+  }
+
+  @override
+  String get qrInfoSharedSuccess => '資訊分享成功!';
+
+  @override
+  String get ocrKeyLockedNote => '已啟用你自己的金鑰。若要更換，請先移除再新增。';
+
+  @override
+  String get ocrRemoveKeyAction => '移除金鑰';
+
+  @override
+  String get ocrPaywallTitle => '升級雲端辨識';
+
+  @override
+  String get ocrPaywallSubtitle => '更快、更準的名片辨識，免設定金鑰。';
+
+  @override
+  String get ocrPlanPlusPrice => 'US\$0.99/月';
+
+  @override
+  String get ocrPlanPlusDesc => '每月 20 次雲端辨識';
+
+  @override
+  String get ocrPlanProPrice => 'US\$2.99/月';
+
+  @override
+  String get ocrPlanProDesc => '每月 100 次雲端辨識';
+
+  @override
+  String get ocrRestorePurchases => '還原購買';
+
+  @override
+  String get ocrManageSubscription => '管理訂閱';
+
+  @override
+  String get ocrSubscribeThanks => '感謝訂閱！';
+
+  @override
+  String get ocrRestoreDone => '購買已還原。';
+
+  @override
+  String get ocrRestoreNone => '沒有可還原的購買。';
+
+  @override
+  String get ocrSyncing => '同步中…';
+
+  @override
+  String get ocrPaywallLegal =>
+      '自動續訂訂閱。方案每月自動續訂，直到你取消為止；可隨時在商店管理或取消。費用將向你的商店帳號收取。';
+
+  @override
+  String get ocrTerms => '使用條款';
+
+  @override
+  String ocrSubCancelledExpires(String date) {
+    return '已取消 · 可使用至 $date';
+  }
+
+  @override
+  String get ocrSubscribeFailed => '發生錯誤，請再試一次。';
+
+  @override
+  String get scanCardHint => '將名片放入框內';
+
+  @override
+  String get scanCardBackgroundTip => '請放在單色、無花紋的背景上';
+
+  @override
+  String get scanCardSingleTip => '一次辨識一張名片';
+
+  @override
+  String get ocrFeedbackPromptTitle => '辨識結果不理想嗎？';
+
+  @override
+  String get ocrFeedbackPromptBody => '如果這張名片辨識得不好，你可以協助我們改善。我們會退還你本月的一次掃描次數。';
+
+  @override
+  String get ocrFeedbackReport => '協助改善';
+
+  @override
+  String get ocrFeedbackDismiss => '不用了';
+
+  @override
+  String get ocrFeedbackDontAsk24h => '24 小時內不再詢問';
+
+  @override
+  String get ocrFeedbackConsentTitle => '協助我們改善辨識';
+
+  @override
+  String get ocrFeedbackConsentSummary =>
+      '送出這張名片的辨識資料以協助改善。僅用於改善辨識，分析後即刪除，且一律於 30 天內刪除。';
+
+  @override
+  String get ocrFeedbackConsentIncludePhoto => '附上名片照片（有助我們修正辨識，取消勾選可略過）';
+
+  @override
+  String get ocrFeedbackViewTerms => '查看完整條款';
+
+  @override
+  String get ocrFeedbackTermsBody =>
+      '資料控管者：SecBizCard 為你送出之回饋的資料控管者。聯絡信箱：privacy@ixo.app。\n\n收集內容：名片的辨識文字與版面資料、辨識結果，以及名片照片——因為要重現並修正辨識錯誤，照片是必要的。送出一律為選擇性，且每次都會詢問。\n\n用途：僅用於重現並改善辨識準確度。我們不作其他用途，也不會出售或為廣告目的分享。\n\n資料會經過哪些對象：為處理你的回饋，我們會委由代為處理的服務供應商——Google Cloud Vision 與 Firebase（Google）進行辨識與儲存。這些資料可能於你所在國家以外處理；對歐盟使用者，於必要時我們採用標準契約條款（SCC）。除此之外我們不會與任何其他人分享。\n\n法律依據：我們改善辨識品質的正當利益，以及你對本次送出的同意。由於名片包含他人的個人資料，你確認你有合理依據為此用途分享該資料。\n\n保留期限：我們在完成分析後即刪除你送出的資料，且一律於 30 天內刪除。資料在傳輸與儲存過程中均經加密。\n\n你的權利：你可透過 privacy@ixo.app 要求存取或刪除你送出的回饋，或提出疑慮。完整說明請見我們的隱私權政策。';
+
+  @override
+  String get ocrFeedbackSubmit => '同意並送出';
+
+  @override
+  String get ocrFeedbackCancel => '取消';
+
+  @override
+  String get ocrFeedbackThanks => '感謝！你的回饋有助於改善辨識。';
+
+  @override
+  String get ocrFeedbackThanksRefunded => '感謝！我們已退還你一次掃描次數。';
+
+  @override
+  String get ocrFeedbackLimitReached => '你已達本月回饋上限。感謝你的協助！';
+
+  @override
+  String get ocrFeedbackFailed => '回饋送出失敗，請稍後再試。';
+
+  @override
+  String get editProfileTitle => '編輯個人資料';
+
+  @override
+  String get editProfilePhoneResetWarn => '⚠️ 已修改已驗證的電話，儲存後驗證將被重設。';
+
+  @override
+  String get editProfileReverifyHint => '⚠️ 修改此項後需要重新驗證';
+
+  @override
+  String get editProfileEditPhoto => '編輯相片';
+
+  @override
+  String get editProfileChooseImageSource => '選擇圖片來源';
+
+  @override
+  String get editProfileGallery => '相簿';
+
+  @override
+  String get editProfileCamera => '相機';
+
+  @override
+  String get editProfileVerificationResetTitle => '驗證將被重設';
+
+  @override
+  String get editProfileVerificationResetBody =>
+      '您正在變更已驗證的電話號碼，這會重設驗證狀態，您需要重新驗證新的號碼。';
+
+  @override
+  String get editProfileContinue => '繼續';
+
+  @override
+  String get editProfileFullName => '姓名';
+
+  @override
+  String get editProfileNameRequired => '姓名為必填';
+
+  @override
+  String get editProfileJobTitle => '職稱';
+
+  @override
+  String get editProfileCompany => '公司';
+
+  @override
+  String get editProfilePhone => '電話';
+
+  @override
+  String get editProfileAdditionalInfo => '其他資訊';
+
+  @override
+  String get editProfileAddField => '新增欄位';
+
+  @override
+  String get editProfileTapToChangePhoto => '點擊以更換相片';
+
+  @override
+  String get editProfileBusinessCards => '名片';
+
+  @override
+  String get editProfileFrontSide => '正面';
+
+  @override
+  String get editProfileBackSide => '背面';
+
+  @override
+  String editProfileUpload(String label) {
+    return '上傳$label';
+  }
+
+  @override
+  String get editProfileFieldTypeLabel => '類型';
+
+  @override
+  String get editProfileFieldLabelLabel => '標籤';
+
+  @override
+  String get editProfileAdd => '新增';
+
+  @override
+  String get handshakeTitle => '交換資訊';
+
+  @override
+  String handshakeSaveFailed(String error) {
+    return '儲存失敗：$error';
+  }
+
+  @override
+  String get handshakeShareBackTitle => '回傳您的資訊？';
+
+  @override
+  String get handshakeShareBackBody => '您要將自己的聯絡資訊回傳給對方嗎？';
+
+  @override
+  String get handshakeNo => '否';
+
+  @override
+  String get handshakeYes => '是';
+
+  @override
+  String handshakeShareFailed(String error) {
+    return '分享失敗：$error';
+  }
+
+  @override
+  String get handshakeInvalidLink => '連結無效或已過期';
+
+  @override
+  String handshakeParseError(String error) {
+    return '解析資料時發生錯誤：$error';
+  }
+
+  @override
+  String get handshakeFoundLink => '已找到安全連結';
+
+  @override
+  String get handshakeRequestPrompt => '要請求交換資訊嗎？';
+
+  @override
+  String get handshakeAbort => '中止';
+
+  @override
+  String get handshakeSendRequest => '傳送請求';
+
+  @override
+  String get handshakeRequestSent => '請求已送出！';
+
+  @override
+  String get handshakeWaitingApproval => '等待對方核准…';
+
+  @override
+  String get handshakeRequestDeclined => '請求已被拒絕';
+
+  @override
+  String get handshakeSessionExpired => '工作階段已過期';
+
+  @override
+  String get handshakeInfoReceived => '已收到資訊！';
+
+  @override
+  String get handshakeSelectContext => '選擇要分享的情境';
+
+  @override
+  String get handshakeContextBusiness => '商務';
+
+  @override
+  String get handshakeContextSocial => '社交';
+
+  @override
+  String get handshakeContextLite => '精簡';
+
+  @override
+  String get handshakeShare => '分享';
+
+  @override
+  String get incomingExpired => '已過期';
+
+  @override
+  String get incomingUnknownUser => '未知使用者';
+
+  @override
+  String get incomingTitle => '收到請求';
+
+  @override
+  String incomingWantsToExchange(String name) {
+    return '$name 想與您交換聯絡資訊。';
+  }
+
+  @override
+  String get incomingAddToContacts => '加入我的聯絡人';
+
+  @override
+  String get incomingChooseInfo => '選擇要分享的資訊：';
+
+  @override
+  String get incomingDecline => '拒絕';
+
+  @override
+  String get incomingApprove => '核准';
+
+  @override
+  String get scannerInvalidQr => 'QR code 無效';
+
+  @override
+  String get scannerInvalidQrFormat => 'QR code 格式無效。應為：https://ixo.app/<id>';
+
+  @override
+  String get scannerTitle => '掃描 QR code';
+
+  @override
+  String get scannerPlaceInFrame => '將 QR code 對準框內';
+
+  @override
+  String get scannerPermissionTitle => '需要相機權限';
+
+  @override
+  String get scannerPermissionBody => '此功能需要相機存取權，以掃描 QR code 進行安全交換。';
+
+  @override
+  String get scannerOpenSettings => '開啟設定';
+
+  @override
+  String get scannerGrantPermission => '授予權限';
+
+  @override
+  String get editContactTitle => '編輯聯絡人';
+
+  @override
+  String get editContactUpdated => '聯絡人已更新';
+
+  @override
+  String get editContactBasicInfo => '基本資訊';
+
+  @override
+  String get editContactDisplayName => '顯示名稱';
+
+  @override
+  String get editContactNickname => '暱稱（僅您可見）';
+
+  @override
+  String get editContactJobInfo => '工作資訊';
+
+  @override
+  String get editContactContact => '聯絡方式';
+
+  @override
+  String get editContactEmail => '電子郵件';
+
+  @override
+  String get editContactMobile => '行動電話';
+
+  @override
+  String get editContactOriginalScan => '原始掃描';
+
+  @override
+  String editContactFieldRequired(String label) {
+    return '$label 為必填';
+  }
+
+  @override
+  String get contactDetailTitle => '聯絡人詳情';
+
+  @override
+  String contactDetailCopied(String label) {
+    return '已複製$label到剪貼簿';
+  }
+
+  @override
+  String get contactDetailChooseGallery => '從相簿選擇';
+
+  @override
+  String get contactDetailTakePhoto => '拍照';
+
+  @override
+  String get contactDetailRemovePhoto => '移除相片';
+
+  @override
+  String get contactDetailPhotoUpdated => '相片已更新';
+
+  @override
+  String get contactDetailCurrentAccount => '目前帳號';
+
+  @override
+  String get contactDetailExportTitle => '匯出到 Google 通訊錄';
+
+  @override
+  String get contactDetailUseThisAccount => '使用此帳號';
+
+  @override
+  String get contactDetailUseAnotherAccount => '或使用其他帳號';
+
+  @override
+  String contactDetailExportFailed(String error) {
+    return '匯出失敗：$error';
+  }
+
+  @override
+  String get contactDetailExportSuccess => '匯出成功！';
+
+  @override
+  String get contactDetailExportPermissionDenied =>
+      '權限遭拒。請允許存取您的 Google 聯絡人後再試一次。';
+
+  @override
+  String contactDetailShareVcardFailed(String error) {
+    return '分享 vCard 失敗：$error';
+  }
+
+  @override
+  String contactDetailShareZipFailed(String error) {
+    return '分享 .zip 失敗：$error';
+  }
+
+  @override
+  String get contactDetailMoreActions => '更多操作';
+
+  @override
+  String get contactDetailShareVcard => '僅文字（vCard .vcf）';
+
+  @override
+  String get contactDetailShareZip => '文字＋圖片（.zip）';
+
+  @override
+  String get contactDetailSaveToGoogle => '儲存到 Google 通訊錄';
+
+  @override
+  String get contactDetailLabelEmail => '電子郵件';
+
+  @override
+  String get contactDetailLabelPhone => '電話';
+
+  @override
+  String get contactDetailLabelJobTitle => '職稱';
+
+  @override
+  String get contactDetailLabelCompany => '公司';
+
+  @override
+  String get contactDetailLabelDepartment => '部門';
+
+  @override
+  String get contactDetailLabelAddress => '地址';
+
+  @override
+  String get contactDetailOcrResult => 'OCR 結果';
+
+  @override
+  String get scanCapturing => '拍攝中…';
+
+  @override
+  String get scanDetectingEdges => '偵測名片邊緣中…';
+
+  @override
+  String get scanRecognizeFailed => '無法辨識名片上的文字';
+
+  @override
+  String get scanNoteOwnKeyNearLimit => '您的 Cloud Vision 金鑰即將達到每月免費上限（80%）。';
+
+  @override
+  String get scanNoteSharedNearLimit => '本月共用辨識額度即將用完。';
+
+  @override
+  String get scanNoteUsedOnDevice => '已使用裝置端辨識。在設定中加入 Cloud Vision 金鑰可獲得最佳效果。';
+
+  @override
+  String get scanToggleHorizontal => '橫向';
+
+  @override
+  String get scanToggleVertical => '直向';
+
+  @override
+  String get scanCameraUnavailableTitle => '相機無法使用';
+
+  @override
+  String get scanCameraUnavailableBody => '無法存取相機。請確認其未被其他應用程式使用。';
+
+  @override
+  String get scanRetry => '重試';
+
+  @override
+  String get scanPermissionBody => '此功能需要相機存取權，以掃描並辨識名片。';
+
+  @override
+  String get backupCreating => '建立備份中…';
+
+  @override
+  String get backupPhasePreparing => '準備中…';
+
+  @override
+  String get backupPhaseEncrypting => '加密中…';
+
+  @override
+  String get backupPhaseUploading => '上傳中…';
+
+  @override
+  String get restorePhaseDownloading => '下載中…';
+
+  @override
+  String get restorePhaseDecrypting => '解密中…';
+
+  @override
+  String get restorePhaseRestoring => '還原中…';
+
+  @override
+  String get backupErrorOffline => '沒有網路連線。請連上網路後再試一次。';
+
+  @override
+  String get backupErrorInterrupted => '備份上傳中斷了。請檢查你的網路連線後再試一次。';
+
+  @override
+  String get backupErrorAuth => '無法存取 Google 雲端硬碟。請重新登入後再試一次。';
+
+  @override
+  String get backupErrorGeneric => '備份失敗，請再試一次。';
+
+  @override
+  String get restoreErrorOffline => '沒有網路連線。請連上網路後再試一次。';
+
+  @override
+  String get restoreErrorInterrupted => '還原下載中斷了。請檢查你的網路連線後再試一次。';
+
+  @override
+  String get restoreErrorAuth => '無法存取 Google 雲端硬碟。請重新登入後再試一次。';
+
+  @override
+  String get restoreErrorGeneric => '還原失敗，請再試一次。';
+
+  @override
+  String get backupCloudNewerStatus => '雲端備份比此裝置更新';
+
+  @override
+  String backupFailed(String error) {
+    return '備份失敗：$error';
+  }
+
+  @override
+  String get backupSuccessStatus => '備份成功！';
+
+  @override
+  String get backupSavedToDrive => '備份已儲存到 Google 雲端硬碟';
+
+  @override
+  String get backupCloudNewerTitle => '雲端備份較新';
+
+  @override
+  String get backupNeverChangedOnDevice => '此裝置從未變更';
+
+  @override
+  String backupLastChanged(String time) {
+    return '上次變更於 $time';
+  }
+
+  @override
+  String backupCloudNewerBody(String cloudTime, String localState) {
+    return 'Google 雲端硬碟中的備份更新於 $cloudTime，比此裝置上的資料（$localState）更新。\n\n現在備份會覆蓋較新的備份——很可能是從其他裝置建立的。若您想在此裝置取得較新的資料，請取消並改用「還原」。\n\n仍要覆蓋較新的備份嗎？';
+  }
+
+  @override
+  String get backupOverwrite => '覆蓋';
+
+  @override
+  String get backupRestoreConfirmTitle => '還原備份？';
+
+  @override
+  String get backupRestoreConfirmBody =>
+      '這會下載你的 Google 雲端硬碟備份，並「覆蓋」這台裝置上的聯絡人與設定。要繼續嗎？';
+
+  @override
+  String get backupRestoreAction => '還原';
+
+  @override
+  String get backupRestoringStatus => '從雲端硬碟還原中…';
+
+  @override
+  String backupRestoreFailed(String error) {
+    return '還原失敗：$error';
+  }
+
+  @override
+  String get backupRestoreCompletedStatus => '還原完成！';
+
+  @override
+  String get backupRestoreSuccessBody => '資料還原成功。必要時請重新啟動應用程式。';
+
+  @override
+  String get backupDriveDesc => '將您的聯絡人與設定以加密檔案安全備份到 Google 雲端硬碟。';
+
+  @override
+  String get backupWebEditorTitle => 'Secured Web Editor';
+
+  @override
+  String get backupWebEditorBody =>
+      '我們提供一個網頁編輯器，可在電腦瀏覽器中開啟，批次整理、編輯與合併您的聯絡人。開啟後，依畫面上的步驟連結您的 Google 雲端硬碟即可。';
+
+  @override
+  String get backupWebEditorUrlCopied => '已複製網頁編輯器連結到剪貼簿。';
+
+  @override
+  String get backupProcessing => '處理中…';
+
+  @override
+  String get backupLastBackupLabel => '上次備份';
+
+  @override
+  String get backupNever => '從未';
+
+  @override
+  String get backupNowButton => '立即備份';
+
+  @override
+  String get backupChecking => '檢查中…';
+
+  @override
+  String get backupRestoreFromBackup => '從備份還原';
+
+  @override
+  String get backupNoBackupFound => '找不到備份';
+
+  @override
+  String get magicWordSectionTitle => '備份密語（Magic Word）';
+
+  @override
+  String get magicWordSectionDescNone =>
+      '預設會用只有這個 App 能推導的金鑰加密你的備份。設定自己的密語後,只有你能解開備份——連我們都不行。';
+
+  @override
+  String get magicWordSectionDescSet =>
+      '已設定密語。你的備份只能用它解開。請妥善保管——只有想讓秘書開啟你的備份時才分享給對方。';
+
+  @override
+  String get magicWordSetButton => '設定密語';
+
+  @override
+  String get magicWordChangeButton => '變更密語';
+
+  @override
+  String get magicWordDialogTitle => '設定你的密語';
+
+  @override
+  String get magicWordEnterLabel => '密語';
+
+  @override
+  String get magicWordRule => '8 到 16 個字元。可用空格與符號。區分大小寫。小提示:用一句只有你記得住的話。';
+
+  @override
+  String get magicWordLengthError => '密語必須為 8 到 16 個字元。';
+
+  @override
+  String get magicWordForgetWarning =>
+      '重要:只有你會知道這個密語。一旦忘記,你的備份將「永遠」無法還原,我們也無法協助你救回。';
+
+  @override
+  String get magicWordReveal => '顯示';
+
+  @override
+  String get magicWordHide => '隱藏';
+
+  @override
+  String get magicWordCopy => '複製';
+
+  @override
+  String get magicWordCopied => '已複製密語到剪貼簿。';
+
+  @override
+  String get magicWordSaved => '密語已設定——會在你下次備份時生效。';
+
+  @override
+  String get magicWordStoredLabel => '你的密語';
+
+  @override
+  String get magicWordRestorePromptTitle => '輸入密語';
+
+  @override
+  String get magicWordRestorePromptBody => '這份備份以密語鎖定。請輸入以還原。(區分大小寫。)';
+
+  @override
+  String get magicWordRestoreWrong => '密語錯誤——無法用它解開這份備份。請確認後再試一次。';
+
+  @override
+  String get magicWordRestorePromptBodyNoWord => '這份備份以密語鎖定。請輸入以還原。(區分大小寫。)';
+
+  @override
+  String get magicWordRestorePromptBodyWrongWord =>
+      '這台裝置上儲存的密語無法解開這份備份。請輸入正確的密語。(區分大小寫。)';
+
+  @override
+  String get magicWordRememberTitle => '記住密語？';
+
+  @override
+  String get magicWordRememberBody => '要在這台裝置上記住這個密語，讓之後的備份與還原自動使用它嗎？';
+
+  @override
+  String get magicWordRememberYes => '記住';
+
+  @override
+  String get magicWordRememberNo => '暫時不要';
+
+  @override
+  String get backupDowngradeTitle => '移除密語保護？';
+
+  @override
+  String get backupDowngradeBody =>
+      '你的 Google 雲端硬碟備份目前以密語保護。這次備份將改用預設加密並移除該保護。要繼續嗎？';
+
+  @override
+  String get backupEmptyDisabledHint => '請先新增至少一位聯絡人再備份。';
+
+  @override
+  String get backupRestoreFirstHint => '你有雲端備份，但本機沒有資料。請先還原，再進行備份或設定密語。';
+
+  @override
+  String get backupSetWordNextBackupHint => '雲端備份尚未套用新密語——請點「立即備份」以套用。';
+
+  @override
+  String get backupRestoreStaleTitle => '備份比你的資料還舊';
+
+  @override
+  String backupRestoreStaleBody(String cloudTime, String localTime) {
+    return '這份雲端備份建立於 $cloudTime——比你最近一次的本機變更 $localTime 還舊。還原會用這份較舊的備份覆蓋你較新的本機資料。要繼續嗎？';
+  }
+
+  @override
+  String get commonContinue => '繼續';
+
+  @override
+  String vcardErrorReadingFile(String error) {
+    return '讀取檔案時發生錯誤：$error';
+  }
+
+  @override
+  String vcardInvalidPackage(String error) {
+    return '套件無效：$error';
+  }
+
+  @override
+  String get vcardNoContactsInPackage => '套件中找不到聯絡人';
+
+  @override
+  String get vcardPasteFirst => '請先貼上 vCard 內容';
+
+  @override
+  String get vcardNoContactsInContent => 'vCard 內容中找不到聯絡人';
+
+  @override
+  String vcardImportedCount(int count, String skippedNote) {
+    return '已匯入 $count 位聯絡人$skippedNote';
+  }
+
+  @override
+  String vcardSkippedNote(int count) {
+    return '（略過 $count 位）';
+  }
+
+  @override
+  String get vcardViewAction => '檢視';
+
+  @override
+  String vcardImportFailed(String error) {
+    return '匯入失敗：$error';
+  }
+
+  @override
+  String vcardPreviewTitle(int count) {
+    return '要匯入 $count 位聯絡人嗎？';
+  }
+
+  @override
+  String get vcardNoContactInfo => '無聯絡資訊';
+
+  @override
+  String get vcardImportAction => '匯入';
+
+  @override
+  String get vcardHowItWorks => '運作方式';
+
+  @override
+  String get vcardHowItWorksDesc =>
+      '使用您喜愛的 AI 應用程式（ChatGPT、Gemini、Grok 等）掃描一張或多張名片照片（建議一次最多 6 張），並請它將每張結果格式化為 vCard 2.1。';
+
+  @override
+  String get vcardCopyPrompt => '複製 AI 提示';
+
+  @override
+  String get vcardPromptCopied => '已複製 AI 提示到剪貼簿！';
+
+  @override
+  String get vcardThen => '接著：';
+
+  @override
+  String get vcardStep1 => '上傳匯出的 .vcf 檔案，或';
+
+  @override
+  String get vcardStep2 => '直接在下方貼上 vCard 文字';
+
+  @override
+  String get vcardOption1 => '選項 1：上傳檔案';
+
+  @override
+  String get vcardChooseFile => '選擇檔案（.vcf）';
+
+  @override
+  String get vcardOr => '或';
+
+  @override
+  String get vcardOption2 => '選項 2：貼上 vCard 文字';
+
+  @override
+  String get vcardImporting => '匯入中…';
+
+  @override
+  String get vcardImportFromText => '從文字匯入';
+
+  @override
+  String get historyClearTitle => '清除記錄？';
+
+  @override
+  String get historyClearBody => '這會刪除所有交換記錄。';
+
+  @override
+  String get historyClearAction => '清除';
+
+  @override
+  String get historyClearTooltip => '清除記錄';
+
+  @override
+  String get historyNoActivity => '尚無活動';
+
+  @override
+  String get historyApproved => '已核准！';
+
+  @override
+  String get historyStatusApproved => '已核准';
+
+  @override
+  String get historyStatusRejected => '已拒絕';
+
+  @override
+  String get historyStatusPending => '待處理';
+
+  @override
+  String get historyStatusMissed => '已錯過';
+
+  @override
+  String get historyStatusExpired => '已過期';
+
+  @override
+  String get verifyEmailTitle => '驗證電子郵件';
+
+  @override
+  String emailVerifyCustomSent(String email) {
+    return '驗證郵件已寄至 $email！點擊連結以更新您的登入電子郵件。';
+  }
+
+  @override
+  String get emailVerifySent => '驗證郵件已寄出！請查看您的收件匣。';
+
+  @override
+  String get emailNotVerifiedYet => '電子郵件尚未驗證。請查看收件匣並點擊驗證連結。';
+
+  @override
+  String get emailCheckYourEmail => '查看您的電子郵件';
+
+  @override
+  String get emailVerifyYourEmail => '驗證您的電子郵件';
+
+  @override
+  String get emailSentBody => '我們已寄出驗證連結到您的電子郵件。點擊連結以驗證您的電子郵件地址。';
+
+  @override
+  String get emailWillSendBody => '我們將寄給您一個驗證連結，以確認您的電子郵件地址。';
+
+  @override
+  String get emailSendButton => '寄送驗證郵件';
+
+  @override
+  String get emailIveVerified => '我已驗證';
+
+  @override
+  String get emailResend => '重新寄送郵件';
+
+  @override
+  String get emailTips => '提示';
+
+  @override
+  String get emailTipsBody =>
+      '• 若沒看到郵件，請檢查垃圾郵件夾\n• 驗證連結將於 1 小時後失效\n• 需要時可重新寄送郵件';
+
+  @override
+  String get verifyPhoneTitle => '驗證電話號碼';
+
+  @override
+  String get phoneSmsTimeout => 'SMS 請求逾時。此號碼可能已被使用、無效，或被伺服器封鎖。';
+
+  @override
+  String get phoneEnter6Digit => '請輸入 6 位數驗證碼';
+
+  @override
+  String get phoneVerifiedAuto => '電話已自動驗證！';
+
+  @override
+  String get phoneEnterNumber => '輸入您的電話號碼';
+
+  @override
+  String get phoneWillSendSms => '我們將透過簡訊寄送驗證碼給您';
+
+  @override
+  String get phoneNumberLabel => '電話號碼';
+
+  @override
+  String get phoneSendCode => '寄送驗證碼';
+
+  @override
+  String get phoneEnterCode => '輸入驗證碼';
+
+  @override
+  String phoneSentCodeTo(String phone) {
+    return '我們已將 6 位數驗證碼寄至 $phone';
+  }
+
+  @override
+  String get phoneVerify => '驗證';
+
+  @override
+  String get phoneDidntReceive => '沒有收到驗證碼？ ';
+
+  @override
+  String phoneResendIn(int seconds) {
+    return '$seconds 秒後可重新寄送';
+  }
+
+  @override
+  String get phoneResendCode => '重新寄送驗證碼';
+
+  @override
+  String get phoneChangeNumber => '更改電話號碼';
+
+  @override
+  String get contextSettingsTitle => '名片情境';
+
+  @override
+  String contextSettingsErrorSaving(String error) {
+    return '儲存時發生錯誤：$error';
+  }
+
+  @override
+  String get contextSettingsSaved => '情境已成功儲存';
+
+  @override
+  String get contextSettingsIntro => '自訂在不同情境下要分享的資訊';
+
+  @override
+  String get contextSettingsBusinessDesc => '完整的專業資訊';
+
+  @override
+  String get contextSettingsSocialDesc => '不含工作細節的個人聯絡方式';
+
+  @override
+  String get contextSettingsLiteDesc => '僅最少量的資訊';
+
+  @override
+  String get contextSettingsToggleName => '姓名';
+
+  @override
+  String get contextSettingsToggleEmail => '電子郵件';
+
+  @override
+  String get contextSettingsTogglePhone => '電話';
+
+  @override
+  String get contextSettingsToggleJobTitle => '職稱';
+
+  @override
+  String get contextSettingsToggleCompany => '公司';
+
+  @override
+  String get contextSettingsToggleAvatar => '頭像';
+
+  @override
+  String get contextSettingsToggleCardFront => '名片正面';
+
+  @override
+  String get contextSettingsToggleCardBack => '名片背面';
+
+  @override
+  String get homeYourBusinessCard => '您的名片';
+
+  @override
+  String get homeScanToExchange => 'Scan to exchange';
+
+  @override
+  String get homeShareMyInfo => '分享我的資訊';
+
+  @override
+  String get manualCropTitle => '調整範圍';
+
+  @override
+  String get manualCropReset => '重設為預設';
+
+  @override
+  String get manualCropFailed => '裁切失敗';
+
+  @override
+  String get reviewTitle => '檢視聯絡人';
+
+  @override
+  String get reviewSaved => '聯絡人已儲存！';
+
+  @override
+  String get reviewFieldName => '姓名';
+
+  @override
+  String get reviewFieldEmail => '電子郵件';
+
+  @override
+  String get reviewFieldCompany => '公司';
+
+  @override
+  String get reviewFieldTitle => '職稱';
+
+  @override
+  String get reviewFieldPhone => '電話';
+
+  @override
+  String get reviewFieldMobile => '手機';
+
+  @override
+  String get reviewFieldFax => '傳真';
+
+  @override
+  String get reviewFieldWebsite => '網站';
+
+  @override
+  String get reviewFieldAddress => '地址';
+
+  @override
+  String get reviewFieldTaxId => '統一編號／稅號';
+
+  @override
+  String get landingStoreLinkFailed => '無法開啟商店連結';
+
+  @override
+  String get landingInvitationTitle => 'SecBizCard 邀請';
+
+  @override
+  String get landingInvitationBody =>
+      '您受邀透過 SecBizCard 建立聯繫。若要檢視此安全個人資料並交換資訊，請使用我們的行動應用程式。';
+
+  @override
+  String get landingDownloadApp => '下載應用程式';
+
+  @override
+  String get landingContinueToApp => '前往應用程式';
+
+  @override
+  String get landingHeroTitle => '專業身分的\n全新標準。';
+
+  @override
+  String get landingHeroSubtitle => '安全、即時且經過驗證的聯絡資訊交換。\n由雲端驅動。';
+
+  @override
+  String get landingMockName => '您的姓名';
+
+  @override
+  String get landingMockTitle => '技術長';
+
+  @override
+  String get landingFeatureQrTitle => 'QR 交換';
+
+  @override
+  String get landingFeatureQrDesc => '只要出示您的動態 QR code，即可立即分享名片。';
+
+  @override
+  String get landingFeaturePrivacyTitle => '隱私優先';
+
+  @override
+  String get landingFeaturePrivacyDesc => '您的資料保存在您自己的 Google 雲端硬碟，沒有集中式的資料蒐集。';
+
+  @override
+  String get landingFeatureOfflineTitle => '離線可用';
+
+  @override
+  String get landingFeatureOfflineDesc => '即使沒有網路連線，也能存取並分享您的名片。';
+
+  @override
+  String get landingFeatureVerifiedTitle => '已驗證身分';
+
+  @override
+  String get landingFeatureVerifiedDesc => '透過電子郵件與電話驗證標記，在您的個人資料上建立信任。';
+
+  @override
+  String get landingDownloadHeadline => '體驗安全又快速的\n名片交換';
+
+  @override
+  String landingCopyright(int year) {
+    return '© $year SecBizCard. 保留一切權利。';
+  }
+
+  @override
+  String get landingPrivacyPolicy => '隱私權政策';
+
+  @override
+  String get landingEula => 'EULA';
+
+  @override
+  String get mainCancelSelection => '取消選取';
+
+  @override
+  String mainSelectedCount(int count) {
+    return '已選取 $count 項';
+  }
+
+  @override
+  String get mainExportTooltip => '匯出';
+
+  @override
+  String get mainBackupReminderTitle => '要備份您的聯絡人嗎？';
+
+  @override
+  String get mainBackupReminderBody =>
+      '您的聯絡人與名片圖片僅儲存在此裝置上。我們建議備份到您自己的 Google 雲端硬碟，以免遺失。';
+
+  @override
+  String get mainBackupDontRemind => '本月不再提醒';
+
+  @override
+  String get mainBackupLater => '稍後';
+
+  @override
+  String get mainBackupNow => '立即備份';
+
+  @override
+  String mainExportCount(int count) {
+    return '匯出 $count 位聯絡人';
+  }
+
+  @override
+  String get mainExportVcardSubtitle => '聯絡欄位，不含名片圖片';
+
+  @override
+  String get mainExportZipSubtitle => '欄位加名片照片，可重新匯入';
+
+  @override
+  String mainShareFailed(String error) {
+    return '分享失敗：$error';
+  }
+
+  @override
+  String mainExporting(int count) {
+    return '正在匯出 $count 位聯絡人…';
+  }
+
+  @override
+  String mainExportingProgress(int done, int total) {
+    return '正在匯出 $done/$total…';
+  }
+
+  @override
+  String mainExportedToGoogle(int count) {
+    return '已將 $count 位聯絡人匯出到 Google 通訊錄';
+  }
+
+  @override
+  String mainExportFailed(String error) {
+    return '匯出失敗：$error';
+  }
+
+  @override
+  String mainExportedPartial(int succeeded, int total, int failed) {
+    return '已匯出 $total 位中的 $succeeded 位；$failed 位失敗';
+  }
+
+  @override
+  String get versionGateUpdateTitle => '有可用的更新';
+
+  @override
+  String get versionGateUpdateBody => 'SecBizCard 有新版本可用,請更新後繼續使用。';
+
+  @override
+  String get versionGateUpdateAction => '更新';
+
+  @override
+  String get versionGateLaterAction => '稍後';
+}
+
+/// The translations for Chinese, using the Han script (`zh_Hans`).
+class AppLocalizationsZhHans extends AppLocalizationsZh {
+  AppLocalizationsZhHans() : super('zh_Hans');
+
+  @override
+  String get appTitle => 'SecBizCard';
+
+  @override
+  String get loginSlogan => '安全、专业、即时';
+
+  @override
+  String get signInWithGoogle => '使用 Google 登入';
+
+  @override
+  String get signInWithApple => '使用 Apple 登入';
+
+  @override
+  String orSignInWith(String provider) {
+    return '或使用 $provider 登入';
+  }
+
+  @override
+  String get profileTitle => '个人档案';
+
+  @override
+  String get editProfile => '编辑档案';
+
+  @override
+  String get onboardingWelcome => '歡迎使用 SecBizCard';
+
+  @override
   String get ocrRecognizingCloudVision => '使用 Cloud Vision 辨识中…';
 
   @override
@@ -1727,9 +3450,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get versionGateLaterAction => '稍后';
 }
 
-/// The translations for Chinese, as used in Taiwan (`zh_TW`).
-class AppLocalizationsZhTw extends AppLocalizationsZh {
-  AppLocalizationsZhTw() : super('zh_TW');
+/// The translations for Chinese, using the Han script (`zh_Hant`).
+class AppLocalizationsZhHant extends AppLocalizationsZh {
+  AppLocalizationsZhHant() : super('zh_Hant');
 
   @override
   String get appTitle => 'SecBizCard';

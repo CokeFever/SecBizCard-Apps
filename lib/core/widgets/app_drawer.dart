@@ -280,10 +280,13 @@ class AppDrawer extends ConsumerWidget {
                     // the value (e.g. zh_TW → Traditional) and falls back to
                     // English for anything it doesn't recognize.
                     final locale = Localizations.localeOf(context);
-                    final lang = locale.countryCode != null &&
-                            locale.countryCode!.isNotEmpty
-                        ? '${locale.languageCode}_${locale.countryCode}'
-                        : locale.languageCode;
+                    final lang = locale.scriptCode != null &&
+                            locale.scriptCode!.isNotEmpty
+                        ? '${locale.languageCode}_${locale.scriptCode}'
+                        : (locale.countryCode != null &&
+                                locale.countryCode!.isNotEmpty
+                            ? '${locale.languageCode}_${locale.countryCode}'
+                            : locale.languageCode);
                     _dismiss(context);
                     launchUrl(
                       Uri.parse('https://ixo.app/guide?lang=$lang'),

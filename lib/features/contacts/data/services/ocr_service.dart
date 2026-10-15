@@ -263,6 +263,7 @@ class OCRService {
       displayName: result.displayName,
       title: result.title,
       company: result.company,
+      department: result.department, // carry OCR department into the model
       phone: result.phone,
       mobile: result.mobile,
       website: result.website,
