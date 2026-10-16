@@ -20,6 +20,7 @@ import 'core/config/theme.dart'; // 引入 Skill 1 產生的 Theme
 import 'core/router/app_router.dart';
 import 'core/config/theme_controller.dart';
 import 'core/version_gate/version_gate.dart';
+import 'core/widgets/root_messenger.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -147,6 +148,7 @@ class _IxoAppState extends ConsumerState<IxoApp> with WidgetsBindingObserver {
 
     return MaterialApp.router(
       title: 'SecBizCard',
+      scaffoldMessengerKey: rootMessengerKey,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       localeListResolutionCallback: LocaleResolver.resolve,
