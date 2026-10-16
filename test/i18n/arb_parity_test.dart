@@ -4,10 +4,10 @@
 // This test is the authoritative gate for three invariants that gen-l10n alone
 // does not fully enforce:
 //
-//   (a) PARITY — every non-template locale carries all 530 non-@ template keys
+//   (a) PARITY — every non-template locale carries all 564 non-@ template keys
 //       from app_en.arb. Counting is done by JSON parse of non-@ keys, NEVER a
-//       line grep (grep -c '":' returns 531 for the zh files and 1133 for en
-//       because en carries all the @-metadata).
+//       line grep (grep -c '":' returns a higher number for the zh files and
+//       for en because en carries all the @-metadata).
 //
 //   (b) PLACEHOLDER INTEGRITY — for every key present in a locale, the set of
 //       ICU {placeholder} tokens matches app_en.arb's token set for that key,
@@ -77,13 +77,13 @@ void main() {
   final template = _loadArb(_templateLocale);
   final templateKeys = _nonAtKeys(template);
 
-  test('template app_en.arb has the expected 530 non-@ keys', () {
-    expect(templateKeys.length, 530);
+  test('template app_en.arb has the expected 564 non-@ keys', () {
+    expect(templateKeys.length, 564);
   });
 
   group('(a) key parity with app_en.arb', () {
     for (final locale in _nonTemplateLocales) {
-      test('app_$locale.arb contains all 530 template keys', () {
+      test('app_$locale.arb contains all 564 template keys', () {
         final arb = _loadArb(locale);
         final keys = _nonAtKeys(arb);
         final missing = templateKeys.difference(keys);

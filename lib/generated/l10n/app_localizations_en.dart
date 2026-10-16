@@ -1794,4 +1794,108 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get versionGateLaterAction => 'Later';
+
+  @override
+  String get customFieldCategoryPhone => 'Phone';
+
+  @override
+  String get customFieldCategoryEmail => 'Email';
+
+  @override
+  String get customFieldCategoryAddress => 'Address';
+
+  @override
+  String get customFieldCategoryWebsite => 'Website';
+
+  @override
+  String get customFieldCategorySocial => 'Social';
+
+  @override
+  String get customFieldCategoryDate => 'Date';
+
+  @override
+  String get customFieldCategoryNote => 'Note';
+
+  @override
+  String get customFieldLabelWork => 'Work';
+
+  @override
+  String get customFieldLabelHome => 'Home';
+
+  @override
+  String get customFieldLabelMobile => 'Mobile';
+
+  @override
+  String get customFieldLabelFax => 'Fax';
+
+  @override
+  String get customFieldLabelMain => 'Main';
+
+  @override
+  String get customFieldLabelOther => 'Other';
+
+  @override
+  String get customFieldLabelPersonal => 'Personal';
+
+  @override
+  String get customFieldLabelCompany => 'Company';
+
+  @override
+  String get customFieldLabelBlog => 'Blog';
+
+  @override
+  String get customFieldLabelPortfolio => 'Portfolio';
+
+  @override
+  String get customFieldLabelLinkedin => 'LinkedIn';
+
+  @override
+  String get customFieldLabelTwitter => 'Twitter';
+
+  @override
+  String get customFieldLabelFacebook => 'Facebook';
+
+  @override
+  String get customFieldLabelInstagram => 'Instagram';
+
+  @override
+  String get customFieldLabelGithub => 'GitHub';
+
+  @override
+  String get customFieldLabelBirthday => 'Birthday';
+
+  @override
+  String get customFieldLabelAnniversary => 'Anniversary';
+
+  @override
+  String get customFieldLabelGeneral => 'General';
+
+  @override
+  String customFieldLabelComposed(String label, String category) {
+    return '$label $category';
+  }
+
+  @override
+  String get customFieldAltName => 'Alternate Name';
+
+  @override
+  String get customFieldAltTitle => 'Alternate Title';
+
+  @override
+  String get customFieldAltCompany => 'Alternate Company';
+
+  @override
+  String get customFieldAltPhone => 'Alternate Phone';
+
+  @override
+  String get customFieldAltAddress => 'Alternate Address';
+
+  @override
+  String get customFieldCity => 'City';
+
+  @override
+  String get customFieldPostalCode => 'Postal Code';
+
+  @override
+  String get customFieldNickname => 'Nickname';
 }

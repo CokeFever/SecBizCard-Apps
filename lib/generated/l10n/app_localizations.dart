@@ -3283,6 +3283,210 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Later'**
   String get versionGateLaterAction;
+
+  /// No description provided for @customFieldCategoryPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get customFieldCategoryPhone;
+
+  /// No description provided for @customFieldCategoryEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get customFieldCategoryEmail;
+
+  /// No description provided for @customFieldCategoryAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get customFieldCategoryAddress;
+
+  /// No description provided for @customFieldCategoryWebsite.
+  ///
+  /// In en, this message translates to:
+  /// **'Website'**
+  String get customFieldCategoryWebsite;
+
+  /// No description provided for @customFieldCategorySocial.
+  ///
+  /// In en, this message translates to:
+  /// **'Social'**
+  String get customFieldCategorySocial;
+
+  /// No description provided for @customFieldCategoryDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get customFieldCategoryDate;
+
+  /// No description provided for @customFieldCategoryNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get customFieldCategoryNote;
+
+  /// No description provided for @customFieldLabelWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Work'**
+  String get customFieldLabelWork;
+
+  /// No description provided for @customFieldLabelHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get customFieldLabelHome;
+
+  /// No description provided for @customFieldLabelMobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile'**
+  String get customFieldLabelMobile;
+
+  /// No description provided for @customFieldLabelFax.
+  ///
+  /// In en, this message translates to:
+  /// **'Fax'**
+  String get customFieldLabelFax;
+
+  /// No description provided for @customFieldLabelMain.
+  ///
+  /// In en, this message translates to:
+  /// **'Main'**
+  String get customFieldLabelMain;
+
+  /// No description provided for @customFieldLabelOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get customFieldLabelOther;
+
+  /// No description provided for @customFieldLabelPersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get customFieldLabelPersonal;
+
+  /// No description provided for @customFieldLabelCompany.
+  ///
+  /// In en, this message translates to:
+  /// **'Company'**
+  String get customFieldLabelCompany;
+
+  /// No description provided for @customFieldLabelBlog.
+  ///
+  /// In en, this message translates to:
+  /// **'Blog'**
+  String get customFieldLabelBlog;
+
+  /// No description provided for @customFieldLabelPortfolio.
+  ///
+  /// In en, this message translates to:
+  /// **'Portfolio'**
+  String get customFieldLabelPortfolio;
+
+  /// No description provided for @customFieldLabelLinkedin.
+  ///
+  /// In en, this message translates to:
+  /// **'LinkedIn'**
+  String get customFieldLabelLinkedin;
+
+  /// No description provided for @customFieldLabelTwitter.
+  ///
+  /// In en, this message translates to:
+  /// **'Twitter'**
+  String get customFieldLabelTwitter;
+
+  /// No description provided for @customFieldLabelFacebook.
+  ///
+  /// In en, this message translates to:
+  /// **'Facebook'**
+  String get customFieldLabelFacebook;
+
+  /// No description provided for @customFieldLabelInstagram.
+  ///
+  /// In en, this message translates to:
+  /// **'Instagram'**
+  String get customFieldLabelInstagram;
+
+  /// No description provided for @customFieldLabelGithub.
+  ///
+  /// In en, this message translates to:
+  /// **'GitHub'**
+  String get customFieldLabelGithub;
+
+  /// No description provided for @customFieldLabelBirthday.
+  ///
+  /// In en, this message translates to:
+  /// **'Birthday'**
+  String get customFieldLabelBirthday;
+
+  /// No description provided for @customFieldLabelAnniversary.
+  ///
+  /// In en, this message translates to:
+  /// **'Anniversary'**
+  String get customFieldLabelAnniversary;
+
+  /// No description provided for @customFieldLabelGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get customFieldLabelGeneral;
+
+  /// No description provided for @customFieldLabelComposed.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} {category}'**
+  String customFieldLabelComposed(String label, String category);
+
+  /// No description provided for @customFieldAltName.
+  ///
+  /// In en, this message translates to:
+  /// **'Alternate Name'**
+  String get customFieldAltName;
+
+  /// No description provided for @customFieldAltTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Alternate Title'**
+  String get customFieldAltTitle;
+
+  /// No description provided for @customFieldAltCompany.
+  ///
+  /// In en, this message translates to:
+  /// **'Alternate Company'**
+  String get customFieldAltCompany;
+
+  /// No description provided for @customFieldAltPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Alternate Phone'**
+  String get customFieldAltPhone;
+
+  /// No description provided for @customFieldAltAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Alternate Address'**
+  String get customFieldAltAddress;
+
+  /// No description provided for @customFieldCity.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get customFieldCity;
+
+  /// No description provided for @customFieldPostalCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Postal Code'**
+  String get customFieldPostalCode;
+
+  /// No description provided for @customFieldNickname.
+  ///
+  /// In en, this message translates to:
+  /// **'Nickname'**
+  String get customFieldNickname;
 }
 
 class _AppLocalizationsDelegate

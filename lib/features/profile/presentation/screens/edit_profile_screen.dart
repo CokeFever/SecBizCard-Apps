@@ -38,7 +38,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   late TextEditingController _nameController;
   late TextEditingController _titleController;
   late TextEditingController _companyController;
+  late TextEditingController _departmentController;
   late TextEditingController _phoneController;
+  late TextEditingController _websiteController;
 
   late FocusNode _phoneFocusNode;
   bool _isPhoneModified = false;
@@ -78,7 +80,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     if (_nameController.text.trim() != widget.user.displayName) return true;
     if (_titleController.text.trim() != (widget.user.title ?? '')) return true;
     if (_companyController.text.trim() != (widget.user.company ?? '')) return true;
+    if (_departmentController.text.trim() != (widget.user.department ?? '')) return true;
     if (_phoneController.text.trim() != (widget.user.phone ?? '')) return true;
+    if (_websiteController.text.trim() != (widget.user.website ?? '')) return true;
 
     // Compare custom fields
     final currentCustomFields = <String, String>{};
@@ -105,7 +109,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     _nameController = TextEditingController(text: widget.user.displayName);
     _titleController = TextEditingController(text: widget.user.title);
     _companyController = TextEditingController(text: widget.user.company);
+    _departmentController = TextEditingController(text: widget.user.department);
     _phoneController = TextEditingController(text: widget.user.phone);
+    _websiteController = TextEditingController(text: widget.user.website);
     _phoneFocusNode = FocusNode();
     _phoneFocusNode.addListener(_onPhoneFocusChange);
 
@@ -118,7 +124,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     _nameController.addListener(_onFieldChanged);
     _titleController.addListener(_onFieldChanged);
     _companyController.addListener(_onFieldChanged);
+    _departmentController.addListener(_onFieldChanged);
     _phoneController.addListener(_onFieldChanged);
+    _websiteController.addListener(_onFieldChanged);
   }
 
   void _onFieldChanged() {
@@ -159,7 +167,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     _nameController.dispose();
     _titleController.dispose();
     _companyController.dispose();
+    _departmentController.dispose();
     _phoneController.dispose();
+    _websiteController.dispose();
     for (var controller in _customFieldControllers.values) {
       controller.dispose();
     }
@@ -344,10 +354,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     }
   }
 
-  // Use shared FieldFormatter
-  String _formatFieldLabel(String key) => FieldFormatter.formatLabel(key);
-
-
   void _removeCustomField(String key) {
     setState(() {
       _customFieldControllers[key]?.dispose();
@@ -412,8 +418,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         company: _companyController.text.trim().isEmpty
             ? null
             : _companyController.text.trim(),
-        department: widget.user.department,
+        department: _departmentController.text.trim().isEmpty
+            ? null
+            : _departmentController.text.trim(),
         phone: newPhone.isEmpty ? null : newPhone,
+        website: _websiteController.text.trim().isEmpty
+            ? null
+            : _websiteController.text.trim(),
         avatarDriveFileId: _isAvatarRemoved ? null : avatarDriveFileId,
         photoUrl: _isAvatarRemoved
             ? null
@@ -526,6 +537,15 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 icon: Icons.business,
               ),
               const SizedBox(height: 16),
+              // Reuse the detail-screen's contactDetailLabelDepartment key here
+              // (deliberate cross-namespace reuse: same five-language term, no
+              // separate edit key).
+              _buildTextField(
+                controller: _departmentController,
+                label: AppLocalizations.of(context)!.contactDetailLabelDepartment,
+                icon: Icons.business_outlined,
+              ),
+              const SizedBox(height: 16),
               // Phone field with verification indicator
               _buildVerifiableField(
                 controller: _phoneController,
@@ -534,6 +554,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 keyboardType: TextInputType.phone,
                 isVerified: widget.user.phoneVerified,
                 focusNode: _phoneFocusNode,
+              ),
+              const SizedBox(height: 16),
+              _buildTextField(
+                controller: _websiteController,
+                label: AppLocalizations.of(context)!.reviewFieldWebsite,
+                icon: Icons.language,
+                keyboardType: TextInputType.url,
               ),
               const SizedBox(height: 24),
               // Dynamic Fields Section
@@ -557,7 +584,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         Expanded(
                           child: _buildTextField(
                             controller: entry.value,
-                            label: _formatFieldLabel(entry.key),
+                            label: FieldFormatter.localizedLabel(
+                                AppLocalizations.of(context)!, entry.key),
                             icon: FieldFormatter.getIcon(entry.key),
                             focusNode: _customFieldFocusNodes[entry.key],
                             readOnly: entry.key.toLowerCase().contains('birthday') || 
@@ -987,7 +1015,10 @@ class _AddFieldDialogState extends State<_AddFieldDialog> {
             initialValue: _selectedCategory,
             decoration: InputDecoration(labelText: l10n.editProfileFieldTypeLabel),
             items: widget.fieldTypes.keys.map((type) {
-              return DropdownMenuItem(value: type, child: Text(type));
+              return DropdownMenuItem(
+                value: type,
+                child: Text(FieldFormatter.addFieldCategoryLabel(l10n, type)),
+              );
             }).toList(),
             onChanged: (value) {
               setState(() {
@@ -1001,7 +1032,10 @@ class _AddFieldDialogState extends State<_AddFieldDialog> {
             initialValue: _selectedLabel,
             decoration: InputDecoration(labelText: l10n.editProfileFieldLabelLabel),
             items: widget.fieldTypes[_selectedCategory]!.map((label) {
-              return DropdownMenuItem(value: label, child: Text(label));
+              return DropdownMenuItem(
+                value: label,
+                child: Text(FieldFormatter.addFieldLabel(l10n, label)),
+              );
             }).toList(),
             onChanged: (value) {
               setState(() {

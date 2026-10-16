@@ -62,6 +62,7 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
   late TextEditingController _emailController;
   late TextEditingController _companyController;
   late TextEditingController _titleController;
+  late TextEditingController _departmentController;
   late TextEditingController _phoneController;
   late TextEditingController _mobileController;
   late TextEditingController _faxController;
@@ -76,6 +77,9 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
     _emailController = TextEditingController(text: widget.profile.email);
     _companyController = TextEditingController(text: widget.profile.company);
     _titleController = TextEditingController(text: widget.profile.title);
+    _departmentController = TextEditingController(
+      text: widget.profile.department,
+    );
     _phoneController = TextEditingController(text: widget.profile.phone);
     _mobileController = TextEditingController(text: widget.profile.mobile);
     _faxController = TextEditingController(
@@ -94,6 +98,7 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
     _emailController.dispose();
     _companyController.dispose();
     _titleController.dispose();
+    _departmentController.dispose();
     _phoneController.dispose();
     _mobileController.dispose();
     _faxController.dispose();
@@ -127,6 +132,7 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
       email: _emailController.text.trim(),
       company: _companyController.text.trim(),
       title: _titleController.text.trim(),
+      department: _departmentController.text.trim(),
       phone: _phoneController.text.trim(),
       mobile: _mobileController.text.trim(),
       website: _websiteController.text.trim(),
@@ -330,6 +336,12 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
                   ),
                   const SizedBox(height: 16),
                   _buildTextField(_titleController, l10n.reviewFieldTitle, Icons.badge),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    _departmentController,
+                    l10n.contactDetailLabelDepartment,
+                    Icons.business_outlined,
+                  ),
                   const SizedBox(height: 16),
                   _buildTextField(_phoneController, l10n.reviewFieldPhone, Icons.phone),
                   const SizedBox(height: 16),

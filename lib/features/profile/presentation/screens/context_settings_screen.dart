@@ -363,7 +363,7 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
                     final isVisible =
                         cardContext.showCustomFields[key] ?? false;
                     return _buildToggle(
-                      FieldFormatter.formatLabel(key),
+                      FieldFormatter.localizedLabel(l10n, key),
                       isVisible,
                       (value) => _updateCustomFieldVisibility(type, key, value),
                       icon: FieldFormatter.getIcon(key),

@@ -1751,4 +1751,108 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get versionGateLaterAction => '나중에';
+
+  @override
+  String get customFieldCategoryPhone => '전화';
+
+  @override
+  String get customFieldCategoryEmail => '이메일';
+
+  @override
+  String get customFieldCategoryAddress => '주소';
+
+  @override
+  String get customFieldCategoryWebsite => '웹사이트';
+
+  @override
+  String get customFieldCategorySocial => '소셜';
+
+  @override
+  String get customFieldCategoryDate => '날짜';
+
+  @override
+  String get customFieldCategoryNote => '메모';
+
+  @override
+  String get customFieldLabelWork => '직장';
+
+  @override
+  String get customFieldLabelHome => '자택';
+
+  @override
+  String get customFieldLabelMobile => '휴대폰';
+
+  @override
+  String get customFieldLabelFax => '팩스';
+
+  @override
+  String get customFieldLabelMain => '대표';
+
+  @override
+  String get customFieldLabelOther => '기타';
+
+  @override
+  String get customFieldLabelPersonal => '개인';
+
+  @override
+  String get customFieldLabelCompany => '회사';
+
+  @override
+  String get customFieldLabelBlog => '블로그';
+
+  @override
+  String get customFieldLabelPortfolio => '포트폴리오';
+
+  @override
+  String get customFieldLabelLinkedin => 'LinkedIn';
+
+  @override
+  String get customFieldLabelTwitter => 'Twitter';
+
+  @override
+  String get customFieldLabelFacebook => 'Facebook';
+
+  @override
+  String get customFieldLabelInstagram => 'Instagram';
+
+  @override
+  String get customFieldLabelGithub => 'GitHub';
+
+  @override
+  String get customFieldLabelBirthday => '생일';
+
+  @override
+  String get customFieldLabelAnniversary => '기념일';
+
+  @override
+  String get customFieldLabelGeneral => '일반';
+
+  @override
+  String customFieldLabelComposed(String label, String category) {
+    return '$category $label';
+  }
+
+  @override
+  String get customFieldAltName => '다른 이름';
+
+  @override
+  String get customFieldAltTitle => '다른 직책';
+
+  @override
+  String get customFieldAltCompany => '다른 회사';
+
+  @override
+  String get customFieldAltPhone => '다른 전화';
+
+  @override
+  String get customFieldAltAddress => '다른 주소';
+
+  @override
+  String get customFieldCity => '도시';
+
+  @override
+  String get customFieldPostalCode => '우편번호';
+
+  @override
+  String get customFieldNickname => '닉네임';
 }

@@ -35,6 +35,8 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
   late TextEditingController _phoneController;
   late TextEditingController _mobileController;
   late TextEditingController _emailController;
+  late TextEditingController _websiteController;
+  late TextEditingController _addressController;
   File? _cardFrontImage;
   File? _cardBackImage;
   bool _isCardFrontRemoved = false;
@@ -74,6 +76,8 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
     if (_phoneController.text.trim() != (widget.user.phone ?? '')) return true;
     if (_mobileController.text.trim() != (widget.user.mobile ?? '')) return true;
     if (_emailController.text.trim() != (widget.user.email ?? '')) return true;
+    if (_websiteController.text.trim() != (widget.user.website ?? '')) return true;
+    if (_addressController.text.trim() != (widget.user.address ?? '')) return true;
 
     // Compare custom fields
     final currentCustomFields = <String, String>{};
@@ -109,6 +113,8 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
     _phoneController = TextEditingController(text: widget.user.phone);
     _mobileController = TextEditingController(text: widget.user.mobile);
     _emailController = TextEditingController(text: widget.user.email);
+    _websiteController = TextEditingController(text: widget.user.website);
+    _addressController = TextEditingController(text: widget.user.address);
 
     widget.user.customFields.forEach((key, value) {
       if (key != 'Nickname') {
@@ -125,6 +131,8 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
     _phoneController.addListener(_onFieldChanged);
     _mobileController.addListener(_onFieldChanged);
     _emailController.addListener(_onFieldChanged);
+    _websiteController.addListener(_onFieldChanged);
+    _addressController.addListener(_onFieldChanged);
   }
 
   void _onFieldChanged() {
@@ -141,6 +149,8 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
     _phoneController.dispose();
     _mobileController.dispose();
     _emailController.dispose();
+    _websiteController.dispose();
+    _addressController.dispose();
     for (var controller in _customFieldControllers.values) {
       controller.dispose();
     }
@@ -181,7 +191,6 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
   }
 
   // Use shared FieldFormatter
-  String _formatFieldLabel(String key) => FieldFormatter.formatLabel(key);
   IconData _getIconForInfoType(String key) => FieldFormatter.getIcon(key);
 
   Future<void> _save() async {
@@ -226,6 +235,12 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
             ? null
             : _mobileController.text.trim(),
         email: _emailController.text.trim(),
+        website: _websiteController.text.trim().isEmpty
+            ? null
+            : _websiteController.text.trim(),
+        address: _addressController.text.trim().isEmpty
+            ? null
+            : _addressController.text.trim(),
         cardFrontPath: _isCardFrontRemoved
             ? null
             : (_cardFrontImage != null)
@@ -376,7 +391,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
               const SizedBox(height: 16),
               _buildTextField(
                 _mobileController,
-                l10n.editContactMobile,
+                l10n.reviewFieldMobile,
                 Icons.smartphone,
                 keyboardType: TextInputType.phone,
               ),
@@ -387,6 +402,20 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
                 Icons.email,
                 keyboardType: TextInputType.emailAddress,
                 required: false,
+              ),
+              const SizedBox(height: 16),
+              _buildTextField(
+                _websiteController,
+                l10n.reviewFieldWebsite,
+                Icons.language,
+                keyboardType: TextInputType.url,
+              ),
+              const SizedBox(height: 16),
+              _buildTextField(
+                _addressController,
+                l10n.reviewFieldAddress,
+                Icons.location_on_outlined,
+                maxLines: 3,
               ),
               const SizedBox(height: 24),
 
@@ -407,7 +436,7 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
                         Expanded(
                           child: _buildTextField(
                             entry.value,
-                            _formatFieldLabel(entry.key),
+                            FieldFormatter.localizedLabel(l10n, entry.key),
                             _getIconForInfoType(entry.key),
                             readOnly: entry.key.toLowerCase().contains('birthday') || 
                                      entry.key.toLowerCase().contains('date'),
@@ -459,11 +488,13 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
     TextInputType? keyboardType,
     bool readOnly = false,
     VoidCallback? onTap,
+    int maxLines = 1,
   }) {
     return TextFormField(
       controller: controller,
       readOnly: readOnly,
       onTap: onTap,
+      maxLines: maxLines,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, color: Colors.grey),
@@ -834,7 +865,10 @@ class _AddFieldDialogState extends State<_AddFieldDialog> {
             initialValue: _selectedCategory,
             decoration: InputDecoration(labelText: l10n.editProfileFieldTypeLabel),
             items: widget.fieldTypes.keys.map((type) {
-              return DropdownMenuItem(value: type, child: Text(type));
+              return DropdownMenuItem(
+                value: type,
+                child: Text(FieldFormatter.addFieldCategoryLabel(l10n, type)),
+              );
             }).toList(),
             onChanged: (value) {
               setState(() {
@@ -848,7 +882,10 @@ class _AddFieldDialogState extends State<_AddFieldDialog> {
             initialValue: _selectedLabel,
             decoration: InputDecoration(labelText: l10n.editProfileFieldLabelLabel),
             items: widget.fieldTypes[_selectedCategory]!.map((label) {
-              return DropdownMenuItem(value: label, child: Text(label));
+              return DropdownMenuItem(
+                value: label,
+                child: Text(FieldFormatter.addFieldLabel(l10n, label)),
+              );
             }).toList(),
             onChanged: (value) {
               setState(() {
