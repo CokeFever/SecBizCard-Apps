@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:secbizcard/core/responsive/adaptive_container.dart';
 import 'package:secbizcard/core/responsive/breakpoints.dart';
+import 'package:secbizcard/core/widgets/root_messenger.dart';
 import 'package:secbizcard/features/profile/domain/user_profile.dart';
 import 'package:secbizcard/features/contacts/data/contacts_repository.dart';
 import 'package:secbizcard/features/contacts/data/recognition_quality.dart';
@@ -227,22 +229,22 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
     return false;
   }
 
-  /// Called on Back. If recognition looked poor, offer the (opt-in) report
-  /// prompt, then let the pop proceed. Returns after any dialog completes.
-  Future<void> _handleLeave() async {
-    if (_feedbackHandled) return;
+  /// Called on Back. If recognition looked poor, run the (opt-in) report
+  /// prompt + consent dialog and return the collected submission; otherwise
+  /// null. Collects consent only — it performs NO upload and reads NO localized
+  /// strings (the l10n bundle is captured in the pop callback prologue, before
+  /// this is ever awaited), so the submit can run detached after the pop. See
+  /// Decision 2.
+  Future<OcrFeedbackSubmission?> _collectFeedbackIfAny() async {
+    if (_feedbackHandled) return null;
     _feedbackHandled = true;
     // Only for shared-key / own-key with raw lines available, and only when the
     // result looked poor. Nothing here blocks leaving.
-    if (widget.ocrRawLines == null || widget.ocrRawLines!.isEmpty) return;
-    if (!_recognitionLikelyPoor) return;
-    if (!mounted) return;
+    if (widget.ocrRawLines == null || widget.ocrRawLines!.isEmpty) return null;
+    if (!_recognitionLikelyPoor) return null;
+    if (!mounted) return null;
 
-    final proceed =
-        await OcrFeedbackDialogs.maybePromptOnLeave(context, _feedbackService);
-    if (!proceed || !mounted) return;
-
-    await OcrFeedbackDialogs.showConsentAndSubmit(
+    return OcrFeedbackDialogs.collectFeedbackIfAny(
       context,
       _feedbackService,
       OcrFeedbackSample(
@@ -280,9 +282,27 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        await _handleLeave();
+        // INVARIANT (load-bearing, see Decision 2): capture the localized
+        // strings as the FIRST statements, before any await and before any
+        // dialog runs. _collectFeedbackIfAny awaits dialogs that can tear down
+        // this element, so no AppLocalizations.of(context) call may appear
+        // after this point (here, in _collectFeedbackIfAny, or in the detached
+        // submit) — doing so would reintroduce a use-after-dispose.
+        final l10n = AppLocalizations.of(context)!;
+        final msgs = _FeedbackMessages(
+          thanks: l10n.ocrFeedbackThanks,
+          refunded: l10n.ocrFeedbackThanksRefunded,
+          limit: l10n.ocrFeedbackLimitReached,
+          failed: l10n.ocrFeedbackFailed,
+        );
+        final submission = await _collectFeedbackIfAny();
         if (mounted && context.mounted && Navigator.canPop(context)) {
-          Navigator.pop(context);
+          Navigator.pop(context); // return to capture NOW
+        }
+        if (submission != null) {
+          // Detached: survives this screen's disposal so backing out never
+          // cancels the upload. Toasts via the app-root messenger.
+          unawaited(_submitFeedbackDetached(submission, msgs));
         }
       },
       child: Scaffold(
@@ -395,4 +415,61 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
       ),
     );
   }
+}
+
+/// Pre-resolved feedback result strings, captured on the review-screen context
+/// BEFORE the first await so the detached submit (which must never call
+/// AppLocalizations.of) can map a [FeedbackResult] to a localized toast.
+class _FeedbackMessages {
+  const _FeedbackMessages({
+    required this.thanks,
+    required this.refunded,
+    required this.limit,
+    required this.failed,
+  });
+
+  final String thanks;
+  final String refunded;
+  final String limit;
+  final String failed;
+}
+
+/// Submits a collected feedback sample detached from the (now-popped) review
+/// screen, then toasts the result via the app-root messenger. Holds NO
+/// widget/context references and never calls AppLocalizations.of — it owns its
+/// own [OcrFeedbackService] (app-scoped Firebase handles) and uses the
+/// pre-resolved [m] strings. This is what makes the upload survive the pop.
+///
+/// The include-photo derivation mirrors the old showConsentAndSubmit exactly so
+/// opt-out-photo is preserved: imagePath/consentImage are only set when the user
+/// ticked include-photo AND a local image path exists.
+Future<void> _submitFeedbackDetached(
+  OcrFeedbackSubmission s,
+  _FeedbackMessages m,
+) async {
+  final sample = s.sample;
+  final result = await OcrFeedbackService().submit(
+    engine: sample.engine,
+    recognitionId: sample.recognitionId,
+    appVersion: sample.appVersion,
+    ocrPkgVersion: sample.ocrPkgVersion,
+    cardLanguage: sample.cardLanguage,
+    region: sample.region,
+    rawOcrLines: sample.rawOcrLines,
+    parsedResult: sample.parsedResult,
+    confidence: sample.confidence,
+    imagePath: s.includePhoto ? sample.imagePath : null,
+    consentData: true,
+    consentImage: s.includePhoto && sample.imagePath != null,
+  );
+
+  final String msg;
+  if (result.limitReached) {
+    msg = m.limit;
+  } else if (result.success) {
+    msg = result.refunded ? m.refunded : m.thanks;
+  } else {
+    msg = m.failed;
+  }
+  rootMessengerKey.currentState?.showSnackBar(SnackBar(content: Text(msg)));
 }

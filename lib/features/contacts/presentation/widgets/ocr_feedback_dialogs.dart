@@ -10,8 +10,11 @@ import 'package:secbizcard/features/contacts/data/ocr_feedback_service.dart';
 ///     was poor, with a "don't ask for 24h" checkbox. Only call this when the
 ///     predictor flagged the result as likely-poor AND the prompt isn't
 ///     suppressed.
-///  2. [showConsentAndSubmit] — the consent dialog (concise summary + expandable
-///     full terms + optional include-photo), then submits via the service.
+///  2. [collectFeedbackIfAny] — the consent dialog (concise summary + expandable
+///     full terms + optional include-photo). It only COLLECTS consent and
+///     returns an [OcrFeedbackSubmission] (or null); it performs NO upload and
+///     shows NO toast. The actual submit runs detached, after the screen pops,
+///     so backing out of the review screen never cancels an in-flight upload.
 ///
 /// Consent legal text is a PLACEHOLDER pending legal review (see the arb key
 /// `ocrFeedbackTermsBody`).
@@ -69,14 +72,20 @@ class OcrFeedbackDialogs {
     return proceed ?? false;
   }
 
-  /// Shows the consent dialog and, on agreement, submits the sample. Shows a
-  /// result snackbar. [sample] carries everything the service needs except the
-  /// image-consent flag (decided here via the checkbox).
-  static Future<void> showConsentAndSubmit(
+  /// Runs the Back-press prompt + consent dialog on [context] and, on
+  /// agreement, returns an immutable [OcrFeedbackSubmission] (sample + the
+  /// include-photo choice). Returns null if the user declined/cancelled at any
+  /// dialog. Performs NO upload and shows NO toast — the caller submits the
+  /// returned struct detached (after popping the screen) so the upload outlives
+  /// the review screen's lifecycle.
+  static Future<OcrFeedbackSubmission?> collectFeedbackIfAny(
     BuildContext context,
     OcrFeedbackService service,
     OcrFeedbackSample sample,
   ) async {
+    final proceed = await maybePromptOnLeave(context, service);
+    if (!proceed || !context.mounted) return null;
+
     final l10n = AppLocalizations.of(context)!;
     // Photo is included by DEFAULT (opt-out): the card image is what makes the
     // feedback useful for fixing recognition. It stays a checkbox the user can
@@ -144,37 +153,27 @@ class OcrFeedbackDialogs {
       ),
     );
 
-    if (agreed != true || !context.mounted) return;
+    if (agreed != true) return null;
 
-    final result = await service.submit(
-      engine: sample.engine,
-      recognitionId: sample.recognitionId,
-      appVersion: sample.appVersion,
-      ocrPkgVersion: sample.ocrPkgVersion,
-      cardLanguage: sample.cardLanguage,
-      region: sample.region,
-      rawOcrLines: sample.rawOcrLines,
-      parsedResult: sample.parsedResult,
-      confidence: sample.confidence,
-      // Only send the image path if the user ticked include-photo.
-      imagePath: includePhoto ? sample.imagePath : null,
-      consentData: true,
-      consentImage: includePhoto && sample.imagePath != null,
-    );
-
-    if (!context.mounted) return;
-    final String msg;
-    if (result.limitReached) {
-      msg = l10n.ocrFeedbackLimitReached;
-    } else if (result.success) {
-      msg = result.refunded
-          ? l10n.ocrFeedbackThanksRefunded
-          : l10n.ocrFeedbackThanks;
-    } else {
-      msg = l10n.ocrFeedbackFailed;
-    }
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    // No upload here: hand the collected consent back to the caller, which
+    // submits it detached after popping. The include-photo derivation must
+    // stay identical to the (previous) showConsentAndSubmit so opt-out-photo is
+    // preserved: the service receives imagePath only when the box is ticked.
+    return OcrFeedbackSubmission(sample: sample, includePhoto: includePhoto);
   }
+}
+
+/// Immutable result of [OcrFeedbackDialogs.collectFeedbackIfAny]: the gathered
+/// sample plus the user's include-photo choice. Holds no widget/context so the
+/// detached submit that consumes it can outlive the review screen.
+class OcrFeedbackSubmission {
+  const OcrFeedbackSubmission({
+    required this.sample,
+    required this.includePhoto,
+  });
+
+  final OcrFeedbackSample sample;
+  final bool includePhoto;
 }
 
 /// Everything needed to submit a feedback sample, gathered by the caller.
