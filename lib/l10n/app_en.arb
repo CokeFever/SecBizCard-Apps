@@ -1049,6 +1049,8 @@
   "@contextSettingsToggleJobTitle": {},
   "contextSettingsToggleCompany": "Company",
   "@contextSettingsToggleCompany": {},
+  "contextSettingsToggleDepartment": "Department",
+  "@contextSettingsToggleDepartment": {},
   "contextSettingsToggleAvatar": "Avatar",
   "@contextSettingsToggleAvatar": {},
   "contextSettingsToggleCardFront": "Business Card Front",

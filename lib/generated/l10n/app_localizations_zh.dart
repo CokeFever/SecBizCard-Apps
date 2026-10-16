@@ -1518,6 +1518,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get contextSettingsToggleCompany => '公司';
 
   @override
+  String get contextSettingsToggleDepartment => '部門';
+
+  @override
   String get contextSettingsToggleAvatar => '頭像';
 
   @override
@@ -3345,6 +3348,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get contextSettingsToggleCompany => '公司';
 
   @override
+  String get contextSettingsToggleDepartment => '部门';
+
+  @override
   String get contextSettingsToggleAvatar => '头像';
 
   @override
@@ -5170,6 +5176,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get contextSettingsToggleCompany => '公司';
+
+  @override
+  String get contextSettingsToggleDepartment => '部門';
 
   @override
   String get contextSettingsToggleAvatar => '頭像';

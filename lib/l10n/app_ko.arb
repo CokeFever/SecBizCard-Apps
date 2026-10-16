@@ -476,6 +476,7 @@
   "contextSettingsTogglePhone": "전화",
   "contextSettingsToggleJobTitle": "직책",
   "contextSettingsToggleCompany": "회사",
+  "contextSettingsToggleDepartment": "부서",
   "contextSettingsToggleAvatar": "아바타",
   "contextSettingsToggleCardFront": "명함 앞면",
   "contextSettingsToggleCardBack": "명함 뒷면",

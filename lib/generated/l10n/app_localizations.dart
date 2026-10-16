@@ -2906,6 +2906,12 @@ abstract class AppLocalizations {
   /// **'Company'**
   String get contextSettingsToggleCompany;
 
+  /// No description provided for @contextSettingsToggleDepartment.
+  ///
+  /// In en, this message translates to:
+  /// **'Department'**
+  String get contextSettingsToggleDepartment;
+
   /// No description provided for @contextSettingsToggleAvatar.
   ///
   /// In en, this message translates to:

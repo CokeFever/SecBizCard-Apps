@@ -1544,6 +1544,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get contextSettingsToggleCompany => '会社';
 
   @override
+  String get contextSettingsToggleDepartment => '部署';
+
+  @override
   String get contextSettingsToggleAvatar => 'アバター';
 
   @override

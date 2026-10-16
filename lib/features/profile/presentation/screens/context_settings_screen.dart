@@ -318,6 +318,15 @@ class _ContextSettingsScreenState extends ConsumerState<ContextSettingsScreen> {
                   icon: Icons.business_outlined,
                 ),
                 _buildToggle(
+                  l10n.contextSettingsToggleDepartment,
+                  cardContext.showDepartment,
+                  (value) => _updateContext(
+                    type,
+                    cardContext.copyWith(showDepartment: value),
+                  ),
+                  icon: Icons.apartment_outlined,
+                ),
+                _buildToggle(
                   l10n.contextSettingsToggleAvatar,
                   cardContext.showAvatar,
                   (value) => _updateContext(
