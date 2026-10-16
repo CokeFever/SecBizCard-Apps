@@ -100,6 +100,12 @@ android {
         }
     }
 
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
+
     dependencies {
         // Official OpenCV Android artifact from Maven Central.
         // Replaces the discontinued com.quickbirdstudios:opencv:4.5.3.0, whose
