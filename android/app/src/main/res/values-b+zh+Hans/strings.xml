@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Anchor config only: forces aapt2 to emit a zh-Hans config in the
+     resource table so Android per-app language selection (简体中文/zh-Hans-CN/SG)
+     can match and apply. Real UI strings are Flutter ARBs (lib/l10n).
+     Do not add translations here. -->
+<resources>
+    <string name="app_name">SecBizCard</string>
+</resources>

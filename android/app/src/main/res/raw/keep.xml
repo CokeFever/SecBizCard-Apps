@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Resource-shrinker keep list.
+
+     The release build enables shrinkResources (build.gradle.kts). The app's
+     launcher label is a hardcoded literal in AndroidManifest.xml
+     (android:label="SecBizCard"), so @string/app_name is NOT referenced from
+     code or the manifest. Without this keep directive the shrinker strips
+     app_name entirely — including its values-b+zh+Hant / values-b+zh+Hans
+     configs — which collapses the compiled resource table back to a bare `zh`
+     locale and breaks Android per-app language matching for Traditional Chinese
+     (中文（台灣）/zh-TW and 繁體中文/zh-Hant-HK/MO/MY).
+
+     Keeping app_name forces the shrinker to retain all of its locale configs so
+     aapt2 emits real zh-Hant and zh-Hans configs. These are anchor configs only;
+     real UI strings live in Flutter ARBs (lib/l10n). -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@string/app_name" />
