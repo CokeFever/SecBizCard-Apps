@@ -1753,4 +1753,108 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get versionGateLaterAction => '後で';
+
+  @override
+  String get customFieldCategoryPhone => '電話';
+
+  @override
+  String get customFieldCategoryEmail => 'メール';
+
+  @override
+  String get customFieldCategoryAddress => '住所';
+
+  @override
+  String get customFieldCategoryWebsite => 'ウェブサイト';
+
+  @override
+  String get customFieldCategorySocial => 'ソーシャル';
+
+  @override
+  String get customFieldCategoryDate => '日付';
+
+  @override
+  String get customFieldCategoryNote => 'メモ';
+
+  @override
+  String get customFieldLabelWork => '勤務先';
+
+  @override
+  String get customFieldLabelHome => '自宅';
+
+  @override
+  String get customFieldLabelMobile => '携帯';
+
+  @override
+  String get customFieldLabelFax => 'FAX';
+
+  @override
+  String get customFieldLabelMain => '代表';
+
+  @override
+  String get customFieldLabelOther => 'その他';
+
+  @override
+  String get customFieldLabelPersonal => '個人';
+
+  @override
+  String get customFieldLabelCompany => '会社';
+
+  @override
+  String get customFieldLabelBlog => 'ブログ';
+
+  @override
+  String get customFieldLabelPortfolio => 'ポートフォリオ';
+
+  @override
+  String get customFieldLabelLinkedin => 'LinkedIn';
+
+  @override
+  String get customFieldLabelTwitter => 'Twitter';
+
+  @override
+  String get customFieldLabelFacebook => 'Facebook';
+
+  @override
+  String get customFieldLabelInstagram => 'Instagram';
+
+  @override
+  String get customFieldLabelGithub => 'GitHub';
+
+  @override
+  String get customFieldLabelBirthday => '誕生日';
+
+  @override
+  String get customFieldLabelAnniversary => '記念日';
+
+  @override
+  String get customFieldLabelGeneral => '一般';
+
+  @override
+  String customFieldLabelComposed(String label, String category) {
+    return '$category$label';
+  }
+
+  @override
+  String get customFieldAltName => '別名';
+
+  @override
+  String get customFieldAltTitle => '別の役職';
+
+  @override
+  String get customFieldAltCompany => '別の会社';
+
+  @override
+  String get customFieldAltPhone => '別の電話';
+
+  @override
+  String get customFieldAltAddress => '別の住所';
+
+  @override
+  String get customFieldCity => '市区町村';
+
+  @override
+  String get customFieldPostalCode => '郵便番号';
+
+  @override
+  String get customFieldNickname => 'ニックネーム';
 }

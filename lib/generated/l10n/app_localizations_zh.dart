@@ -1725,6 +1725,110 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get versionGateLaterAction => '稍後';
+
+  @override
+  String get customFieldCategoryPhone => '電話';
+
+  @override
+  String get customFieldCategoryEmail => '電子郵件';
+
+  @override
+  String get customFieldCategoryAddress => '地址';
+
+  @override
+  String get customFieldCategoryWebsite => '網站';
+
+  @override
+  String get customFieldCategorySocial => '社群';
+
+  @override
+  String get customFieldCategoryDate => '日期';
+
+  @override
+  String get customFieldCategoryNote => '備註';
+
+  @override
+  String get customFieldLabelWork => '公司';
+
+  @override
+  String get customFieldLabelHome => '住家';
+
+  @override
+  String get customFieldLabelMobile => '行動';
+
+  @override
+  String get customFieldLabelFax => '傳真';
+
+  @override
+  String get customFieldLabelMain => '主要';
+
+  @override
+  String get customFieldLabelOther => '其他';
+
+  @override
+  String get customFieldLabelPersonal => '個人';
+
+  @override
+  String get customFieldLabelCompany => '公司';
+
+  @override
+  String get customFieldLabelBlog => '部落格';
+
+  @override
+  String get customFieldLabelPortfolio => '作品集';
+
+  @override
+  String get customFieldLabelLinkedin => 'LinkedIn';
+
+  @override
+  String get customFieldLabelTwitter => 'Twitter';
+
+  @override
+  String get customFieldLabelFacebook => 'Facebook';
+
+  @override
+  String get customFieldLabelInstagram => 'Instagram';
+
+  @override
+  String get customFieldLabelGithub => 'GitHub';
+
+  @override
+  String get customFieldLabelBirthday => '生日';
+
+  @override
+  String get customFieldLabelAnniversary => '紀念日';
+
+  @override
+  String get customFieldLabelGeneral => '一般';
+
+  @override
+  String customFieldLabelComposed(String label, String category) {
+    return '$category$label';
+  }
+
+  @override
+  String get customFieldAltName => '其他姓名';
+
+  @override
+  String get customFieldAltTitle => '其他職稱';
+
+  @override
+  String get customFieldAltCompany => '其他公司';
+
+  @override
+  String get customFieldAltPhone => '其他電話';
+
+  @override
+  String get customFieldAltAddress => '其他地址';
+
+  @override
+  String get customFieldCity => '城市';
+
+  @override
+  String get customFieldPostalCode => '郵遞區號';
+
+  @override
+  String get customFieldNickname => '暱稱';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -3448,6 +3552,110 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get versionGateLaterAction => '稍后';
+
+  @override
+  String get customFieldCategoryPhone => '电话';
+
+  @override
+  String get customFieldCategoryEmail => '电子邮件';
+
+  @override
+  String get customFieldCategoryAddress => '地址';
+
+  @override
+  String get customFieldCategoryWebsite => '网站';
+
+  @override
+  String get customFieldCategorySocial => '社交';
+
+  @override
+  String get customFieldCategoryDate => '日期';
+
+  @override
+  String get customFieldCategoryNote => '备注';
+
+  @override
+  String get customFieldLabelWork => '公司';
+
+  @override
+  String get customFieldLabelHome => '住家';
+
+  @override
+  String get customFieldLabelMobile => '手机';
+
+  @override
+  String get customFieldLabelFax => '传真';
+
+  @override
+  String get customFieldLabelMain => '主要';
+
+  @override
+  String get customFieldLabelOther => '其他';
+
+  @override
+  String get customFieldLabelPersonal => '个人';
+
+  @override
+  String get customFieldLabelCompany => '公司';
+
+  @override
+  String get customFieldLabelBlog => '博客';
+
+  @override
+  String get customFieldLabelPortfolio => '作品集';
+
+  @override
+  String get customFieldLabelLinkedin => 'LinkedIn';
+
+  @override
+  String get customFieldLabelTwitter => 'Twitter';
+
+  @override
+  String get customFieldLabelFacebook => 'Facebook';
+
+  @override
+  String get customFieldLabelInstagram => 'Instagram';
+
+  @override
+  String get customFieldLabelGithub => 'GitHub';
+
+  @override
+  String get customFieldLabelBirthday => '生日';
+
+  @override
+  String get customFieldLabelAnniversary => '纪念日';
+
+  @override
+  String get customFieldLabelGeneral => '常规';
+
+  @override
+  String customFieldLabelComposed(String label, String category) {
+    return '$category$label';
+  }
+
+  @override
+  String get customFieldAltName => '其他姓名';
+
+  @override
+  String get customFieldAltTitle => '其他职位';
+
+  @override
+  String get customFieldAltCompany => '其他公司';
+
+  @override
+  String get customFieldAltPhone => '其他电话';
+
+  @override
+  String get customFieldAltAddress => '其他地址';
+
+  @override
+  String get customFieldCity => '城市';
+
+  @override
+  String get customFieldPostalCode => '邮政编码';
+
+  @override
+  String get customFieldNickname => '昵称';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -5171,4 +5379,108 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get versionGateLaterAction => '稍後';
+
+  @override
+  String get customFieldCategoryPhone => '電話';
+
+  @override
+  String get customFieldCategoryEmail => '電子郵件';
+
+  @override
+  String get customFieldCategoryAddress => '地址';
+
+  @override
+  String get customFieldCategoryWebsite => '網站';
+
+  @override
+  String get customFieldCategorySocial => '社群';
+
+  @override
+  String get customFieldCategoryDate => '日期';
+
+  @override
+  String get customFieldCategoryNote => '備註';
+
+  @override
+  String get customFieldLabelWork => '公司';
+
+  @override
+  String get customFieldLabelHome => '住家';
+
+  @override
+  String get customFieldLabelMobile => '行動';
+
+  @override
+  String get customFieldLabelFax => '傳真';
+
+  @override
+  String get customFieldLabelMain => '主要';
+
+  @override
+  String get customFieldLabelOther => '其他';
+
+  @override
+  String get customFieldLabelPersonal => '個人';
+
+  @override
+  String get customFieldLabelCompany => '公司';
+
+  @override
+  String get customFieldLabelBlog => '部落格';
+
+  @override
+  String get customFieldLabelPortfolio => '作品集';
+
+  @override
+  String get customFieldLabelLinkedin => 'LinkedIn';
+
+  @override
+  String get customFieldLabelTwitter => 'Twitter';
+
+  @override
+  String get customFieldLabelFacebook => 'Facebook';
+
+  @override
+  String get customFieldLabelInstagram => 'Instagram';
+
+  @override
+  String get customFieldLabelGithub => 'GitHub';
+
+  @override
+  String get customFieldLabelBirthday => '生日';
+
+  @override
+  String get customFieldLabelAnniversary => '紀念日';
+
+  @override
+  String get customFieldLabelGeneral => '一般';
+
+  @override
+  String customFieldLabelComposed(String label, String category) {
+    return '$category$label';
+  }
+
+  @override
+  String get customFieldAltName => '其他姓名';
+
+  @override
+  String get customFieldAltTitle => '其他職稱';
+
+  @override
+  String get customFieldAltCompany => '其他公司';
+
+  @override
+  String get customFieldAltPhone => '其他電話';
+
+  @override
+  String get customFieldAltAddress => '其他地址';
+
+  @override
+  String get customFieldCity => '城市';
+
+  @override
+  String get customFieldPostalCode => '郵遞區號';
+
+  @override
+  String get customFieldNickname => '暱稱';
 }

@@ -572,11 +572,11 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
             if (_user.mobile != null && _user.mobile!.isNotEmpty)
               _buildContactTile(
                 icon: Icons.smartphone,
-                label: l10n.editContactMobile,
+                label: l10n.reviewFieldMobile,
                 value: _user.mobile!,
                 onTap: () => _launchPhone(_user.mobile!),
                 onLongPress: () =>
-                    _copyToClipboard(_user.mobile!, l10n.editContactMobile),
+                    _copyToClipboard(_user.mobile!, l10n.reviewFieldMobile),
               ),
 
             if (_user.title != null && _user.title!.isNotEmpty)
@@ -616,6 +616,16 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
                     _copyToClipboard(_user.address!, l10n.contactDetailLabelAddress),
               ),
 
+            if (_user.website != null && _user.website!.isNotEmpty)
+              _buildContactTile(
+                icon: Icons.language_outlined,
+                label: l10n.reviewFieldWebsite,
+                value: _user.website!,
+                onTap: () => _launchUrl(_user.website!),
+                onLongPress: () =>
+                    _copyToClipboard(_user.website!, l10n.reviewFieldWebsite),
+              ),
+
             if (_user.customFields.isNotEmpty) ...[
               const SizedBox(height: 16),
               const Divider(),
@@ -625,7 +635,7 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
                   .map((entry) {
                     return _buildContactTile(
                       icon: FieldFormatter.getIcon(entry.key),
-                      label: FieldFormatter.formatLabel(entry.key),
+                      label: FieldFormatter.localizedLabel(l10n, entry.key),
                       value: entry.value,
                       onTap: () {
                         if (entry.value.startsWith('http')) {

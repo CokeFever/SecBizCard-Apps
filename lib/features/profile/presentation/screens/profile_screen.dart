@@ -96,7 +96,8 @@ class ProfileScreen extends ConsumerWidget {
                     return _buildInfoTile(
                       FieldFormatter.getIcon(entry.key),
                       entry.value,
-                      label: FieldFormatter.formatLabel(entry.key),
+                      label: FieldFormatter.localizedLabel(
+                          AppLocalizations.of(context)!, entry.key),
                       showVerificationHint: false, // Hidden until mechanism is ready
                       onVerifyTap: null, // Disabled for secondary emails
                     );
