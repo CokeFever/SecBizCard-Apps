@@ -29,6 +29,7 @@ extension UserProfileFilter on UserProfile {
     if (context.showPhone) filtered['phone'] = phone;
     if (context.showTitle) filtered['title'] = title;
     if (context.showCompany) filtered['company'] = company;
+    if (context.showDepartment) filtered['department'] = department;
     if (context.showAvatar) {
       filtered['photoUrl'] = photoUrl;
       filtered['avatarDriveFileId'] = avatarDriveFileId;

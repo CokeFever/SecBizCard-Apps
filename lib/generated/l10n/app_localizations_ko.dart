@@ -1543,6 +1543,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get contextSettingsToggleCompany => '회사';
 
   @override
+  String get contextSettingsToggleDepartment => '부서';
+
+  @override
   String get contextSettingsToggleAvatar => '아바타';
 
   @override

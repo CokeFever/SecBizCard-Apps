@@ -1580,6 +1580,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get contextSettingsToggleCompany => 'Company';
 
   @override
+  String get contextSettingsToggleDepartment => 'Department';
+
+  @override
   String get contextSettingsToggleAvatar => 'Avatar';
 
   @override
