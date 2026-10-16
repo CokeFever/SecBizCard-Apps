@@ -30,6 +30,11 @@ void main() {
       expected: zhHant,
     ),
     (
+      desc: 'zh-Hant-TW (script+region) -> Hant',
+      input: [const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'TW')],
+      expected: zhHant,
+    ),
+    (
       desc: 'zh-Hans-SG (script subtag beats region)',
       input: [const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans', countryCode: 'SG')],
       expected: zhHans,
