@@ -207,6 +207,10 @@ GoRouter goRouter(Ref ref) {
           return ContactReviewScreen(
             profile: args['profile'] as UserProfile,
             imagePath: args['imagePath'] as String,
+            // OCR-INPUT image (the exact bytes Vision/ML Kit saw). The feedback
+            // corpus uploads this, not the displayed preview. Null when reached
+            // from a path that carries no separate OCR-input image.
+            ocrImagePath: args['ocrImagePath'] as String?,
             // Optional OCR metadata for the "report bad recognition" flow.
             ocrEngine: args['ocrEngine'] as String?,
             ocrRecognitionId: args['ocrRecognitionId'] as String?,

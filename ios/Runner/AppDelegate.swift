@@ -247,13 +247,17 @@ import ImageIO
         }
 
         // ============================================================
-        // STEP 6: Image Enhancement (matches Android's enhanceImage)
+        // STEP 6: OCR-INPUT enhancement — CONTRAST-ONLY (NO brightness)
         // ============================================================
+        // The brightness bump (formerly kCIInputBrightnessKey 0.04) is dropped:
+        // it washed out faint text and caused the over-exposed scans. Contrast
+        // 1.2 is unchanged and legibility-neutral for OCR, so the OCR bytes
+        // carry LESS alteration than 1.6.5, never more. The preview knobs are
+        // NEVER read here (SCOPE FENCE) — the preview is written separately.
         let finalCG = finalImage.cgImage!
         let enhancedCI = CIImage(cgImage: finalCG)
             .applyingFilter("CIColorControls", parameters: [
                 kCIInputContrastKey: 1.2,
-                kCIInputBrightnessKey: 0.04,
             ])
 
         guard let enhancedCG = ctxLocal.createCGImage(enhancedCI, from: enhancedCI.extent) else {
@@ -263,11 +267,16 @@ import ImageIO
         let enhancedImage = UIImage(cgImage: enhancedCG)
 
         // ============================================================
-        // STEP 7: Save as JPEG
+        // STEP 7: Save OCR-input JPEG + the display PREVIEW sibling
         // ============================================================
         if let jpegData = enhancedImage.jpegData(compressionQuality: 0.9) {
             do {
                 try jpegData.write(to: URL(fileURLWithPath: outputPath))
+                // PREVIEW: contrast-only enhancement of the SAME oriented clean
+                // warp (finalImage, pre-OCR-contrast) at the preview contrast.
+                // Degrade to the OCR path if the preview can't be written.
+                let previewOut = self.writePreview(finalImage, outputPath: outputPath,
+                                                   tuning: tuning, ctx: ctxLocal) ?? outputPath
                 let areaRatio = fullArea > 0 ? CardScoring.polygonArea(winner) / fullArea : 0.0
                 let pts: [Double] = [
                     Double(winner[0].x), Double(winner[0].y),
@@ -280,6 +289,7 @@ import ImageIO
                         "success": true,
                         "fallback": false,
                         "fallbackState": "state3",
+                        "previewPath": previewOut,
                         "aspectMismatch": aspectMismatch,
                         "score": score,
                         "areaRatio": areaRatio,
@@ -320,6 +330,9 @@ import ImageIO
         }
 
         var fallbackState = "state1"
+        // The oriented clean image the PREVIEW is derived from (same
+        // orientation as the saved OCR-input bytes).
+        var previewSource: UIImage? = nil
         if let roi = state2Roi {
             // CIImage is BOTTOM-LEFT origin: convert the TL ROI to CI (BL) space,
             // crop, re-origin to (0,0), then run the SAME orient/enhance/save
@@ -339,18 +352,24 @@ import ImageIO
                 } else if !isVertical && ch > cw {
                     cropImage = self.rotateUIImage90CW(cropImage)
                 }
-                // Enhancement (matches finish's CIColorControls).
+                // OCR-INPUT enhancement — CONTRAST-ONLY (NO brightness). iOS
+                // still enhances STATE 2 for OCR input (the documented
+                // iOS-enhances / Android-does-not divergence is preserved), but
+                // the washout-causing brightness key is dropped. Preview knobs
+                // are NEVER read here (SCOPE FENCE).
                 let cropCGf = cropImage.cgImage!
                 let enhancedCI = CIImage(cgImage: cropCGf)
                     .applyingFilter("CIColorControls", parameters: [
                         kCIInputContrastKey: 1.2,
-                        kCIInputBrightnessKey: 0.04,
                     ])
                 if let enhancedCG = ctxLocal.createCGImage(enhancedCI, from: enhancedCI.extent),
                    let jpegData = UIImage(cgImage: enhancedCG).jpegData(compressionQuality: 0.9) {
                     do {
                         try jpegData.write(to: URL(fileURLWithPath: outputPath))
                         fallbackState = "state2"
+                        // Preview derives from the oriented (pre-OCR-contrast)
+                        // crop so it matches the stored orientation.
+                        previewSource = cropImage
                     } catch {
                         print("STATE 2 save error: \(error)")
                     }
@@ -361,12 +380,20 @@ import ImageIO
         if fallbackState == "state1" {
             // No usable guide ROI (or STATE 2 render failed) → last-resort full
             // frame (STATE 1): write the full baked image so the fallback path
-            // ALWAYS produces a file.
+            // ALWAYS produces a file. OCR input stays RAW (unchanged).
             if let fullCG = ctxLocal.createCGImage(bakedImage, from: bakedImage.extent),
                let jpegData = UIImage(cgImage: fullCG).jpegData(compressionQuality: 0.9) {
                 try? jpegData.write(to: URL(fileURLWithPath: outputPath))
+                previewSource = UIImage(cgImage: fullCG)
             }
         }
+
+        // PREVIEW sibling for the fallback states: contrast-only enhanced copy
+        // of the oriented crop/frame (never brightness). Degrade to the OCR
+        // path on write failure.
+        let previewOut = previewSource.flatMap {
+            self.writePreview($0, outputPath: outputPath, tuning: tuning, ctx: ctxLocal)
+        } ?? outputPath
 
         // Manual-crop seed: best sub-threshold quad if present, else guide
         // corners, else full-frame corners. Never an 80% default.
@@ -395,6 +422,7 @@ import ImageIO
                 "success": true,
                 "fallback": true,
                 "fallbackState": fallbackStateOut,
+                "previewPath": previewOut,
                 "aspectMismatch": aspectMismatch,
                 "score": score,
                 "areaRatio": 0.0, // no card detected
@@ -477,6 +505,50 @@ import ImageIO
     return CGRect(x: x0, y: y0, width: max(0, x1 - x0), height: max(0, y1 - y0))
   }
   
+  /// Derives the sibling preview path from an OCR-input outputPath by swapping
+  /// only the trailing ".jpg" for "_preview.jpg". Native and Dart apply the
+  /// SAME deterministic rule, so the preview filename agrees without passing it
+  /// over the channel. Anchored to the END so only the extension is swapped.
+  private func previewPath(for outputPath: String) -> String {
+    if outputPath.hasSuffix(".jpg") {
+      return String(outputPath.dropLast(4)) + "_preview.jpg"
+    }
+    return outputPath + "_preview.jpg"
+  }
+
+  /// Writes the user-visible PREVIEW sibling for [outputPath]. The preview is a
+  /// CONTRAST-ONLY (NO brightness) enhancement of the already-oriented
+  /// [orientedClean] image at `tuning.previewContrast`, OR a plain copy when
+  /// `previewEnhanceEnabled` is off. SCOPE FENCE: this is the ONLY place the
+  /// preview knobs are read; the OCR-input writes never see them. Returns the
+  /// preview path on success, or nil on any failure so the caller can degrade
+  /// the preview to the OCR-input path (a scan must never fail because the
+  /// cosmetic preview couldn't be written).
+  private func writePreview(_ orientedClean: UIImage, outputPath: String,
+                            tuning: CardScoring.CardTuning, ctx: CIContext) -> String? {
+    let dest = previewPath(for: outputPath)
+    let previewImage: UIImage
+    if tuning.previewEnhanceEnabled, let cg = orientedClean.cgImage {
+      // Contrast-only, NO brightness key — same rule as the OCR input, just a
+      // (possibly) different contrast driven by Remote Config.
+      let ci = CIImage(cgImage: cg).applyingFilter("CIColorControls", parameters: [
+        kCIInputContrastKey: tuning.previewContrast,
+      ])
+      guard let outCG = ctx.createCGImage(ci, from: ci.extent) else { return nil }
+      previewImage = UIImage(cgImage: outCG)
+    } else {
+      previewImage = orientedClean // plain copy of the clean image
+    }
+    guard let jpeg = previewImage.jpegData(compressionQuality: 0.9) else { return nil }
+    do {
+      try jpeg.write(to: URL(fileURLWithPath: dest))
+      return dest
+    } catch {
+      print("preview save error: \(error)")
+      return nil
+    }
+  }
+
   /// Rotate a UIImage 90° clockwise (matches Android's Core.ROTATE_90_CLOCKWISE)
   private func rotateUIImage90CW(_ image: UIImage) -> UIImage {
     let size = CGSize(width: image.size.height, height: image.size.width)

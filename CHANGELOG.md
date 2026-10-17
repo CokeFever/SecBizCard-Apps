@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.6.6]
+
+### Fixed
+- **Scan**: Department/unit is now recognized on two-column cards, where the contact details sit in a separate column from the name and title. Previously a right-column email could keep the left-column department from being picked up.
+- **Scan**: The saved "original scan" is no longer over-exposed. The image shown and stored for you now uses clearer black-and-white contrast instead of a brightness boost, so faint text stays legible — while the text recognition itself reads an un-brightened copy, so accuracy is unchanged.
+
+### Changed
+- **Scan**: Added more department/unit terms (including the Chinese suffix 科) and a safeguard so a company name ending in a unit-like word is not mistaken for a department.
+- **Report bad recognition**: Monthly feedback submissions now scale with your plan — more submissions on higher tiers, and unlimited for VIP.
+
 ## [1.5.9] - 2026-09-21
 
 ### Fixed

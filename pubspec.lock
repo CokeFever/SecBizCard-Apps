@@ -5,8 +5,8 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/SecBizCard_OCR"
-      ref: b223f8bba0d7829119c5f01dcf637ae18ba99a73
-      resolved-ref: b223f8bba0d7829119c5f01dcf637ae18ba99a73
+      ref: dab6c0ac6d7c2f47d075243b8d0f130d7897c4af
+      resolved-ref: dab6c0ac6d7c2f47d075243b8d0f130d7897c4af
       url: "git@github.com:CokeFever/SecBizCard.git"
     source: git
     version: "0.0.1"

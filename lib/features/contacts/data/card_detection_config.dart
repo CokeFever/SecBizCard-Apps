@@ -85,6 +85,14 @@ class CardDetectionConfig {
     // the SAVED/OCR crop tightness, defaulting to 0.20 (+20% per side) per the
     // owner spec. Range-clamped. See docs/card_detection_scoring.md.
     'fallbackGuideMarginRatio': 0.20,
+    // Contrast applied to the DISPLAYED/stored "original scan" PREVIEW image
+    // ONLY (never the OCR-input bytes). Separating the preview from the OCR
+    // input lets us drop the washout-causing brightness bump from the OCR
+    // image while keeping the preview legible. Default 1.2 matches today's
+    // visible contrast. Range-clamped [1.0, 2.0] (1.0 = no change). NEVER read
+    // in the native OCR-input write path — see OpenCVProcessor.kt /
+    // AppDelegate.swift preview-write comments.
+    'previewContrast': 1.2,
   };
 
   static const Map<String, bool> _flagDefaults = <String, bool>{
@@ -99,6 +107,12 @@ class CardDetectionConfig {
     // kill-switch without a release. The mandatory full-image fallback makes
     // ON-by-default unable to regress detection relative to today.
     'usePrecrop': true,
+    // Preview-enhancement kill-switch. Defaults ON (the preview gets
+    // contrast-only enhancement at previewContrast). Flip OFF from the console
+    // to write the preview as a plain copy of the clean crop (no contrast
+    // change) — a remote rollback. Affects the PREVIEW image ONLY, never the
+    // OCR-input bytes.
+    'previewEnhanceEnabled': true,
   };
 
   // ---- Integer-valued remote config: the APP VERSION GATE thresholds. -------
@@ -156,6 +170,10 @@ class CardDetectionConfig {
     'cannyHighB': [1.0, 500.0],
     'precropMarginRatio': [0.0, 1.0],
     'fallbackGuideMarginRatio': [0.0, 1.0],
+    // 1.0 = no contrast change; cap at 2.0 to avoid crushing the preview. An
+    // out-of-range remote value keeps the default (1.2), per the keep-default
+    // mechanism in _fromRemoteConfig.
+    'previewContrast': [1.0, 2.0],
   };
 
   /// Fallback instance using only in-app defaults. Used before any successful

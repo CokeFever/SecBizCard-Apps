@@ -15,7 +15,17 @@ import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
 class ContactReviewScreen extends ConsumerStatefulWidget {
   final UserProfile profile;
+
+  /// Displayed/stored "original scan" — the contrast-only PREVIEW image. Shown
+  /// as the thumbnail. NOT uploaded to the feedback corpus (that needs the
+  /// exact OCR-input bytes, see [ocrImagePath]).
   final String imagePath;
+
+  /// OCR-INPUT image (the exact bytes Vision/ML Kit consumed). Uploaded to the
+  /// feedback corpus so reported samples reflect what OCR actually saw, not the
+  /// contrast-tweaked preview. Null when no separate OCR-input image exists
+  /// (then the feedback falls back to [imagePath]).
+  final String? ocrImagePath;
 
   // Optional OCR metadata for the "report bad recognition" flow. Null when the
   // screen is reached from a path that doesn't carry it.
@@ -42,6 +52,7 @@ class ContactReviewScreen extends ConsumerStatefulWidget {
     super.key,
     required this.profile,
     required this.imagePath,
+    this.ocrImagePath,
     this.ocrEngine,
     this.ocrRecognitionId,
     this.ocrRawLines,
@@ -267,7 +278,11 @@ class _ContactReviewScreenState extends ConsumerState<ContactReviewScreen> {
           'detectionScore': widget.ocrDetectionScore,
           'detectionFallback': widget.ocrDetectionFallback,
         },
-        imagePath: widget.imagePath,
+        // Upload the OCR-INPUT bytes (what Vision/ML Kit saw), NOT the
+        // contrast-tweaked preview. Falls back to the preview only when no
+        // separate OCR-input path exists (e.g. ML Kit). The include-photo
+        // opt-out in _submitFeedbackDetached still guards this path.
+        imagePath: widget.ocrImagePath ?? widget.imagePath,
       ),
     );
   }
