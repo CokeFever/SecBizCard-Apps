@@ -4,9 +4,11 @@ packages:
   SecBizCard_OCR:
     dependency: "direct main"
     description:
-      path: "../SecBizCard/packages/SecBizCard_OCR"
-      relative: true
-    source: path
+      path: "packages/SecBizCard_OCR"
+      ref: b223f8bba0d7829119c5f01dcf637ae18ba99a73
+      resolved-ref: b223f8bba0d7829119c5f01dcf637ae18ba99a73
+      url: "git@github.com:CokeFever/SecBizCard.git"
+    source: git
     version: "0.0.1"
   _discoveryapis_commons:
     dependency: transitive
@@ -1962,5 +1964,5 @@ packages:
     source: hosted
     version: "3.1.3"
 sdks:
-  dart: ">=3.10.3 <4.0.0"
+  dart: ">=3.10.8 <4.0.0"
   flutter: ">=3.38.4"
