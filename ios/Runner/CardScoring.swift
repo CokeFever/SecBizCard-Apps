@@ -62,6 +62,15 @@ enum CardScoring {
         // expanded by THIS fraction (not the full frame). Distinct from
         // precropMarginRatio (detection ROI). See docs/card_detection_scoring.md.
         var fallbackGuideMarginRatio = 0.20
+        // PREVIEW-ONLY knobs (SCOPE FENCE: feed the _preview JPEG ONLY — the
+        // user-visible "original scan". NEVER read in the OCR-input write path,
+        // which is brightness-free). See AppDelegate.swift preview-write sites.
+        //  - previewContrast: contrast for the preview (default 1.2; Dart
+        //    range-clamps to [1.0, 2.0]). No brightness offset.
+        //  - previewEnhanceEnabled: false => preview is a plain copy of the
+        //    clean crop (no contrast) — remote rollback kill-switch.
+        var previewContrast = 1.2
+        var previewEnhanceEnabled = true
 
         init() {}
 
@@ -92,6 +101,8 @@ enum CardScoring {
             usePrecrop = b("usePrecrop", usePrecrop)
             precropMarginRatio = d("precropMarginRatio", precropMarginRatio)
             fallbackGuideMarginRatio = d("fallbackGuideMarginRatio", fallbackGuideMarginRatio)
+            previewContrast = d("previewContrast", previewContrast)
+            previewEnhanceEnabled = b("previewEnhanceEnabled", previewEnhanceEnabled)
         }
     }
 

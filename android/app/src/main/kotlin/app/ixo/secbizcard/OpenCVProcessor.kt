@@ -106,6 +106,18 @@ class OpenCVProcessor {
         // expanded by THIS fraction (not the full frame). Distinct from
         // precropMarginRatio (detection ROI). See docs/card_detection_scoring.md.
         val fallbackGuideMarginRatio = d("fallbackGuideMarginRatio", 0.20)
+
+        // PREVIEW-ONLY knobs (SCOPE FENCE: these feed the _preview JPEG ONLY —
+        // the user-visible "original scan". They MUST NEVER be read in the
+        // OCR-input write path, which stays brightness-free contrast-only). The
+        // preview image exists so we could drop the washout-causing brightness
+        // bump from the OCR input without the stored scan looking flat.
+        //  - previewContrast: contrast multiplier for the preview (default 1.2,
+        //    range-clamped in Dart to [1.0, 2.0]). NO brightness offset.
+        //  - previewEnhanceEnabled: when false, the preview is a plain copy of
+        //    the clean crop (no contrast) — a remote rollback kill-switch.
+        val previewContrast = d("previewContrast", 1.2)
+        val previewEnhanceEnabled = b("previewEnhanceEnabled", true)
     }
 
     fun processBusinessCard(
@@ -222,23 +234,33 @@ class OpenCVProcessor {
 
                 val cardContour = MatOfPoint2f(*origCorners.map { it!! }.toTypedArray())
                 val result = warpPerspective(src, cardContour, t.useCentroidCornerSort)
+                // OCR-INPUT image: contrast-only (NO brightness) — see enhanceImage.
                 var processed = enhanceImage(result)
+                // PREVIEW image: the SAME clean warp, oriented identically, but
+                // enhanced only for display (preview knobs). Kept separate so
+                // the OCR bytes never gain the preview's contrast/offset.
+                var previewClean = result
 
                 if (isVertical) {
                     if (processed.cols() > processed.rows()) {
                         Core.rotate(processed, processed, Core.ROTATE_90_CLOCKWISE)
+                        Core.rotate(previewClean, previewClean, Core.ROTATE_90_CLOCKWISE)
                     }
                 } else {
                     if (processed.rows() > processed.cols()) {
                         Core.rotate(processed, processed, Core.ROTATE_90_CLOCKWISE)
+                        Core.rotate(previewClean, previewClean, Core.ROTATE_90_CLOCKWISE)
                     }
                 }
 
                 saveMatAsJpeg(processed, outputPath)
+                // Write the preview sibling; degrade to the OCR path on failure.
+                val previewPath = writePreview(previewClean, outputPath, t) ?: outputPath
 
                 resultData["success"] = true
                 resultData["fallback"] = false
                 resultData["fallbackState"] = "state3"
+                resultData["previewPath"] = previewPath
                 resultData["aspectMismatch"] = aspectMismatch
                 resultData["score"] = bestScore
                 // Fraction of the frame the detected card occupies. A small
@@ -265,7 +287,14 @@ class OpenCVProcessor {
             //    imageNormalizedGuide). We expand+clamp it in RESIZED pixels via
             //    the same expandAndClamp used for detection, then scale that ROI
             //    back to ORIGINAL src pixels for the crop.
+            //    OCR-input bytes in STATE 1/2 stay RAW on Android (we do NOT
+            //    newly enhance them — preserving the documented iOS-enhances-
+            //    STATE-2 / Android-does-not divergence for OCR input). The
+            //    contrast-enhanced sibling is the PREVIEW only.
             var fallbackState = "state1"
+            // Holds the oriented RAW crop/frame that the preview is derived
+            // from (same orientation as the saved OCR-input bytes).
+            var previewSource: Mat? = null
             if (imageGuideRect != null) {
                 val roiResized = expandAndClamp(
                     imageGuideRect, resized.cols(), resized.rows(),
@@ -293,19 +322,29 @@ class OpenCVProcessor {
                                 Core.rotate(cropped, cropped, Core.ROTATE_90_CLOCKWISE)
                             }
                         }
-                        saveMatAsJpeg(cropped, outputPath)
+                        saveMatAsJpeg(cropped, outputPath) // OCR input: RAW crop
+                        previewSource = cropped
                         fallbackState = "state2"
                     }
                 }
             }
             if (fallbackState == "state1") {
-                // No usable guide ROI → last-resort full frame (STATE 1).
+                // No usable guide ROI → last-resort full frame (STATE 1). OCR
+                // input is the RAW full frame (orientation as captured/baked).
                 saveMatAsJpeg(src, outputPath)
+                previewSource = src
             }
+
+            // PREVIEW sibling for the fallback states: contrast-only enhanced
+            // copy of the RAW crop/frame (never brightness). Degrade to the
+            // OCR path on write failure.
+            val previewPath =
+                (previewSource?.let { writePreview(it, outputPath, t) }) ?: outputPath
 
             resultData["success"] = true
             resultData["fallback"] = true
             resultData["fallbackState"] = fallbackState
+            resultData["previewPath"] = previewPath
             resultData["aspectMismatch"] = aspectMismatch
             resultData["score"] = bestScore
             resultData["areaRatio"] = 0.0 // no card detected
@@ -658,25 +697,35 @@ class OpenCVProcessor {
                 Point(points[6], points[7]),
             )
             val matPoints = MatOfPoint2f(*srcPoints)
-            var warped = warpPerspective(src, matPoints, t.useCentroidCornerSort)
+            val warpedClean = warpPerspective(src, matPoints, t.useCentroidCornerSort)
 
+            // OCR-INPUT image: contrast-only (NO brightness) — see enhanceImage.
+            var warped = warpedClean
             try {
-                warped = enhanceImage(warped)
+                warped = enhanceImage(warpedClean)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+            // PREVIEW image derived from the SAME clean warp, oriented identically.
+            var previewClean = warpedClean
 
             if (isVertical) {
                 if (warped.cols() > warped.rows()) {
                     Core.rotate(warped, warped, Core.ROTATE_90_CLOCKWISE)
+                    Core.rotate(previewClean, previewClean, Core.ROTATE_90_CLOCKWISE)
                 }
             } else {
                 if (warped.rows() > warped.cols()) {
                     Core.rotate(warped, warped, Core.ROTATE_90_CLOCKWISE)
+                    Core.rotate(previewClean, previewClean, Core.ROTATE_90_CLOCKWISE)
                 }
             }
 
             saveMatAsJpeg(warped, outputPath)
+            // Preview sibling at the deterministic _preview.jpg path; Dart
+            // derives the same path. Failure is non-fatal (Dart degrades to the
+            // OCR path), so a preview write error does not fail manual crop.
+            writePreview(previewClean, outputPath, t)
             return true
         } catch (e: Exception) {
             e.printStackTrace()
@@ -724,10 +773,59 @@ class OpenCVProcessor {
         }
     }
 
+    /**
+     * CONTRAST-ONLY enhancement for the OCR-INPUT image. The brightness offset
+     * (formerly +10) is dropped: a brightness bump washes out faint text and
+     * was the cause of the over-exposed, hard-to-read scans. Contrast 1.2 is
+     * legibility-neutral for OCR and unchanged from before, so the OCR bytes
+     * carry LESS alteration than 1.6.5, never more. This is NEVER passed the
+     * preview knobs — the preview is written separately by writePreview().
+     */
     private fun enhanceImage(src: Mat): Mat {
         val dest = Mat()
-        src.convertTo(dest, -1, 1.2, 10.0)
+        src.convertTo(dest, -1, 1.2, 0.0) // contrast 1.2, NO brightness offset
         return dest
+    }
+
+    /**
+     * Derives the sibling preview path from an OCR-input outputPath by swapping
+     * only the ".jpg" extension for "_preview.jpg". Native and Dart apply the
+     * SAME deterministic rule so the preview filename agrees without passing it
+     * over the channel. Anchored to the END so only the extension is swapped.
+     */
+    private fun previewPathFor(outputPath: String): String =
+        outputPath.replaceFirst(Regex("\\.jpg$"), "_preview.jpg")
+
+    /**
+     * Writes the user-visible PREVIEW sibling for [ocrOutputPath]. The preview
+     * is a CONTRAST-ONLY (NO brightness) enhancement of the already-oriented
+     * [orientedClean] crop at the preview contrast, OR a plain copy when
+     * previewEnhanceEnabled is off. SCOPE FENCE: this is the ONLY place the
+     * preview knobs are read; the OCR-input write never sees them. The caller
+     * passes a bitmap that is ALREADY in the final (isVertical-corrected)
+     * orientation, so the preview matches the stored card orientation.
+     * Returns the preview path on success, or null on any write failure so the
+     * caller can degrade the preview to the OCR-input path (a scan must never
+     * fail because the cosmetic preview couldn't be written).
+     */
+    private fun writePreview(orientedClean: Mat, ocrOutputPath: String, t: Tuning): String? {
+        return try {
+            val previewPath = previewPathFor(ocrOutputPath)
+            val preview = if (t.previewEnhanceEnabled) {
+                val dest = Mat()
+                // Contrast-only, NO brightness offset — same rule as OCR input,
+                // just a (possibly) different contrast driven by Remote Config.
+                orientedClean.convertTo(dest, -1, t.previewContrast, 0.0)
+                dest
+            } else {
+                orientedClean // plain copy of the clean crop (remote rollback)
+            }
+            saveMatAsJpeg(preview, previewPath)
+            previewPath
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 
     private fun warpPerspective(src: Mat, contour: MatOfPoint2f, useCentroid: Boolean = true): Mat {

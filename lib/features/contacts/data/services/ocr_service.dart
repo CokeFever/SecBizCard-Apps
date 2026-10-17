@@ -151,7 +151,19 @@ class OCRService {
   Future<bool> willAttemptCloudVision() async => true;
 
   /// Recognizes a business card, returning the parsed profile + engine used.
-  Future<OcrOutcome> recognize(String imagePath) async {
+  ///
+  /// [ocrImagePath] is the OCR-INPUT image — the exact bytes read for
+  /// Vision/ML Kit. [previewImagePath] (when present) is the display/stored
+  /// PREVIEW sibling (contrast-only, no brightness bump); the resulting
+  /// [UserProfile.originalImagePath] is set to it so the user sees the legible
+  /// preview while OCR consumes the un-brightened input. When null (e.g. the
+  /// ML Kit path has no native preview) originalImagePath falls back to the
+  /// OCR-input path. The bytes recognize() READS are always [ocrImagePath];
+  /// the preview path never affects recognition.
+  Future<OcrOutcome> recognize(String ocrImagePath,
+      {String? previewImagePath}) async {
+    final imagePath = ocrImagePath;
+    final storedImagePath = previewImagePath ?? ocrImagePath;
     final bytes = await File(imagePath).readAsBytes();
     final base64Image = base64Encode(bytes);
 
@@ -162,7 +174,7 @@ class OCRService {
         final res = await _vision.recognizeWithOwnKey(base64Image, ownKey);
         final parsed = _parseResult(res);
         return OcrOutcome(
-          profile: _mapToUserProfile(parsed, imagePath),
+          profile: _mapToUserProfile(parsed, storedImagePath),
           engine: OcrEngineUsed.ownKeyVision,
           rawOcrLines: _linesToMaps(res.lines),
           bestNameScore: parsed.bestNameScore,
@@ -183,7 +195,7 @@ class OCRService {
       final res = await _vision.recognizeWithSharedKey(base64Image);
       final parsed = _parseResult(res);
       return OcrOutcome(
-        profile: _mapToUserProfile(parsed, imagePath),
+        profile: _mapToUserProfile(parsed, storedImagePath),
         engine: OcrEngineUsed.sharedVision,
         // Near-limit warning only for finite tiers (VIP has null cap = ∞).
         note: (res.tierUsed != null && res.tierCap != null &&
@@ -211,7 +223,9 @@ class OCRService {
     try {
       final result = await _ocr.recognizeBusinessCard(imagePath);
       return OcrOutcome(
-        profile: _mapToUserProfile(result, imagePath),
+        // ML Kit runs no native enhance → no washout; originalImagePath =
+        // preview when one exists, else the OCR-input path (storedImagePath).
+        profile: _mapToUserProfile(result, storedImagePath),
         engine: OcrEngineUsed.mlKit,
       );
     } catch (e) {

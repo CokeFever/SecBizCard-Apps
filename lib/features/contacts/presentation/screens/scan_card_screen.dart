@@ -215,12 +215,16 @@ class _ScanCardScreenState extends ConsumerState<ScanCardScreen>
         });
       }
 
-      // Call OpenCV Perspective Correction
-      String finalImagePath = image.path;
+      // Call OpenCV Perspective Correction. We track TWO paths from here on:
+      //  - ocrInputPath: the exact bytes fed to recognize() (no brightness bump)
+      //  - previewPath: the display/stored "original scan" (contrast-only)
+      // They are the same file only when native produced no separate preview.
+      String ocrInputPath = image.path;
+      String previewPath = image.path;
       try {
-        final processedPath = await _processWithOpenCV(image.path);
+        final processed = await _processWithOpenCV(image.path);
 
-        if (processedPath == null) {
+        if (processed == null) {
           // User cancelled manual crop or processing failed
           if (mounted) {
             setState(() {
@@ -232,7 +236,8 @@ class _ScanCardScreenState extends ConsumerState<ScanCardScreen>
           return;
         }
 
-        finalImagePath = processedPath;
+        ocrInputPath = processed.ocrPath;
+        previewPath = processed.previewPath;
       } catch (e) {
         debugPrint('OpenCV processing failed, falling back to original: $e');
       }
@@ -250,14 +255,20 @@ class _ScanCardScreenState extends ConsumerState<ScanCardScreen>
         });
       }
 
-      final outcome = await _ocrService.recognize(finalImagePath);
+      final outcome = await _ocrService.recognize(
+        ocrInputPath,
+        previewImagePath: previewPath,
+      );
 
-      // Auto-upright the preview using the server-detected text orientation
-      // (from Vision word baselines). Fixes cards that came out 90°/180° off
-      // even though detection succeeded. No-op when orientation is 0.
+      // Auto-upright the stored/displayed PREVIEW using the server-detected
+      // text orientation (from Vision word baselines). Fixes cards that came
+      // out 90°/180° off even though detection succeeded. No-op when
+      // orientation is 0. The preview is what originalImagePath points at, so
+      // it's the image that must be rotated for display; the OCR bytes were
+      // already consumed above.
       if (outcome.orientation != 0) {
-        final rotated = await _applyOrientation(finalImagePath, outcome.orientation);
-        if (rotated != null) finalImagePath = rotated;
+        final rotated = await _applyOrientation(previewPath, outcome.orientation);
+        if (rotated != null) previewPath = rotated;
       }
 
       if (mounted) {
@@ -274,7 +285,11 @@ class _ScanCardScreenState extends ConsumerState<ScanCardScreen>
             '/review-contact',
             extra: {
               'profile': profile,
-              'imagePath': finalImagePath,
+              // Displayed/stored "original scan" = the contrast-only preview.
+              'imagePath': previewPath,
+              // OCR-INPUT image (the exact bytes Vision/ML Kit saw). The
+              // feedback corpus uploads THIS, never the preview.
+              'ocrImagePath': ocrInputPath,
               // Metadata for the optional "report bad recognition" flow.
               'ocrEngine': outcome.engineName,
               'ocrRecognitionId': outcome.recognitionId,
@@ -492,7 +507,20 @@ class _ScanCardScreenState extends ConsumerState<ScanCardScreen>
     return null;
   }
 
-  Future<String?> _processWithOpenCV(String inputPath) async {
+  /// Derives the sibling preview path from an OCR-input path by swapping only
+  /// the trailing ".jpg" for "_preview.jpg" — the SAME deterministic rule the
+  /// native side uses, so Dart and native agree without passing it over the
+  /// channel. Anchored to the END so only the extension is swapped.
+  String _previewPathFor(String ocrPath) =>
+      ocrPath.replaceFirst(RegExp(r'\.jpg$'), '_preview.jpg');
+
+  /// Runs native card processing and returns BOTH image paths: [ocrPath] is the
+  /// OCR-input image (fed to recognize()); [previewPath] is the display/stored
+  /// "original scan" (contrast-only, no brightness bump). On any native-write
+  /// failure the preview degrades to the OCR path so the scan never fails.
+  /// Returns null only when the user cancelled / processing failed outright.
+  Future<({String ocrPath, String previewPath})?> _processWithOpenCV(
+      String inputPath) async {
     const channel = MethodChannel('app.ixo.secbizcard/opencv');
     final outputPath = inputPath.replaceFirst('.jpg', '_processed.jpg');
 
@@ -564,6 +592,11 @@ class _ScanCardScreenState extends ConsumerState<ScanCardScreen>
           throw Exception('Processing failed');
         }
 
+        // Preview sibling path reported by native (contrast-only display
+        // image). Degrade to the OCR path if native didn't report one (old
+        // native / write failure) so the scan never lacks a displayable image.
+        final nativePreview = result['previewPath'] as String? ?? outputPath;
+
         if (isFallback) {
           // Native has ALREADY written STATE 2 (a guide-region crop; STATE 1
           // only when no usable guide) to outputPath — this is the stored
@@ -600,21 +633,30 @@ class _ScanCardScreenState extends ConsumerState<ScanCardScreen>
               },
             );
 
-            if (manualResult != null) return manualResult;
+            if (manualResult != null) {
+              // Manual crop wrote the OCR-input at manualResult and a preview
+              // sibling via the SAME deterministic suffix rule.
+              return (
+                ocrPath: manualResult,
+                previewPath: _previewPathFor(manualResult),
+              );
+            }
           }
           // User cancelled / plugin missing manual-crop: keep STATE 2.
-          return outputPath;
+          return (ocrPath: outputPath, previewPath: nativePreview);
         }
 
-        return outputPath;
+        return (ocrPath: outputPath, previewPath: nativePreview);
       } else if (result is String) {
-        return result;
+        // Legacy string result (no preview sibling) → preview = OCR path.
+        return (ocrPath: result, previewPath: result);
       }
 
       return null;
     } on MissingPluginException {
-      debugPrint('OpenCV channel not implemented (iOS?), falling back to original image');
-      return inputPath;
+      debugPrint('OpenCV channel not implemented, falling back to original image');
+      // No native processing → the raw capture is both OCR input and preview.
+      return (ocrPath: inputPath, previewPath: inputPath);
     } catch (e) {
       debugPrint('OpenCV Error: $e');
       return null;
