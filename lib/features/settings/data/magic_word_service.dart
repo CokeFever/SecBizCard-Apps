@@ -10,7 +10,8 @@ part 'magic_word_service.g.dart';
 /// Stores the user's optional backup "magic word" securely on-device.
 ///
 /// The magic word is the key source for encrypting the Google Drive backup
-/// (see docs/web_portal_and_e2e_encryption_plan.md). It mirrors the BYOK key
+/// (see the SecBizCard backend repo: docs/web_portal_and_e2e_encryption_plan.md).
+/// It mirrors the BYOK key
 /// handling in [OcrSettingsService]:
 ///  - stored in the platform secure enclave via flutter_secure_storage
 ///    (iOS Keychain / Android Keystore), same accessibility option;

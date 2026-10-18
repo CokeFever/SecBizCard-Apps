@@ -8,7 +8,8 @@ import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:secbizcard/core/errors/failure.dart';
 
 /// Owns the backup file byte layout — the app↔web binary contract defined in
-/// docs/web_portal_and_e2e_encryption_plan.md ("備份檔格式(定案...)"). PURE
+/// the SecBizCard backend repo's docs/web_portal_and_e2e_encryption_plan.md
+/// ("備份檔格式(定案...)"). PURE
 /// Dart (no Flutter imports) so the exact same bytes can be reproduced by a
 /// future JS Web Crypto implementation.
 ///

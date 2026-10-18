@@ -1,15 +1,24 @@
 # Backend Protection & App Check — Ground Truth (cross-session)
 
 CRITICAL持久事實。重開 session 失憶時,關於「後端防護 / App Check / 誰能用後端」一律以本檔為準。
-細節與當時脈絡見 `docs/handoff_2026-10-10.md` 及 `.agents/tasks/investigate-backend-protection/findings.md`。
+細節與當時脈絡見 backend repo 的 `SecBizCard/docs/handoff_2026-10-10.md`(handoff 已於 2026-10-18
+全數移至 private backend repo)及該 repo 的 investigate-backend-protection findings。
 
 ## 為什麼要防護(問題陳述)
-`SecBizCard-Apps` 是 **public repo**。fork 者改掉 Android `applicationId` / iOS bundle id、重新
-build,只要仍指向 owner 的 Firebase 專案(`ixo-app-secbizcard`),**今天就能免費用 owner 的後端**
-(所有 Cloud Functions callable 只有 Firebase Auth 把關 → 只證明「是個登入使用者」,**證明不了「是哪個
-app」**)。防線 = **Firebase App Check**(Android Play Integrity / iOS App Attest):fork 改了
-package name 就產不出有效 attestation,後端據此拒絕。
-- Owner app id(雙平台): `app.ixo.secbizcard`。Owner admin UID: `***REMOVED-UID***`。
+> ℹ️ 2026-10-18:`SecBizCard-Apps` **暫時**轉 private,只為清掉已外洩的機敏內容(含 git 歷史);
+> 清乾淨後**計畫轉回 public**。所以以下「public repo」前提**維持成立**,不要當它已永久私有。
+> 另注:就算哪天真的永久 private,防護必要性也不消失——Firebase config 是**編譯進商店 app** 的,
+> 反編譯 APK/IPA 即可取出,結論與對策不變。
+
+`SecBizCard-Apps` 是 **public repo**(現暫時 private,待清理後轉回)。fork/反編譯者改掉 Android
+`applicationId` / iOS bundle id、重新 build,只要仍指向 owner 的 Firebase 專案
+(`ixo-app-secbizcard`),**今天就能免費用 owner 的後端**(所有 Cloud Functions callable 只有
+Firebase Auth 把關 → 只證明「是個登入使用者」,**證明不了「是哪個 app」**)。防線 = **Firebase
+App Check**(Android Play Integrity / iOS App Attest):改了 package name 就產不出有效 attestation,
+後端據此拒絕。
+- Owner app id(雙平台): `app.ixo.secbizcard`(package name,隨 app 發佈本就可見,非機敏)。
+  Owner **admin UID** 是機敏值,**不放 app repo**(因 -Apps 計畫轉回 public)→ 見 backend private 文件
+  `SecBizCard/docs/internal_admin_reference.md`。
 
 ## 兩類後端服務,授權策略不同(別搞混)
 1. **CV OCR(shared Cloud Vision key 池)= `recognizeCard`** → 只放行 owner 自家 app。企業要用 →

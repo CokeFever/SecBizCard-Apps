@@ -20,7 +20,8 @@ dependencies:
   crypto: ^3.0.6
   cryptography: 2.7.0 # pinned: PBKDF2-HMAC-SHA256 + AES-256-GCM for the magic-word
                       # backup codec (web-alignable params). Keep in sync with the
-                      # Web Crypto impl per docs/web_portal_and_e2e_encryption_plan.md.
+                      # Web Crypto impl per the SecBizCard backend repo's
+                      # docs/web_portal_and_e2e_encryption_plan.md.
   unorm_dart: ^0.3.0 # Unicode NFC normalization for the magic word (trim + NFC),
                       # so a word that "looks the same" always derives the same key.
   flutter_riverpod: ^2.5.1

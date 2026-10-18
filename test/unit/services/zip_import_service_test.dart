@@ -49,14 +49,14 @@ void main() {
       'source': 'test',
       'contacts': [
         {
-          'name': 'Louis Lu',
-          'company': 'Softmobile',
+          'name': 'Bob Lee',
+          'company': 'Example Technology',
           'department': 'Marketing',
           'title': 'AVP',
-          'email': 'louis@example.com',
-          'phone': '***REMOVED-PHONE***',
-          'mobile': '***REMOVED-PHONE***',
-          'fax': '***REMOVED-PHONE***',
+          'email': 'bob@example.com',
+          'phone': '+10000000003',
+          'mobile': '+10000000002',
+          'fax': '+10000000004',
           'website': 'www.example.com',
           'address': 'Taipei 114, Taiwan',
           'note': 'met at conf',
@@ -71,16 +71,16 @@ void main() {
     expect(result.skipped, 0);
     expect(result.contacts, hasLength(1));
     final c = result.contacts.first;
-    expect(c.displayName, 'Louis Lu');
-    expect(c.company, 'Softmobile');
+    expect(c.displayName, 'Bob Lee');
+    expect(c.company, 'Example Technology');
     expect(c.department, 'Marketing');
     expect(c.title, 'AVP');
-    expect(c.email, 'louis@example.com');
-    expect(c.phone, '***REMOVED-PHONE***');
-    expect(c.mobile, '***REMOVED-PHONE***');
+    expect(c.email, 'bob@example.com');
+    expect(c.phone, '+10000000003');
+    expect(c.mobile, '+10000000002');
     expect(c.website, 'www.example.com');
     expect(c.address, 'Taipei 114, Taiwan');
-    expect(c.customFields['fax'], '***REMOVED-PHONE***');
+    expect(c.customFields['fax'], '+10000000004');
     expect(c.customFields['note'], 'met at conf');
     expect(c.source, 'ocr');
     // Images extracted to real temp files.

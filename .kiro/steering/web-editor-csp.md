@@ -1,8 +1,11 @@
 # Web Editor (ixo.app) — Strict CSP & Build Ground Truth (cross-session)
 
 適用於 `SecBizCard` repo 的 Nuxt 4 網站(`website/`,部署到 ixo.app,含 /editor 與 /guide)。
-重開 session 處理 web editor 的 CSP / 部署 / 白屏問題時以本檔為準。細節脈絡見
-`docs/handoff_2026-10-08.md`(H1 嚴格 CSP 緣起)與 fix-editor-importmap-csp 任務。
+重開 session 處理 web editor 的 CSP / 部署 / 白屏問題時以本檔為準。細節脈絡見 backend repo 的
+`SecBizCard/docs/handoff_2026-10-08.md`(H1 嚴格 CSP 緣起;handoff 與 web editor/portal 設計文件已於
+2026-10-18 全數移至 private backend repo)與 fix-editor-importmap-csp 任務。web editor 的設計 source
+of truth 現在也在 backend repo:`SecBizCard/docs/web_editor_design.md`、`web_editor_ux_backlog.md`、
+`web_portal_and_e2e_encryption_plan.md`。
 
 ## 嚴格 CSP 是刻意的,不要弱化
 - root `firebase.json` 的 hosting `headers` 有一條 `**` CSP,`script-src` 是 **`'self'` + 指定

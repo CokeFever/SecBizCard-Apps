@@ -62,6 +62,13 @@ ios/build/
 # FVM Version Cache
 .fvm/
 
+# Agent task artifacts — internal, may contain admin UIDs/secret names; NEVER commit
+# (this repo is planned to go public again — see .kiro/steering/repo-layout.md)
+.agents/
+# git worktrees created by workflows
+.worktrees/
 # Dummy/test backup fixtures produced by tool/make_dummy_backup.dart (never commit test data)
-.agents/tmp/
 secbizcard-dummy.zip
+
+# JVM heap/crash dumps (Gradle/Kotlin daemon build artifacts)
+*.hprof

@@ -3,58 +3,53 @@
 重開 session 時,這裡記錄「已討論、owner 同意未來要做、但還沒排進版本」的項目。做了就從這裡移除
 並寫進對應 handoff。
 
-## 強制更新機制 + Remote Config version gate(未來 app 版本)
-**背景:** app 目前**沒有**強制更新機制(2026-10-12 grep 確認)。但 app 已在用 Firebase Remote
-Config(`lib/features/contacts/data/card_detection_config.dart` 已讀 RC),所以加 gate 不用從零開始。
+目前沒有待辦項目 —— 先前列的都已實作上線(見下方「已完成」紀錄)。下一個明顯的大動作是
+**後端 App Check enforce**(見 `backend-protection.md` 的 5 步前置鐵律),但那要等 1.6.6 普及 +
+強更把舊版趕上來、verified 比例上升、舊版流量歸零後,由 owner 明確指示才做 —— 不是「待辦」,是
+「條件未到的未來決策」。
 
-**要做的(未來某個 app 版本,例如 1.6.5+):**
-- app 啟動時讀一個 Remote Config 值,例如 `min_supported_build`(整數,對應 pubspec 的 build number)。
-- 若當前 app build < `min_supported_build` → 顯示**擋住的更新畫面**(五語:en/zh-TW/zh-CN/ja/ko),
-  附「前往商店更新」按鈕(用 url_launcher 開對應商店),不給繼續用。
-- 之後要「強更」時,只要在 Firebase Console 把 `min_supported_build` 設成目標 build → 所有舊版
-  app 下次啟動被擋 → 被迫更新。**純後台遠端控制,不用再發 app 版本。**
+---
 
-**先天限制(務必記得):** version gate 只能擋「安裝了含 gate 那版之後」的使用者。現在停在 1.6.3/更舊
-的使用者沒有 gate 程式,事後設 RC 擋不到他們 —— 他們只能靠商店自然更新。gate 是防止**未來**使用者
-卡舊版,以及讓 owner 之後能把 1.6.5+ 的人往上推。
+## 常駐參考(不是待辦,但別忘)
 
-**為什麼要做(動機):** 搭配後端 App Check enforce 的 5 步前置鐵律(見 `backend-protection.md`)——
-gate 是「步驟 4:雙平台強更把舊版趕上來」的實作手段,讓 unverified(無 App Check)流量歸零,
-才能安全翻後端 enforce。
+### App Check 現況(monitor-only,2026-10)
+- Client:1.6.4+ 起 `main.dart` 的 `FirebaseAppCheck.instance.activate()`(release =
+  playIntegrity/appAttest,debug = debug provider,fail-open try/catch)。1.6.5/1.6.6 兩批**沒動**
+  這段(2026-10-17 git -S 確認唯一改動是 1.6.4 的 `2124ab1`)。
+- 後端:所有 service enforcement = OFF(monitor)。Firebase Console → App Check 的 verified 比例
+  是**全體流量**統計:比例偏低 ≠ 新版 app 回歸,而是**舊版(無 App Check client,1.6.3/更早)還佔
+  大宗 + 新版剛發未普及**。各服務比例分歧(Storage 高、Firestore 低)也佐證是流量組成問題,不是
+  app 整個不送 token。要看「新版有沒有送 token」看 Console 的 **Apps** 分頁(按 app/版本),不是
+  APIs 分頁的總比例。
+- 翻 enforce 的 5 步鐵律見 `backend-protection.md`,**agent 不得自作主張**。
 
-**平台原生強更的限制(為什麼要自建 RC gate):**
-- Android Play In-App Updates 有 immediate 模式,但要 app 接 `in_app_update` plugin 才會觸發
-  (目前沒接);Play 後台沒有「遠端一鍵強更」。
-- iOS App Store **沒有**原生強更,一定要 app 自己做 version gate。
-- 結論:兩平台都必須 app 端有程式。RC gate 是跨雙平台、owner 可遠端控制的乾淨解。
+### 強更 version gate(2026-10-13 已實作,commit `1c03575`,在 main)
+RC 控制:`min_supported_build`(default 180,force)+ `latest_build`(soft alert)。force 顯示不可
+關閉的全螢幕更新牆,soft 顯示每次啟動一次的可關閉對話框,都用 url_launcher 開商店。fail-open、五語、
+11 單元測試。= App Check enforce 鐵律「步驟 4:雙平台強更把舊版趕上來」的現成工具。要強更時在
+Firebase Console 把 `min_supported_build` 設成目標 build 即可,純後台遠端控制。
 
-## OCR 姓名修法已進 package,但 app 還沒吃到(⚠️ 發版必做)
-**狀態(2026-10-12):** OCR 姓名 vs title 修法(email↔name 覆蓋度雙向比對 + 擴充 title 詞庫/縮寫
-SRE/FDE/… + Microsoft Joanne Tsai 回歸測試,47→56 測試)已 commit + push 到 **sibling repo
-`SecBizCard` main = commit `97e45a5`**。但**尚未到使用者手上**。
+### admin 工具:重置 feedback 計數
+`SecBizCard/scripts/reset_feedback_count.mjs`(backend repo,**絕不可進 public SecBizCard-Apps**)。
+用 email 查 uid → 重置 `ocr_feedback_submits/user_{uid}_{YYYYMM}.count` 為 0。測試超過每月 feedback
+cap 時:`node scripts/reset_feedback_count.mjs --yes <email>`。⚠️ month key 用 `YYYYMM` 無分隔符
+(對齊後端 `currentMonthKey()`)。
+→ **owner 測試帳號 email/UID 對照見 backend private 文件 `SecBizCard/docs/internal_admin_reference.md`**
+(機敏值不放 app repo,因 -Apps 計畫轉回 public)。
 
-**為什麼:** app `pubspec.yaml` 用 **git dependency + pin 到特定 commit**(刻意設計,鎖定每版 OCR):
-```
-SecBizCard_OCR:
-  git: { url: ..., path: packages/SecBizCard_OCR, ref: 1def446d9e03bc36598481617d18196ad0717fc7 }
-```
-目前 ref 還 pin 在**舊 commit `1def446`**。
+### feedback 月度 cap 分級(2026-10-17 已上線,1.6.6+198)
+後端 `functions/src/quota.ts` 的 `feedbackCapForTier`:basic 5 / plus 10 / pro 20 / vip 無限(null
+跳過)。`submitOcrFeedback` 用 `resolveTier` 判 tier。
 
-**⚠️ 發下一個 app 版本(1.6.5)時必做,否則「以為修了但 app 還用舊 parser」:**
-1. 把 pubspec.yaml 的 `ref:` 從 `1def446...` 更新成 **`97e45a5`**(或屆時 OCR package 的最新 main commit)。
-2. `fvm flutter pub get` 更新 pubspec.lock。
-3. build + 驗證姓名解析(可跑 app 的相關測試)。
-這一步跟 1.6.5 的其他改動(問題 1 precrop fallback 存檔、強更 version gate 若一起做)一起發。
+---
 
-## 問題 1 — precrop fallback 存整張原圖 → ✅ 已修(commit `8850b76`,本地 main 未 push)
-投資報告:`.agents/tasks/investigate-ocr-precrop-name/findings.md`。
-**已實作(2026-10-12,commit `8850b76` 在 SecBizCard-Apps 本地 main,未 push、未發版):**
-降級順序改成 **STATE 3(偵測邊緣)→ STATE 2(導引框+20%,photo 座標)→ STATE 1(整張,極端才用)**。
-STATE 2 現在是 OCR 輸入 + 存檔原圖(同一張),不再 fallback 到整張。20% = Remote Config tunable
-`fallbackGuideMarginRatio`(default 0.20,可免發版調)。手動裁切改以 STATE 2 為基準(不再 80% 鬆框)。
-動了 Android OpenCVProcessor.kt / iOS AppDelegate.swift+CardScoring.swift / Dart
-scan_card_screen.dart+manual_crop_screen.dart+scan_guide_geometry.dart,+7 座標映射單元測試。
-**⚠️ native 影像裁切 CI 驗不了 → 有一份 9 案例真機測試清單在
-`.agents/tasks/fix-precrop-state2-fallback-2026-10-12/verification.md`,owner 發版前/後務必真機測
-(尤其 iPad 橫向原生畫面這個最大回歸風險)。**
-這個改動跟姓名 ref bump 一起進 1.6.5。
+## 已完成並清除的項目(2026-10 兩個 release 批次 + 強更 gate)
+下列先前在此 backlog、現已實作上線,記錄一行免得重做:
+- **強更 version gate(RC min_supported_build force + latest_build soft)** → commit `1c03575`,在 main。
+- **OCR 姓名 vs title 修法** → OCR ref 已 bump,現 pin `dab6c0a`(1.6.6)。
+- **precrop fallback(STATE3→STATE2→STATE1)** → commit `8850b76` 在 main,1.6.x 發出。
+- **i18n 五語 + 欄位 i18n/涵蓋 + department 欄位 + feedback 背景上傳** → 1.6.5(+197)。
+- **Android per-app 語言**(關 AAB language split + 實體 `values-b+zh+Hant` resource config +
+  `keep.xml`;繁中含 zh-TW 可選、涵蓋台港澳不 fallback)→ 1.6.5(+194~196)。
+- **OCR 部門雙欄守衛 + 「科」詞庫 + original scan 過曝分圖(OCR 圖/顯示圖分離 + RC previewContrast)
+  + feedback 分級 cap** → 1.6.6(+198)。

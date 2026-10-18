@@ -32,7 +32,8 @@ third-party security assessment required**.
 
 - [x] Brand verified (app name, logo, support email) — done earlier this session.
 - [x] Domain `ixo.app` ownership verified in Search Console (same Google account
-      as the GCP project: ***REMOVED-EMAIL***).
+      as the GCP project — owner account, see backend private
+      `SecBizCard/docs/internal_admin_reference.md`).
 - [x] Privacy Policy live: https://ixo.app/privacy
 - [x] Terms of Service / EULA live: https://ixo.app/eula
 - [x] Publishing status = In production.

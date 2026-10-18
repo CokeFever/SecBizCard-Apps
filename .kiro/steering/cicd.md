@@ -31,6 +31,12 @@ Android had no Play upload, when the real pipeline is GCP Cloud Build.
   GitHub **artifact**. It does NOT upload to Play. This is a secondary QA build,
   not the release path. Its secrets live in **GitHub Secrets**. Don't confuse it
   with the Cloud Build release above.
+- ⚠️ **2026-10-18 起 repo 暫時轉 private**(清機敏內容用,清完計畫轉回 public,見 backend-protection.md)。
+  private 期間:(1) GitHub Actions 失去 public 的免費無限額度,這條 `android_build.yml` 會吃 owner
+  的 Actions 分鐘額度(轉回 public 後恢復免費);(2) **下次發版務必實測 release pipeline 觸發**——
+  Android 的 **GCP Cloud Build trigger**(`android-release-build`)與 iOS 的 **Xcode Cloud** 都綁
+  這個 GitHub repo,public↔private 切換後 GitHub App / OAuth 授權「通常」保留但不保證,打 tag 前先
+  確認兩邊都還能被 tag 觸發(owner 已決定:pipeline 驗證延到下個版本做)。
 
 ## iOS release → Xcode Cloud
 
