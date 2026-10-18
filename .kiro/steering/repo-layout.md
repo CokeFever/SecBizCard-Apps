@@ -33,9 +33,17 @@ CRITICAL 持久事實。重開 session 失憶時,關於「兩個 repo 誰是主�
   `ocr_feedback_store_privacy_labels.md`、`agp9_migration_readiness.md`)。
 
 ## -Apps 轉回 public 前的未竟事項(2026-10-18)
-1. **git 歷史重寫**:機敏內容已從工作樹移除,但**仍在 -Apps 已 push 的 git 歷史**。轉回 public 前
-   必須用 `git filter-repo`/BFG 從歷史清除 + force-push(破壞性,owner 決定時機)。
-2. **rotate demo 密碼**:demo 帳號密碼在 public 期間已外洩,不管歷史清不清都要換(實際帳密見 backend
-   private `internal_admin_reference.md`;rotate 後更新該檔與各 `release_*_store_copy.md`)。
-3. **pipeline 重驗**:public↔private 切換後,下次發版確認 GCP Cloud Build trigger + Xcode Cloud
-   還能被 tag 觸發(owner 已決定:延到下個版本驗)。
+1. ✅ **git 歷史重寫(已完成 2026-10-18)**:用 `git filter-repo` 兩輪清除所有歷史中的機敏文件
+   (handoff/release/web_editor/portal/DEV_ENV/firebase_func docs、`.agents/` task 產物、
+   失效的 `dev_sync.md`)+ 替換機敏字串(demo 密碼/admin UID/owner email/真實電話 → `***REMOVED-*`)。
+   force-push 全部 branches + 107 tags(**全是 forced update,非 create → 未觸發 pipeline**)。
+   force-push 前已先停用 Cloud Build trigger + Xcode Cloud workflow。mirror 備份留在
+   `SecBizCard/.backups/`。normal clone 全史掃描確認乾淨(僅存 `REVENUECAT_WEBHOOK_AUTH` 這個
+   **secret 名稱**,非值,刻意保留供 cicd/hook 文件參照)。GitHub 端舊 dangling object 會自動 GC;
+   repo 已 private + 無 fork,外部不可達。
+2. **rotate demo 密碼**:demo 帳號密碼在 public 期間已外洩,歷史重寫只讓未來看不到,**已洩漏的仍須
+   rotate**(實際帳密見 backend private `internal_admin_reference.md`;owner 自行判斷時機;rotate 後
+   更新該檔與各 `release_*_store_copy.md`)。
+3. ⚠️ **重新啟用 pipeline + 重驗**:force-push 前停用的 **Cloud Build trigger + Xcode Cloud workflow
+   必須重新啟用**;public↔private 切換後,下次發版(owner 將從 `SecBizCard` 出發)確認兩者還能被
+   tag 觸發。
