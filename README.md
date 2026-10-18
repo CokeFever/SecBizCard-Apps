@@ -42,7 +42,8 @@ the source of truth; Japanese and Korean are machine-translated.
 ## 🔨 Development
 
 ### Prerequisites
-- Flutter SDK
+- Flutter **3.38.9** (pinned via [fvm](https://fvm.app/)) — do not use `stable`;
+  a newer Dart analyzer breaks the OCR package's code generation.
 - Firebase CLI
 - Google Cloud project configured
 
