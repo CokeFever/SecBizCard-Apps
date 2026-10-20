@@ -96,3 +96,29 @@ will ask for:
 Until verification is approved, the web editor (ixo.app/editor) will still show the
 warning because it shares the project's consent screen. Use "Advanced → continue"
 to test. This is expected and not a bug.
+
+## ⚠️ Status update — 2026-10-18: demo video REJECTED, re-record required
+Google's Third-Party Data Safety Team replied a second time and **rejected the
+reused demo video**: it did not sufficiently demonstrate why the `contacts` scope
+is necessary. They require a NEW video showing the **maximum extent** of the
+user-facing features that use the scope. Four hard acceptance criteria:
+1. Consent screen fully expanded and readable (click "Show all services" if scopes
+   are collapsed).
+2. Scopes in the video exactly match those submitted in GCP Console.
+3. Demonstrate the full user-facing use of `contacts` (Save to Google Contacts,
+   end to end, ideally showing the contact appear in Google Contacts).
+4. Test account with NO auth blockers (no phone/credit-card verification) + written
+   step-by-step navigation.
+
+**Decisions / how to redo (full script + reply draft in `docs/oauth_demo_rerecord.md`):**
+- Record ONLY the `contacts` feature (Save to Google Contacts). Do NOT record
+  Backup/Restore or Web Editor — those use `drive.file` (non-sensitive) and only
+  blur the focus.
+- Record using the test account `ixo.app.demo@gmail.com` (video account = test
+  account). First **rotate the demo password** (the old one leaked while the app
+  repo was public) and use the new one in the video + reply.
+- To make the consent screen reappear: sign in with that account at
+  https://myaccount.google.com/connections → remove SecBizCard's access, then
+  sign in again in the app.
+- Reply directly to the email with the new video link + test credentials + steps
+  (the reply itself re-triggers review; there is no separate "resubmit" button).
