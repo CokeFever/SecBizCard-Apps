@@ -115,8 +115,9 @@ user-facing features that use the scope. Four hard acceptance criteria:
   Backup/Restore or Web Editor — those use `drive.file` (non-sensitive) and only
   blur the focus.
 - Record using the test account `ixo.app.demo@gmail.com` (video account = test
-  account). First **rotate the demo password** (the old one leaked while the app
-  repo was public) and use the new one in the video + reply.
+  account). This reviewer account is meant to be seen by reviewers — no rotation
+  needed; it just must never appear in the public repo (keep it in the private
+  repo only).
 - To make the consent screen reappear: sign in with that account at
   https://myaccount.google.com/connections → remove SecBizCard's access, then
   sign in again in the app.

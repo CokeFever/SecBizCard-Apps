@@ -41,9 +41,10 @@ CRITICAL 持久事實。重開 session 失憶時,關於「兩個 repo 誰是主�
    `SecBizCard/.backups/`。normal clone 全史掃描確認乾淨(僅存 `REVENUECAT_WEBHOOK_AUTH` 這個
    **secret 名稱**,非值,刻意保留供 cicd/hook 文件參照)。GitHub 端舊 dangling object 會自動 GC;
    repo 已 private + 無 fork,外部不可達。
-2. **rotate demo 密碼**:demo 帳號密碼在 public 期間已外洩,歷史重寫只讓未來看不到,**已洩漏的仍須
-   rotate**(實際帳密見 backend private `internal_admin_reference.md`;owner 自行判斷時機;rotate 後
-   更新該檔與各 `release_*_store_copy.md`)。
+2. **demo / 審查帳號密碼**:這是給 App Store / Play / Google 審查員用的帳號,本質上**本來就會被
+   審查員看到、不是秘密,不需要 rotate**。唯一要求:**不可出現在 public repo**。實際帳密放 backend
+   private `internal_admin_reference.md` 與 `release_*_store_copy.md`(都在 private repo),-Apps
+   不得出現。
 3. ⚠️ **重新啟用 pipeline + 重驗**:force-push 前停用的 **Cloud Build trigger + Xcode Cloud workflow
    必須重新啟用**;public↔private 切換後,下次發版(owner 將從 `SecBizCard` 出發)確認兩者還能被
    tag 觸發。

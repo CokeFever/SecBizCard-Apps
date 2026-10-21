@@ -5,7 +5,8 @@ CRITICAL持久事實。重開 session 失憶時,關於「後端防護 / App Chec
 全數移至 private backend repo)及該 repo 的 investigate-backend-protection findings。
 
 ## 為什麼要防護(問題陳述)
-> ℹ️ 2026-10-18:`SecBizCard-Apps` **暫時**轉 private,只為清掉已外洩的機敏內容(含 git 歷史);
+> ℹ️ 2026-10-18:`SecBizCard-Apps` **暫時**轉 private,只為清掉不該出現在 public repo 的內部內容
+> (handoff、admin UID、owner email 等;含 git 歷史);
 > 清乾淨後**計畫轉回 public**。所以以下「public repo」前提**維持成立**,不要當它已永久私有。
 > 另注:就算哪天真的永久 private,防護必要性也不消失——Firebase config 是**編譯進商店 app** 的,
 > 反編譯 APK/IPA 即可取出,結論與對策不變。
