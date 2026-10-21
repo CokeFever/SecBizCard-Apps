@@ -122,3 +122,9 @@ user-facing features that use the scope. Four hard acceptance criteria:
   sign in again in the app.
 - Reply directly to the email with the new video link + test credentials + steps
   (the reply itself re-triggers review; there is no separate "resubmit" button).
+
+### ✅ 2026-10-18 晚:第二支 demo 影片已重錄 + 回信已寄出 → 等 Google 重審
+- 重錄的影片(YouTube unlisted short URL)已依 `oauth_demo_rerecord.md` 腳本錄製:登入 consent
+  (有勾 drive.file)+ Save to Google Contacts 觸發的**第二段 contacts consent** 都拍清楚。
+- 回信(含影片連結 + 測試帳號 + 逐步說明)**已由 owner 寄出**。email 回覆即觸發重審,無 resubmit 按鈕。
+- **owner 無待辦,等 Google 回覆。** 下次 session 檢查:Google 是否再回信(通過 / 又要補件)。
