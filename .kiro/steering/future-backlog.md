@@ -42,6 +42,8 @@
   大宗 + 新版剛發未普及**。各服務比例分歧(Storage 高、Firestore 低)也佐證是流量組成問題,不是
   app 整個不送 token。要看「新版有沒有送 token」看 Console 的 **Apps** 分頁(按 app/版本),不是
   APIs 分頁的總比例。
+- **2026-10-19:1.6.6+198 已雙平台上架** = enforce 5 步鐵律的步驟 1 達成;但「上架 ≠ 普及」,
+  仍在步驟 2~3(monitor + 觀察 verified 比例上升、舊版流量下降)。enforce 還早。
 - 翻 enforce 的 5 步鐵律見 `backend-protection.md`,**agent 不得自作主張**。
 
 ### 強更 version gate(2026-10-13 已實作,commit `1c03575`,在 main)
