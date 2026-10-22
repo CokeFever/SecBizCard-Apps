@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:mockito/mockito.dart';
 
+import 'package:googleapis/drive/v3.dart' as drive;
+import 'package:googleapis/people/v1.dart' as people;
 import 'package:secbizcard/features/auth/data/auth_repository.dart';
 import 'package:secbizcard/features/settings/data/magic_word_service.dart';
 import 'package:secbizcard/features/settings/data/ocr_settings_service.dart';
@@ -62,6 +64,7 @@ void main() {
   late AuthRepository authRepo;
   late MockFirebaseAuth mockFirebaseAuth;
   late MockGoogleSignIn mockGoogleSignIn;
+  late MockGoogleSignIn mockDriveGoogleSignIn;
   late MockGoogleSignIn mockContactsGoogleSignIn;
   late MockProfileRepository mockProfileRepo;
   late FakeRef fakeRef;
@@ -71,6 +74,7 @@ void main() {
     deletedKeys.clear();
     mockFirebaseAuth = MockFirebaseAuth();
     mockGoogleSignIn = MockGoogleSignIn();
+    mockDriveGoogleSignIn = MockGoogleSignIn();
     mockContactsGoogleSignIn = MockGoogleSignIn();
     mockProfileRepo = MockProfileRepository();
     fakeRef = FakeRef();
@@ -84,6 +88,7 @@ void main() {
       mockFirebaseAuth,
       mockGoogleSignIn,
       fakeRef,
+      driveGoogleSignIn: mockDriveGoogleSignIn,
       contactsGoogleSignIn: mockContactsGoogleSignIn,
     );
   });
@@ -157,14 +162,16 @@ void main() {
       when(mockIdTokenResult.signInProvider).thenReturn('google.com');
       when(mockFirebaseAuth.signOut()).thenAnswer((_) async {});
       when(mockGoogleSignIn.signOut()).thenAnswer((_) async => null);
+      when(mockDriveGoogleSignIn.signOut()).thenAnswer((_) async => null);
       when(mockContactsGoogleSignIn.signOut()).thenAnswer((_) async => null);
 
       await authRepo.signOut();
 
       verify(mockFirebaseAuth.signOut()).called(1);
-      // Logout must clear BOTH independent Google instances (drive.file and
-      // contacts) so no Google grant lingers for the next account.
+      // Logout must clear all three independent Google instances (identity +
+      // drive + contacts) so no Google grant lingers for the next account.
       verify(mockGoogleSignIn.signOut()).called(1);
+      verify(mockDriveGoogleSignIn.signOut()).called(1);
       verify(mockContactsGoogleSignIn.signOut()).called(1);
       // Sign-out must also clear the BYOK key AND the magic word from secure
       // storage (each fault-isolated), so a shared device leaves no trace.
@@ -193,6 +200,38 @@ void main() {
         driveInstance.serverClientId,
         '769422548283-rvuciu2cmfj9149fudj9q59pql4ofo8q.apps.googleusercontent.com',
       );
+    });
+
+    test('three-stage least privilege: each instance declares only its scope',
+        () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final loginInstance = container.read(loginGoogleSignInProvider);
+      final driveInstance = container.read(driveGoogleSignInProvider);
+      final contactsInstance = container.read(contactsGoogleSignInProvider);
+
+      // Login/identity instance declares NO sensitive scope — the login consent
+      // screen only asks for basic identity, so declining Drive/Contacts signs
+      // in cleanly with no error.
+      expect(loginInstance.scopes, isEmpty);
+
+      // Drive instance declares ONLY drive.file; contacts instance declares
+      // ONLY the contacts scope. Each sensitive scope is requested lazily at its
+      // own use site, never at login.
+      expect(
+        driveInstance.scopes,
+        [drive.DriveApi.driveFileScope],
+      );
+      expect(
+        contactsInstance.scopes,
+        [people.PeopleServiceApi.contactsScope],
+      );
+
+      // The identity instance is a distinct object from the other two, so its
+      // (empty) scope set can never leak the drive/contacts grants.
+      expect(identical(loginInstance, driveInstance), isFalse);
+      expect(identical(loginInstance, contactsInstance), isFalse);
     });
   });
 }

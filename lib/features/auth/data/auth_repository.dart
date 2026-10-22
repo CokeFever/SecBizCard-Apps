@@ -60,12 +60,27 @@ google_sign_in.GoogleSignIn contactsGoogleSignIn(Ref ref) {
   );
 }
 
+/// Identity-only GoogleSignIn instance for the LOGIN / silent-sign-in /
+/// re-auth path. Declares NO sensitive scope, so the Google consent screen at
+/// login asks only for basic identity (openid/email/profile) — a user who
+/// does not want Drive/Contacts signs in cleanly with NO error. drive.file and
+/// contacts are requested later, lazily, by DriveRepository / ContactsRepository
+/// on their own dedicated instances (three-stage least privilege).
+@riverpod
+google_sign_in.GoogleSignIn loginGoogleSignIn(Ref ref) {
+  return google_sign_in.GoogleSignIn(
+    serverClientId: _kServerClientId,
+    // No scopes: basic profile/email/openid are implied by google_sign_in.
+  );
+}
+
 @Riverpod(keepAlive: true)
 AuthRepository authRepository(Ref ref) {
   return AuthRepository(
     fire_auth.FirebaseAuth.instance,
-    ref.watch(driveGoogleSignInProvider),
+    ref.watch(loginGoogleSignInProvider),
     ref,
+    driveGoogleSignIn: ref.watch(driveGoogleSignInProvider),
     contactsGoogleSignIn: ref.watch(contactsGoogleSignInProvider),
   );
 }
@@ -77,19 +92,24 @@ Stream<fire_auth.User?> authState(Ref ref) {
 
 class AuthRepository {
   final fire_auth.FirebaseAuth _firebaseAuth;
-  // Drive instance (login / silent sign-in / Google re-auth all run through
-  // this one — they only ever touch basic + drive.file scopes).
+  // Login/identity instance (login / silent sign-in / Google re-auth all run
+  // through this one — it declares NO sensitive scope, only basic identity).
   final google_sign_in.GoogleSignIn _googleSignIn;
+  // Drive instance, held only so signOut()/deleteAccount() can fully clear
+  // Google state (its drive.file grant) for the next account on this device.
+  final google_sign_in.GoogleSignIn _driveGoogleSignIn;
   // Contacts instance, held only so signOut()/deleteAccount() can fully clear
-  // Google state across BOTH grants.
+  // Google state (its contacts grant) for the next account on this device.
   final google_sign_in.GoogleSignIn _contactsGoogleSignIn;
 
   AuthRepository(
     this._firebaseAuth,
     this._googleSignIn,
     this._ref, {
+    required google_sign_in.GoogleSignIn driveGoogleSignIn,
     required google_sign_in.GoogleSignIn contactsGoogleSignIn,
-  }) : _contactsGoogleSignIn = contactsGoogleSignIn {
+  })  : _driveGoogleSignIn = driveGoogleSignIn,
+        _contactsGoogleSignIn = contactsGoogleSignIn {
     _init();
   }
 
@@ -348,10 +368,11 @@ class AuthRepository {
       final provider = await _getSignInProvider();
       await _firebaseAuth.signOut();
       if (provider == 'google.com') {
-        // Sign out of BOTH Google instances. They are independent GoogleSignIn
-        // objects (drive.file vs contacts), so logout must clear each one to
-        // fully reset Google state for the next account on this device.
+        // Sign out of all three Google instances (identity + drive + contacts).
+        // They are independent GoogleSignIn objects, so logout must clear each
+        // one to fully reset Google state for the next account on this device.
         await _googleSignIn.signOut();
+        await _driveGoogleSignIn.signOut();
         await _contactsGoogleSignIn.signOut();
       }
       // Apple Sign-In does not require explicit sign-out
@@ -454,10 +475,12 @@ class AuthRepository {
       // Delete the Firebase Auth account
       await user.delete();
 
-      // Sign out of Google if applicable — clear BOTH instances so no Google
-      // grant (drive.file or contacts) lingers after account deletion.
+      // Sign out of Google if applicable — clear all three Google instances
+      // (identity + drive + contacts) so no Google grant lingers after account
+      // deletion.
       if (provider == 'google.com') {
         await _googleSignIn.signOut();
+        await _driveGoogleSignIn.signOut();
         await _contactsGoogleSignIn.signOut();
       }
 
