@@ -17,7 +17,7 @@ app 與 backend 的使用契約是**耦合**的:改 app 端呼叫後端 callable
 dependency 引用。
 
 ## 這個 repo 的可見性與鐵律
-- 本 repo **目前暫時 private**(2026-10-18),**清乾淨後計畫轉回 public**。
+- 本 repo **為 public**(2026-10-22 經 GitHub 官方完成敏感歷史抹除後已正式切回 public)。
 - 🚫 **因此任何機敏資訊(帳密、admin UID、owner email、個人設備、真實 PII)絕不可進此 repo。**
   機敏值集中放 `SecBizCard`(private)的 `docs/internal_admin_reference.md`;此 repo 的文件/steering
   只能放「見該檔」指標。新增任何文件前先確認 public-safe。

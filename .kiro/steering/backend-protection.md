@@ -11,7 +11,7 @@ CRITICAL持久事實。重開 session 失憶時,關於「後端防護 / App Chec
 > 另注:就算哪天真的永久 private,防護必要性也不消失——Firebase config 是**編譯進商店 app** 的,
 > 反編譯 APK/IPA 即可取出,結論與對策不變。
 
-`SecBizCard-Apps` 是 **public repo**(現暫時 private,待清理後轉回)。fork/反編譯者改掉 Android
+`SecBizCard-Apps` 是 **public repo**。fork/反編譯者改掉 Android
 `applicationId` / iOS bundle id、重新 build,只要仍指向 owner 的 Firebase 專案
 (`ixo-app-secbizcard`),**今天就能免費用 owner 的後端**(所有 Cloud Functions callable 只有
 Firebase Auth 把關 → 只證明「是個登入使用者」,**證明不了「是哪個 app」**)。防線 = **Firebase

@@ -8,7 +8,7 @@ CRITICAL 持久事實。重開 session 失憶時,關於「兩個 repo 誰是主�
 | Repo | 本機路徑 | 角色 | 可見性 |
 |------|---------|------|--------|
 | **`SecBizCard`**(backend/website) | `/Users/jack/_Projects/SecBizCard` | **主 project folder**(新)。backend functions、官網 Nuxt(`website/`,含 /editor /guide)、**所有 handoff/內部文件/設計文件/admin 機敏對照** | **private** |
-| `SecBizCard-Apps`(Flutter app) | `/Users/jack/_Projects/SecBizCard-Apps` | app 端原始碼。**暫時 private**(2026-10-18 為清歷史機敏而轉),**清乾淨後計畫轉回 public** | 暫時 private → 目標 public |
+| `SecBizCard-Apps`(Flutter app) | `/Users/jack/_Projects/SecBizCard-Apps` | app 端原始碼。**public**(2026-10-22 經 GitHub 官方完成敏感歷史抹除後已正式切回 public) | public |
 
 - **以後開 project folder 以 `SecBizCard`(backend)為主**(舊習慣是以 -Apps 為主,已反轉)。
 - `-Apps` 會轉回 public → **任何機敏資訊(帳密、admin UID、owner email、個人設備、真實 PII)
