@@ -1300,6 +1300,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your Google Drive backup is currently protected with a magic word. This backup will switch to default encryption and remove that protection. Continue?';
 
   @override
+  String get backupNoWordNudgeTitle => 'Back up without a magic word?';
+
+  @override
+  String get backupNoWordNudgeBody =>
+      'You haven\'t set a magic word, so this backup will use basic encryption tied to your signed-in account. It\'s safely encrypted, but a backup like this can\'t be opened in the web editor (ixo.app/editor). Set a magic word to be able to open your backup in the web editor.';
+
+  @override
+  String get backupNoWordNudgeSetWord => 'Set a magic word';
+
+  @override
+  String get backupNoWordNudgeProceed => 'Back up anyway';
+
+  @override
   String get backupEmptyDisabledHint =>
       'Add at least one contact before backing up.';
 

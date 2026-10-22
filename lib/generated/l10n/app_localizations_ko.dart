@@ -1269,6 +1269,19 @@ class AppLocalizationsKo extends AppLocalizations {
       'Google 드라이브 백업이 현재 매직 워드로 보호되어 있습니다. 이 백업은 기본 암호화로 전환되어 해당 보호가 해제됩니다. 계속할까요?';
 
   @override
+  String get backupNoWordNudgeTitle => '매직 워드 없이 백업할까요?';
+
+  @override
+  String get backupNoWordNudgeBody =>
+      '매직 워드를 설정하지 않아 이 백업은 로그인한 계정에 연결된 기본 암호화를 사용합니다. 암호화는 적용되지만, 이런 백업은 웹 편집기(ixo.app/editor)에서 열 수 없습니다. 매직 워드를 설정하면 웹 편집기에서 백업을 열 수 있습니다.';
+
+  @override
+  String get backupNoWordNudgeSetWord => '매직 워드 설정';
+
+  @override
+  String get backupNoWordNudgeProceed => '그래도 백업';
+
+  @override
   String get backupEmptyDisabledHint => '백업하기 전에 연락처를 하나 이상 추가하세요.';
 
   @override

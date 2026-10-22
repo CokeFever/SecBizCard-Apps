@@ -1270,6 +1270,19 @@ class AppLocalizationsJa extends AppLocalizations {
       'Google ドライブのバックアップは現在マジックワードで保護されています。このバックアップは既定の暗号化に切り替わり、その保護は解除されます。続行しますか？';
 
   @override
+  String get backupNoWordNudgeTitle => 'マジックワードなしでバックアップしますか？';
+
+  @override
+  String get backupNoWordNudgeBody =>
+      'マジックワードが未設定のため、このバックアップはログイン中のアカウントに紐づく基本暗号化を使用します。暗号化は行われますが、このバックアップはウェブエディター（ixo.app/editor）で開けません。マジックワードを設定すると、ウェブエディターでバックアップを開けるようになります。';
+
+  @override
+  String get backupNoWordNudgeSetWord => 'マジックワードを設定';
+
+  @override
+  String get backupNoWordNudgeProceed => 'このままバックアップ';
+
+  @override
   String get backupEmptyDisabledHint => 'バックアップする前に連絡先を 1 件以上追加してください。';
 
   @override

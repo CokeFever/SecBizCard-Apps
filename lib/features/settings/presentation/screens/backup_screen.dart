@@ -14,6 +14,21 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:secbizcard/generated/l10n/app_localizations.dart';
 
+/// The three outcomes of the first-time / account-bound-encryption backup nudge
+/// (sub-task B). A dismissed dialog defaults to [cancel].
+enum _NoWordBackupChoice { setWord, proceed, cancel }
+
+/// B: pure predicate for when the no-magic-word nudge fires — exactly when the
+/// cloud file is NOT already magic-word protected (D11 owns that case) AND this
+/// device has no magic word (so the backup would use account-bound encryption).
+/// Extracted so the decision rule is unit-testable without pumping the screen.
+@visibleForTesting
+bool shouldNudgeNoMagicWord({
+  required bool cloudMagicWordProtected,
+  required bool hasLocalWord,
+}) =>
+    !cloudMagicWordProtected && !hasLocalWord;
+
 class BackupScreen extends ConsumerStatefulWidget {
   const BackupScreen({super.key});
 
@@ -214,6 +229,41 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           final proceed = await _confirmDowngrade();
           if (proceed != true) return;
         }
+      } else {
+        // B: first-time / account-bound-encryption soft nudge. When the cloud
+        // file is NOT already magic-word protected (so D11 did not handle the
+        // no-word case) AND this device has no magic word, the backup would be
+        // written with account-bound ("basic") encryption, which cannot be
+        // opened in the web editor. Nudge — but never block: the user may set a
+        // magic word first, or proceed anyway. Fires on EVERY no-word backup
+        // (no one-time suppression), per owner intent.
+        final hasLocalWord =
+            await ref.read(magicWordServiceProvider).hasMagicWord();
+        if (!mounted) return;
+        if (shouldNudgeNoMagicWord(
+          cloudMagicWordProtected: cloudProtected,
+          hasLocalWord: hasLocalWord,
+        )) {
+          final choice = await _confirmFirstTimeNoMagicWord();
+          if (!mounted) return;
+          switch (choice) {
+            case _NoWordBackupChoice.cancel:
+              return;
+            case _NoWordBackupChoice.setWord:
+              await _openSetMagicWordDialog();
+              if (!mounted) return;
+              // A confirmed set left backupSetWordNextBackupHint on
+              // _statusMessage (via _applyMagicWord) — keep it. A cancelled set
+              // left the stale "Preparing…" — clear it so nothing lingers.
+              if (!_hasMagicWord) {
+                setState(() => _statusMessage = null);
+              }
+              return;
+            case _NoWordBackupChoice.proceed:
+              // Fall through to the existing service.backup(...) below.
+              break;
+          }
+        }
       }
     }
 
@@ -325,6 +375,41 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         ],
       ),
     );
+  }
+
+  /// B: soft, informational nudge shown before a backup when no magic word is
+  /// set. The backup would use basic encryption tied to the signed-in account,
+  /// which CANNOT be opened in the web editor. Not a block — the user may set a
+  /// magic word first or proceed anyway. Mirrors the [_confirmDowngrade]
+  /// AlertDialog pattern but offers three choices; a dismissed dialog defaults
+  /// to [_NoWordBackupChoice.cancel].
+  Future<_NoWordBackupChoice> _confirmFirstTimeNoMagicWord() async {
+    final l10n = AppLocalizations.of(context)!;
+    final result = await showDialog<_NoWordBackupChoice>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.backupNoWordNudgeTitle),
+        content: Text(l10n.backupNoWordNudgeBody),
+        actions: [
+          TextButton(
+            onPressed: () =>
+                Navigator.pop(context, _NoWordBackupChoice.cancel),
+            child: Text(l10n.commonCancel),
+          ),
+          TextButton(
+            onPressed: () =>
+                Navigator.pop(context, _NoWordBackupChoice.proceed),
+            child: Text(l10n.backupNoWordNudgeProceed),
+          ),
+          FilledButton(
+            onPressed: () =>
+                Navigator.pop(context, _NoWordBackupChoice.setWord),
+            child: Text(l10n.backupNoWordNudgeSetWord),
+          ),
+        ],
+      ),
+    );
+    return result ?? _NoWordBackupChoice.cancel;
   }
 
   /// A1: the ONLY public entry for a restore. The re-entrancy guard is set at

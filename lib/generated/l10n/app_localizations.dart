@@ -2414,6 +2414,30 @@ abstract class AppLocalizations {
   /// **'Your Google Drive backup is currently protected with a magic word. This backup will switch to default encryption and remove that protection. Continue?'**
   String get backupDowngradeBody;
 
+  /// Title of the soft nudge shown before a first-time backup when no magic word is set
+  ///
+  /// In en, this message translates to:
+  /// **'Back up without a magic word?'**
+  String get backupNoWordNudgeTitle;
+
+  /// No description provided for @backupNoWordNudgeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t set a magic word, so this backup will use basic encryption tied to your signed-in account. It\'s safely encrypted, but a backup like this can\'t be opened in the web editor (ixo.app/editor). Set a magic word to be able to open your backup in the web editor.'**
+  String get backupNoWordNudgeBody;
+
+  /// No description provided for @backupNoWordNudgeSetWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a magic word'**
+  String get backupNoWordNudgeSetWord;
+
+  /// No description provided for @backupNoWordNudgeProceed.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up anyway'**
+  String get backupNoWordNudgeProceed;
+
   /// Hint shown when Back Up Now is disabled because there are no local contacts
   ///
   /// In en, this message translates to:

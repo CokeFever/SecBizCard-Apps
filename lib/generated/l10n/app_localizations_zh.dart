@@ -1248,6 +1248,19 @@ class AppLocalizationsZh extends AppLocalizations {
       '你的 Google 雲端硬碟備份目前以密語保護。這次備份將改用預設加密並移除該保護。要繼續嗎？';
 
   @override
+  String get backupNoWordNudgeTitle => '尚未設定密語，仍要備份嗎？';
+
+  @override
+  String get backupNoWordNudgeBody =>
+      '你尚未設定密語，這次備份將使用「登入帳號綁定的基本加密」。備份仍有加密保護，但這種備份無法在網頁編輯器（ixo.app/editor）開啟。設定密語後，就能在網頁編輯器開啟你的備份。';
+
+  @override
+  String get backupNoWordNudgeSetWord => '設定密語';
+
+  @override
+  String get backupNoWordNudgeProceed => '仍要備份';
+
+  @override
   String get backupEmptyDisabledHint => '請先新增至少一位聯絡人再備份。';
 
   @override
@@ -3078,6 +3091,19 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
       '你的 Google 云端硬盘备份目前以密语保护。这次备份将改用默认加密并移除该保护。要继续吗？';
 
   @override
+  String get backupNoWordNudgeTitle => '尚未设置密语，仍要备份吗？';
+
+  @override
+  String get backupNoWordNudgeBody =>
+      '你尚未设置密语，这次备份将使用“登录账号绑定的基本加密”。备份仍有加密保护，但这种备份无法在网页编辑器（ixo.app/editor）打开。设置密语后，就能在网页编辑器打开你的备份。';
+
+  @override
+  String get backupNoWordNudgeSetWord => '设置密语';
+
+  @override
+  String get backupNoWordNudgeProceed => '仍要备份';
+
+  @override
   String get backupEmptyDisabledHint => '请先添加至少一位联系人再备份。';
 
   @override
@@ -4906,6 +4932,19 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   @override
   String get backupDowngradeBody =>
       '你的 Google 雲端硬碟備份目前以密語保護。這次備份將改用預設加密並移除該保護。要繼續嗎？';
+
+  @override
+  String get backupNoWordNudgeTitle => '尚未設定密語，仍要備份嗎？';
+
+  @override
+  String get backupNoWordNudgeBody =>
+      '你尚未設定密語，這次備份將使用「登入帳號綁定的基本加密」。備份仍有加密保護，但這種備份無法在網頁編輯器（ixo.app/editor）開啟。設定密語後，就能在網頁編輯器開啟你的備份。';
+
+  @override
+  String get backupNoWordNudgeSetWord => '設定密語';
+
+  @override
+  String get backupNoWordNudgeProceed => '仍要備份';
 
   @override
   String get backupEmptyDisabledHint => '請先新增至少一位聯絡人再備份。';
