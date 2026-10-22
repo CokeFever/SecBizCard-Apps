@@ -165,6 +165,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     if (l is ConnectionFailure) return l10n.restoreErrorOffline;
     if (l is InterruptedTransferFailure) return l10n.restoreErrorInterrupted;
     if (l is AuthFailure) return l10n.restoreErrorAuth;
+    if (l.message.contains('No backup found')) return l10n.backupNoBackupFound;
     return l10n.restoreErrorGeneric;
   }
 
