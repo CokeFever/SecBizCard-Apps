@@ -199,6 +199,12 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         setState(() {
           _opInProgress = false;
           _isLoading = false;
+          // If the backup aborted before reaching a terminal status (e.g. user
+          // cancelled downgrade confirmation or no-magic-word nudge), clear the
+          // lingering "Preparing…" label so it does not persist on screen.
+          if (_statusMessage == l10n.backupPhasePreparing) {
+            _statusMessage = null;
+          }
         });
       }
     }
@@ -227,7 +233,10 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         if (!mounted) return;
         if (!hasLocalWord) {
           final proceed = await _confirmDowngrade();
-          if (proceed != true) return;
+          if (proceed != true) {
+            if (mounted) setState(() => _statusMessage = null);
+            return;
+          }
         }
       } else {
         // B: first-time / account-bound-encryption soft nudge. When the cloud
@@ -248,6 +257,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           if (!mounted) return;
           switch (choice) {
             case _NoWordBackupChoice.cancel:
+              if (mounted) setState(() => _statusMessage = null);
               return;
             case _NoWordBackupChoice.setWord:
               await _openSetMagicWordDialog();
@@ -462,10 +472,13 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     // D12: reverse-staleness warning. If the cloud backup is OLDER than this
     // device's latest local change, restoring would overwrite newer local data
     // with an older backup. Warn and require a second confirmation.
+    // Only warn when this device actually HAS local contacts to lose; a fresh
+    // install or empty device has nothing to protect.
     final cloudTime = await service.cloudBackupModifiedTime();
     final localTime = await BackupReminderService().lastModifiedAt();
     if (!mounted) return;
-    if (cloudTime != null &&
+    if (_hasLocalContacts &&
+        cloudTime != null &&
         localTime != null &&
         cloudTime.isBefore(localTime)) {
       final proceed = await _confirmStaleRestore(cloudTime, localTime);

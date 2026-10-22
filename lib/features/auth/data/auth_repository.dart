@@ -351,7 +351,7 @@ class AuthRepository {
           emailVerified: true,
           emailVerifiedAt: DateTime.now(),
         );
-        await profileRepo.createOrUpdateUser(newProfile);
+        await profileRepo.createOrUpdateUser(newProfile, markModified: false);
         debugPrint('[Auth] New user profile created');
       } else {
         debugPrint('[Auth] Existing user found');
