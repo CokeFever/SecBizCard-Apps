@@ -42,16 +42,23 @@ class DriveRepository {
         return left(const AuthFailure('User not signed in'));
       }
 
-      // Check permissions
-      // Note: canAccessScopes is cleaner but requestScopes handles both check and request
-      final authorized = await _googleSignIn.requestScopes([
+      // Check permissions: only request if the scope hasn't been granted yet.
+      // Calling requestScopes unconditionally on every API call causes
+      // re-entrant Activity collisions on Android and hangs the auth future.
+      final hasScope = await _googleSignIn.canAccessScopes([
         drive.DriveApi.driveFileScope,
       ]);
-      if (!authorized) {
-        return left(const AuthFailure('Drive permission denied'));
+      if (!hasScope) {
+        final authorized = await _googleSignIn.requestScopes([
+          drive.DriveApi.driveFileScope,
+        ]);
+        if (!authorized) {
+          return left(const AuthFailure('Drive permission denied'));
+        }
       }
 
-      final authHeaders = await account.authHeaders;
+      final currentAccount = _googleSignIn.currentUser ?? account;
+      final authHeaders = await currentAccount.authHeaders;
       final authenticatedClient = _GoogleAuthClient(authHeaders);
       return right(drive.DriveApi(authenticatedClient));
     } catch (e) {

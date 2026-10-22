@@ -48,7 +48,6 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   // so it can never start a concurrent backup/restore. Set/cleared in a
   // try/finally so it is released on BOTH success and failure.
   bool _opInProgress = false;
-  bool _checkingBackup = true;
   bool _hasRemoteBackup = false;
   String? _statusMessage;
   // Tracks whether the current status message is an error, so the UI can color
@@ -71,7 +70,11 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   void initState() {
     super.initState();
     _loadLastBackupTime();
-    _checkRemoteBackup();
+    // Do NOT call _checkRemoteBackup() on init: under three-stage least-privilege
+    // OAuth, the user has not granted drive.file scope at login. Probing Drive
+    // unconditionally on screen entry triggers an unexpected permission prompt
+    // and causes re-entrant Activity collisions on Android. Drive access is
+    // requested lazily on explicit Back Up Now / Restore from Backup actions.
     _loadMagicWordState();
     _loadLocalDataState();
   }
@@ -96,18 +99,6 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         // (set/change/clear) so a stale value is never shown.
         _magicWordRevealed = false;
         _revealedMagicWord = null;
-      });
-    }
-  }
-
-  Future<void> _checkRemoteBackup() async {
-    setState(() => _checkingBackup = true);
-    final service = ref.read(backupServiceProvider);
-    final hasBackup = await service.hasBackup();
-    if (mounted) {
-      setState(() {
-        _hasRemoteBackup = hasBackup;
-        _checkingBackup = false;
       });
     }
   }
@@ -789,8 +780,6 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                   SectionCard(
                     child: Column(
                       children: [
-                        if (_checkingBackup)
-                          const LinearProgressIndicator(minHeight: 2),
                         if (_isLoading) ...[
                           const CircularProgressIndicator(),
                           const SizedBox(height: 16),
@@ -879,20 +868,11 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed: _isLoading ||
-                              _opInProgress ||
-                              _checkingBackup ||
-                              !_hasRemoteBackup
+                      onPressed: _isLoading || _opInProgress
                           ? null
                           : _performRestore,
                       icon: const Icon(Icons.download),
-                      label: Text(
-                        _checkingBackup
-                            ? l10n.backupChecking
-                            : (_hasRemoteBackup
-                                ? l10n.backupRestoreFromBackup
-                                : l10n.backupNoBackupFound),
-                      ),
+                      label: Text(l10n.backupRestoreFromBackup),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         foregroundColor: Theme.of(context).colorScheme.primary,
