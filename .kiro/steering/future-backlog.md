@@ -5,26 +5,6 @@
 
 ## 待辦
 
-### 🐛 登入不授予 drive.file 時的錯誤處理 bug(2026-10-18 owner 確認要修)
-- **症狀**:Google 登入時,consent 畫面的 `drive.file` 若**不勾就繼續**,登入雖然成功(身分 OK),
-  但 app 會顯示一次**紅色 exception / 錯誤訊息**。
-- **根因**(已從 code 確認):登入走 `driveGoogleSignIn` 實例,它在建構時就宣告 `scopes:[drive.file]`
-  (`SecBizCard-Apps/lib/features/auth/data/auth_repository.dart`)。使用者拒絕 drive.file →
-  `google_sign_in` 套件因「宣告的 scope 未全授予」拋 exception → `signInWithGoogle` 的 try/catch
-  接住但仍冒錯誤 UI。Firebase 身分登入其實只需 idToken,不需 drive.file,所以登入本該乾淨成功。
-- **正確行為**(owner 要的):登入只要身分(openid/email/profile),**不在登入當下硬要 drive.file**;
-  使用者沒授予就乾淨登入、**不顯示紅色錯誤**;等真正要**備份/還原**時,才在該處 `requestScopes
-  ([drive.file])` 要求授權(比照 contacts 現在的延後請求模式)。
-- **⚠️ 修改注意**:
-  - 不可破壞之前修 BAD_REQUEST 的「drive / contacts 兩個獨立 GoogleSignIn 實例隔離」設計。
-  - 要全程驗 silent sign-in、re-auth、backup、restore 流程仍正常。
-  - **備份提醒(`backup_reminder_service.dart`)本就不用 drive 權限**(純本地時間戳,刻意設計),
-    這部分是對的、不要動。
-  - app code 在 **`SecBizCard-Apps` repo**(owner 以後從 `SecBizCard` 開發,改 app 要跨到隔壁 repo,
-    路徑見 `repo-layout.md`)。建議開正式 workflow(設計→實作→review→測 drive 授權流程)做,
-    不要隨手改(牽涉登入+備份兩條關鍵路徑)。
-- **與 OAuth 送審無關**:送審審的是 contacts;此 bug 是 drive.file 的 UX,獨立處理。
-
 ### 後端 App Check enforce(條件未到的未來決策,非即時待辦)
 見 `backend-protection.md` 的 5 步前置鐵律。要等 1.6.6 普及 + 強更把舊版趕上來、verified 比例上升、
 舊版流量歸零後,由 owner 明確指示才做。
@@ -76,3 +56,15 @@ cap 時:`node scripts/reset_feedback_count.mjs --yes <email>`。⚠️ month key
   `keep.xml`;繁中含 zh-TW 可選、涵蓋台港澳不 fallback)→ 1.6.5(+194~196)。
 - **OCR 部門雙欄守衛 + 「科」詞庫 + original scan 過曝分圖(OCR 圖/顯示圖分離 + RC previewContrast)
   + feedback 分級 cap** → 1.6.6(+198)。
+- **Backup/Restore 授權 + magic word UX 合併修法(2026-10-21,workflow 完成,local-only 已 merge 進
+  `-Apps` main,未 push/未發版)** → 兩 commit:`dd235c3`(子題 A:三段式最小權限 OAuth — 新增
+  identity-only `loginGoogleSignIn`,login/drive/contacts 三實例隔離,登入不帶 sensitive scope、
+  drive/contacts 延後 requestScopes;修好「不勾 drive.file 冒紅色錯誤」)、`f26f9e2`(子題 B:首次無
+  magic word 備份軟性 nudge,文案「登入帳號綁定的基本加密」不提 uid、只提 web editor 限制、五語 ARB、
+  codec/reminder 未動 → uid-mode restore 不變)。analyze/gen-l10n/build_runner/全測試綠(POC scratch
+  test 的預期 fail 除外)。
+  - ⚠️ **owner 待辦:on-device 手動測 9 項**(headless 無法跑真 OAuth consent)——清單見
+    `-Apps/.agents/tasks/backup-auth-and-magicword-ux/plan.md` §Manual on-device OAuth verification。
+    重點:登入拒 drive/contacts 要乾淨無紅錯、backup 時才跳 drive consent、無 magic word 跳 nudge
+    三選項且每次都跳、"仍要備份"後同帳號能 restore、設密語後第二次不跳且能在 web editor 開。
+  - 發版照常:owner 打 `android/v*+build` / `ios/v*+build` tag(見 cicd.md)。
