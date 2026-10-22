@@ -132,13 +132,19 @@ void main() {
         mockProfileRepo.getUser(argThat(isA<String>())),
       ).thenAnswer((_) async => const Left(GeneralFailure('Not found')));
       when(
-        mockProfileRepo.createOrUpdateUser(argThat(isA<UserProfile>())),
+        mockProfileRepo.createOrUpdateUser(
+          argThat(isA<UserProfile>()),
+          markModified: anyNamed('markModified'),
+        ),
       ).thenAnswer((_) async => const Right(unit));
 
       final result = await authRepo.signInWithGoogle(mockProfileRepo);
 
       expect(result.isRight(), true);
-      verify(mockProfileRepo.createOrUpdateUser(argThat(isA<UserProfile>()))).called(1);
+      verify(mockProfileRepo.createOrUpdateUser(
+        argThat(isA<UserProfile>()),
+        markModified: false,
+      )).called(1);
     });
 
     test('signInWithGoogle failure - user canceled', () async {

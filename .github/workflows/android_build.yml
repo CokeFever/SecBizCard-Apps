@@ -1,19 +1,19 @@
-name: Android Release Build
+name: Android QA Build (Manual / PR)
 
 on:
-  # Release builds are driven by tags only. We intentionally do NOT build on
-  # every push to main — a release APK/AAB is only needed when we cut a version
-  # (android/v* tag). This avoids a duplicate run every time main is pushed.
-  push:
-    tags:
-      - 'android/v*'
+  # The official Android release pipeline is handled exclusively by GCP Cloud
+  # Build (ixo-app-secbizcard, trigger android-release-build on git tag
+  # android/v*), which uploads the AAB directly to Play Store internal testing.
+  # This GitHub Actions workflow builds a raw QA APK artifact and is kept
+  # manual-only (workflow_dispatch) to save private Actions minutes and avoid
+  # redundant builds on tag push.
+  workflow_dispatch:
   pull_request:
     branches: [ "main" ]
     paths-ignore:
       - 'website/**'
       - 'docs/**'
       - 'README.md'
-  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
