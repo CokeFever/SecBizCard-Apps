@@ -29,7 +29,7 @@ dependency 引用。
 - **在 `SecBizCard`(private)**:handoff、release store copy/runbook、web editor/portal 設計、
   後端架構、開發環境、admin 機敏對照。
 - **兩邊同步**:`docs/oauth_verification.md`(兩份內容一致且 public-safe)。
-- **最新進度**:讀 `SecBizCard/docs/` 裡日期最新的 `handoff_*.md`。
+- **最新進度**:讀 `SecBizCard/docs/` 裡日期最新的 `handoff_*.md`(目前 `handoff_2026-10-23.md`)。
 
 ## Steering(ground truth,兩 repo 都放,backend 為權威)
 `.kiro/steering/`:`repo-layout.md`、`cicd.md`(三套發版 pipeline)、`backend-protection.md`
