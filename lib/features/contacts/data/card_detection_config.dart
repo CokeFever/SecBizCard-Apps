@@ -132,7 +132,7 @@ class CardDetectionConfig {
   // this map only supplies defaults so a missing/invalid remote value falls
   // back to the shipped default rather than null.
   static const Map<String, int> _intDefaults = <String, int>{
-    'min_supported_build': 180,
+    'min_supported_build': 100,
     'latest_build': 0,
   };
 
