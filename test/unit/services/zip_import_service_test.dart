@@ -33,7 +33,7 @@ List<int> _buildZip(Map<String, dynamic> manifest, {bool addImages = true}) {
       archive.addFile(ArchiveFile(name, _jpegBytes.length, _jpegBytes));
     }
   }
-  return ZipEncoder().encode(archive)!;
+  return ZipEncoder().encode(archive);
 }
 
 void main() {
@@ -157,7 +157,7 @@ void main() {
     final archive = Archive();
     final bytes = utf8.encode('hi');
     archive.addFile(ArchiveFile('readme.txt', bytes.length, bytes));
-    final zip = ZipEncoder().encode(archive)!;
+    final zip = ZipEncoder().encode(archive);
     expect(
       () => ZipImportService.parse(zip),
       throwsA(isA<FormatException>()),
@@ -212,7 +212,7 @@ void main() {
     // One byte over the per-image cap.
     final huge = List<int>.filled(ZipImportService.maxImageBytes + 1, 0x41);
     archive.addFile(ArchiveFile('images/big.jpg', huge.length, huge));
-    final zip = ZipEncoder().encode(archive)!;
+    final zip = ZipEncoder().encode(archive);
 
     final result = await ZipImportService.parse(zip);
     expect(result.contacts, hasLength(1));
