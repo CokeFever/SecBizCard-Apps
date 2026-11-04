@@ -1,0 +1,9 @@
+{
+  "id" : "28c52463-7e9d-4845-9c28-cfa27b8b1d04",
+  "targets" : [
+    {
+      "id" : "1DB4F25B-A3E3-4CA4-A829-D30266FFC62B",
+      "name" : "SecBizCard"
+    }
+  ]
+}

@@ -20,7 +20,7 @@
   `firebase_functions_architecture.md`、`DEV_ENVIRONMENT.md`、
   **`docs/internal_admin_reference.md`(admin UID / owner 帳號 / demo 憑證,機敏)**。
 - **兩邊同步**:`docs/oauth_verification.md`(public-safe,真實 owner email 只在 internal_admin_reference)。
-- **最新進度**:讀 `docs/` 裡日期最新的 `handoff_*.md`(目前 `handoff_2026-10-29.md`)。
+- **最新進度**:讀 `docs/` 裡日期最新的 `handoff_*.md`(目前 `handoff_2026-11-04.md`)。
 
 ## Steering 與 Rules(ground truth,兩 repo 都放,backend 為權威)
 - 規範存放於 `.kiro/steering/` 及 Antigravity 原生 `.agent/rules/`(`repo-layout.md`、`cicd.md`、`backend-protection.md`、`web-editor-csp.md`、`future-backlog.md`)。
