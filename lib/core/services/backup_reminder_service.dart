@@ -14,8 +14,9 @@ final backupReminderServiceProvider = Provider<BackupReminderService>(
 ///    require Drive auth or trigger a permission prompt. We rely purely on two
 ///    local timestamps: when data last changed vs. when it was last backed up
 ///    (a successful backup OR a successful restore both count as "in sync").
-///  - **Non-intrusive.** The reminder only surfaces on a later cold start, and
-///    the user can snooze it for the rest of the calendar month.
+///  - **Non-intrusive.** The reminder only surfaces on a later cold start,
+///    throttled to at most once every 7 days when dismissed, and the user can
+///    snooze it for the rest of the calendar month.
 ///
 /// Timestamps are stored as epoch-ms ints in shared_preferences, matching the
 /// app's existing ad-hoc pattern. The backup timestamp reuses the same key the
@@ -31,8 +32,10 @@ class BackupReminderService {
   // Reuses the key the Backup screen already persists on a successful backup.
   static const String keyLastBackup = 'last_backup_timestamp';
   static const String keyLastModified = 'last_modified_timestamp';
+  static const String keyLastReminded = 'backup_reminder_last_reminded_timestamp';
   // Stored as year*100 + month (e.g. 202609 for Sep 2026).
   static const String keySnoozedMonth = 'backup_reminder_snoozed_month';
+  static const int reminderCooldownDays = 7;
 
   Future<SharedPreferences> get _prefs async =>
       _injectedPrefs ?? await SharedPreferences.getInstance();
@@ -49,9 +52,20 @@ class BackupReminderService {
   }
 
   /// Record that data is now safely backed up (successful backup OR restore).
+  /// Also clears the weekly reminder cooldown so future unbacked changes are
+  /// evaluated cleanly from the next-day rule.
   Future<void> markBackedUp() async {
     final prefs = await _prefs;
     await prefs.setInt(keyLastBackup, _now().millisecondsSinceEpoch);
+    await prefs.remove(keyLastReminded);
+  }
+
+  /// Record that the reminder dialog was shown and dismissed without snoozing
+  /// for the month, throttling the next reminder for [reminderCooldownDays]
+  /// (7 calendar days).
+  Future<void> markReminded() async {
+    final prefs = await _prefs;
+    await prefs.setInt(keyLastReminded, _now().millisecondsSinceEpoch);
   }
 
   /// The local timestamp of the last recorded data change, or null if nothing
@@ -88,6 +102,7 @@ class BackupReminderService {
     final prefs = await _prefs;
     await prefs.remove(keyLastModified);
     await prefs.remove(keyLastBackup);
+    await prefs.remove(keyLastReminded);
     await prefs.remove(keySnoozedMonth);
   }
 
@@ -97,10 +112,12 @@ class BackupReminderService {
   /// worth backing up — an empty install is never nagged.
   ///
   /// Returns true when: there is data, the reminder has not been snoozed for
-  /// the current calendar month, AND there are unbacked-up changes whose last
-  /// change was on an earlier calendar day than today. The day-boundary rule
-  /// means a contact added/edited *today* is only surfaced from the NEXT day's
-  /// cold start onward — we never nag about a change the user just made.
+  /// the current calendar month, at least [reminderCooldownDays] (7 calendar
+  /// days) have elapsed since the last reminder (if any), AND there are
+  /// unbacked-up changes whose last change was on an earlier calendar day than
+  /// today. The day-boundary rule means a contact added/edited *today* is only
+  /// surfaced from the NEXT day's cold start onward — we never nag about a
+  /// change the user just made.
   Future<bool> shouldRemind({required bool hasData}) async {
     if (!hasData) return false;
 
@@ -109,6 +126,21 @@ class BackupReminderService {
     // Snoozed for this calendar month? (auto-resets next month)
     final snoozedMonth = prefs.getInt(keySnoozedMonth);
     if (snoozedMonth != null && snoozedMonth == _monthKey) return false;
+
+    final now = _now();
+    final todayUtc = DateTime.utc(now.year, now.month, now.day);
+
+    // Weekly throttle: if the user already saw & dismissed the reminder within
+    // the past 7 calendar days, wait until next week.
+    final lastReminded = prefs.getInt(keyLastReminded);
+    if (lastReminded != null) {
+      final reminded = DateTime.fromMillisecondsSinceEpoch(lastReminded);
+      final remindedUtc =
+          DateTime.utc(reminded.year, reminded.month, reminded.day);
+      if (todayUtc.difference(remindedUtc).inDays < reminderCooldownDays) {
+        return false;
+      }
+    }
 
     final lastModified = prefs.getInt(keyLastModified);
     // Nothing was ever recorded as changed on this device -> nothing to nag
@@ -122,9 +154,8 @@ class BackupReminderService {
     // Next-day rule: only remind once the change is at least one calendar day
     // old. A change made today waits until tomorrow.
     final modified = DateTime.fromMillisecondsSinceEpoch(lastModified);
-    final now = _now();
-    final modifiedDay = DateTime(modified.year, modified.month, modified.day);
-    final today = DateTime(now.year, now.month, now.day);
-    return today.isAfter(modifiedDay);
+    final modifiedUtc =
+        DateTime.utc(modified.year, modified.month, modified.day);
+    return todayUtc.isAfter(modifiedUtc);
   }
 }

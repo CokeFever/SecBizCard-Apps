@@ -155,15 +155,71 @@ void main() {
           DateTime(2026, 9, 18).millisecondsSinceEpoch,
       BackupReminderService.keyLastBackup:
           DateTime(2026, 9, 17).millisecondsSinceEpoch,
+      BackupReminderService.keyLastReminded:
+          DateTime(2026, 9, 19).millisecondsSinceEpoch,
       BackupReminderService.keySnoozedMonth: 202609,
     });
     final s = svc(prefs, now: DateTime(2026, 9, 20));
     await s.clear();
     expect(prefs.getInt(BackupReminderService.keyLastModified), isNull);
     expect(prefs.getInt(BackupReminderService.keyLastBackup), isNull);
+    expect(prefs.getInt(BackupReminderService.keyLastReminded), isNull);
     expect(prefs.getInt(BackupReminderService.keySnoozedMonth), isNull);
     // A fresh account on this device is not nagged.
     expect(await s.shouldRemind(hasData: true), isFalse);
+  });
+
+  group('weekly reminder cooldown (markReminded)', () {
+    test('suppresses reminders for 6 days after dismissal, reminds on day 7',
+        () async {
+      final modified = DateTime(2026, 9, 19, 10);
+      prefs = await freshPrefs({
+        BackupReminderService.keyLastModified: modified.millisecondsSinceEpoch,
+      });
+
+      // Day 0 (Sep 20, 20:00): reminder shown & dismissed without monthly snooze.
+      final day0 = svc(prefs, now: DateTime(2026, 9, 20, 20));
+      expect(await day0.shouldRemind(hasData: true), isTrue);
+      await day0.markReminded();
+      expect(prefs.getInt(BackupReminderService.keyLastReminded), isNotNull);
+
+      // Same day & days 1..6: suppressed.
+      expect(await day0.shouldRemind(hasData: true), isFalse);
+      for (var d = 1; d <= 6; d++) {
+        final later = svc(prefs, now: DateTime(2026, 9, 20 + d, 9));
+        expect(await later.shouldRemind(hasData: true), isFalse,
+            reason: 'day +$d should still be within weekly cooldown');
+      }
+
+      // Day 7 (Sep 27, 08:00 — even earlier in the day than 20:00): remind again.
+      final day7 = svc(prefs, now: DateTime(2026, 9, 27, 8));
+      expect(await day7.shouldRemind(hasData: true), isTrue);
+    });
+
+    test('markBackedUp clears weekly cooldown so future edits remind next day',
+        () async {
+      final modified1 = DateTime(2026, 9, 19, 10);
+      prefs = await freshPrefs({
+        BackupReminderService.keyLastModified: modified1.millisecondsSinceEpoch,
+      });
+
+      final day0 = svc(prefs, now: DateTime(2026, 9, 20, 10));
+      await day0.markReminded();
+      expect(await day0.shouldRemind(hasData: true), isFalse);
+
+      // User backs up later that day -> clears keyLastReminded.
+      await svc(prefs, now: DateTime(2026, 9, 20, 12)).markBackedUp();
+      expect(prefs.getInt(BackupReminderService.keyLastReminded), isNull);
+
+      // User edits again on Sep 21 -> reminded on Sep 22 (not blocked by Sep 20).
+      await svc(prefs, now: DateTime(2026, 9, 21, 9)).markDataModified();
+      expect(
+        await svc(prefs, now: DateTime(2026, 9, 22, 9)).shouldRemind(
+          hasData: true,
+        ),
+        isTrue,
+      );
+    });
   });
 
   group('empty-account own-profile write does not arm the reminder (BUG 3)',

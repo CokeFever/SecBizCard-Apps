@@ -148,9 +148,12 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       ),
     );
 
-    // Honour the checkbox regardless of which button was tapped.
+    // Honour the checkbox regardless of which button was tapped; otherwise
+    // throttle further reminders for 7 days (cancelled/Later/dismissed).
     if (dontRemind) {
       await reminder.snoozeThisMonth();
+    } else {
+      await reminder.markReminded();
     }
     if (action == 'backup' && mounted) {
       context.push('/backup');
